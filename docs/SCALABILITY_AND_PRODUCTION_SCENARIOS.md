@@ -1,6 +1,6 @@
 # CarBroz Backend - Scalability and Production Scenarios
 
-This document serves as a backend architecture guide for founders, backend engineers, mobile engineers, and future team members of the CarBroz Platform. It explains real production problems that occur when an application scales from thousands to millions of users, along with industry-grade, highly scalable solutions leveraging the CarBroz technology stack.
+This document serves as the definitive backend architecture guide for founders, backend engineers, mobile engineers, and future technical team members of the CarBroz Platform. It outlines real production bottlenecks that occur when an application scales from thousands to millions of users, providing industry-grade, highly scalable solutions leveraging our specific technology stack.
 
 ## Technology Stack Context
 - **Backend**: Node.js, Fastify, TypeScript
@@ -17,16 +17,16 @@ This document serves as a backend architecture guide for founders, backend engin
 ## Scenario 1: Thousands of users opening the same Server Driven UI login screen simultaneously.
 
 ### Scenario
-10,000 users open the CarBroz app at the exact same time during a massive marketing campaign, all landing on the initial login screen.
+10,000 users open the CarBroz app at the exact same time during a massive marketing campaign or push notification blast, all landing on the initial login screen.
 
 ### What Happens Internally
 - **API request flow**: 10,000 requests hit the `/api/v1/screen/auth_login` endpoint simultaneously.
-- **Database interaction**: If the UI config is stored in DB, it triggers 10,000 identical `SELECT` queries.
+- **Database interaction**: If the UI config is fetched from the DB, it triggers 10,000 identical `SELECT` queries.
 - **Server resources affected**: Node.js event loop gets flooded. CPU spikes parsing and serializing the same large JSON object 10,000 times.
 - **Failure points**: The database connection pool is exhausted, leading to timeouts and HTTP 503 Service Unavailable errors.
 
 ### Problems Created
-- **Database overload**: Complete lockup of the DB preventing other critical operations (like processing actual bookings).
+- **Performance issues**: Complete lockup of the DB preventing other critical operations (like processing actual bookings).
 - **User experience impact**: Users stare at a blank screen or a loading spinner that never finishes. High churn rate on the first screen.
 
 ### Wrong Implementation Example
@@ -35,7 +35,32 @@ A beginner architecture dynamically queries the database for the login layout, r
 ### Production Grade Solution
 - **Redis caching strategy**: Since the Login UI doesn't change per user, the serialized JSON response is stored in Redis. The Fastify route first checks Redis `GET screen:auth_login`. If present, it serves it instantly from memory.
 - **CDN usage**: For purely static, anonymous SDUI screens, place a CDN (like Cloudflare or AWS CloudFront) in front of the API. The CDN caches the JSON payload at the edge. 10,000 requests hit the CDN, and only 1 hits the CarBroz backend.
-- **UI configuration loading**: Background jobs or Admin Panel webhooks trigger a Redis cache invalidation only when the UI is explicitly updated.
+
+```mermaid
+sequenceDiagram
+    participant Mobile App
+    participant CDN
+    participant Fastify API
+    participant Redis
+    participant PostgreSQL
+
+    Mobile App->>CDN: GET /api/v1/screen/auth_login
+    alt Cache Hit
+        CDN-->>Mobile App: Return JSON (10ms)
+    else Cache Miss
+        CDN->>Fastify API: GET /api/v1/screen/auth_login
+        Fastify API->>Redis: GET screen:auth_login
+        alt Redis Hit
+            Redis-->>Fastify API: Return JSON
+        else Redis Miss
+            Fastify API->>PostgreSQL: SELECT ui_config
+            PostgreSQL-->>Fastify API: Return data
+            Fastify API->>Redis: SETEX screen:auth_login JSON
+        end
+        Fastify API-->>CDN: Return JSON
+        CDN-->>Mobile App: Return JSON
+    end
+```
 
 ---
 
@@ -47,20 +72,39 @@ During a flash sale, thousands of users request login OTPs concurrently. Malicio
 ### What Happens Internally
 - **API request flow**: Thousands of `POST /api/v1/auth/send_otp` requests hit the backend.
 - **External API interaction**: Backend makes synchronous HTTP requests to the SMS provider (e.g., Twilio/MSG91).
-- **Cost explosion**: SMS providers charge per message. Spam bots can drain thousands of dollars in minutes.
-- **Failure points**: External SMS API rate limits are hit, causing genuine users to fail to receive OTPs.
+- **Failure points**: External SMS API rate limits are hit. The external API takes 2 seconds to respond, blocking Fastify workers.
 
 ### Problems Created
-- **Performance issues**: Waiting for SMS provider HTTP responses blocks the Fastify event loop threads if not managed properly.
-- **Business impact**: Massive financial loss from OTP abuse and loss of genuine customers who cannot log in.
+- **Cost explosion**: SMS providers charge per message. Spam bots can drain thousands of dollars in minutes.
+- **Performance issues**: Waiting for SMS provider HTTP responses exhausts Fastify connections.
 
 ### Wrong Implementation Example
-The API controller directly calls the SMS provider SDK synchronously, inserts the OTP into the PostgreSQL database, and doesn't verify how many times the user has asked for an OTP in the last hour.
+The API controller directly calls the SMS provider SDK synchronously, inserts the OTP into the PostgreSQL database, and doesn't verify how many times the user has asked for an OTP.
 
 ### Production Grade Solution
-- **Rate limiting & Throttling**: Implement strict rate-limiting in Fastify using Redis. E.g., Max 3 OTP requests per phone number per 15 minutes. Implement IP-based and Device-ID-based throttling.
-- **Queue/Event usage**: Push the SMS dispatch task to **BullMQ**. The backend responds immediately with `{"success": true}`. The BullMQ worker processes the queue and talks to the SMS provider, preventing backend lockup.
-- **Redis temporary storage**: Store OTPs in Redis with a strict TTL (e.g., `SETEX otp:9876543210 300 "1234"`). Do NOT store OTPs in PostgreSQL.
+- **Rate limiting**: Implement strict rate-limiting in Fastify using Redis. E.g., Max 3 OTP requests per phone number per 15 minutes.
+- **Queue/Event usage**: Push the SMS dispatch task to **BullMQ**. The backend responds immediately with `{"success": true}`. The BullMQ worker processes the queue asynchronously.
+
+```mermaid
+sequenceDiagram
+    participant App
+    participant API
+    participant Redis
+    participant BullMQ
+    participant SMS Provider
+
+    App->>API: POST /send_otp
+    API->>Redis: INCR rate_limit:phone
+    alt Limit Exceeded
+        API-->>App: 429 Too Many Requests
+    else Allowed
+        API->>Redis: SETEX otp:phone 300 "1234"
+        API->>BullMQ: Add Job { phone, "1234" }
+        API-->>App: 200 OK (Instant)
+    end
+    
+    BullMQ->>SMS Provider: Send SMS Async
+```
 
 ---
 
@@ -75,7 +119,6 @@ Thousands of users who just received their OTPs submit them for verification at 
 
 ### Problems Created
 - **Database overload**: PostgreSQL transaction overhead for data that only lives for 5 minutes degrades the performance of core tables.
-- **Performance issues**: Slower verification means slower login, frustrating users.
 
 ### Wrong Implementation Example
 The backend queries the `Users` or `OtpLogs` table in Postgres, checks if it matches, and performs an SQL `UPDATE` to mark the OTP as used.
@@ -83,7 +126,7 @@ The backend queries the `Users` or `OtpLogs` table in Postgres, checks if it mat
 ### Production Grade Solution
 - **Redis temporary storage**: OTPs are inherently transient. The Fastify API performs a Redis `GET otp:<phone>`.
 - **Expiry handling**: Redis natively handles expiration (TTL). If the key is gone, the OTP is invalid/expired.
-- **Security considerations**: Upon successful verification, immediately `DEL otp:<phone>` from Redis to prevent replay attacks. Then, issue a JWT session and asynchronously upsert the user into the PostgreSQL database if they are new.
+- **Security considerations**: Upon successful verification, immediately `DEL otp:<phone>` from Redis to prevent replay attacks. Then, issue a JWT session and asynchronously upsert the user into the PostgreSQL database.
 
 ---
 
@@ -102,12 +145,21 @@ The CarBroz Home Screen becomes massive, containing a Banner carousel, Categorie
 - **User experience impact**: The app feels slow, unresponsive, and consumes a lot of the user's mobile data.
 
 ### Wrong Implementation Example
-The backend queries all tables (Banners, Categories, Services, Reviews) using deeply nested Prisma `include` statements, builds one monolithic UI tree, and sends it as a single HTTP response.
+The backend queries all tables using deeply nested Prisma `include` statements, builds one monolithic UI tree, and sends it as a single 3MB HTTP response.
 
 ### Production Grade Solution
-- **API response optimization**: The SDUI engine must support **Component-based loading** and **Lazy loading**.
-- **Pagination**: The initial JSON only contains the structural skeleton, banners, and categories. The Reviews and Nearby Partners sections are returned as "Placeholder/Skeleton" components with a `lazyLoadUrl` action.
-- **Execution**: The mobile app renders the top half instantly, and asynchronously fetches the bottom sections via parallel API calls, keeping the initial JSON under 50KB.
+- **API response optimization**: The initial JSON only contains the structural skeleton, banners, and categories (under 50KB). 
+- **Lazy loading strategy**: The Reviews and Nearby Partners sections are returned as "Placeholder" components with a `lazyLoadUrl` action.
+
+```mermaid
+graph TD
+    A[Mobile App] -->|GET /screen/home| B(API)
+    B -->|Returns 50KB Skeleton| A
+    A -->|Renders Top Half| C{User Scrolls Down}
+    C -->|GET /screen/home/reviews| B
+    B -->|Returns Reviews JSON| A
+    A -->|Appends to UI| D[Complete Screen]
+```
 
 ---
 
@@ -125,12 +177,12 @@ Even with optimized data, rendering a highly dynamic feed of hundreds of car was
 - **User experience impact**: Severe frame drops (jank) while scrolling.
 
 ### Wrong Implementation Example
-The SDUI payload contains an array of 500 service items inside a standard Column component. The mobile app attempts to render them all at once on the main UI thread.
+The SDUI payload contains an array of 500 service items inside a standard Column component. The mobile app renders them all at once on the main UI thread.
 
 ### Production Grade Solution
-- **Compose LazyColumn/LazyRow strategy**: The backend SDUI payload must explicitly define components as `list_template` or `lazy_column`. 
-- **Virtual rendering**: This signals the Compose Multiplatform engine to use `LazyColumn`, which only allocates memory for the UI items currently visible on the screen.
-- **Pagination**: The backend implements cursor-based pagination. The SDUI list component includes an `onEndReached` action that fetches the next page of JSON UI nodes.
+- **Compose LazyColumn/LazyRow strategy**: The backend SDUI payload explicitly defines components as `list_template` or `lazy_column`. 
+- **Virtual rendering**: This signals the Compose Multiplatform engine to use `LazyColumn`, which only allocates memory for the 5-10 UI items currently visible on the screen.
+- **Pagination**: The backend implements cursor-based pagination. The SDUI list component includes an `onEndReached` action that fetches the next page.
 
 ---
 
@@ -141,21 +193,29 @@ After a year of successful operations, the `Booking`, `Users`, `Payments`, and `
 
 ### What Happens Internally
 - **Database interaction**: A simple `SELECT * FROM Booking WHERE userId = X` requires a full table scan.
-- **Server resources affected**: Postgres CPU spikes, memory buffers fill up, and connection pools become exhausted waiting for slow queries to return.
+- **Server resources affected**: Postgres CPU spikes, memory buffers fill up, and connection pools become exhausted.
 
 ### Problems Created
 - **Timeout scenarios**: API requests exceed the 10-second timeout, resulting in HTTP 504 Gateway Timeout.
 - **Business impact**: Customers cannot view their booking history; partners cannot see their upcoming schedules.
 
 ### Wrong Implementation Example
-Keeping all data in a single monolithic table without indexes, querying historical data (from 2 years ago) directly on the primary database, and opening a new DB connection per request.
+Keeping all data in a single monolithic table without indexes, querying historical data directly on the primary database, and opening a new DB connection per request.
 
 ### Production Grade Solution
 - **Indexing**: Apply B-Tree indexes on highly queried foreign keys (e.g., `userId`, `partnerId`, `status`). 
-- **Query optimization**: Avoid `SELECT *`. Select only required fields. Avoid deep `JOIN` operations on large tables.
-- **Read replicas**: Route heavy `SELECT` queries (like user booking history) to Postgres Read Replicas, leaving the Primary instance free for `INSERT`/`UPDATE` operations.
-- **Database partitioning**: Partition the `Booking` and `Payments` tables by date (e.g., monthly partitions) so queries for "active bookings" only scan a tiny fraction of the total data.
-- **Connection pooling**: Use PgBouncer or Prisma Accelerate to multiplex thousands of API connections into a small pool of actual Postgres connections.
+- **Read replicas**: Route heavy `SELECT` queries to Postgres Read Replicas, leaving the Primary instance free for `INSERT`/`UPDATE` operations.
+- **Database partitioning**: Partition the `Booking` and `Payments` tables by date (e.g., monthly partitions).
+- **Connection pooling**: Use PgBouncer to multiplex thousands of API connections into a small pool of actual Postgres connections.
+
+```mermaid
+graph LR
+    A[API Instances] -->|Writes| B[(Primary DB)]
+    A -->|Reads| C[(Read Replica 1)]
+    A -->|Reads| D[(Read Replica 2)]
+    B -.->|Async Replication| C
+    B -.->|Async Replication| D
+```
 
 ---
 
@@ -175,15 +235,32 @@ A premium slot (Saturday 10:00 AM) is available for a popular car wash partner. 
 The use case merely performs a `SELECT` to check availability, followed by an `INSERT` to book, assuming no one else will book it in the 50 milliseconds between the two queries.
 
 ### Production Grade Solution
-- **Database locking**: Use PostgreSQL transactional locks (e.g., `SELECT ... FOR UPDATE`) to lock the partner's availability row so the second request must wait until the first is resolved.
-- **Distributed lock (Redis Redlock)**: For distributed systems, acquire a lock in Redis (`SET lock:partner:123:slot:10am NX PX 5000`). The first user gets the lock, processes the booking, and releases it. The second user fails to get the lock and is returned a "Slot no longer available" error cleanly.
+- **Distributed lock (Redis Redlock)**: Acquire a lock in Redis for that specific partner and time slot. 
+
+```mermaid
+sequenceDiagram
+    participant User A
+    participant User B
+    participant Redis Lock
+    participant DB
+
+    User A->>Redis Lock: SET lock:partnerX:10am NX PX 5000
+    Redis Lock-->>User A: OK (Acquired)
+    
+    User B->>Redis Lock: SET lock:partnerX:10am NX PX 5000
+    Redis Lock-->>User B: Fails (Slot locked)
+    User B-->>User B: Return "Slot no longer available"
+    
+    User A->>DB: INSERT Booking
+    User A->>Redis Lock: DEL lock:partnerX:10am
+```
 
 ---
 
 ## Scenario 8: Payment succeeds but booking creation fails.
 
 ### Scenario
-A user pays $50 for a wash via a payment gateway (e.g., Stripe/Razorpay). The payment succeeds, but a sudden network glitch or database error prevents the backend from creating the `Booking` record.
+A user pays $50 via Stripe/Razorpay. The payment succeeds, but a sudden network glitch or database error prevents the backend from creating the `Booking` record.
 
 ### What Happens Internally
 - **Distributed transaction problem**: The payment system (external) committed the transaction, but the internal database rolled back. 
@@ -192,13 +269,12 @@ A user pays $50 for a wash via a payment gateway (e.g., Stripe/Razorpay). The pa
 - **Business impact**: The customer's card is charged, but they have no booking. Customer support is flooded with angry calls.
 
 ### Wrong Implementation Example
-The API calls the Payment Gateway synchronously, waits for the success response, and then tries to `INSERT` the booking. If the `INSERT` throws a Prisma error, the request dies, and the money is lost in limbo.
+The API calls the Payment Gateway synchronously, waits for the success response, and then tries to `INSERT` the booking. If the `INSERT` throws an error, the money is lost in limbo.
 
 ### Production Grade Solution
-- **Event-driven architecture**: Implement the Saga pattern or Webhook-first flow. 
-- **Payment events**: The frontend initiates payment. The backend records a `PENDING` booking. The payment gateway hits a backend webhook `POST /api/v1/payment/webhook`.
-- **Booking consumers**: The webhook publishes a `PaymentSucceeded` event to BullMQ/Kafka. A background worker consumes this event and confirms the booking.
-- **Retry mechanism & Dead letter queue**: If the worker fails to update the database, it retries automatically with exponential backoff. If it completely fails, it moves to a Dead Letter Queue (DLQ) where an admin can manually intervene, guaranteeing no data is permanently lost.
+- **Event driven architecture**: The backend records a `PENDING` booking first. The payment gateway hits a backend webhook.
+- **Booking consumers**: The webhook publishes a `PaymentSucceeded` event to Kafka/BullMQ. A background worker consumes this event and confirms the booking.
+- **Dead letter queue**: If the worker fails to update the DB, it retries with exponential backoff. If it fails 5 times, it moves to a Dead Letter Queue (DLQ) for manual admin intervention.
 
 ---
 
@@ -215,12 +291,12 @@ A memory leak or unhandled exception causes the main Node.js Fastify instance to
 - **Business impact**: 100% downtime. Total loss of revenue until an engineer manually restarts the server.
 
 ### Wrong Implementation Example
-Running the app on a single AWS EC2 instance using `node server.js` or `pm2` without auto-scaling. If the instance dies, the app is dead.
+Running the app on a single AWS EC2 instance using `node server.js` without auto-scaling. If the instance dies, the app is dead.
 
 ### Production Grade Solution
 - **Horizontal scaling**: Containerize the app using Docker. Run the containers in Kubernetes (K8s) or AWS ECS.
 - **Load balancer**: Place an Application Load Balancer (ALB) in front. Run at least 3 identical instances (pods) of the API across different availability zones.
-- **Auto scaling**: Configure Kubernetes HPA (Horizontal Pod Autoscaler) to automatically spin up more instances if CPU usage exceeds 70%. If one instance crashes, the Load Balancer routes traffic to the healthy ones while K8s automatically spins up a replacement pod.
+- **Auto scaling**: Configure Kubernetes HPA (Horizontal Pod Autoscaler) to automatically spin up more instances if CPU usage exceeds 70%.
 
 ---
 
@@ -236,19 +312,19 @@ Customers in areas with slow 3G/4G networks, high latency, and packet loss try t
 - **User experience impact**: The user stares at a blank screen, assumes the app is broken, and uninstalls it.
 
 ### Wrong Implementation Example
-Sending uncompressed JSON and serving raw `.png` or `.jpg` images directly from the local file system.
+Sending uncompressed JSON and serving raw `.png` images directly from the local file system.
 
 ### Production Grade Solution
 - **API compression**: Enable **Brotli** or **Gzip** compression in Fastify. JSON compresses extremely well, shrinking a 500KB payload to 50KB.
-- **Image optimization**: Serve all UI assets via a CDN with automatic format conversion to **WebP** or **AVIF**, dynamically resizing images based on the mobile device's screen density (e.g., `?width=400&format=webp`).
-- **Offline-first architecture & Local caching**: The mobile app caches the SDUI layout JSON locally. On next launch, it instantly renders the cached UI while fetching the updated JSON in the background.
+- **Image optimization**: Serve all UI assets via a CDN with automatic format conversion to **WebP** or **AVIF**.
+- **Offline-first architecture**: The mobile app caches the SDUI layout JSON locally. On next launch, it instantly renders the cached UI while fetching the updated JSON in the background.
 
 ---
 
 ## Scenario 11: Server Driven UI version mismatch.
 
 ### Scenario
-The backend team introduces a shiny new `carousel_video` component for the SDUI engine. They deploy the backend. However, a user opens the app on a 2-month-old version of the iOS app that has no native renderer for `carousel_video`.
+The backend team introduces a shiny new `carousel_video` component for the SDUI engine. However, a user opens the app on a 2-month-old version of the iOS app that has no native renderer for `carousel_video`.
 
 ### What Happens Internally
 - **API request flow**: The backend sends the new JSON payload containing `{ type: "carousel_video" }`.
@@ -284,7 +360,7 @@ Modifying the existing controller and DTO in place and deploying it, assuming ev
 
 ### Production Grade Solution
 - **API versioning**: Create a new route `/api/v2/booking` while keeping `/api/v1/booking` intact.
-- **Migration strategy**: The `/v1/` endpoint maps the old `serviceId` into an array, then calls the exact same underlying Application Use Case. Both versions are supported until analytics show v1 traffic dropping below 1%, at which point it is sunset safely.
+- **Migration strategy**: The `/v1/` endpoint maps the old `serviceId` into an array, then calls the exact same underlying Application Use Case. Both versions are supported until analytics show v1 traffic dropping below 1%.
 
 ---
 
@@ -305,7 +381,7 @@ Using `console.log("Booking failed")` which outputs unstructured text without co
 ### Production Grade Solution
 - **Structured logging**: Use **Pino** to output JSON logs.
 - **Request ID**: Inject a unique `traceId` (UUID) via Fastify middleware into every request. Attach this `traceId` to every log line, database query, and background job event related to that request.
-- **Distributed tracing**: Return the `traceId` in the API error response to the client. The customer gives the support agent the `traceId`. The engineer queries Grafana/Elasticsearch for `traceId=12345` and sees the exact sequence of events, identifying the exact line of code that failed in seconds.
+- **Distributed tracing**: Return the `traceId` in the API error response to the client. The customer gives the support agent the `traceId`. The engineer queries Grafana for `traceId=12345` and sees the exact sequence of events.
 
 ---
 
@@ -323,12 +399,11 @@ The CarBroz engineering team grows from 2 to 30 developers. The monolithic codeb
   When traffic grows, we deploy the *exact same codebase*, but configure instances differently. Instance A only mounts `/api/v1/booking` (Booking API), and Instance B runs BullMQ (Worker).
 
 - **Stage 3: Microservices only when required**
-  If the Booking domain requires a completely different scaling profile or language (e.g., Go for high concurrency), it is extracted into a standalone service.
+  If the Booking domain requires a completely different scaling profile, it is extracted into a standalone service.
   - **Auth service**
   - **Booking service**
   - **Payment service**
-  - **Notification service**
-  Communication shifts from internal events to a Kafka/RabbitMQ event bus.
+  Communication shifts from internal events to a Kafka event bus.
 
 ---
 
@@ -343,10 +418,9 @@ Marketing wants to launch a "Monsoon Wash Sale" tomorrow, changing the home scre
 ### Production Grade Solution
 - **Server Driven UI System**: 
   - **Admin Panel**: Marketing uploads the image and tweaks the layout via a visual dashboard.
-  - **UI Configuration**: The configuration is saved to the database.
   - **Backend**: The `ScreenFactory` pulls the new layout JSON and updates Redis.
   - **Mobile Application**: On next launch, the mobile app pulls the new JSON payload and immediately renders the "Monsoon Wash Sale" design, completely bypassing App Store approvals.
-- **Feature Flags**: Roll out the new UI only to 10% of users first (A/B testing) to monitor conversion rates before rolling it out to 100%.
+- **Feature Flags**: Roll out the new UI only to 10% of users first (A/B testing).
 
 ---
 ---
