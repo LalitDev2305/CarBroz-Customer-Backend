@@ -1,17 +1,28 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildApp } from '../../../app.js';
 import { asValue } from 'awilix';
+import { getContainer } from '../../../container/index.js';
 describe('Health Module', () => {
     let app;
     beforeAll(async () => {
-        app = await buildApp();
-        app.diContainer.register({
+        const container = getContainer();
+        container.register({
+            configProvider: asValue({
+                get: async () => 'true',
+                has: async () => true,
+                getAll: async () => ({})
+            }),
+            featureFlagProvider: asValue({
+                isEnabled: async () => true,
+                getAllFlags: async () => ({})
+            }),
             databaseProvider: asValue({
                 health: async () => true,
                 connect: async () => { },
                 disconnect: async () => { }
-            })
+            }),
         });
+        app = await buildApp();
         await app.ready();
     });
     afterAll(async () => {

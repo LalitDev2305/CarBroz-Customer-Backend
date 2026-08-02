@@ -259,6 +259,9 @@ importers:
       '@carbroz/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@carbroz/feature-flags':
+        specifier: workspace:*
+        version: link:../../packages/feature-flags
       '@carbroz/logger':
         specifier: workspace:*
         version: link:../../packages/logger
@@ -347,6 +350,9 @@ importers:
 
   packages/config:
     dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../common
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -368,6 +374,12 @@ importers:
       prisma:
         specifier: ^6.19.3
         version: 6.19.3(typescript@6.0.3)
+
+  packages/feature-flags:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../common
 
   packages/logger:
     dependencies:

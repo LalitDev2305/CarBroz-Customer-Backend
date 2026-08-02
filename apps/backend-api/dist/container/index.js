@@ -1,18 +1,23 @@
-import { createContainer, asClass } from 'awilix';
-import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory } from '@carbroz/database';
-let container;
+import { asClass } from 'awilix';
+import { diContainer } from '@fastify/awilix';
+import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory, PrismaConfigRepository, PrismaFeatureFlagRepository } from '@carbroz/database';
+import { ConfigProvider } from '@carbroz/config';
+import { FeatureFlagProvider } from '@carbroz/feature-flags';
+let isRegistered = false;
 export function getContainer() {
-    if (!container) {
-        container = createContainer({
-            strict: true,
-        });
-        container.register({
+    if (!isRegistered) {
+        diContainer.register({
             prismaProvider: asClass(PrismaProvider).singleton(),
             databaseProvider: asClass(PrismaDatabaseProvider).singleton(),
             transactionProvider: asClass(PrismaTransactionProvider).singleton(),
-            repositoryFactory: asClass(RepositoryFactory).singleton()
+            repositoryFactory: asClass(RepositoryFactory).singleton(),
+            configRepository: asClass(PrismaConfigRepository).singleton(),
+            featureFlagRepository: asClass(PrismaFeatureFlagRepository).singleton(),
+            configProvider: asClass(ConfigProvider).singleton(),
+            featureFlagProvider: asClass(FeatureFlagProvider).singleton()
         });
+        isRegistered = true;
     }
-    return container;
+    return diContainer;
 }
 //# sourceMappingURL=index.js.map

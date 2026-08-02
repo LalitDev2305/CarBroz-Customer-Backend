@@ -10,6 +10,7 @@ import shutdownPlugin from './plugins/shutdown.plugin.js';
 import jwtPlugin from './plugins/jwt.plugin.js';
 import authRoutes from './modules/auth/api/auth.routes.js';
 import healthRoutes from './modules/health/api/health.routes.js';
+import { configRoutes } from './modules/config/api/config.routes.js';
 import { ResponseHelper } from '@carbroz/common';
 import uiRoutes from './ui/ui.routes.js';
 import appRoutes from './app.routes.js';
@@ -103,8 +104,9 @@ export const buildApp = async (): Promise<FastifyInstance> => {
 
   // Routes
   await app.register(healthRoutes, { prefix: '/health' });
-  await app.register(authRoutes, { prefix: '/api/v1/auth' });
-  await app.register(uiRoutes, { prefix: '/api/v1/ui' });
+  await app.register(authRoutes, { prefix: '/v1/auth' });
+  app.register(configRoutes, { prefix: '/v1/config' });
+  app.register(uiRoutes, { prefix: '/v1/ui' });
   await app.register(appRoutes, { prefix: '/api/v1/app' });
 
   return app;

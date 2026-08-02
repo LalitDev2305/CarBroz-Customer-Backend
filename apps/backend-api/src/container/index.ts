@@ -1,5 +1,8 @@
-import { createContainer, InjectionMode, AwilixContainer, asClass } from 'awilix';
-import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory } from '@carbroz/database';
+import { InjectionMode, asClass, AwilixContainer } from 'awilix';
+import { diContainer } from '@fastify/awilix';
+import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory, PrismaConfigRepository, PrismaFeatureFlagRepository } from '@carbroz/database';
+import { ConfigProvider } from '@carbroz/config';
+import { FeatureFlagProvider } from '@carbroz/feature-flags';
 
 // Interface defining the dependencies available in the container
 export interface Cradle {
@@ -7,22 +10,27 @@ export interface Cradle {
   databaseProvider: import('@carbroz/common').IDatabaseProvider;
   transactionProvider: import('@carbroz/common').ITransactionProvider;
   repositoryFactory: import('@carbroz/database').RepositoryFactory;
+  configRepository: import('@carbroz/common').IConfigRepository;
+  featureFlagRepository: import('@carbroz/common').IFeatureFlagRepository;
+  configProvider: import('@carbroz/common').IConfigProvider;
+  featureFlagProvider: import('@carbroz/common').IFeatureFlagProvider;
 }
 
-let container: AwilixContainer<Cradle>;
+let isRegistered = false;
 
 export function getContainer(): AwilixContainer<Cradle> {
-  if (!container) {
-    container = createContainer<Cradle>({
-      strict: true,
+  if (!isRegistered) {
+    diContainer.register({
+      prismaProvider: asClass(PrismaProvider).classic().singleton(),
+      databaseProvider: asClass(PrismaDatabaseProvider).classic().singleton(),
+      transactionProvider: asClass(PrismaTransactionProvider).classic().singleton(),
+      repositoryFactory: asClass(RepositoryFactory).classic().singleton(),
+      configRepository: asClass(PrismaConfigRepository).classic().singleton(),
+      featureFlagRepository: asClass(PrismaFeatureFlagRepository).classic().singleton(),
+      configProvider: asClass(ConfigProvider).classic().singleton(),
+      featureFlagProvider: asClass(FeatureFlagProvider).classic().singleton()
     });
-    
-    container.register({
-      prismaProvider: asClass(PrismaProvider).singleton(),
-      databaseProvider: asClass(PrismaDatabaseProvider).singleton(),
-      transactionProvider: asClass(PrismaTransactionProvider).singleton(),
-      repositoryFactory: asClass(RepositoryFactory).singleton()
-    });
+    isRegistered = true;
   }
-  return container;
+  return diContainer as unknown as AwilixContainer<Cradle>;
 }

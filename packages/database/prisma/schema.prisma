@@ -42,3 +42,27 @@ model RefreshToken {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 }
+
+
+model SystemConfig {
+  id          Int       @id @default(autoincrement())
+  publicId    String    @unique @default(uuid())
+  key         String    @unique
+  value       String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+model FeatureFlag {
+  id          Int       @id @default(autoincrement())
+  publicId    String    @unique @default(uuid())
+  key         String    @unique
+  enabled     Boolean   @default(false)
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+

@@ -13,6 +13,7 @@ export default fp(async (app: FastifyInstance) => {
     disposeOnClose: true,
     disposeOnResponse: true,
     strictBooleanEnforced: true,
+    injectionMode: 'CLASSIC',
   });
 
   // Attach the root container for global access (optional, mainly for background jobs)
