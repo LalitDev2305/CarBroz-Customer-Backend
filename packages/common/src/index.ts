@@ -3,12 +3,16 @@ export * from './exceptions.js';
 export * from './responses.js';
 
 // Domain
+export * from './domain/User.js';
+export * from './domain/UserSession.js';
 export * from './domain/IEntity.js';
 export * from './domain/IAggregateRoot.js';
 export * from './domain/IDomainEvent.js';
-export * from './domain/IRepository.js';
 export * from './domain/IReadRepository.js';
 export * from './domain/IWriteRepository.js';
+export * from './domain/IRepository.js';
+export * from './domain/repositories/IUserRepository.js';
+export * from './domain/repositories/IUserSessionRepository.js';
 
 // Application
 export * from './application/IUseCase.js';

@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 export declare class AuthController {
+    guestLogin(request: FastifyRequest, reply: FastifyReply): Promise<never>;
     sendOtp(request: FastifyRequest, reply: FastifyReply): Promise<never>;
     verifyOtp(request: FastifyRequest, reply: FastifyReply): Promise<never>;
     refresh(request: FastifyRequest, reply: FastifyReply): Promise<never>;
