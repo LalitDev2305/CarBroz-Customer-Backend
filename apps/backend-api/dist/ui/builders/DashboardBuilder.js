@@ -1,5 +1,4 @@
 import { BaseTemplate } from '../templates/BaseTemplate.js';
-import { BaseSection } from '../sections/BaseSection.js';
 import { UI } from '../utils/UI.js';
 import { BaseScreenBuilder } from './BaseScreenBuilder.js';
 export class DashboardBuilder extends BaseScreenBuilder {
@@ -10,26 +9,24 @@ export class DashboardBuilder extends BaseScreenBuilder {
             .setProperties({
             horizontalAlignment: 'center',
         });
-        // ==========================================
-        // 1. COLLAPSING HEADER SECTION
-        // ==========================================
-        const headerSection = new BaseSection('header_section', 'collapsing_header_section')
-            .addComponent(this.buildTopAppBar(isLoggedIn))
-            .addComponent(this.buildSearchBar())
-            .addComponent(this.buildCollapsedTopAppBar(isLoggedIn));
-        // ==========================================
-        // 2. DASHBOARD CONTENT SECTION
-        // ==========================================
-        const dashboardSection = new BaseSection('dashboard_section')
-            .addComponent(this.buildHeroBanner());
-        // Generate the 5 identical service grids as requested (Mock Data)
-        for (let i = 0; i < 5; i++) {
-            dashboardSection.addComponent(this.buildServiceGrid(`grid_menu_component_${i}`));
-        }
-        // Add Bottom Navigation
-        dashboardSection.addComponent(this.buildBottomNavigation());
-        template.addSection(headerSection);
-        template.addSection(dashboardSection);
+        const rootComponent = UI.component('dashboard_root', 'default_component_layout')
+            .setProperties({
+            width: 'match',
+            height: 'match',
+            padding: '16',
+        });
+        // 1. Header Subcomponent
+        rootComponent.addSubcomponent(this.buildHeader(isLoggedIn));
+        // 2. Search Subcomponent
+        rootComponent.addSubcomponent(this.buildSearchBox());
+        // 3. Hero Banner Component (Added as a subcomponent structurally inside root, wait, if it's a Component it should be added to template? No, template has one root component, so this must be a subcomponent OR rootComponent must be the single Component)
+        // Wait, the user agreed to put styling on the component, but if it's inside the dashboard, it is actually a subcomponent of the dashboard_root component! 
+        // Wait, in SDUI, if dashboard_root is the only component, then hero_banner MUST be a subcomponent, so we apply the card styling to the subcomponent!
+        // Or we can add multiple components to the template! 
+        template.addComponent(rootComponent);
+        template.addComponent(this.buildHeroBanner());
+        // 4. Services Component (Added to template so it stacks below the hero banner)
+        template.addComponent(this.buildServicesCard());
         const theme = {
             theme: 'light',
             showBackButton: false,
@@ -52,134 +49,302 @@ export class DashboardBuilder extends BaseScreenBuilder {
             theme,
         };
     }
-    // --- COMPONENT BUILDER HELPERS ---
-    buildTopAppBar(isLoggedIn) {
-        const rightSlot = UI.component('top_app_bar_content_subcomponent_right', 'top_app_bar_content_subcomponent')
-            .setProperties({ slot: 'right', horizontalAlignment: 'end', verticalAlignment: 'center' });
+    buildHeader(isLoggedIn) {
+        const headerSubcomponent = UI.component('header_main_subcomponent', 'default_subcomponent_layout')
+            .setProperties({
+            axis: 'ROW',
+            mainAxisAlignment: 'SPACE_BETWEEN',
+            crossAxisAlignment: 'CENTER',
+            width: 'match'
+        });
+        // LEFT CHILD
+        const leftChild = UI.child('header_left_child')
+            .setProperties({
+            axis: 'ROW',
+            crossAxisAlignment: 'CENTER',
+            gap: 12
+        });
+        // Location Avatar Atom
+        leftChild.addChildData(UI.component('header_location_avatar', 'atom_avatar')
+            .setProperties({
+            icon: {
+                iconName: 'ic_location',
+                imageUrl: 'https://example.com/location_ic.png', // Or empty if you just want standard icon
+                tint: '#007A53'
+            },
+            backgroundColor: '#E7F7F9',
+            cornerRadius: 50,
+            padding: 12,
+            width: 48,
+            height: 48
+        }));
+        // Location Text Column
+        const textLayout = UI.child('header_location_text_layout')
+            .setProperties({
+            axis: 'COLUMN',
+            crossAxisAlignment: 'START'
+        });
+        textLayout.addChildData(UI.component('header_location_title', 'atom_text')
+            .setProperties({
+            text: 'Work',
+            textColor: '#000000',
+            typography: 'label_large',
+            fontWeight: 'BOLD'
+        }));
+        textLayout.addChildData(UI.component('header_location_subtitle', 'atom_text')
+            .setProperties({
+            text: 'HSR Layout',
+            textColor: '#666666',
+            typography: 'body_medium',
+            trailing: {
+                icon: 'arrow_drop_down',
+                tint: '#333333'
+            }
+        }));
+        // Since textLayout is a ChildLayout, we add it to the leftChild array directly
+        // Note: ensure the frontend parser can deserialize child layouts nested in childrenData
+        leftChild.addChildData(textLayout);
+        // RIGHT CHILD
+        const rightChild = UI.child('header_right_child')
+            .setProperties({
+            axis: 'ROW',
+            crossAxisAlignment: 'CENTER'
+        });
         if (isLoggedIn) {
-            rightSlot.addChild(UI.image('profile_image', 'http://127.0.0.1:3000/images/profile.png')
-                .setProperties({ shape: 'circle', width: 'size_m', height: 'size_m' }));
-        }
-        else {
-            rightSlot.addChild(UI.button('login_btn', 'Login')
+            rightChild.addChildData(UI.component('header_profile_avatar', 'atom_avatar')
                 .setProperties({
-                style: 'primary',
-                size: 'text_s',
-                height: 'size_s',
-                corner_radius: 'radius_m',
-            })
-                .setAction('onClick', {
-                type: 'navigation',
-                payload: { destination: 'auth/auth_login', api: 'auth/auth_login' }
+                icon: {
+                    iconName: 'ic_user',
+                    imageUrl: 'https://example.com/profile_ic.png',
+                    tint: '#007A53'
+                },
+                backgroundColor: '#F5F5F5',
+                cornerRadius: 50,
+                padding: 12,
+                width: 48,
+                height: 48
             }));
         }
-        return UI.component('top_app_bar_component')
-            .setProperties({
-            height: 'size_m',
-            layoutDirection: 'horizontal',
-            horizontalArrangement: 'space_between',
-            verticalAlignment: 'center',
-            paddingStart: 'spacing_m',
-            paddingEnd: 'spacing_m'
-        })
-            .addSubComponent(UI.component('top_app_bar_content_subcomponent_left', 'top_app_bar_content_subcomponent')
-            .setProperties({ slot: 'left', layoutDirection: 'horizontal', verticalAlignment: 'center' })
-            .addChild(UI.icon('location_icon', 'location').setProperties({ color: '#0EA5A8' }))
-            .addChild(UI.text('location_text', 'Home - 123 Main St')
-            .setProperties({ weight: 'Bold', size: 'text_m', marginStart: 'spacing_xs', marginEnd: 'spacing_xs' }))
-            .addChild(UI.icon('dropdown_icon', 'arrow_drop_down').setProperties({ color: '#111827' })))
-            .addSubComponent(rightSlot);
-    }
-    buildSearchBar() {
-        return UI.component('search_bar_component')
-            .setProperties({ paddingStart: 'spacing_m', paddingEnd: 'spacing_m' })
-            .addSubComponent(UI.component('search_bar_content_subcomponent')
-            .addChild(UI.input('home_search_input', 'text')
-            .setProperties({
-            placeholder: 'Search services...',
-            backgroundColor: '#F3F4F6',
-            corner_radius: 'radius_m',
-            height: 'size_m',
-            border: '#E5E7EB'
-        })));
-    }
-    buildCollapsedTopAppBar(isLoggedIn) {
-        const rightSlot = UI.component('top_app_bar_content_subcomponent_right', 'top_app_bar_content_subcomponent')
-            .setProperties({ slot: 'right', horizontalAlignment: 'end', verticalAlignment: 'center' });
-        if (isLoggedIn) {
-            rightSlot.addChild(UI.image('profile_image', 'http://127.0.0.1:3000/images/profile.png')
-                .setProperties({ shape: 'circle', width: 'size_m', height: 'size_m' }));
-        }
         else {
-            rightSlot.addChild(UI.button('login_btn_collapsed', 'Login')
+            rightChild.addChildData(UI.component('header_login_btn', 'atom_button')
                 .setProperties({
-                style: 'primary',
-                size: 'text_s',
-                height: 'size_s',
-                corner_radius: 'radius_m',
+                text: 'Login',
+                backgroundColor: '#007A53',
+                textColor: '#FFFFFF',
+                cornerRadius: 8,
+                width: 'wrap',
+                height: 'wrap'
             })
-                .setAction('onClick', {
+                .setSingleAction({
                 type: 'navigation',
-                payload: { destination: 'auth/auth_login', api: 'auth/auth_login' }
+                payload: { destination: 'form_template', api: 'auth/auth_login' }
             }));
         }
-        return UI.component('collapsed_top_app_bar_component', 'top_app_bar_component')
+        headerSubcomponent.addChild(leftChild);
+        headerSubcomponent.addChild(rightChild);
+        return headerSubcomponent;
+    }
+    buildSearchBox() {
+        const searchSubcomponent = UI.component('search_subcomponent', 'default_subcomponent_layout')
             .setProperties({
-            height: 'size_m',
-            layoutDirection: 'horizontal',
-            horizontalArrangement: 'space_between',
-            verticalAlignment: 'center',
-            paddingStart: 'spacing_m',
-            paddingEnd: 'spacing_m'
-        })
-            .addSubComponent(UI.component('collapsed_search_subcomponent', 'search_bar_content_subcomponent')
-            .setProperties({ slot: 'left', layoutDirection: 'horizontal', verticalAlignment: 'center', widthPercent: '0.85' })
-            .addChild(UI.input('collapsed_home_search_input', 'text')
+            axis: 'ROW',
+            mainAxisAlignment: 'SPACE_BETWEEN',
+            crossAxisAlignment: 'CENTER',
+            width: 'match',
+            paddingTop: 16
+        });
+        const searchChild = UI.child('search_child')
             .setProperties({
-            placeholder: 'Search services...',
-            backgroundColor: '#F3F4F6',
-            corner_radius: 'radius_m',
-            height: 'size_s',
-            border: '#E5E7EB'
-        })))
-            .addSubComponent(rightSlot);
+            axis: 'ROW',
+            crossAxisAlignment: 'CENTER',
+            width: 'match',
+            gap: 12
+        });
+        searchChild.addChildData(UI.component('search_input_atom', 'atom_input_field')
+            .setProperties({
+            inputType: 'text',
+            hint: 'Search for services...',
+            weight: 1,
+            height: 'wrap',
+            backgroundColor: '#F5F5F5',
+            cornerRadius: 12,
+            leading: {
+                icon: 'ic_search',
+                tint: '#666666'
+            }
+        }));
+        searchChild.addChildData(UI.component('search_filter_avatar', 'atom_avatar')
+            .setProperties({
+            icon: {
+                iconName: 'ic_filter',
+                imageUrl: '',
+                tint: '#FFFFFF'
+            },
+            backgroundColor: '#007A53',
+            cornerRadius: 12,
+            padding: 12,
+            width: 48,
+            height: 48
+        }));
+        searchSubcomponent.addChild(searchChild);
+        return searchSubcomponent;
     }
     buildHeroBanner() {
-        return UI.component('image_banner_component')
-            .setProperties({ marginTop: 'spacing_l' })
-            .addSubComponent(UI.component('image_banner_content_subcomponent')
+        // We apply card styling at the COMPONENT level as requested, including border properties
+        const heroComponent = UI.component('hero_component', 'default_component_layout')
             .setProperties({
-            backgroundColor: '#111827',
-            corner_radius: 'radius_l',
-            padding: 'spacing_m',
-            layoutDirection: 'horizontal',
-            verticalAlignment: 'center'
-        })
-            .addChild(UI.text('hero_text_col', 'Flat 50% Off\\non First Premium Wash')
-            .setProperties({ color: '#FFFFFF', size: 'text_l', weight: 'Bold', widthPercent: '0.6' }))
-            .addChild(UI.image('hero_image', 'http://127.0.0.1:3000/images/car_stars.png')
-            .setProperties({ width: 'size_xl', height: 'size_xl', content_scale: 'Fit' })));
+            width: 'match',
+            height: '30%h',
+            padding: 16,
+            cornerRadius: 16,
+            elevation: 4,
+            borderWidth: 1,
+            borderColor: '#007A53',
+            backgroundGradient: {
+                colors: [
+                    { color: '#B8E3EA', stop: 0.0 },
+                    { color: '#D7F1F4', stop: 0.5 },
+                    { color: '#F2FBFC', stop: 1.0 }
+                ]
+            }
+        });
+        // The structural subcomponent
+        const heroSubcomponent = UI.component('hero_subcomponent', 'default_subcomponent_layout')
+            .setProperties({
+            axis: 'ROW',
+            mainAxisAlignment: 'SPACE_BETWEEN',
+            crossAxisAlignment: 'CENTER',
+            width: 'match'
+        });
+        // LEFT: Text Content
+        const textChild = UI.child('hero_text_child')
+            .setProperties({
+            axis: 'COLUMN',
+            crossAxisAlignment: 'START',
+            weight: 1,
+            gap: 8
+        });
+        textChild.addChildData(UI.component('hero_badge_atom', 'atom_badge')
+            .setProperties({
+            text: 'EXCLUSIVE OFFER',
+            backgroundColor: '#007A53',
+            textColor: '#FFFFFF',
+            icon: 'sparkles'
+        }));
+        textChild.addChildData(UI.component('hero_title_atom', 'atom_text')
+            .setProperties({
+            text: "<font color='#006994'>Flat 50% OFF</font> on\nFirst Premium\nWash",
+            isHtml: true,
+            textColor: '#111111',
+            typography: 'headline_large',
+            fontWeight: 'BOLD'
+        }));
+        textChild.addChildData(UI.component('hero_book_btn_atom', 'atom_button')
+            .setProperties({
+            text: 'Book Now',
+            backgroundColor: '#111111',
+            textColor: '#FFFFFF',
+            cornerRadius: 50,
+            padding: 12,
+            marginTop: 8,
+            trailing: {
+                icon: 'arrow_forward',
+                backgroundColor: '#FFFFFF',
+                tint: '#111111',
+                isCircular: true,
+                padding: 4
+            }
+        }));
+        // RIGHT: Image Content
+        const imageChild = UI.child('hero_image_child')
+            .setProperties({
+            axis: 'COLUMN',
+            crossAxisAlignment: 'CENTER'
+        });
+        imageChild.addChildData(UI.component('hero_car_image_atom', 'atom_image')
+            .setProperties({
+            imageUrl: 'http://127.0.0.1:8080/images/car_stars.png', // Fallback to car image we have
+            width: 120,
+            height: 'wrap',
+            contentScale: 'FIT'
+        }));
+        heroSubcomponent.addChild(textChild);
+        heroSubcomponent.addChild(imageChild);
+        heroComponent.addSubcomponent(heroSubcomponent);
+        return heroComponent;
     }
-    buildServiceGrid(id) {
-        return UI.component(id, 'grid_menu_component')
-            .setProperties({ marginTop: 'spacing_l' })
-            .addSubComponent(UI.component('grid_menu_content_subcomponent_title', 'grid_menu_content_subcomponent')
-            .setProperties({ layoutDirection: 'horizontal' })
-            .addChild(UI.text('service_title', 'Our Services').setProperties({ weight: 'Bold', size: 'text_l' })))
-            .addSubComponent(UI.component('grid_menu_content_subcomponent_row1', 'grid_menu_content_subcomponent')
-            .setProperties({ layoutDirection: 'horizontal', horizontalArrangement: 'space_between', marginTop: 'spacing_m' })
-            .addChild(UI.button('service_1_btn', 'Full Wash').setProperties({ icon: 'check', style: 'secondary', widthPercent: '0.45' }))
-            .addChild(UI.button('service_2_btn', 'Deep Clean').setProperties({ icon: 'check', style: 'secondary', widthPercent: '0.45' })))
-            .addSubComponent(UI.component('grid_menu_content_subcomponent_row2', 'grid_menu_content_subcomponent')
-            .setProperties({ layoutDirection: 'horizontal', horizontalArrangement: 'space_between', marginTop: 'spacing_m' })
-            .addChild(UI.button('service_3_btn', 'Coating').setProperties({ icon: 'check', style: 'secondary', widthPercent: '0.45' }))
-            .addChild(UI.button('service_4_btn', 'Interior').setProperties({ icon: 'check', style: 'secondary', widthPercent: '0.45' })));
-    }
-    buildBottomNavigation() {
-        return UI.component('bottom_navigation_component')
-            .addSubComponent(UI.component('bottom_navigation_content_subcomponent')
-            .addChild(UI.component('home_bottom_nav', 'generic_bottom_navigation')
-            .setProperties({ activeTab: 'home' })));
+    buildServicesCard() {
+        const servicesComponent = UI.component('services_component', 'default_component_layout')
+            .setProperties({
+            width: 'match',
+            height: '20%h',
+            padding: 16,
+            cornerRadius: 16,
+            borderWidth: 1,
+            borderColor: '#E0E0E0',
+            backgroundColor: '#FFFFFF',
+            elevation: 4,
+            marginTop: -32,
+            marginHorizontal: 16
+        });
+        const servicesSubcomponent = UI.component('services_subcomponent', 'default_subcomponent_layout')
+            .setProperties({
+            axis: 'ROW',
+            mainAxisAlignment: 'SPACE_BETWEEN',
+            crossAxisAlignment: 'CENTER',
+            width: 'match',
+            height: 'match'
+        });
+        // Helper to generate service items
+        const addServiceItem = (id, name, icon) => {
+            const child = UI.child(`service_${id}_child`)
+                .setProperties({
+                axis: 'COLUMN',
+                crossAxisAlignment: 'CENTER',
+                gap: 8
+            });
+            child.addChildData(UI.component(`service_${id}_avatar`, 'atom_avatar')
+                .setProperties({
+                icon: { iconName: icon, tint: '#007A53' },
+                backgroundColor: '#E7F7F9',
+                cornerRadius: 50,
+                padding: 16,
+                width: 56,
+                height: 56
+            }));
+            child.addChildData(UI.component(`service_${id}_text`, 'atom_text')
+                .setProperties({
+                text: name,
+                textColor: '#111111',
+                typography: 'body_small',
+                fontWeight: 'BOLD'
+            }));
+            servicesSubcomponent.addChild(child);
+        };
+        // Add the 4 main services
+        addServiceItem('wash', 'Full Wash', 'ic_wash');
+        addServiceItem('interior', 'Interior', 'ic_interior');
+        addServiceItem('exterior', 'Exterior', 'ic_exterior');
+        addServiceItem('detailing', 'Detailing', 'ic_detailing');
+        // Add the 5th child: Arrow Navigation
+        const arrowChild = UI.child('service_arrow_child')
+            .setProperties({
+            axis: 'COLUMN',
+            crossAxisAlignment: 'CENTER',
+            mainAxisAlignment: 'CENTER'
+        });
+        arrowChild.addChildData(UI.component('service_arrow_avatar', 'atom_avatar')
+            .setProperties({
+            icon: { iconName: 'arrow_forward', tint: '#666666' },
+            backgroundColor: '#F5F5F5',
+            cornerRadius: 50,
+            padding: 8,
+            width: 40,
+            height: 40
+        }));
+        servicesSubcomponent.addChild(arrowChild);
+        servicesComponent.addSubcomponent(servicesSubcomponent);
+        return servicesComponent;
     }
 }
 //# sourceMappingURL=DashboardBuilder.js.map

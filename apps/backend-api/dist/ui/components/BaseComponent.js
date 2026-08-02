@@ -4,7 +4,9 @@ export class BaseComponent {
     properties;
     action;
     subComponents;
+    subcomponents;
     children;
+    childrenData;
     constructor(id, type) {
         this.id = id;
         this.type = type;
@@ -14,7 +16,7 @@ export class BaseComponent {
         return this;
     }
     setAction(eventName, action) {
-        if (!this.action) {
+        if (!this.action || typeof this.action.type === 'string') {
             this.action = {};
         }
         this.action[eventName] = action;
@@ -27,11 +29,29 @@ export class BaseComponent {
         this.subComponents.push(component);
         return this;
     }
+    addSubcomponent(component) {
+        if (!this.subcomponents) {
+            this.subcomponents = [];
+        }
+        this.subcomponents.push(component);
+        return this;
+    }
     addChild(component) {
         if (!this.children) {
             this.children = [];
         }
         this.children.push(component);
+        return this;
+    }
+    addChildData(component) {
+        if (!this.childrenData) {
+            this.childrenData = [];
+        }
+        this.childrenData.push(component);
+        return this;
+    }
+    setSingleAction(action) {
+        this.action = action;
         return this;
     }
 }

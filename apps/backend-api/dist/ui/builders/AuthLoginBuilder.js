@@ -1,153 +1,138 @@
 import { BaseTemplate } from '../templates/BaseTemplate.js';
-import { BaseSection } from '../sections/BaseSection.js';
 import { UI } from '../utils/UI.js';
 import { BaseScreenBuilder } from './BaseScreenBuilder.js';
 export class AuthLoginBuilder extends BaseScreenBuilder {
     screenId = 'auth_login';
     async build(context) {
-        const template = new BaseTemplate('login_layout', 'form_template')
+        const template = new BaseTemplate('login_main', 'form_template')
             .setProperties({
-            padding: 'spacing_m',
-            verticalArrangement: 'center',
-            horizontalAlignment: 'center',
+            padding: '16',
         });
-        const authSection = new BaseSection('authentication_section');
-        // 1. Image Banner
-        const imageBanner = UI.component('image_banner_component')
-            .setProperties({ horizontalAlignment: 'center' })
-            .addSubComponent(UI.component('image_banner_content_subcomponent')
-            .setProperties({ horizontalAlignment: 'center' })
-            .addChild(UI.image('logo_image', 'http://127.0.0.1:3000/images/carbroz_logo.png')
+        const rootComponent = UI.component('login_root_component', 'default_component_layout')
             .setProperties({
-            width: 'size_huge',
-            height: 'size_xxl',
-            content_scale: 'Fit',
-            marginTop: 'spacing_m',
-        })));
-        // 2. Page Header
-        const pageHeader = UI.component('page_header_component')
-            .setProperties({ horizontalAlignment: 'center' })
-            .addSubComponent(UI.component('page_header_content_subcomponent')
-            .setProperties({ horizontalAlignment: 'center' })
-            .addChild(UI.text('login_subheading', 'Your Car, Our Care\\n At Your Doorstep')
+            width: 'match',
+            height: 'match',
+            backgroundColor: 'transparent'
+        });
+        const mainSubcomponent = UI.component('login_main_subcomponent', 'default_subcomponent_layout')
             .setProperties({
-            horizontalAlignment: 'center',
-            font_family: 'Plus Jakarta Sans',
-            weight: 'ExtraBold',
-            size: 'text_huge',
-            color: '#111827',
-            marginTop: 'spacing_xxl',
-            lineHeight: 'line_height_xl',
-            letterSpacing: 'letter_spacing_xs',
-            alignment: 'Center',
-        }))
-            .addChild(UI.text('login_body', 'Login or Sign up to explore premium\\ncar wash services')
+            axis: 'COLUMN',
+            mainAxisAlignment: 'SPACE_BETWEEN',
+            crossAxisAlignment: 'CENTER',
+            width: 'match',
+            height: 'match',
+            padding: 0,
+            margin: 0
+        });
+        // Top Section
+        const topSection = UI.child('login_top_section')
             .setProperties({
-            horizontalAlignment: 'center',
-            font_family: 'Plus Jakarta Sans',
-            weight: 'Medium',
-            size: 'text_m',
-            color: '#6B7280',
-            marginTop: 'spacing_s',
-            lineHeight: 'line_height_m',
-            alignment: 'Center',
-        })));
-        // 3. Text Input (Phone)
-        const textInputComp = UI.component('text_input_component')
-            .addSubComponent(UI.component('text_input_content_subcomponent')
-            .addChild(UI.input('phone_number_input', 'phone')
+            axis: 'COLUMN',
+            mainAxisAlignment: 'START',
+            crossAxisAlignment: 'CENTER',
+            gap: 24,
+            width: 'match',
+            height: 'wrap'
+        });
+        topSection.addChildData(UI.component('login_logo_atom', 'atom_image')
             .setProperties({
-            placeholder: '+91 00000 00000',
-            corner_radius: 'radius_m',
-            border: '#D7EEF0',
-            focus_border: '#0EA5A8',
-            font_family: 'Plus Jakarta Sans',
-            size: 'text_l',
-            color: '#111827',
-            backgroundColor: '#FFFFFF',
-            padding: 'spacing_l',
-            marginTop: 'spacing_xl',
-            width: 'fill_max_width',
-        })));
-        // 4. Primary Action (Button)
-        const primaryAction = UI.component('primary_action_component')
-            .addSubComponent(UI.component('primary_action_content_subcomponent')
-            .addChild(UI.button('get_otp_btn', 'Get OTP')
+            imageUrl: 'http://127.0.0.1:8080/images/carbroz_logo.png',
+            width: '80%w',
+            height: '25%h',
+            contentScale: 'FIT'
+        }));
+        topSection.addChildData(UI.component('login_tagline_atom', 'atom_text')
             .setProperties({
-            font_family: 'Plus Jakarta Sans',
-            weight: 'ExtraBold',
-            size: 'text_l',
-            color: '#FFFFFF',
-            corner_radius: 'radius_l',
-            gradient: { start: '#11B6BC', end: '#0B8C91' },
-            shadow: 'true',
-            height: 'size_m',
-            marginTop: 'spacing_xl',
+            text: 'Your Car Our Care \n At Your Door Step',
+            textColor: '#666666',
+            fontSize: 14,
+            font: 'Inter',
+            style: 'NORMAL',
+            typography: 'body_medium',
+            textAlign: 'CENTER',
+            marginTop: -16
+        }));
+        topSection.addChildData(UI.component('login_circle_icon_atom', 'atom_avatar')
+            .setProperties({
+            icon: {
+                iconName: 'ic_user',
+                imageUrl: '', // Blank will trigger the fallback ic_user
+                tint: '#007A53'
+            },
+            backgroundColor: '#E7F7F9',
+            cornerRadius: 50,
+            padding: 16,
+            width: 64,
+            height: 64
+        }));
+        topSection.addChildData(UI.component('login_welcome_atom', 'atom_text')
+            .setProperties({
+            text: 'Welcome Back!',
+            textColor: '#000000',
+            fontSize: 24,
+            font: 'Inter',
+            style: 'NORMAL',
+            typography: 'heading_large',
+            fontWeight: 'BOLD'
+        }));
+        topSection.addChildData(UI.component('login_subtitle_atom', 'atom_text')
+            .setProperties({
+            text: 'Login to continue',
+            textColor: '#666666',
+            fontSize: 16,
+            font: 'Inter',
+            style: 'NORMAL',
+            typography: 'body_large',
+            marginTop: -16
+        }));
+        topSection.addChildData(UI.component('phoneNumber', 'atom_input_field')
+            .setProperties({
+            inputType: 'phone',
+            hint: 'Phone Number',
+            showCountryPicker: true,
+            defaultCountryCode: '+91',
+            width: 'match',
+            height: 'wrap'
+        }));
+        topSection.addChildData(UI.component('login_get_otp_btn', 'atom_button')
+            .setProperties({
+            text: 'Continue',
+            backgroundColor: '#007A53',
+            textColor: '#FFFFFF',
+            width: 'match',
+            height: 'wrap',
+            cornerRadius: 8
         })
-            .setAction('onClick', {
-            type: 'navigation',
+            .setSingleAction({
+            type: 'api_call',
             payload: {
-                destination: 'auth/auth_otp',
-                api: 'auth/auth_otp'
+                endpoint: 'auth/send_otp',
+                method: 'POST'
             }
-        }))
-            .addChild(UI.button('skip_btn', 'Skip for now')
+        }));
+        // Bottom Section
+        const bottomSection = UI.child('login_bottom_section')
             .setProperties({
-            font_family: 'Plus Jakarta Sans',
-            weight: 'Bold',
-            size: 'text_m',
-            color: '#6B7280',
-            style: 'text_only',
-            marginTop: 'spacing_m',
-            horizontalAlignment: 'center',
-        })
-            .setAction('onClick', {
-            type: 'navigation',
-            payload: {
-                destination: 'dashboard_template',
-                api: 'dashboard/home'
-            }
-        })));
-        // 5. Terms component
-        const termsComp = UI.component('terms_component')
+            axis: 'COLUMN',
+            mainAxisAlignment: 'END',
+            crossAxisAlignment: 'CENTER',
+            width: 'match',
+            height: 'wrap'
+        });
+        bottomSection.addChildData(UI.component('login_bottom_image_atom', 'atom_image')
             .setProperties({
-            horizontalAlignment: 'center',
-            marginTop: 'spacing_l',
-        })
-            .addSubComponent(UI.component('terms_content_subcomponent')
-            .setProperties({
-            layoutDirection: 'horizontal',
-            horizontalArrangement: 'center',
-        })
-            .addChild(UI.text('terms_text_1', 'By continuing, you agree to our ')
-            .setProperties({
-            font_family: 'Plus Jakarta Sans',
-            size: 'text_xs',
-            color: '#6B7280',
-        }))
-            .addChild(UI.text('terms_text_2', 'Terms & Conditions')
-            .setProperties({
-            font_family: 'Plus Jakarta Sans',
-            size: 'text_xs',
-            color: '#0EA5A8',
-            weight: 'ExtraBold',
-        })
-            .setAction('onClick', {
-            type: 'navigation',
-            payload: { destination: 'terms_screen' }
-        })));
-        // Assemble Section
-        authSection
-            .addComponent(imageBanner)
-            .addComponent(pageHeader)
-            .addComponent(textInputComp)
-            .addComponent(primaryAction)
-            .addComponent(termsComp);
-        template.addSection(authSection);
+            imageUrl: 'http://127.0.0.1:8080/images/car_stars.png',
+            width: 'match',
+            height: 'wrap',
+            contentScale: 'FIT'
+        }));
+        mainSubcomponent.addChild(topSection);
+        mainSubcomponent.addChild(bottomSection);
+        rootComponent.addSubcomponent(mainSubcomponent);
+        template.addComponent(rootComponent);
         const theme = {
             theme: 'light',
             showBackButton: false,
-            statusBar: 'transparent',
             backgroundGradient: {
                 colors: [
                     { color: '#B8E3EA', stop: 0.0 },
@@ -155,13 +140,13 @@ export class AuthLoginBuilder extends BaseScreenBuilder {
                     { color: '#D7F1F4', stop: 0.35 },
                     { color: '#E7F7F9', stop: 0.6 },
                     { color: '#F2FBFC', stop: 0.8 },
-                    { color: '#FBFEFE', stop: 1.0 },
-                ],
-            },
+                    { color: '#FBFEFE', stop: 1.0 }
+                ]
+            }
         };
         return {
             screenId: 'auth_login',
-            templateId: 'login_layout',
+            templateId: 'auth_layout',
             templateType: 'form_template',
             template,
             theme,

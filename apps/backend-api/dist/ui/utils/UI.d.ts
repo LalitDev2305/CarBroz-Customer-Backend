@@ -9,6 +9,11 @@ export declare class UI {
      */
     static component(id: string, type?: string): GenericComponent;
     /**
+     * Creates a child layout component.
+     * If `type` is omitted, it defaults to `default_child_layout`.
+     */
+    static child(id: string, type?: string): GenericComponent;
+    /**
      * Creates a text component.
      */
     static text(id: string, text: string): GenericComponent;

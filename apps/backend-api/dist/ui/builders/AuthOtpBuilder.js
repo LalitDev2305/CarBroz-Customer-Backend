@@ -1,160 +1,187 @@
 import { BaseTemplate } from '../templates/BaseTemplate.js';
-import { BaseSection } from '../sections/BaseSection.js';
 import { UI } from '../utils/UI.js';
 import { BaseScreenBuilder } from './BaseScreenBuilder.js';
 export class AuthOtpBuilder extends BaseScreenBuilder {
     screenId = 'auth_otp';
     async build(context) {
-        const template = new BaseTemplate('otp_layout', 'form_template')
+        const template = new BaseTemplate('otp_main', 'form_template')
             .setProperties({
-            padding: 'spacing_m',
-            verticalArrangement: 'center',
-            horizontalAlignment: 'center',
+            padding: '16',
         });
-        const authSection = new BaseSection('authentication_section');
-        // 1. Image Banner
-        const imageBanner = UI.component('image_banner_component')
-            .setProperties({ horizontalAlignment: 'center' })
-            .addSubComponent(UI.component('image_banner_content_subcomponent')
-            .setProperties({ horizontalAlignment: 'center' })
-            .addChild(UI.image('logo_image', 'http://127.0.0.1:3000/images/carbroz_logo.png')
+        const rootComponent = UI.component('otp_root_component', 'default_component_layout')
             .setProperties({
-            width: 'size_huge',
-            height: 'size_xxl',
-            content_scale: 'Fit',
-            marginTop: 'spacing_m',
-        })));
-        // 2. Page Header
-        const pageHeader = UI.component('page_header_component')
-            .setProperties({ horizontalAlignment: 'center' })
-            .addSubComponent(UI.component('page_header_content_subcomponent')
-            .setProperties({ horizontalAlignment: 'center' })
-            .addChild(UI.text('title_text', 'Verify Your Number')
+            width: 'match',
+            height: 'match',
+            backgroundColor: 'transparent'
+        });
+        const mainSubcomponent = UI.component('otp_main_subcomponent', 'default_subcomponent_layout')
             .setProperties({
-            font_family: 'Poppins',
-            size: 'text_huge',
-            weight: 'Poppins-SemiBold',
-            lineHeight: 'line_height_xl',
-            letterSpacing: 'letter_spacing_xs',
-            color: '#111827',
-            alignment: 'Center',
-            marginTop: 'spacing_xxl',
-            horizontalAlignment: 'center',
-        }))
-            .addChild(UI.text('subtitle_text', 'Enter the 4-digit code sent to')
+            axis: 'COLUMN',
+            mainAxisAlignment: 'SPACE_BETWEEN',
+            crossAxisAlignment: 'CENTER',
+            width: 'match',
+            height: 'match',
+            padding: 0,
+            margin: 0
+        });
+        // Top Section
+        const topSection = UI.component('otp_top_section', 'default_child_layout')
             .setProperties({
-            font_family: 'Plus Jakarta Sans',
-            size: 'text_m',
-            weight: 'Medium',
-            lineHeight: 'line_height_m',
-            color: '#6B7280',
-            alignment: 'Center',
-            marginTop: 'spacing_s',
-            horizontalAlignment: 'center',
-        })));
-        // 3. Labeled Info Component (Phone Number + Edit Icon)
-        const labeledInfo = UI.component('labeled_info_component')
+            axis: 'COLUMN',
+            mainAxisAlignment: 'START',
+            crossAxisAlignment: 'CENTER',
+            gap: 24,
+            width: 'match',
+            height: 'wrap'
+        });
+        topSection.addChildData(UI.component('otp_logo_atom', 'atom_image')
             .setProperties({
-            horizontalArrangement: 'center',
-            verticalAlignment: 'center',
-            marginTop: 'spacing_m',
-        })
-            .addSubComponent(UI.component('labeled_info_content_subcomponent')
+            imageUrl: 'http://127.0.0.1:8080/images/carbroz_logo.png',
+            width: '80%w',
+            height: '25%h',
+            contentScale: 'FIT'
+        }));
+        topSection.addChildData(UI.component('otp_tagline_atom', 'atom_text')
             .setProperties({
-            layoutDirection: 'horizontal',
-            horizontalArrangement: 'center',
-            verticalAlignment: 'center',
-        })
-            .addChild(UI.text('phone_text', '+91 98765 43210')
+            text: 'Your Car Our Care \n At Your Door Step',
+            textColor: '#666666',
+            fontSize: 14,
+            font: 'Inter',
+            style: 'NORMAL',
+            typography: 'body_medium',
+            textAlign: 'CENTER',
+            marginTop: -16
+        }));
+        topSection.addChildData(UI.component('otp_circle_icon_atom', 'atom_avatar')
             .setProperties({
-            font_family: 'Plus Jakarta Sans',
-            weight: 'ExtraBold',
-            size: 'text_xl',
-            color: '#111827',
-            horizontalAlignment: 'center',
-        }))
-            .addChild(UI.icon('edit_icon', 'edit')
+            icon: {
+                iconName: 'ic_user',
+                imageUrl: '', // Blank will trigger the fallback ic_user
+                tint: '#007A53'
+            },
+            backgroundColor: '#E7F7F9',
+            cornerRadius: 50,
+            padding: 16,
+            width: 64,
+            height: 64
+        }));
+        topSection.addChildData(UI.component('otp_verify_atom', 'atom_text')
             .setProperties({
-            width: 'icon_m',
-            height: 'icon_m',
-            color: '#0EA5A8',
-            marginStart: 'spacing_s',
-        })));
-        // 4. Text Input Component (OTP Boxes)
-        const textInputComp = UI.component('text_input_component')
-            .addSubComponent(UI.component('text_input_content_subcomponent')
-            .addChild(UI.input('otp_boxes', 'otp_custom')
+            text: 'Verify your phone number',
+            textColor: '#000000',
+            fontSize: 24,
+            font: 'Inter',
+            style: 'NORMAL',
+            typography: 'heading_large',
+            fontWeight: 'BOLD',
+            textAlign: 'CENTER'
+        }));
+        topSection.addChildData(UI.component('otp_phone_number_text', 'atom_text')
             .setProperties({
-            length: '4',
-            corner_radius: 'radius_m',
-            border: '#D7EEF0',
-            focus_border: '#0EA5A8',
-            size: 'text_xxl',
-            weight: 'ExtraBold',
-            color: '#111827',
-            box_spacing: 'spacing_m',
-            box_size: 'size_l',
-            marginTop: 'spacing_xl',
-            width: 'fill_max_width',
-        })
-            .setAction('onChange', {
-            type: 'verify_otp',
-            payload: { destination: 'm1_07_existing_user_check' }
-        })));
-        // 5. Timer Action (Resend OTP)
-        const timerAction = UI.component('timer_action_component')
-            .addSubComponent(UI.component('timer_action_content_subcomponent')
-            .addChild(UI.component('resend_row', 'resend_timer')
-            .setProperties({
-            timer_text: 'Resend OTP in ',
-            timer_seconds: '25',
-            timer_color: '#6B7280',
-            action_text: 'Resend OTP',
-            action_color: '#0EA5A8',
-            resending_text: 'Resending OTP...',
-            size: 'text_m',
-            marginTop: 'spacing_xl',
-            width: 'fill_max_width',
-        })
-            .setAction('onClick', {
-            type: 'api_call',
-            payload: { endpoint: '/api/v1/resend-otp' }
-        })));
-        // 6. Primary Action Component (Continue Button)
-        const primaryAction = UI.component('primary_action_component')
-            .addSubComponent(UI.component('primary_action_content_subcomponent')
-            .addChild(UI.button('continue_btn', 'Continue')
-            .setProperties({
-            font_family: 'Plus Jakarta Sans',
-            weight: 'ExtraBold',
-            size: 'text_l',
-            color: '#FFFFFF',
-            corner_radius: 'radius_l',
-            gradient: { start: '#11B6BC', end: '#0B8C91' },
-            shadow: 'true',
-            height: 'size_m',
-            marginTop: 'spacing_xxl',
-        })
-            .setAction('onClick', {
-            type: 'verify_otp',
-            payload: {
-                destination: 'dashboard_template',
-                api: 'dashboard/home'
+            text: '+91 9876543210',
+            textColor: '#666666',
+            fontSize: 16,
+            font: 'Inter',
+            style: 'NORMAL',
+            typography: 'body_large',
+            marginTop: -16,
+            trailing: {
+                icon: 'ic_edit',
+                tint: '#007A53',
+                action: {
+                    type: 'navigate',
+                    payload: {
+                        screenId: 'auth_login'
+                    }
+                }
             }
-        })));
-        // Assemble Section
-        authSection
-            .addComponent(imageBanner)
-            .addComponent(pageHeader)
-            .addComponent(labeledInfo)
-            .addComponent(textInputComp)
-            .addComponent(timerAction)
-            .addComponent(primaryAction);
-        template.addSection(authSection);
+        }));
+        topSection.addChildData(UI.component('otp', 'atom_otp_input')
+            .setProperties({
+            boxCount: 6,
+            textColor: '#000000',
+            cursorColor: '#007A53',
+            keyboardType: 'NUMBER',
+            borderColor: '#E0E0E0',
+            focusedBorderColor: '#007A53',
+            width: 'match',
+            height: 'wrap'
+        }));
+        const resendRow = UI.component('otp_resend_row', 'default_child_layout')
+            .setProperties({
+            axis: 'ROW',
+            mainAxisAlignment: 'SPACE_BETWEEN',
+            crossAxisAlignment: 'CENTER',
+            width: 'match',
+            height: 'wrap'
+        });
+        resendRow.addChildData(UI.component('otp_timer_text', 'atom_text')
+            .setProperties({
+            text: 'Resending OTP in 00:30',
+            textColor: '#666666',
+            fontSize: 14,
+            font: 'Inter',
+            style: 'NORMAL',
+            typography: 'body_medium',
+            visible: false
+        }));
+        resendRow.addChildData(UI.component('otp_resend_text', 'atom_text')
+            .setProperties({
+            text: 'Resend',
+            textColor: '#007A53',
+            fontSize: 14,
+            font: 'Inter',
+            style: 'NORMAL',
+            typography: 'body_medium_bold',
+            fontWeight: 'BOLD'
+        })
+            .setSingleAction({
+            type: 'update_child',
+            targetId: 'otp_timer_text',
+            payload: {
+                visible: true
+            }
+        }));
+        topSection.addChildData(resendRow);
+        topSection.addChildData(UI.component('otp_verify_btn', 'atom_button')
+            .setProperties({
+            text: 'Verify OTP',
+            backgroundColor: '#007A53',
+            textColor: '#FFFFFF',
+            width: 'match',
+            height: 'wrap',
+            cornerRadius: 8
+        })
+            .setSingleAction({
+            type: 'api_call',
+            payload: {
+                endpoint: 'auth/verify_otp',
+                method: 'POST'
+            }
+        }));
+        // Bottom Section
+        const bottomSection = UI.component('otp_bottom_section', 'default_child_layout')
+            .setProperties({
+            axis: 'COLUMN',
+            mainAxisAlignment: 'END',
+            crossAxisAlignment: 'CENTER',
+            width: 'match',
+            height: 'wrap'
+        });
+        bottomSection.addChildData(UI.component('otp_bottom_image_atom', 'atom_image')
+            .setProperties({
+            imageUrl: 'http://127.0.0.1:8080/images/car_stars.png',
+            width: 'match',
+            height: 'wrap',
+            contentScale: 'FIT'
+        }));
+        mainSubcomponent.addChild(topSection);
+        mainSubcomponent.addChild(bottomSection);
+        rootComponent.addSubcomponent(mainSubcomponent);
+        template.addComponent(rootComponent);
         const theme = {
             theme: 'light',
-            showBackButton: true,
-            statusBar: 'transparent',
+            showBackButton: false,
             backgroundGradient: {
                 colors: [
                     { color: '#B8E3EA', stop: 0.0 },
@@ -162,13 +189,13 @@ export class AuthOtpBuilder extends BaseScreenBuilder {
                     { color: '#D7F1F4', stop: 0.35 },
                     { color: '#E7F7F9', stop: 0.6 },
                     { color: '#F2FBFC', stop: 0.8 },
-                    { color: '#FBFEFE', stop: 1.0 },
-                ],
-            },
+                    { color: '#FBFEFE', stop: 1.0 }
+                ]
+            }
         };
         return {
-            screenId: 'otp_verification_screen',
-            templateId: 'otp_layout',
+            screenId: 'auth_otp',
+            templateId: 'auth_layout',
             templateType: 'form_template',
             template,
             theme,

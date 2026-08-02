@@ -8,6 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@carbroz/common": "workspace:*",
     "@carbroz/config": "workspace:*",
     "@prisma/client": "^6.19.3",
     "prisma": "^6.19.3"

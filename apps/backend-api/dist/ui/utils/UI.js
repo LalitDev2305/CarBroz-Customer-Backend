@@ -11,6 +11,13 @@ export class UI {
         return new GenericComponent(id, type);
     }
     /**
+     * Creates a child layout component.
+     * If `type` is omitted, it defaults to `default_child_layout`.
+     */
+    static child(id, type = 'default_child_layout') {
+        return new GenericComponent(id, type);
+    }
+    /**
      * Creates a text component.
      */
     static text(id, text) {

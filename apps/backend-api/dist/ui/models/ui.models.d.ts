@@ -6,6 +6,7 @@ export interface ActionPayload {
 }
 export interface UIAction {
     type: string;
+    targetId?: string;
     payload?: ActionPayload;
 }
 export interface UIProperties {
@@ -15,9 +16,11 @@ export interface IComponent {
     id: string;
     type: string;
     properties?: UIProperties;
-    action?: Record<string, UIAction>;
+    action?: UIAction | Record<string, UIAction>;
     subComponents?: IComponent[];
+    subcomponents?: IComponent[];
     children?: IComponent[];
+    childrenData?: any[];
 }
 export interface ISection {
     id: string;
@@ -28,7 +31,8 @@ export interface ITemplate {
     id: string;
     type: string;
     properties?: UIProperties;
-    sections: ISection[];
+    sections?: ISection[];
+    components?: IComponent[];
 }
 export interface ThemeColor {
     color: string;

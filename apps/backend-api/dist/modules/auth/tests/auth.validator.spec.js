@@ -1,4 +1,5 @@
 import { sendOtpSchema, verifyOtpSchema } from '../validator/auth.validator.js';
+import { describe, it, expect } from 'vitest';
 describe('Auth Validators', () => {
     describe('sendOtpSchema', () => {
         it('should validate a correct mobile number', () => {

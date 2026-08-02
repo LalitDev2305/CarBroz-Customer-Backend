@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { requireRole, requirePermission } from '../../../middlewares/rbac.middleware.js';
 import { AppRole, AppPermission } from '../domain/rbac.js';
 import { ForbiddenError } from '@carbroz/common';

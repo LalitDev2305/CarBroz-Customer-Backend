@@ -2,11 +2,14 @@ import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { getFastifyLoggerConfig } from '@carbroz/logger';
-import { AppConfig, SecurityConfig } from '@carbroz/config';
+import { AppConfig, SecurityConfig, LoggingConfig } from '@carbroz/config';
 import { globalErrorHandler } from './middlewares/error-handler.js';
+import diPlugin from './plugins/di.plugin.js';
 import requestContextPlugin from './plugins/request-context.js';
+import shutdownPlugin from './plugins/shutdown.plugin.js';
 import jwtPlugin from './plugins/jwt.plugin.js';
 import authRoutes from './modules/auth/api/auth.routes.js';
+import healthRoutes from './modules/health/api/health.routes.js';
 import { ResponseHelper } from '@carbroz/common';
 import uiRoutes from './ui/ui.routes.js';
 import appRoutes from './app.routes.js';
@@ -19,10 +22,25 @@ const __dirname = path.dirname(__filename);
 
 export const buildApp = async (): Promise<FastifyInstance> => {
   const app = Fastify({
-    logger: getFastifyLoggerConfig(AppConfig.logLevel),
+    logger: getFastifyLoggerConfig(LoggingConfig.logLevel),
   });
 
+  await app.register(cors, {
+    origin: SecurityConfig.corsOrigin,
+    credentials: true,
+  });
+
+  // Security Headers
+  await app.register(helmet);
+
+  // Graceful Shutdown
+  await app.register(shutdownPlugin);
+
   // Plugins Registration Order
+  
+  // 0. DI Container (Must be registered early to bind request.diScope)
+  await app.register(diPlugin);
+
   // 1. Request Context
   await app.register(requestContextPlugin);
 
@@ -34,14 +52,6 @@ export const buildApp = async (): Promise<FastifyInstance> => {
 
   // 2. JWT Plugin
   await app.register(jwtPlugin);
-
-  // 3. Helmet
-  await app.register(helmet);
-
-  // 3. CORS
-  await app.register(cors, {
-    origin: SecurityConfig.corsOrigin,
-  });
 
   // Global Error Handler
   app.setErrorHandler(globalErrorHandler);
@@ -92,8 +102,9 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   });
 
   // Routes
+  await app.register(healthRoutes, { prefix: '/health' });
   await app.register(authRoutes, { prefix: '/api/v1/auth' });
-  await app.register(uiRoutes, { prefix: '/api/v1/screen' });
+  await app.register(uiRoutes, { prefix: '/api/v1/ui' });
   await app.register(appRoutes, { prefix: '/api/v1/app' });
 
   return app;

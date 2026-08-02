@@ -1,16 +1,75 @@
 version: '3.8'
+
 services:
+  backend-api:
+    build:
+      context: .
+      dockerfile: apps/backend-api/Dockerfile
+    container_name: carbroz-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.development
+    networks:
+      - carbroz-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health/liveness"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
   postgres:
-    image: postgres:15-alpine
-    restart: always
+    image: postgres:16-alpine
+    container_name: carbroz-postgres
+    restart: unless-stopped
+    env_file:
+      - .env.development
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: carbroz
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - carbroz-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d carbroz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: carbroz-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - carbroz-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  postgres_data:
+  pgdata:
+    name: carbroz-pg-data
+  redisdata:
+    name: carbroz-redis-data
+
+networks:
+  carbroz-net:
+    name: carbroz-bridge-net
+    driver: bridge

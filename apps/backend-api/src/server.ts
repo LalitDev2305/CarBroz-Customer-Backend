@@ -1,5 +1,5 @@
 import { buildApp } from './app.js';
-import { disconnectDatabase } from '@carbroz/database';
+import { getContainer } from './container/index.js';
 import { AppConfig } from '@carbroz/config';
 
 const start = async () => {
@@ -13,7 +13,12 @@ const start = async () => {
     // Graceful shutdown
     const gracefulShutdown = async (signal: string) => {
       app.log.info(`Received signal ${signal}, shutting down gracefully...`);
-      await disconnectDatabase();
+      try {
+        const dbProvider = getContainer().resolve('databaseProvider');
+        await dbProvider.disconnect();
+      } catch (e) {
+        app.log.warn('Failed to disconnect database gracefully');
+      }
       await app.close();
       process.exit(0);
     };
