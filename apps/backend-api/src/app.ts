@@ -1,6 +1,7 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
+import fastifyRateLimit from '@fastify/rate-limit';
 import { getFastifyLoggerConfig } from '@carbroz/logger';
 import { AppConfig, SecurityConfig, LoggingConfig } from '@carbroz/config';
 import { globalErrorHandler } from './middlewares/error-handler.js';
@@ -32,6 +33,19 @@ export const buildApp = async (): Promise<FastifyInstance> => {
 
   // Security Headers
   await app.register(helmet);
+
+  // Rate Limiting
+  await app.register(fastifyRateLimit, {
+    max: 100,
+    timeWindow: '1 minute',
+    errorResponseBuilder: (request, context) => {
+      return ResponseHelper.error(
+        `Rate limit exceeded, retry in ${context.after}`,
+        'TOO_MANY_REQUESTS',
+        request.traceId
+      );
+    }
+  });
 
   // Graceful Shutdown
   await app.register(shutdownPlugin);
@@ -80,24 +94,19 @@ export const buildApp = async (): Promise<FastifyInstance> => {
 
   // Global Request Logger Hook
   app.addHook('preHandler', async (request, reply) => {
-    console.log(`\n==================================================`);
-    console.log(`🚀 API CALL: ${request.method} ${request.url}`);
-    console.log(`==================================================`);
+    request.log.info({ req: { method: request.method, url: request.url } }, `🚀 API CALL: ${request.method} ${request.url}`);
     if (request.body) {
-      console.log(`📦 Payload:\n${JSON.stringify(request.body, null, 2)}`);
+      request.log.debug({ body: request.body }, '📦 Payload');
     }
   });
 
   app.addHook('onSend', async (request, reply, payload) => {
-    console.log(`--------------------------------------------------`);
-    console.log(`✅ Response [${reply.statusCode}]:`);
     try {
       const jsonPayload = JSON.parse(payload as string);
-      console.log(JSON.stringify(jsonPayload, null, 2));
+      request.log.info({ res: jsonPayload }, `✅ Response [${reply.statusCode}]`);
     } catch {
-      console.log(payload);
+      request.log.info({ res: payload }, `✅ Response [${reply.statusCode}]`);
     }
-    console.log(`==================================================\n`);
     return payload;
   });
 
