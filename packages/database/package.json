@@ -11,6 +11,10 @@
     "@carbroz/common": "workspace:*",
     "@carbroz/config": "workspace:*",
     "@prisma/client": "^6.19.3",
-    "prisma": "^6.19.3"
+    "prisma": "^6.19.3",
+    "tsx": "^4.19.2"
+  },
+  "prisma": {
+    "seed": "npx @dotenvx/dotenvx run -f ../../.env.development -- tsx prisma/seed.ts"
   }
 }

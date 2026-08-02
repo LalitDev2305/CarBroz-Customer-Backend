@@ -371,6 +371,9 @@ importers:
       prisma:
         specifier: ^6.19.3
         version: 6.19.3(typescript@6.0.3)
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.0
 
   packages/logger:
     dependencies:

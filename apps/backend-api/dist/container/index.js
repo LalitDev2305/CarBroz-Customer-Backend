@@ -1,5 +1,6 @@
 import { createContainer, asClass } from 'awilix';
-import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory, PrismaUserRepository, PrismaUserSessionRepository } from '@carbroz/database';
+import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory, PrismaUserRepository, PrismaUserSessionRepository, PrismaRoleRepository, PrismaPermissionRepository, PrismaAdminRoleRepository } from '@carbroz/database';
+import { AuthorizationProvider } from '../providers/AuthorizationProvider.js';
 import { GuestLoginUseCase } from '../modules/auth/use-cases/GuestLoginUseCase.js';
 import { SendOtpUseCase } from '../modules/auth/use-cases/SendOtpUseCase.js';
 import { VerifyOtpUseCase } from '../modules/auth/use-cases/VerifyOtpUseCase.js';
@@ -19,6 +20,11 @@ export function getContainer() {
             // Repositories
             userRepository: asClass(PrismaUserRepository).classic().singleton(),
             userSessionRepository: asClass(PrismaUserSessionRepository).classic().singleton(),
+            roleRepository: asClass(PrismaRoleRepository).classic().singleton(),
+            permissionRepository: asClass(PrismaPermissionRepository).classic().singleton(),
+            adminRoleRepository: asClass(PrismaAdminRoleRepository).classic().singleton(),
+            // Providers
+            authorizationProvider: asClass(AuthorizationProvider).classic().singleton(),
             // Use Cases
             guestLoginUseCase: asClass(GuestLoginUseCase).classic().scoped(),
             sendOtpUseCase: asClass(SendOtpUseCase).classic().scoped(),

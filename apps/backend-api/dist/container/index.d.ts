@@ -6,6 +6,10 @@ export interface Cradle {
     repositoryFactory: import('@carbroz/database').RepositoryFactory;
     userRepository: import('@carbroz/common').IUserRepository;
     userSessionRepository: import('@carbroz/common').IUserSessionRepository;
+    roleRepository: import('@carbroz/common').IRoleRepository;
+    permissionRepository: import('@carbroz/common').IPermissionRepository;
+    adminRoleRepository: import('@carbroz/common').IAdminRoleRepository;
+    authorizationProvider: import('@carbroz/common').IAuthorizationProvider;
     guestLoginUseCase: import('../modules/auth/use-cases/GuestLoginUseCase.js').GuestLoginUseCase;
     sendOtpUseCase: import('../modules/auth/use-cases/SendOtpUseCase.js').SendOtpUseCase;
     verifyOtpUseCase: import('../modules/auth/use-cases/VerifyOtpUseCase.js').VerifyOtpUseCase;

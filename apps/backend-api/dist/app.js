@@ -9,6 +9,7 @@ import diPlugin from './plugins/di.plugin.js';
 import requestContextPlugin from './plugins/request-context.js';
 import shutdownPlugin from './plugins/shutdown.plugin.js';
 import jwtPlugin from './plugins/jwt.plugin.js';
+import authorizationPlugin from './plugins/authorization.plugin.js';
 import authRoutes from './modules/auth/api/auth.routes.js';
 import healthRoutes from './modules/health/api/health.routes.js';
 import { ResponseHelper } from '@carbroz/common';
@@ -51,6 +52,8 @@ export const buildApp = async () => {
     });
     // 2. JWT Plugin
     await app.register(jwtPlugin);
+    // 3. Authorization Plugin
+    await app.register(authorizationPlugin);
     // Global Error Handler
     app.setErrorHandler(globalErrorHandler);
     // Not Found Handler

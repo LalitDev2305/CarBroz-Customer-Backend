@@ -5,3 +5,6 @@ export * from './repositories/PrismaRepositoryBase.js';
 export * from './repositories/RepositoryFactory.js';
 export * from './repositories/PrismaUserRepository.js';
 export * from './repositories/PrismaUserSessionRepository.js';
+export * from './repositories/PrismaRoleRepository.js';
+export * from './repositories/PrismaPermissionRepository.js';
+export * from './repositories/PrismaAdminRoleRepository.js';

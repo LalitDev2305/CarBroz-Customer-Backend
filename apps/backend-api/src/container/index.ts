@@ -5,8 +5,12 @@ import {
   PrismaTransactionProvider, 
   RepositoryFactory,
   PrismaUserRepository,
-  PrismaUserSessionRepository
+  PrismaUserSessionRepository,
+  PrismaRoleRepository,
+  PrismaPermissionRepository,
+  PrismaAdminRoleRepository
 } from '@carbroz/database';
+import { AuthorizationProvider } from '../providers/AuthorizationProvider.js';
 import { GuestLoginUseCase } from '../modules/auth/use-cases/GuestLoginUseCase.js';
 import { SendOtpUseCase } from '../modules/auth/use-cases/SendOtpUseCase.js';
 import { VerifyOtpUseCase } from '../modules/auth/use-cases/VerifyOtpUseCase.js';
@@ -21,6 +25,10 @@ export interface Cradle {
   repositoryFactory: import('@carbroz/database').RepositoryFactory;
   userRepository: import('@carbroz/common').IUserRepository;
   userSessionRepository: import('@carbroz/common').IUserSessionRepository;
+  roleRepository: import('@carbroz/common').IRoleRepository;
+  permissionRepository: import('@carbroz/common').IPermissionRepository;
+  adminRoleRepository: import('@carbroz/common').IAdminRoleRepository;
+  authorizationProvider: import('@carbroz/common').IAuthorizationProvider;
   guestLoginUseCase: import('../modules/auth/use-cases/GuestLoginUseCase.js').GuestLoginUseCase;
   sendOtpUseCase: import('../modules/auth/use-cases/SendOtpUseCase.js').SendOtpUseCase;
   verifyOtpUseCase: import('../modules/auth/use-cases/VerifyOtpUseCase.js').VerifyOtpUseCase;
@@ -45,6 +53,12 @@ export function getContainer(): AwilixContainer<Cradle> {
       // Repositories
       userRepository: asClass(PrismaUserRepository).classic().singleton(),
       userSessionRepository: asClass(PrismaUserSessionRepository).classic().singleton(),
+      roleRepository: asClass(PrismaRoleRepository).classic().singleton(),
+      permissionRepository: asClass(PrismaPermissionRepository).classic().singleton(),
+      adminRoleRepository: asClass(PrismaAdminRoleRepository).classic().singleton(),
+      
+      // Providers
+      authorizationProvider: asClass(AuthorizationProvider).classic().singleton(),
       
       // Use Cases
       guestLoginUseCase: asClass(GuestLoginUseCase).classic().scoped(),
