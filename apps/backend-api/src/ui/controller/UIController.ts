@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { ScreenFactory } from '../factory/ScreenFactory.js';
-import { JsonSerializer } from '../serializer/JsonSerializer.js';
+import { ScreenFactory, JsonSerializer } from '@carbroz/ui-sdk';
 
 export class UIController {
   private factory: ScreenFactory;

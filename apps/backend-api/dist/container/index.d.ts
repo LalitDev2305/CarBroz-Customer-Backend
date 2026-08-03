@@ -50,5 +50,10 @@ export interface Cradle {
     calculateServicePriceUseCase: import('../modules/catalog/use-cases/CalculateServicePriceUseCase.js').CalculateServicePriceUseCase;
     manageCatalogUseCase: import('../modules/catalog/use-cases/ManageCatalogUseCase.js').ManageCatalogUseCase;
     managePricingTierUseCase: import('../modules/catalog/use-cases/ManagePricingTierUseCase.js').ManagePricingTierUseCase;
+    sduiRegistryRepository: import('@carbroz/common').ISduiRegistryRepository;
+    screenFactory: import('@carbroz/ui-sdk').ScreenFactory;
+    getSduiScreenUseCase: import('../modules/sdui/use-cases/GetSduiScreenUseCase.js').GetSduiScreenUseCase;
+    registerSduiComponentUseCase: import('../modules/sdui/use-cases/RegisterSduiComponentUseCase.js').RegisterSduiComponentUseCase;
+    updateSduiScreenLayoutUseCase: import('../modules/sdui/use-cases/UpdateSduiScreenLayoutUseCase.js').UpdateSduiScreenLayoutUseCase;
 }
 export declare function getContainer(): AwilixContainer<Cradle>;

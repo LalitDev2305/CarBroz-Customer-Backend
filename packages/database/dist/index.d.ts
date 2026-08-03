@@ -18,3 +18,4 @@ export * from './repositories/PrismaCustomerProfileRepository.js';
 export * from './repositories/PrismaAddressRepository.js';
 export * from './repositories/PrismaCatalogRepository.js';
 export * from './repositories/PrismaPricingRepository.js';
+export * from './repositories/PrismaSduiRegistryRepository.js';

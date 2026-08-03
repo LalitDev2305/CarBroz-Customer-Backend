@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { ScreenFactory } from '../factory/ScreenFactory.js';
+import { ScreenFactory } from '@carbroz/ui-sdk';
 export declare class UIController {
     private factory;
     constructor(factory: ScreenFactory);

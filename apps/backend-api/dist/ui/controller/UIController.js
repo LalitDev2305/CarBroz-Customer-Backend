@@ -1,4 +1,4 @@
-import { JsonSerializer } from '../serializer/JsonSerializer.js';
+import { JsonSerializer } from '@carbroz/ui-sdk';
 export class UIController {
     factory;
     constructor(factory) {

@@ -1,4 +1,4 @@
-import { asClass } from 'awilix';
+import { asClass, asFunction } from 'awilix';
 import { diContainer } from '@fastify/awilix';
 import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory, PrismaConfigRepository, PrismaFeatureFlagRepository, PrismaUserRepository, PrismaUserSessionRepository, PrismaRoleRepository, PrismaPermissionRepository, PrismaAdminRoleRepository } from '@carbroz/database';
 import { ConfigProvider } from '@carbroz/config';
@@ -41,6 +41,15 @@ import { GetCatalogUseCase } from '../modules/catalog/use-cases/GetCatalogUseCas
 import { CalculateServicePriceUseCase } from '../modules/catalog/use-cases/CalculateServicePriceUseCase.js';
 import { ManageCatalogUseCase } from '../modules/catalog/use-cases/ManageCatalogUseCase.js';
 import { ManagePricingTierUseCase } from '../modules/catalog/use-cases/ManagePricingTierUseCase.js';
+// Phase 13
+import { PrismaSduiRegistryRepository } from '@carbroz/database';
+import { ScreenFactory } from '@carbroz/ui-sdk';
+import { GetSduiScreenUseCase } from '../modules/sdui/use-cases/GetSduiScreenUseCase.js';
+import { RegisterSduiComponentUseCase } from '../modules/sdui/use-cases/RegisterSduiComponentUseCase.js';
+import { UpdateSduiScreenLayoutUseCase } from '../modules/sdui/use-cases/UpdateSduiScreenLayoutUseCase.js';
+import { AuthLoginBuilder } from '../modules/auth/ui/AuthLoginBuilder.js';
+import { AuthOtpBuilder } from '../modules/auth/ui/AuthOtpBuilder.js';
+import { DashboardBuilder } from '../modules/config/ui/DashboardBuilder.js';
 let isRegistered = false;
 export function getContainer() {
     if (!isRegistered) {
@@ -104,6 +113,20 @@ export function getContainer() {
             calculateServicePriceUseCase: asClass(CalculateServicePriceUseCase).classic().scoped(),
             manageCatalogUseCase: asClass(ManageCatalogUseCase).classic().scoped(),
             managePricingTierUseCase: asClass(ManagePricingTierUseCase).classic().scoped(),
+            // Phase 13
+            sduiRegistryRepository: asClass(PrismaSduiRegistryRepository).classic().singleton(),
+            screenFactory: asFunction(() => {
+                const factory = new ScreenFactory();
+                factory.registerBuilders([
+                    new AuthLoginBuilder(),
+                    new AuthOtpBuilder(),
+                    new DashboardBuilder(),
+                ]);
+                return factory;
+            }).singleton(),
+            getSduiScreenUseCase: asClass(GetSduiScreenUseCase).classic().scoped(),
+            registerSduiComponentUseCase: asClass(RegisterSduiComponentUseCase).classic().scoped(),
+            updateSduiScreenLayoutUseCase: asClass(UpdateSduiScreenLayoutUseCase).classic().scoped(),
         });
         isRegistered = true;
     }

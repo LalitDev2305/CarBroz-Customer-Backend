@@ -1,62 +1,87 @@
-# Phase 13 Implementation Plan: SDUI Registry
+# Phase 13 Implementation Plan: Streamlined SDUI Registry & Engine Relocation
 
 ## Objectives
-Implement a dynamic, database-backed Server-Driven UI (SDUI) Screen Layout Registry. This enables dynamic layout configuration and resolution across Customer, Partner, and Admin apps without breaking the locked SDUI JSON schema hierarchy.
+1. **Part A - SDUI Engine Ownership Correction (`packages/ui-sdk`)**: Establish `@carbroz/ui-sdk` as the sole owner of the reusable SDUI engine (`ScreenFactory`, `BaseScreenBuilder`, `IScreenBuilder`, `JsonSerializer`, `ui.models.ts`, base components, sections, templates, and `UI` DSL helper).
+2. **Part B - Clean Data Contract & Validation**: Support the locked 6-level JSON contract (`Screen` → `Template` → `Component` → `Subcomponent` → `Child` → `ChildrenData` + `Theme`) using clean TypeScript interfaces and level-by-level Zod schemas without introducing unnecessary factory or builder bloat.
+3. **Part C - Database SDUI Registry**: Implement a database-backed SDUI layout registry (`SduiScreen`, `SduiTemplate`, `SduiComponentRegistry`) that resolves published layouts from DB first, validates them against Zod schemas, and falls back to static `ScreenFactory` builders.
 
-## Scope
-- Prisma models: `SduiScreen`, `SduiComponentRegistry`
-- Domain Entities: `SduiScreen`, `SduiComponent`
-- Repository Interface: `ISduiRegistryRepository`
-- Prisma Repository: `PrismaSduiRegistryRepository`
-- Use Cases:
-  - `GetSduiScreenUseCase`: Resolves SDUI screen layouts by `screenId`, target app (`CUSTOMER`, `PARTNER`, `ADMIN`), and version, falling back to static screen builders if no DB override exists.
-  - `RegisterSduiComponentUseCase`: Admin registration of component definitions into the registry.
-  - `UpdateSduiScreenLayoutUseCase`: Admin endpoint to update and publish SDUI JSON layouts.
-- Fastify Controllers: `sdui-registry.controller.ts`, `admin-sdui.controller.ts`
-- DTOs & Zod Validation: `sdui-registry.dto.ts`
-- Routes:
-  - `/api/v1/sdui/registry` (Screen layout resolution)
-  - `/api/v1/admin/sdui` (Screen layout & component management)
-- Dependency Injection: Awilix container registration for all repositories and use cases.
-- Unit & Integration Tests.
+---
 
-## Out of Scope
-- SDUI layout versioning rules & app version matching engine (Phase 14)
-- Dynamic SDUI Localization engine (Phase 15)
-- Dynamic media optimization for SDUI assets (Phase 16)
+## Architecture Validation & Pragmatic Principles
 
-## Files to Create
-- `packages/common/src/domain/SduiScreen.ts`
-- `packages/common/src/domain/SduiComponent.ts`
-- `packages/common/src/domain/repositories/ISduiRegistryRepository.ts`
-- `packages/database/src/repositories/PrismaSduiRegistryRepository.ts`
-- `apps/backend-api/src/modules/sdui/use-cases/GetSduiScreenUseCase.ts`
-- `apps/backend-api/src/modules/sdui/use-cases/RegisterSduiComponentUseCase.ts`
-- `apps/backend-api/src/modules/sdui/use-cases/UpdateSduiScreenLayoutUseCase.ts`
-- `apps/backend-api/src/modules/sdui/api/sdui-registry.controller.ts`
-- `apps/backend-api/src/modules/sdui/api/sdui-registry.routes.ts`
-- `apps/backend-api/src/modules/admin/api/admin-sdui.controller.ts`
-- `apps/backend-api/src/modules/admin/api/admin-sdui.routes.ts`
-- `apps/backend-api/src/modules/sdui/dtos/sdui-registry.dto.ts`
-- Unit tests corresponding to the UseCases and Repository.
+### 1. Fixed Document Hierarchy (Not Deep Object-Oriented Polymorphism)
+The SDUI structure is a structural JSON document:
+```
+Screen
+    └── Template
+            └── Components[]
+                    └── Subcomponents[]
+                            └── Children[]
+                                    └── ChildrenData[]
+```
+- **NO Recursive Tree**: No Component inside Component, Child inside Child, or ChildrenData inside ChildrenData.
+- **NO Factory Bloat**: `ScreenFactory` is the **ONLY** factory required. We do NOT create `TemplateFactory`, `ComponentFactory`, `SubcomponentFactory`, `ChildFactory`, or `ChildrenDataFactory`.
+- **NO Builder Bloat**: `BaseScreenBuilder` is the **ONLY** builder required. `UI.component()`, `UI.child()`, `BaseTemplate`, and `GenericComponent` act as fluent node construction helpers. We do NOT create separate builder classes for every level.
 
-## Files to Modify
-- `packages/database/prisma/schema.prisma` (Add `SduiScreen` and `SduiComponentRegistry`)
-- `packages/database/src/index.ts`
-- `packages/common/src/index.ts`
-- `apps/backend-api/src/container/index.ts` (Register dependencies)
-- `apps/backend-api/src/app.ts` (Register `/api/v1/sdui` and `/api/v1/admin/sdui` routes)
+---
 
-## Database Changes
-- `SduiScreen`: `id`, `publicId`, `screenId`, `targetApp`, `layoutJson` (Json), `version`, `isPublished`, `createdAt`, `updatedAt`
-- `SduiComponentRegistry`: `id`, `publicId`, `name`, `componentType`, `schemaJson` (Json), `createdAt`, `updatedAt`
+## Reusable Component Boundaries
+
+### `@carbroz/ui-sdk` (Sole Engine Owner)
+- **Models**: `IScreen`, `ITemplate`, `IComponent`, `ISubcomponent`, `IChild`, `IChildrenData`, `ITheme`, `UIProperties`, `UIAction`
+- **Schemas**: `childrenDataSchema`, `childSchema`, `subcomponentSchema`, `componentSchema`, `templateSchema`, `themeSchema`, `screenSchema`
+- **Factories**: `ScreenFactory` (Maps `screenId` → `IScreenBuilder`)
+- **Builders**: `BaseScreenBuilder`, `IScreenBuilder`
+- **Utilities**: `JsonSerializer`, `UI` DSL helper, `BaseTemplate`, `GenericComponent`, `BaseComponent`
+
+### Feature Modules (`apps/backend-api/src/modules/*/ui/`)
+- Concrete Screen Builders extending `BaseScreenBuilder`: `AuthLoginBuilder`, `AuthOtpBuilder`, `DashboardBuilder`.
+
+---
+
+## Database Registry Strategy
+
+### Models (`packages/database/prisma/schema.prisma`)
+- `SduiScreen`: Stores complete screen `layoutJson` (`screenId`, `targetApp`, `version`, `isPublished`).
+- `SduiTemplate`: Stores reusable template layouts (`templateId`, `templateType`, `defaultLayoutJson`).
+- `SduiComponentRegistry`: Unified component schema registry (`name`, `nodeLevel`, `componentType`, `schemaJson`, `supportedProperties`, `supportedActions`, `version`, `status`).
+
+### Runtime Resolution Flow
+```
+GET /api/v1/sdui/registry/:screenId
+   │
+   ├── ISduiRegistryRepository.findPublishedScreen(screenId, targetApp)
+   │     │
+   │     ├── Published DB layout found?
+   │     │     ├── YES → Validate screen JSON with Zod screenSchema → Return
+   │     │     └── NO  → Fallback: ScreenFactory.buildScreen(screenId) → Validate with screenSchema → Return
+```
+
+---
+
+## Summary of Planned Modifications
+
+1. **Keep Unchanged**:
+   - `@carbroz/ui-sdk` package structure and entry point.
+   - `ScreenFactory`, `BaseScreenBuilder`, `IScreenBuilder`, `JsonSerializer`, `UI` DSL helper.
+   - Feature module concrete screen builders (`AuthLoginBuilder`, `AuthOtpBuilder`, `DashboardBuilder`).
+   - Clean Architecture layering (`@carbroz/common` entities/interfaces, `@carbroz/database` repositories, `sdui` Fastify routes).
+
+2. **Improve**:
+   - Refine `ui.models.ts` in `packages/ui-sdk` to export explicit type contracts: `ISubcomponent`, `IChild`, `IChildrenData`.
+   - Add level-by-level Zod schemas (`childrenDataSchema` → `screenSchema`) in `packages/ui-sdk` for precise validation.
+   - Update `SduiComponentRegistry` Prisma schema & domain entity with `nodeLevel` (`COMPONENT`, `SUBCOMPONENT`, `CHILD`, `CHILDREN_DATA`).
+
+3. **Remove from Original Plan**:
+   - **REMOVED**: `TemplateFactory`, `ComponentFactory`, `SubcomponentFactory`, `ChildFactory`, `ChildrenDataFactory` (Unnecessary factory proliferation).
+   - **REMOVED**: `BaseTemplateBuilder`, `BaseComponentBuilder`, `BaseSubcomponentBuilder`, `BaseChildBuilder`, `BaseChildrenDataBuilder` (Unnecessary builder proliferation).
+
+---
 
 ## Verification Plan
-1. Validate Prisma schema (`pnpm prisma validate`).
-2. Generate Prisma client & create migration (`pnpm prisma generate`, `pnpm prisma migrate dev`).
-3. Run TypeScript build across all packages (`pnpm build`).
-4. Run ESLint checks across workspace (`pnpm lint`).
-5. Execute unit and integration test suite (`pnpm test`).
 
-## Risks & Mitigations
-- **Contract Parity**: The `layoutJson` stored in `SduiScreen` must strictly adhere to the frozen SDUI contract (`screenId`, `templateId`, `templateType`, `template`, `components`, `subcomponents`, `children`, `childrenData`, `theme`). Validated via Zod JSON schema validation before persistence.
+1. `pnpm prisma validate`
+2. `pnpm prisma generate`
+3. `pnpm build`
+4. `pnpm lint`
+5. `pnpm test`

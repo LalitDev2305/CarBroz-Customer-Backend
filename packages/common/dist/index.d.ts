@@ -63,3 +63,7 @@ export * from './domain/ServiceAddon.js';
 export * from './domain/PricingTier.js';
 export * from './domain/repositories/ICatalogRepository.js';
 export * from './domain/repositories/IPricingRepository.js';
+export * from './domain/SduiScreen.js';
+export * from './domain/SduiTemplate.js';
+export * from './domain/SduiComponent.js';
+export * from './domain/repositories/ISduiRegistryRepository.js';

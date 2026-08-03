@@ -20,3 +20,6 @@ export * from './repositories/PrismaAddressRepository.js';
 // Phase 12
 export * from './repositories/PrismaCatalogRepository.js';
 export * from './repositories/PrismaPricingRepository.js';
+
+// Phase 13
+export * from './repositories/PrismaSduiRegistryRepository.js';

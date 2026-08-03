@@ -268,6 +268,9 @@ importers:
       '@carbroz/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@carbroz/ui-sdk':
+        specifier: workspace:*
+        version: link:../../packages/ui-sdk
       '@carbroz/validation':
         specifier: workspace:*
         version: link:../../packages/validation
@@ -411,6 +414,19 @@ importers:
         version: 6.0.3
 
   packages/types: {}
+
+  packages/ui-sdk:
+    dependencies:
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
 
   packages/validation:
     dependencies:

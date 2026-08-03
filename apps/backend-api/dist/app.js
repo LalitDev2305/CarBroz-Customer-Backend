@@ -30,6 +30,8 @@ import { adminKycRoutes } from './modules/admin/api/admin-kyc.routes.js';
 import customerRoutes from './modules/customer/api/customer.routes.js';
 import catalogRoutes from './modules/catalog/api/catalog.routes.js';
 import adminCatalogRoutes from './modules/admin/api/admin-catalog.routes.js';
+import sduiRegistryRoutes from './modules/sdui/api/sdui-registry.routes.js';
+import adminSduiRoutes from './modules/admin/api/admin-sdui.routes.js';
 export const buildApp = async () => {
     const app = Fastify({
         logger: getFastifyLoggerConfig(LoggingConfig.logLevel),
@@ -117,6 +119,8 @@ export const buildApp = async () => {
     await app.register(customerRoutes, { prefix: '/api/v1/customers' });
     await app.register(catalogRoutes, { prefix: '/api/v1/catalog' });
     await app.register(adminCatalogRoutes, { prefix: '/api/v1/admin/catalog' });
+    await app.register(sduiRegistryRoutes, { prefix: '/api/v1/sdui' });
+    await app.register(adminSduiRoutes, { prefix: '/api/v1/admin/sdui' });
     return app;
 };
 //# sourceMappingURL=app.js.map
