@@ -4,6 +4,12 @@ import { FastifyPluginAsync } from 'fastify';
 import { JwtConfig } from '@carbroz/config';
 import { JwtPayload } from '../modules/auth/infrastructure/jwt.service.interface.js';
 
+declare module 'fastify' {
+  interface FastifyInstance {
+    authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+  }
+}
+
 declare module '@fastify/jwt' {
   interface FastifyJWT {
     payload: JwtPayload;
@@ -22,6 +28,14 @@ const jwtPlugin: FastifyPluginAsync = async (fastify) => {
     verify: {
       allowedIssuers: [JwtConfig.issuer],
     },
+  });
+
+  fastify.decorate('authenticate', async function (request: any, reply: any) {
+    try {
+      await request.jwtVerify();
+    } catch (err) {
+      reply.send(err);
+    }
   });
 };
 

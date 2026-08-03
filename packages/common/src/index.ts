@@ -9,6 +9,12 @@ export * from './domain/Role.js';
 export * from './domain/Permission.js';
 export * from './domain/RolePermission.js';
 export * from './domain/AdminUserRole.js';
+export * from './domain/Partner.js';
+export * from './domain/PartnerMember.js';
+export * from './domain/PartnerType.js';
+export * from './domain/PartnerStatus.js';
+export * from './domain/PartnerMemberRole.js';
+export * from './domain/PartnerMemberStatus.js';
 export * from './domain/IEntity.js';
 export * from './domain/IAggregateRoot.js';
 export * from './domain/IDomainEvent.js';
@@ -20,7 +26,8 @@ export * from './domain/repositories/IUserSessionRepository.js';
 export * from './domain/repositories/IRoleRepository.js';
 export * from './domain/repositories/IPermissionRepository.js';
 export * from './domain/repositories/IAdminRoleRepository.js';
-
+export * from './domain/repositories/IPartnerRepository.js';
+export * from './domain/repositories/IPartnerMemberRepository.js';
 // Application
 export * from './application/IUseCase.js';
 export * from './application/IRequestContext.js';

@@ -19,5 +19,11 @@ export interface Cradle {
     verifyOtpUseCase: import('../modules/auth/use-cases/VerifyOtpUseCase.js').VerifyOtpUseCase;
     refreshTokenUseCase: import('../modules/auth/use-cases/RefreshTokenUseCase.js').RefreshTokenUseCase;
     logoutUseCase: import('../modules/auth/use-cases/LogoutUseCase.js').LogoutUseCase;
+    partnerRepository: import('@carbroz/common').IPartnerRepository;
+    partnerMemberRepository: import('@carbroz/common').IPartnerMemberRepository;
+    registerIndividualPartnerUseCase: import('../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js').RegisterIndividualPartnerUseCase;
+    registerOrganizationPartnerUseCase: import('../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js').RegisterOrganizationPartnerUseCase;
+    getPartnerProfileUseCase: import('../modules/partner/use-cases/GetPartnerProfileUseCase.js').GetPartnerProfileUseCase;
+    verifyPartnerUseCase: import('../modules/partner/use-cases/VerifyPartnerUseCase.js').VerifyPartnerUseCase;
 }
 export declare function getContainer(): AwilixContainer<Cradle>;

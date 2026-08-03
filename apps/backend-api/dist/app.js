@@ -16,6 +16,8 @@ import { configRoutes } from './modules/config/api/config.routes.js';
 import { ResponseHelper } from '@carbroz/common';
 import uiRoutes from './ui/ui.routes.js';
 import appRoutes from './app.routes.js';
+import { partnerRoutes } from './modules/partner/api/partner.routes.js';
+import { adminPartnerRoutes } from './modules/admin/api/admin-partner.routes.js';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -95,6 +97,8 @@ export const buildApp = async () => {
     app.register(configRoutes, { prefix: '/v1/config' });
     app.register(uiRoutes, { prefix: '/v1/ui' });
     await app.register(appRoutes, { prefix: '/api/v1/app' });
+    await app.register(partnerRoutes, { prefix: '/api/v1/partners' });
+    await app.register(adminPartnerRoutes, { prefix: '/api/v1/admin/partners' });
     return app;
 };
 //# sourceMappingURL=app.js.map

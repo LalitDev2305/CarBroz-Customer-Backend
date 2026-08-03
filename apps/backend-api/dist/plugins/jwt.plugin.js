@@ -13,6 +13,14 @@ const jwtPlugin = async (fastify) => {
             allowedIssuers: [JwtConfig.issuer],
         },
     });
+    fastify.decorate('authenticate', async function (request, reply) {
+        try {
+            await request.jwtVerify();
+        }
+        catch (err) {
+            reply.send(err);
+        }
+    });
 };
 export default fp(jwtPlugin, {
     name: 'jwt-plugin',

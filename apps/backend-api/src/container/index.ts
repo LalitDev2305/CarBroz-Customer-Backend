@@ -22,6 +22,15 @@ import { VerifyOtpUseCase } from '../modules/auth/use-cases/VerifyOtpUseCase.js'
 import { RefreshTokenUseCase } from '../modules/auth/use-cases/RefreshTokenUseCase.js';
 import { LogoutUseCase } from '../modules/auth/use-cases/LogoutUseCase.js';
 
+// Phase 8
+import { PrismaPartnerRepository, PrismaPartnerMemberRepository } from '@carbroz/database';
+import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js';
+import { RegisterOrganizationPartnerUseCase } from '../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js';
+import { GetPartnerProfileUseCase } from '../modules/partner/use-cases/GetPartnerProfileUseCase.js';
+import { VerifyPartnerUseCase } from '../modules/partner/use-cases/VerifyPartnerUseCase.js';
+import { PartnerController } from '../modules/partner/api/partner.controller.js';
+import { AdminPartnerController } from '../modules/admin/api/admin-partner.controller.js';
+
 export interface Cradle {
   prismaProvider: import('@carbroz/database').PrismaProvider;
   databaseProvider: import('@carbroz/common').IDatabaseProvider;
@@ -47,6 +56,14 @@ export interface Cradle {
   verifyOtpUseCase: import('../modules/auth/use-cases/VerifyOtpUseCase.js').VerifyOtpUseCase;
   refreshTokenUseCase: import('../modules/auth/use-cases/RefreshTokenUseCase.js').RefreshTokenUseCase;
   logoutUseCase: import('../modules/auth/use-cases/LogoutUseCase.js').LogoutUseCase;
+
+  // Phase 8
+  partnerRepository: import('@carbroz/common').IPartnerRepository;
+  partnerMemberRepository: import('@carbroz/common').IPartnerMemberRepository;
+  registerIndividualPartnerUseCase: import('../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js').RegisterIndividualPartnerUseCase;
+  registerOrganizationPartnerUseCase: import('../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js').RegisterOrganizationPartnerUseCase;
+  getPartnerProfileUseCase: import('../modules/partner/use-cases/GetPartnerProfileUseCase.js').GetPartnerProfileUseCase;
+  verifyPartnerUseCase: import('../modules/partner/use-cases/VerifyPartnerUseCase.js').VerifyPartnerUseCase;
 }
 
 let isRegistered = false;
@@ -81,6 +98,14 @@ export function getContainer(): AwilixContainer<Cradle> {
       verifyOtpUseCase: asClass(VerifyOtpUseCase).classic().scoped(),
       refreshTokenUseCase: asClass(RefreshTokenUseCase).classic().scoped(),
       logoutUseCase: asClass(LogoutUseCase).classic().scoped(),
+
+      // Phase 8
+      partnerRepository: asClass(PrismaPartnerRepository).classic().singleton(),
+      partnerMemberRepository: asClass(PrismaPartnerMemberRepository).classic().singleton(),
+      registerIndividualPartnerUseCase: asClass(RegisterIndividualPartnerUseCase).classic().scoped(),
+      registerOrganizationPartnerUseCase: asClass(RegisterOrganizationPartnerUseCase).classic().scoped(),
+      getPartnerProfileUseCase: asClass(GetPartnerProfileUseCase).classic().scoped(),
+      verifyPartnerUseCase: asClass(VerifyPartnerUseCase).classic().scoped(),
     });
     isRegistered = true;
   }

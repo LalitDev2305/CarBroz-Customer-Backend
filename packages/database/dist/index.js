@@ -10,4 +10,6 @@ export * from './repositories/PrismaPermissionRepository.js';
 export * from './repositories/PrismaAdminRoleRepository.js';
 export * from './repositories/PrismaConfigRepository.js';
 export * from './repositories/PrismaFeatureFlagRepository.js';
+export * from './repositories/PrismaPartnerRepository.js';
+export * from './repositories/PrismaPartnerMemberRepository.js';
 //# sourceMappingURL=index.js.map

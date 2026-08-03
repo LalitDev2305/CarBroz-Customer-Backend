@@ -9,6 +9,12 @@ import { SendOtpUseCase } from '../modules/auth/use-cases/SendOtpUseCase.js';
 import { VerifyOtpUseCase } from '../modules/auth/use-cases/VerifyOtpUseCase.js';
 import { RefreshTokenUseCase } from '../modules/auth/use-cases/RefreshTokenUseCase.js';
 import { LogoutUseCase } from '../modules/auth/use-cases/LogoutUseCase.js';
+// Phase 8
+import { PrismaPartnerRepository, PrismaPartnerMemberRepository } from '@carbroz/database';
+import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js';
+import { RegisterOrganizationPartnerUseCase } from '../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js';
+import { GetPartnerProfileUseCase } from '../modules/partner/use-cases/GetPartnerProfileUseCase.js';
+import { VerifyPartnerUseCase } from '../modules/partner/use-cases/VerifyPartnerUseCase.js';
 let isRegistered = false;
 export function getContainer() {
     if (!isRegistered) {
@@ -36,6 +42,13 @@ export function getContainer() {
             verifyOtpUseCase: asClass(VerifyOtpUseCase).classic().scoped(),
             refreshTokenUseCase: asClass(RefreshTokenUseCase).classic().scoped(),
             logoutUseCase: asClass(LogoutUseCase).classic().scoped(),
+            // Phase 8
+            partnerRepository: asClass(PrismaPartnerRepository).classic().singleton(),
+            partnerMemberRepository: asClass(PrismaPartnerMemberRepository).classic().singleton(),
+            registerIndividualPartnerUseCase: asClass(RegisterIndividualPartnerUseCase).classic().scoped(),
+            registerOrganizationPartnerUseCase: asClass(RegisterOrganizationPartnerUseCase).classic().scoped(),
+            getPartnerProfileUseCase: asClass(GetPartnerProfileUseCase).classic().scoped(),
+            verifyPartnerUseCase: asClass(VerifyPartnerUseCase).classic().scoped(),
         });
         isRegistered = true;
     }
