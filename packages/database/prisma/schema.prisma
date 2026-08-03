@@ -8,44 +8,46 @@ datasource db {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  publicId    String    @unique @default(uuid())
-  email       String?   @unique
-  phoneNumber String?   @unique
-  isGuest     Boolean   @default(false)
-  isAdmin     Boolean   @default(false)
-  role        String    @default("USER")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-  sessions    UserSession[]
-  adminRoles  AdminUserRole[]
-  partnerMembers PartnerMember[]
-  uploadedKycs   KycDocument[] @relation("KycUploader")
-  verifiedKycs   KycDocument[] @relation("KycVerifier")
+  id              Int              @id @default(autoincrement())
+  publicId        String           @unique @default(uuid())
+  email           String?          @unique
+  phoneNumber     String?          @unique
+  isGuest         Boolean          @default(false)
+  isAdmin         Boolean          @default(false)
+  role            String           @default("USER")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+  sessions        UserSession[]
+  adminRoles      AdminUserRole[]
+  partnerMembers  PartnerMember[]
+  uploadedKycs    KycDocument[]    @relation("KycUploader")
+  verifiedKycs    KycDocument[]    @relation("KycVerifier")
+  customerProfile CustomerProfile?
+  addresses       Address[]
 }
 
 model Role {
-  id          Int       @id @default(autoincrement())
-  publicId    String    @unique @default(uuid())
-  name        String    @unique
+  id          Int              @id @default(autoincrement())
+  publicId    String           @unique @default(uuid())
+  name        String           @unique
   description String?
-  isSystem    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isSystem    Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   deletedAt   DateTime?
   permissions RolePermission[]
   adminUsers  AdminUserRole[]
 }
 
 model Permission {
-  id          Int       @id @default(autoincrement())
-  publicId    String    @unique @default(uuid())
-  key         String    @unique
+  id          Int              @id @default(autoincrement())
+  publicId    String           @unique @default(uuid())
+  key         String           @unique
   module      String
   description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   deletedAt   DateTime?
   roles       RolePermission[]
 }
@@ -64,9 +66,9 @@ model AdminUserRole {
   roleId     Int
   assignedBy Int?
   assignedAt DateTime @default(now())
-  
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
 }
@@ -95,7 +97,7 @@ model UserSession {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
-  user         User      @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, deviceId])
 }
@@ -123,31 +125,31 @@ model FeatureFlag {
 }
 
 model Partner {
-  id          Int       @id @default(autoincrement())
-  publicId    String    @unique @default(uuid())
+  id           Int             @id @default(autoincrement())
+  publicId     String          @unique @default(uuid())
   businessName String
-  type        String
-  status      String    @default("PENDING")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-  members     PartnerMember[]
-  profile     PartnerProfile?
+  type         String
+  status       String          @default("PENDING")
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  deletedAt    DateTime?
+  members      PartnerMember[]
+  profile      PartnerProfile?
   kycDocuments KycDocument[]
 }
 
 model PartnerMember {
-  id          Int       @id @default(autoincrement())
-  publicId    String    @unique @default(uuid())
-  userId      Int
-  partnerId   Int
-  role        String
-  status      String    @default("ACTIVE")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        Int      @id @default(autoincrement())
+  publicId  String   @unique @default(uuid())
+  userId    Int
+  partnerId Int
+  role      String
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  partner     Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 
   @@unique([userId, partnerId])
 }
@@ -163,7 +165,7 @@ model PartnerProfile {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  partner      Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 }
 
 model KycDocument {
@@ -179,7 +181,44 @@ model KycDocument {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  partner         Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
-  uploadedBy      User     @relation("KycUploader", fields: [uploadedById], references: [id])
-  verifiedBy      User?    @relation("KycVerifier", fields: [verifiedById], references: [id])
+  partner    Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  uploadedBy User    @relation("KycUploader", fields: [uploadedById], references: [id])
+  verifiedBy User?   @relation("KycVerifier", fields: [verifiedById], references: [id])
+}
+
+model CustomerProfile {
+  id             Int       @id @default(autoincrement())
+  publicId       String    @unique @default(uuid())
+  userId         Int       @unique
+  firstName      String?
+  lastName       String?
+  dateOfBirth    DateTime?
+  gender         String?
+  marketingOptIn Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Address {
+  id           Int       @id @default(autoincrement())
+  publicId     String    @unique @default(uuid())
+  userId       Int
+  label        String? // e.g. "Home", "Work"
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  postalCode   String
+  country      String
+  latitude     Float?
+  longitude    Float?
+  isDefault    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

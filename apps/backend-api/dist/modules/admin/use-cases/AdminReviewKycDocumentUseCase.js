@@ -19,28 +19,23 @@ export class AdminReviewKycDocumentUseCase {
         if (!document) {
             throw new Error('NOT_FOUND: KYC document not found');
         }
-        try {
-            document.status = status;
-            document.rejectionReason = request.data.reason || null;
-            document.verifiedById = adminUserId;
-            document.updatedAt = new Date();
-            const updated = await this.kycDocumentRepository.save(document);
-            if (request.data.action === 'APPROVE') {
-                const allDocs = await this.kycDocumentRepository.findByPartnerId(document.partnerId);
-                const hasPending = allDocs.some(d => d.status === KycDocumentStatus.PENDING);
-                if (!hasPending) {
-                    const partner = await this.partnerRepository.findById(document.partnerId);
-                    if (partner) {
-                        partner.status = PartnerStatus.ACTIVE;
-                        await this.partnerRepository.save(partner);
-                    }
+        document.status = status;
+        document.rejectionReason = request.data.reason || null;
+        document.verifiedById = adminUserId;
+        document.updatedAt = new Date();
+        const updated = await this.kycDocumentRepository.save(document);
+        if (request.data.action === 'APPROVE') {
+            const allDocs = await this.kycDocumentRepository.findByPartnerId(document.partnerId);
+            const hasPending = allDocs.some(d => d.status === KycDocumentStatus.PENDING);
+            if (!hasPending) {
+                const partner = await this.partnerRepository.findById(document.partnerId);
+                if (partner) {
+                    partner.status = PartnerStatus.ACTIVE;
+                    await this.partnerRepository.save(partner);
                 }
             }
-            return updated;
         }
-        catch (error) {
-            throw error;
-        }
+        return updated;
     }
 }
 //# sourceMappingURL=AdminReviewKycDocumentUseCase.js.map

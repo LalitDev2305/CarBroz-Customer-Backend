@@ -28,6 +28,7 @@ export * from './domain/repositories/IPermissionRepository.js';
 export * from './domain/repositories/IAdminRoleRepository.js';
 export * from './domain/repositories/IPartnerRepository.js';
 export * from './domain/repositories/IPartnerMemberRepository.js';
+
 // Application
 export * from './application/IUseCase.js';
 export * from './application/IRequestContext.js';
@@ -51,9 +52,7 @@ export * from './domain/SystemConfig.js';
 export * from './domain/FeatureFlag.js';
 export * from './domain/repositories/IConfigRepository.js';
 export * from './domain/repositories/IFeatureFlagRepository.js';
-
 export * from './providers/IFeatureFlagProvider.js';
-
 export * from './domain/models/Location.js';
 export * from './providers/IMapsProvider.js';
 export * from './domain/PartnerProfile.js';
@@ -63,3 +62,7 @@ export * from './domain/KycDocumentType.js';
 export * from './domain/repositories/IPartnerProfileRepository.js';
 export * from './domain/repositories/IKycDocumentRepository.js';
 export * from './providers/IStorageProvider.js';
+export * from './domain/CustomerProfile.js';
+export * from './domain/Address.js';
+export * from './domain/repositories/ICustomerProfileRepository.js';
+export * from './domain/repositories/IAddressRepository.js';

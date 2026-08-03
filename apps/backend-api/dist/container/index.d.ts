@@ -38,5 +38,11 @@ export interface Cradle {
     kycController: import('../modules/partner/api/kyc.controller.js').KycController;
     adminKycController: import('../modules/admin/api/admin-kyc.controller.js').AdminKycController;
     logger: import('@carbroz/common').ILoggerProvider;
+    customerProfileRepository: import('@carbroz/common').ICustomerProfileRepository;
+    addressRepository: import('@carbroz/common').IAddressRepository;
+    getCustomerProfileUseCase: import('../modules/customer/use-cases/GetCustomerProfileUseCase.js').GetCustomerProfileUseCase;
+    updateCustomerProfileUseCase: import('../modules/customer/use-cases/UpdateCustomerProfileUseCase.js').UpdateCustomerProfileUseCase;
+    manageAddressUseCase: import('../modules/customer/use-cases/ManageAddressUseCase.js').ManageAddressUseCase;
+    extractCustomerDataUseCase: import('../modules/customer/use-cases/ExtractCustomerDataUseCase.js').ExtractCustomerDataUseCase;
 }
 export declare function getContainer(): AwilixContainer<Cradle>;

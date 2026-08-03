@@ -47,6 +47,13 @@ import { KycController } from '../modules/partner/api/kyc.controller.js';
 import { AdminKycController } from '../modules/admin/api/admin-kyc.controller.js';
 import { LoggerProvider } from '../providers/LoggerProvider.js';
 
+// Phase 11
+import { PrismaCustomerProfileRepository, PrismaAddressRepository } from '@carbroz/database';
+import { GetCustomerProfileUseCase } from '../modules/customer/use-cases/GetCustomerProfileUseCase.js';
+import { UpdateCustomerProfileUseCase } from '../modules/customer/use-cases/UpdateCustomerProfileUseCase.js';
+import { ManageAddressUseCase } from '../modules/customer/use-cases/ManageAddressUseCase.js';
+import { ExtractCustomerDataUseCase } from '../modules/customer/use-cases/ExtractCustomerDataUseCase.js';
+
 export interface Cradle {
   prismaProvider: import('@carbroz/database').PrismaProvider;
   databaseProvider: import('@carbroz/common').IDatabaseProvider;
@@ -97,6 +104,13 @@ export interface Cradle {
   kycController: import('../modules/partner/api/kyc.controller.js').KycController;
   adminKycController: import('../modules/admin/api/admin-kyc.controller.js').AdminKycController;
   logger: import('@carbroz/common').ILoggerProvider;
+  // Phase 11
+  customerProfileRepository: import('@carbroz/common').ICustomerProfileRepository;
+  addressRepository: import('@carbroz/common').IAddressRepository;
+  getCustomerProfileUseCase: import('../modules/customer/use-cases/GetCustomerProfileUseCase.js').GetCustomerProfileUseCase;
+  updateCustomerProfileUseCase: import('../modules/customer/use-cases/UpdateCustomerProfileUseCase.js').UpdateCustomerProfileUseCase;
+  manageAddressUseCase: import('../modules/customer/use-cases/ManageAddressUseCase.js').ManageAddressUseCase;
+  extractCustomerDataUseCase: import('../modules/customer/use-cases/ExtractCustomerDataUseCase.js').ExtractCustomerDataUseCase;
 }
 
 let isRegistered = false;
@@ -156,6 +170,13 @@ export function getContainer(): AwilixContainer<Cradle> {
       adminReviewKycDocumentUseCase: asClass(AdminReviewKycDocumentUseCase).classic().scoped(),
       kycController: asClass(KycController).classic().scoped(),
       adminKycController: asClass(AdminKycController).classic().scoped(),
+      // Phase 11
+      customerProfileRepository: asClass(PrismaCustomerProfileRepository).classic().singleton(),
+      addressRepository: asClass(PrismaAddressRepository).classic().singleton(),
+      getCustomerProfileUseCase: asClass(GetCustomerProfileUseCase).classic().scoped(),
+      updateCustomerProfileUseCase: asClass(UpdateCustomerProfileUseCase).classic().scoped(),
+      manageAddressUseCase: asClass(ManageAddressUseCase).classic().scoped(),
+      extractCustomerDataUseCase: asClass(ExtractCustomerDataUseCase).classic().scoped(),
     });
     isRegistered = true;
   }

@@ -27,6 +27,7 @@ const __dirname = path.dirname(__filename);
 import fastifyMultipart from '@fastify/multipart';
 import { kycRoutes } from './modules/partner/api/kyc.routes.js';
 import { adminKycRoutes } from './modules/admin/api/admin-kyc.routes.js';
+import customerRoutes from './modules/customer/api/customer.routes.js';
 export const buildApp = async () => {
     const app = Fastify({
         logger: getFastifyLoggerConfig(LoggingConfig.logLevel),
@@ -111,6 +112,7 @@ export const buildApp = async () => {
     await app.register(mapsRoutes, { prefix: '/api/v1/maps' });
     await app.register(kycRoutes, { prefix: '/api/v1/partners' });
     await app.register(adminKycRoutes, { prefix: '/api/v1/admin/kyc' });
+    await app.register(customerRoutes, { prefix: '/api/v1/customers' });
     return app;
 };
 //# sourceMappingURL=app.js.map

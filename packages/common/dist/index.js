@@ -57,4 +57,8 @@ export * from './domain/KycDocumentType.js';
 export * from './domain/repositories/IPartnerProfileRepository.js';
 export * from './domain/repositories/IKycDocumentRepository.js';
 export * from './providers/IStorageProvider.js';
+export * from './domain/CustomerProfile.js';
+export * from './domain/Address.js';
+export * from './domain/repositories/ICustomerProfileRepository.js';
+export * from './domain/repositories/IAddressRepository.js';
 //# sourceMappingURL=index.js.map
