@@ -52,3 +52,4 @@ export declare const ProvidersConfig: {
     minioAccessKey: string | undefined;
     minioSecretKey: string | undefined;
 };
+export * from './providers/ConfigProvider.js';

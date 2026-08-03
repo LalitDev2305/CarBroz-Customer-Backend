@@ -31,3 +31,8 @@ export * from './providers/IConfigProvider.js';
 export * from './providers/IDatabaseProvider.js';
 export * from './shared/IFactory.js';
 export * from './shared/IBuilder.js';
+export * from './domain/SystemConfig.js';
+export * from './domain/FeatureFlag.js';
+export * from './domain/repositories/IConfigRepository.js';
+export * from './domain/repositories/IFeatureFlagRepository.js';
+export * from './providers/IFeatureFlagProvider.js';

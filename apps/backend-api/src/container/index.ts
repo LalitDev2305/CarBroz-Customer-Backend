@@ -1,15 +1,20 @@
-import { createContainer, AwilixContainer, asClass } from 'awilix';
+import { InjectionMode, asClass, AwilixContainer } from 'awilix';
+import { diContainer } from '@fastify/awilix';
 import { 
   PrismaProvider, 
   PrismaDatabaseProvider, 
   PrismaTransactionProvider, 
-  RepositoryFactory,
+  RepositoryFactory, 
+  PrismaConfigRepository, 
+  PrismaFeatureFlagRepository,
   PrismaUserRepository,
   PrismaUserSessionRepository,
   PrismaRoleRepository,
   PrismaPermissionRepository,
   PrismaAdminRoleRepository
 } from '@carbroz/database';
+import { ConfigProvider } from '@carbroz/config';
+import { FeatureFlagProvider } from '@carbroz/feature-flags';
 import { AuthorizationProvider } from '../providers/AuthorizationProvider.js';
 import { GuestLoginUseCase } from '../modules/auth/use-cases/GuestLoginUseCase.js';
 import { SendOtpUseCase } from '../modules/auth/use-cases/SendOtpUseCase.js';
@@ -17,18 +22,26 @@ import { VerifyOtpUseCase } from '../modules/auth/use-cases/VerifyOtpUseCase.js'
 import { RefreshTokenUseCase } from '../modules/auth/use-cases/RefreshTokenUseCase.js';
 import { LogoutUseCase } from '../modules/auth/use-cases/LogoutUseCase.js';
 
-// Interface defining the dependencies available in the container
 export interface Cradle {
   prismaProvider: import('@carbroz/database').PrismaProvider;
   databaseProvider: import('@carbroz/common').IDatabaseProvider;
   transactionProvider: import('@carbroz/common').ITransactionProvider;
   repositoryFactory: import('@carbroz/database').RepositoryFactory;
+  
+  // Phase 4
+  configRepository: import('@carbroz/common').IConfigRepository;
+  featureFlagRepository: import('@carbroz/common').IFeatureFlagRepository;
+  configProvider: import('@carbroz/common').IConfigProvider;
+  featureFlagProvider: import('@carbroz/common').IFeatureFlagProvider;
+  
+  // Phase 6 & 7
   userRepository: import('@carbroz/common').IUserRepository;
   userSessionRepository: import('@carbroz/common').IUserSessionRepository;
   roleRepository: import('@carbroz/common').IRoleRepository;
   permissionRepository: import('@carbroz/common').IPermissionRepository;
   adminRoleRepository: import('@carbroz/common').IAdminRoleRepository;
   authorizationProvider: import('@carbroz/common').IAuthorizationProvider;
+  
   guestLoginUseCase: import('../modules/auth/use-cases/GuestLoginUseCase.js').GuestLoginUseCase;
   sendOtpUseCase: import('../modules/auth/use-cases/SendOtpUseCase.js').SendOtpUseCase;
   verifyOtpUseCase: import('../modules/auth/use-cases/VerifyOtpUseCase.js').VerifyOtpUseCase;
@@ -36,37 +49,40 @@ export interface Cradle {
   logoutUseCase: import('../modules/auth/use-cases/LogoutUseCase.js').LogoutUseCase;
 }
 
-let container: AwilixContainer<Cradle>;
+let isRegistered = false;
 
 export function getContainer(): AwilixContainer<Cradle> {
-  if (!container) {
-    container = createContainer<Cradle>({
-      strict: true,
-    });
-    
-    container.register({
+  if (!isRegistered) {
+    diContainer.register({
       prismaProvider: asClass(PrismaProvider).classic().singleton(),
       databaseProvider: asClass(PrismaDatabaseProvider).classic().singleton(),
       transactionProvider: asClass(PrismaTransactionProvider).classic().singleton(),
       repositoryFactory: asClass(RepositoryFactory).classic().singleton(),
       
-      // Repositories
+      // Phase 4
+      configRepository: asClass(PrismaConfigRepository).classic().singleton(),
+      featureFlagRepository: asClass(PrismaFeatureFlagRepository).classic().singleton(),
+      configProvider: asClass(ConfigProvider).classic().singleton(),
+      featureFlagProvider: asClass(FeatureFlagProvider).classic().singleton(),
+      
+      // Phase 6 & 7 Repositories
       userRepository: asClass(PrismaUserRepository).classic().singleton(),
       userSessionRepository: asClass(PrismaUserSessionRepository).classic().singleton(),
       roleRepository: asClass(PrismaRoleRepository).classic().singleton(),
       permissionRepository: asClass(PrismaPermissionRepository).classic().singleton(),
       adminRoleRepository: asClass(PrismaAdminRoleRepository).classic().singleton(),
       
-      // Providers
+      // Phase 7 Providers
       authorizationProvider: asClass(AuthorizationProvider).classic().singleton(),
       
-      // Use Cases
+      // Phase 6 Use Cases
       guestLoginUseCase: asClass(GuestLoginUseCase).classic().scoped(),
       sendOtpUseCase: asClass(SendOtpUseCase).classic().scoped(),
       verifyOtpUseCase: asClass(VerifyOtpUseCase).classic().scoped(),
       refreshTokenUseCase: asClass(RefreshTokenUseCase).classic().scoped(),
       logoutUseCase: asClass(LogoutUseCase).classic().scoped(),
     });
+    isRegistered = true;
   }
-  return container;
+  return diContainer as unknown as AwilixContainer<Cradle>;
 }

@@ -8,4 +8,6 @@ export * from './repositories/PrismaUserSessionRepository.js';
 export * from './repositories/PrismaRoleRepository.js';
 export * from './repositories/PrismaPermissionRepository.js';
 export * from './repositories/PrismaAdminRoleRepository.js';
+export * from './repositories/PrismaConfigRepository.js';
+export * from './repositories/PrismaFeatureFlagRepository.js';
 //# sourceMappingURL=index.js.map

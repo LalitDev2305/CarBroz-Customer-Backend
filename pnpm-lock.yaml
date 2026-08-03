@@ -259,6 +259,9 @@ importers:
       '@carbroz/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@carbroz/feature-flags':
+        specifier: workspace:*
+        version: link:../../packages/feature-flags
       '@carbroz/logger':
         specifier: workspace:*
         version: link:../../packages/logger
@@ -350,6 +353,9 @@ importers:
 
   packages/config:
     dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../common
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -374,6 +380,12 @@ importers:
       tsx:
         specifier: ^4.19.2
         version: 4.23.0
+
+  packages/feature-flags:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../common
 
   packages/logger:
     dependencies:

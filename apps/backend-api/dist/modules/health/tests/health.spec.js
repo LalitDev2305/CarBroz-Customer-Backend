@@ -6,11 +6,20 @@ describe('Health Module', () => {
     beforeAll(async () => {
         app = await buildApp();
         app.diContainer.register({
+            configProvider: asValue({
+                get: async () => 'true',
+                has: async () => true,
+                getAll: async () => ({})
+            }),
+            featureFlagProvider: asValue({
+                isEnabled: async () => true,
+                getAllFlags: async () => ({})
+            }),
             databaseProvider: asValue({
                 health: async () => true,
                 connect: async () => { },
                 disconnect: async () => { }
-            })
+            }),
         });
         await app.ready();
     });

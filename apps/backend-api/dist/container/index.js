@@ -1,38 +1,44 @@
-import { createContainer, asClass } from 'awilix';
-import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory, PrismaUserRepository, PrismaUserSessionRepository, PrismaRoleRepository, PrismaPermissionRepository, PrismaAdminRoleRepository } from '@carbroz/database';
+import { asClass } from 'awilix';
+import { diContainer } from '@fastify/awilix';
+import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory, PrismaConfigRepository, PrismaFeatureFlagRepository, PrismaUserRepository, PrismaUserSessionRepository, PrismaRoleRepository, PrismaPermissionRepository, PrismaAdminRoleRepository } from '@carbroz/database';
+import { ConfigProvider } from '@carbroz/config';
+import { FeatureFlagProvider } from '@carbroz/feature-flags';
 import { AuthorizationProvider } from '../providers/AuthorizationProvider.js';
 import { GuestLoginUseCase } from '../modules/auth/use-cases/GuestLoginUseCase.js';
 import { SendOtpUseCase } from '../modules/auth/use-cases/SendOtpUseCase.js';
 import { VerifyOtpUseCase } from '../modules/auth/use-cases/VerifyOtpUseCase.js';
 import { RefreshTokenUseCase } from '../modules/auth/use-cases/RefreshTokenUseCase.js';
 import { LogoutUseCase } from '../modules/auth/use-cases/LogoutUseCase.js';
-let container;
+let isRegistered = false;
 export function getContainer() {
-    if (!container) {
-        container = createContainer({
-            strict: true,
-        });
-        container.register({
+    if (!isRegistered) {
+        diContainer.register({
             prismaProvider: asClass(PrismaProvider).classic().singleton(),
             databaseProvider: asClass(PrismaDatabaseProvider).classic().singleton(),
             transactionProvider: asClass(PrismaTransactionProvider).classic().singleton(),
             repositoryFactory: asClass(RepositoryFactory).classic().singleton(),
-            // Repositories
+            // Phase 4
+            configRepository: asClass(PrismaConfigRepository).classic().singleton(),
+            featureFlagRepository: asClass(PrismaFeatureFlagRepository).classic().singleton(),
+            configProvider: asClass(ConfigProvider).classic().singleton(),
+            featureFlagProvider: asClass(FeatureFlagProvider).classic().singleton(),
+            // Phase 6 & 7 Repositories
             userRepository: asClass(PrismaUserRepository).classic().singleton(),
             userSessionRepository: asClass(PrismaUserSessionRepository).classic().singleton(),
             roleRepository: asClass(PrismaRoleRepository).classic().singleton(),
             permissionRepository: asClass(PrismaPermissionRepository).classic().singleton(),
             adminRoleRepository: asClass(PrismaAdminRoleRepository).classic().singleton(),
-            // Providers
+            // Phase 7 Providers
             authorizationProvider: asClass(AuthorizationProvider).classic().singleton(),
-            // Use Cases
+            // Phase 6 Use Cases
             guestLoginUseCase: asClass(GuestLoginUseCase).classic().scoped(),
             sendOtpUseCase: asClass(SendOtpUseCase).classic().scoped(),
             verifyOtpUseCase: asClass(VerifyOtpUseCase).classic().scoped(),
             refreshTokenUseCase: asClass(RefreshTokenUseCase).classic().scoped(),
             logoutUseCase: asClass(LogoutUseCase).classic().scoped(),
         });
+        isRegistered = true;
     }
-    return container;
+    return diContainer;
 }
 //# sourceMappingURL=index.js.map

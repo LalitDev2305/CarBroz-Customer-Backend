@@ -10,6 +10,7 @@ export default fp(async (app) => {
         disposeOnClose: true,
         disposeOnResponse: true,
         strictBooleanEnforced: true,
+        injectionMode: 'CLASSIC',
     });
     // Attach the root container for global access (optional, mainly for background jobs)
     if (!app.hasDecorator('diContainer')) {

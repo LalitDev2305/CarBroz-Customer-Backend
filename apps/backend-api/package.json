@@ -11,6 +11,7 @@
     "@carbroz/common": "workspace:*",
     "@carbroz/config": "workspace:*",
     "@carbroz/database": "workspace:*",
+    "@carbroz/feature-flags": "workspace:*",
     "@carbroz/logger": "workspace:*",
     "@carbroz/types": "workspace:*",
     "@carbroz/validation": "workspace:*",
