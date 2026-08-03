@@ -222,3 +222,78 @@ model Address {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model ServiceCategory {
+  id          Int       @id @default(autoincrement())
+  publicId    String    @unique @default(uuid())
+  name        String
+  slug        String    @unique
+  description String?
+  iconUrl     String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  services    Service[]
+}
+
+model Service {
+  id                       Int                    @id @default(autoincrement())
+  publicId                 String                 @unique @default(uuid())
+  categoryId               Int
+  name                     String
+  slug                     String                 @unique
+  description              String?
+  imageUrl                 String?
+  basePrice                Int // Stored in cents (e.g. 5000 = $50.00 / 5000 INR)
+  estimatedDurationMinutes Int                    @default(60)
+  isActive                 Boolean                @default(true)
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+  deletedAt                DateTime?
+  category                 ServiceCategory        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  addons                   ServiceAddon[]
+  pricingTiers             PricingTier[]
+  vehicleMultipliers       VehicleTypeMultiplier[]
+}
+
+model ServiceAddon {
+  id          Int       @id @default(autoincrement())
+  publicId    String    @unique @default(uuid())
+  serviceId   Int
+  name        String
+  description String?
+  price       Int // Stored in cents
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  service     Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+
+model PricingTier {
+  id          Int      @id @default(autoincrement())
+  publicId    String   @unique @default(uuid())
+  serviceId   Int
+  name        String // e.g. "Standard", "Premium", "Peak Hours"
+  flatPrice   Int // Base or override flat price in cents
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+
+model VehicleTypeMultiplier {
+  id          Int      @id @default(autoincrement())
+  publicId    String   @unique @default(uuid())
+  serviceId   Int
+  vehicleType String // e.g. "HATCHBACK", "SEDAN", "SUV", "LUXURY"
+  multiplier  Float    @default(1.0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, vehicleType])
+}
+

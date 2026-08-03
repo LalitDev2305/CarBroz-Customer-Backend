@@ -54,6 +54,13 @@ import { UpdateCustomerProfileUseCase } from '../modules/customer/use-cases/Upda
 import { ManageAddressUseCase } from '../modules/customer/use-cases/ManageAddressUseCase.js';
 import { ExtractCustomerDataUseCase } from '../modules/customer/use-cases/ExtractCustomerDataUseCase.js';
 
+// Phase 12
+import { PrismaCatalogRepository, PrismaPricingRepository } from '@carbroz/database';
+import { GetCatalogUseCase } from '../modules/catalog/use-cases/GetCatalogUseCase.js';
+import { CalculateServicePriceUseCase } from '../modules/catalog/use-cases/CalculateServicePriceUseCase.js';
+import { ManageCatalogUseCase } from '../modules/catalog/use-cases/ManageCatalogUseCase.js';
+import { ManagePricingTierUseCase } from '../modules/catalog/use-cases/ManagePricingTierUseCase.js';
+
 export interface Cradle {
   prismaProvider: import('@carbroz/database').PrismaProvider;
   databaseProvider: import('@carbroz/common').IDatabaseProvider;
@@ -111,6 +118,14 @@ export interface Cradle {
   updateCustomerProfileUseCase: import('../modules/customer/use-cases/UpdateCustomerProfileUseCase.js').UpdateCustomerProfileUseCase;
   manageAddressUseCase: import('../modules/customer/use-cases/ManageAddressUseCase.js').ManageAddressUseCase;
   extractCustomerDataUseCase: import('../modules/customer/use-cases/ExtractCustomerDataUseCase.js').ExtractCustomerDataUseCase;
+
+  // Phase 12
+  catalogRepository: import('@carbroz/common').ICatalogRepository;
+  pricingRepository: import('@carbroz/common').IPricingRepository;
+  getCatalogUseCase: import('../modules/catalog/use-cases/GetCatalogUseCase.js').GetCatalogUseCase;
+  calculateServicePriceUseCase: import('../modules/catalog/use-cases/CalculateServicePriceUseCase.js').CalculateServicePriceUseCase;
+  manageCatalogUseCase: import('../modules/catalog/use-cases/ManageCatalogUseCase.js').ManageCatalogUseCase;
+  managePricingTierUseCase: import('../modules/catalog/use-cases/ManagePricingTierUseCase.js').ManagePricingTierUseCase;
 }
 
 let isRegistered = false;
@@ -177,6 +192,13 @@ export function getContainer(): AwilixContainer<Cradle> {
       updateCustomerProfileUseCase: asClass(UpdateCustomerProfileUseCase).classic().scoped(),
       manageAddressUseCase: asClass(ManageAddressUseCase).classic().scoped(),
       extractCustomerDataUseCase: asClass(ExtractCustomerDataUseCase).classic().scoped(),
+      // Phase 12
+      catalogRepository: asClass(PrismaCatalogRepository).classic().singleton(),
+      pricingRepository: asClass(PrismaPricingRepository).classic().singleton(),
+      getCatalogUseCase: asClass(GetCatalogUseCase).classic().scoped(),
+      calculateServicePriceUseCase: asClass(CalculateServicePriceUseCase).classic().scoped(),
+      manageCatalogUseCase: asClass(ManageCatalogUseCase).classic().scoped(),
+      managePricingTierUseCase: asClass(ManagePricingTierUseCase).classic().scoped(),
     });
     isRegistered = true;
   }

@@ -44,5 +44,11 @@ export interface Cradle {
     updateCustomerProfileUseCase: import('../modules/customer/use-cases/UpdateCustomerProfileUseCase.js').UpdateCustomerProfileUseCase;
     manageAddressUseCase: import('../modules/customer/use-cases/ManageAddressUseCase.js').ManageAddressUseCase;
     extractCustomerDataUseCase: import('../modules/customer/use-cases/ExtractCustomerDataUseCase.js').ExtractCustomerDataUseCase;
+    catalogRepository: import('@carbroz/common').ICatalogRepository;
+    pricingRepository: import('@carbroz/common').IPricingRepository;
+    getCatalogUseCase: import('../modules/catalog/use-cases/GetCatalogUseCase.js').GetCatalogUseCase;
+    calculateServicePriceUseCase: import('../modules/catalog/use-cases/CalculateServicePriceUseCase.js').CalculateServicePriceUseCase;
+    manageCatalogUseCase: import('../modules/catalog/use-cases/ManageCatalogUseCase.js').ManageCatalogUseCase;
+    managePricingTierUseCase: import('../modules/catalog/use-cases/ManagePricingTierUseCase.js').ManagePricingTierUseCase;
 }
 export declare function getContainer(): AwilixContainer<Cradle>;

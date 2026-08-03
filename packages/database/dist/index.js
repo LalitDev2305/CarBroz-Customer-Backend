@@ -16,4 +16,7 @@ export * from './repositories/PrismaPartnerProfileRepository.js';
 export * from './repositories/PrismaKycDocumentRepository.js';
 export * from './repositories/PrismaCustomerProfileRepository.js';
 export * from './repositories/PrismaAddressRepository.js';
+// Phase 12
+export * from './repositories/PrismaCatalogRepository.js';
+export * from './repositories/PrismaPricingRepository.js';
 //# sourceMappingURL=index.js.map
