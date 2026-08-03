@@ -37,6 +37,16 @@ import { GeocodeAddressUseCase } from '../modules/maps/use-cases/GeocodeAddressU
 import { ReverseGeocodeUseCase } from '../modules/maps/use-cases/ReverseGeocodeUseCase.js';
 import { CalculateDistanceUseCase } from '../modules/maps/use-cases/CalculateDistanceUseCase.js';
 
+// Phase 10
+import { PrismaPartnerProfileRepository, PrismaKycDocumentRepository } from '@carbroz/database';
+import { MinIOStorageProvider } from '../providers/storage/MinIOStorageProvider.js';
+import { UploadKycDocumentUseCase } from '../modules/partner/use-cases/UploadKycDocumentUseCase.js';
+import { GetPartnerKycStatusUseCase } from '../modules/partner/use-cases/GetPartnerKycStatusUseCase.js';
+import { AdminReviewKycDocumentUseCase } from '../modules/admin/use-cases/AdminReviewKycDocumentUseCase.js';
+import { KycController } from '../modules/partner/api/kyc.controller.js';
+import { AdminKycController } from '../modules/admin/api/admin-kyc.controller.js';
+import { LoggerProvider } from '../providers/LoggerProvider.js';
+
 export interface Cradle {
   prismaProvider: import('@carbroz/database').PrismaProvider;
   databaseProvider: import('@carbroz/common').IDatabaseProvider;
@@ -76,6 +86,17 @@ export interface Cradle {
   geocodeAddressUseCase: import('../modules/maps/use-cases/GeocodeAddressUseCase.js').GeocodeAddressUseCase;
   reverseGeocodeUseCase: import('../modules/maps/use-cases/ReverseGeocodeUseCase.js').ReverseGeocodeUseCase;
   calculateDistanceUseCase: import('../modules/maps/use-cases/CalculateDistanceUseCase.js').CalculateDistanceUseCase;
+
+  // Phase 10
+  partnerProfileRepository: import('@carbroz/common').IPartnerProfileRepository;
+  kycDocumentRepository: import('@carbroz/common').IKycDocumentRepository;
+  storageProvider: import('@carbroz/common').IStorageProvider;
+  uploadKycDocumentUseCase: import('../modules/partner/use-cases/UploadKycDocumentUseCase.js').UploadKycDocumentUseCase;
+  getPartnerKycStatusUseCase: import('../modules/partner/use-cases/GetPartnerKycStatusUseCase.js').GetPartnerKycStatusUseCase;
+  adminReviewKycDocumentUseCase: import('../modules/admin/use-cases/AdminReviewKycDocumentUseCase.js').AdminReviewKycDocumentUseCase;
+  kycController: import('../modules/partner/api/kyc.controller.js').KycController;
+  adminKycController: import('../modules/admin/api/admin-kyc.controller.js').AdminKycController;
+  logger: import('@carbroz/common').ILoggerProvider;
 }
 
 let isRegistered = false;
@@ -124,6 +145,17 @@ export function getContainer(): AwilixContainer<Cradle> {
       geocodeAddressUseCase: asClass(GeocodeAddressUseCase).classic().scoped(),
       reverseGeocodeUseCase: asClass(ReverseGeocodeUseCase).classic().scoped(),
       calculateDistanceUseCase: asClass(CalculateDistanceUseCase).classic().scoped(),
+
+      // Phase 10
+      partnerProfileRepository: asClass(PrismaPartnerProfileRepository).classic().singleton(),
+      kycDocumentRepository: asClass(PrismaKycDocumentRepository).classic().singleton(),
+      storageProvider: asClass(MinIOStorageProvider).classic().singleton(),
+      logger: asClass(LoggerProvider).classic().singleton(),
+      uploadKycDocumentUseCase: asClass(UploadKycDocumentUseCase).classic().scoped(),
+      getPartnerKycStatusUseCase: asClass(GetPartnerKycStatusUseCase).classic().scoped(),
+      adminReviewKycDocumentUseCase: asClass(AdminReviewKycDocumentUseCase).classic().scoped(),
+      kycController: asClass(KycController).classic().scoped(),
+      adminKycController: asClass(AdminKycController).classic().scoped(),
     });
     isRegistered = true;
   }

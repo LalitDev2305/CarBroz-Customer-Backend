@@ -12,4 +12,6 @@ export * from './repositories/PrismaConfigRepository.js';
 export * from './repositories/PrismaFeatureFlagRepository.js';
 export * from './repositories/PrismaPartnerRepository.js';
 export * from './repositories/PrismaPartnerMemberRepository.js';
+export * from './repositories/PrismaPartnerProfileRepository.js';
+export * from './repositories/PrismaKycDocumentRepository.js';
 //# sourceMappingURL=index.js.map

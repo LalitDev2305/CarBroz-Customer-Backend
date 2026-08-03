@@ -20,6 +20,15 @@ import { GoogleMapsProvider } from '../providers/maps/GoogleMapsProvider.js';
 import { GeocodeAddressUseCase } from '../modules/maps/use-cases/GeocodeAddressUseCase.js';
 import { ReverseGeocodeUseCase } from '../modules/maps/use-cases/ReverseGeocodeUseCase.js';
 import { CalculateDistanceUseCase } from '../modules/maps/use-cases/CalculateDistanceUseCase.js';
+// Phase 10
+import { PrismaPartnerProfileRepository, PrismaKycDocumentRepository } from '@carbroz/database';
+import { MinIOStorageProvider } from '../providers/storage/MinIOStorageProvider.js';
+import { UploadKycDocumentUseCase } from '../modules/partner/use-cases/UploadKycDocumentUseCase.js';
+import { GetPartnerKycStatusUseCase } from '../modules/partner/use-cases/GetPartnerKycStatusUseCase.js';
+import { AdminReviewKycDocumentUseCase } from '../modules/admin/use-cases/AdminReviewKycDocumentUseCase.js';
+import { KycController } from '../modules/partner/api/kyc.controller.js';
+import { AdminKycController } from '../modules/admin/api/admin-kyc.controller.js';
+import { LoggerProvider } from '../providers/LoggerProvider.js';
 let isRegistered = false;
 export function getContainer() {
     if (!isRegistered) {
@@ -59,6 +68,16 @@ export function getContainer() {
             geocodeAddressUseCase: asClass(GeocodeAddressUseCase).classic().scoped(),
             reverseGeocodeUseCase: asClass(ReverseGeocodeUseCase).classic().scoped(),
             calculateDistanceUseCase: asClass(CalculateDistanceUseCase).classic().scoped(),
+            // Phase 10
+            partnerProfileRepository: asClass(PrismaPartnerProfileRepository).classic().singleton(),
+            kycDocumentRepository: asClass(PrismaKycDocumentRepository).classic().singleton(),
+            storageProvider: asClass(MinIOStorageProvider).classic().singleton(),
+            logger: asClass(LoggerProvider).classic().singleton(),
+            uploadKycDocumentUseCase: asClass(UploadKycDocumentUseCase).classic().scoped(),
+            getPartnerKycStatusUseCase: asClass(GetPartnerKycStatusUseCase).classic().scoped(),
+            adminReviewKycDocumentUseCase: asClass(AdminReviewKycDocumentUseCase).classic().scoped(),
+            kycController: asClass(KycController).classic().scoped(),
+            adminKycController: asClass(AdminKycController).classic().scoped(),
         });
         isRegistered = true;
     }

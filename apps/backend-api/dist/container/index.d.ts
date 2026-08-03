@@ -29,5 +29,14 @@ export interface Cradle {
     geocodeAddressUseCase: import('../modules/maps/use-cases/GeocodeAddressUseCase.js').GeocodeAddressUseCase;
     reverseGeocodeUseCase: import('../modules/maps/use-cases/ReverseGeocodeUseCase.js').ReverseGeocodeUseCase;
     calculateDistanceUseCase: import('../modules/maps/use-cases/CalculateDistanceUseCase.js').CalculateDistanceUseCase;
+    partnerProfileRepository: import('@carbroz/common').IPartnerProfileRepository;
+    kycDocumentRepository: import('@carbroz/common').IKycDocumentRepository;
+    storageProvider: import('@carbroz/common').IStorageProvider;
+    uploadKycDocumentUseCase: import('../modules/partner/use-cases/UploadKycDocumentUseCase.js').UploadKycDocumentUseCase;
+    getPartnerKycStatusUseCase: import('../modules/partner/use-cases/GetPartnerKycStatusUseCase.js').GetPartnerKycStatusUseCase;
+    adminReviewKycDocumentUseCase: import('../modules/admin/use-cases/AdminReviewKycDocumentUseCase.js').AdminReviewKycDocumentUseCase;
+    kycController: import('../modules/partner/api/kyc.controller.js').KycController;
+    adminKycController: import('../modules/admin/api/admin-kyc.controller.js').AdminKycController;
+    logger: import('@carbroz/common').ILoggerProvider;
 }
 export declare function getContainer(): AwilixContainer<Cradle>;

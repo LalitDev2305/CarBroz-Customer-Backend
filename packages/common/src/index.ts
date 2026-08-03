@@ -56,3 +56,10 @@ export * from './providers/IFeatureFlagProvider.js';
 
 export * from './domain/models/Location.js';
 export * from './providers/IMapsProvider.js';
+export * from './domain/PartnerProfile.js';
+export * from './domain/KycDocument.js';
+export * from './domain/KycDocumentStatus.js';
+export * from './domain/KycDocumentType.js';
+export * from './domain/repositories/IPartnerProfileRepository.js';
+export * from './domain/repositories/IKycDocumentRepository.js';
+export * from './providers/IStorageProvider.js';

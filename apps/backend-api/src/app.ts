@@ -26,9 +26,19 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import fastifyMultipart from '@fastify/multipart';
+import { kycRoutes } from './modules/partner/api/kyc.routes.js';
+import { adminKycRoutes } from './modules/admin/api/admin-kyc.routes.js';
+
 export const buildApp = async (): Promise<FastifyInstance> => {
   const app = Fastify({
     logger: getFastifyLoggerConfig(LoggingConfig.logLevel),
+  });
+
+  await app.register(fastifyMultipart, {
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    }
   });
 
   await app.register(cors, {
@@ -127,6 +137,8 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   await app.register(partnerRoutes, { prefix: '/api/v1/partners' });
   await app.register(adminPartnerRoutes, { prefix: '/api/v1/admin/partners' });
   await app.register(mapsRoutes, { prefix: '/api/v1/maps' });
+  await app.register(kycRoutes, { prefix: '/api/v1/partners' });
+  await app.register(adminKycRoutes, { prefix: '/api/v1/admin/kyc' });
 
   return app;
 };

@@ -1,0 +1,1 @@
+{"version":3,"file":"kyc.dto.js","sourceRoot":"","sources":["../../../../src/modules/partner/dtos/kyc.dto.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,CAAC,EAAE,MAAM,KAAK,CAAC;AACxB,OAAO,EAAE,eAAe,EAAE,MAAM,iBAAiB,CAAC;AAElD,MAAM,CAAC,MAAM,uBAAuB,GAAG,CAAC,CAAC,MAAM,CAAC;IAC9C,IAAI,EAAE,CAAC,CAAC,UAAU,CAAC,eAAe,CAAC;CACpC,CAAC,CAAC"}

@@ -21,6 +21,8 @@ model User {
   sessions    UserSession[]
   adminRoles  AdminUserRole[]
   partnerMembers PartnerMember[]
+  uploadedKycs   KycDocument[] @relation("KycUploader")
+  verifiedKycs   KycDocument[] @relation("KycVerifier")
 }
 
 model Role {
@@ -130,6 +132,8 @@ model Partner {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
   members     PartnerMember[]
+  profile     PartnerProfile?
+  kycDocuments KycDocument[]
 }
 
 model PartnerMember {
@@ -146,4 +150,36 @@ model PartnerMember {
   partner     Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 
   @@unique([userId, partnerId])
+}
+
+model PartnerProfile {
+  id           Int      @id @default(autoincrement())
+  publicId     String   @unique @default(uuid())
+  partnerId    Int      @unique
+  description  String?
+  logoUrl      String?
+  supportEmail String?
+  supportPhone String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  partner      Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+}
+
+model KycDocument {
+  id              Int      @id @default(autoincrement())
+  publicId        String   @unique @default(uuid())
+  partnerId       Int
+  type            String
+  fileUrl         String
+  status          String   @default("PENDING")
+  rejectionReason String?
+  uploadedById    Int
+  verifiedById    Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  partner         Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  uploadedBy      User     @relation("KycUploader", fields: [uploadedById], references: [id])
+  verifiedBy      User?    @relation("KycVerifier", fields: [verifiedById], references: [id])
 }
