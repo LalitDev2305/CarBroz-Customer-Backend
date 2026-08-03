@@ -53,3 +53,6 @@ export * from './domain/repositories/IConfigRepository.js';
 export * from './domain/repositories/IFeatureFlagRepository.js';
 
 export * from './providers/IFeatureFlagProvider.js';
+
+export * from './domain/models/Location.js';
+export * from './providers/IMapsProvider.js';

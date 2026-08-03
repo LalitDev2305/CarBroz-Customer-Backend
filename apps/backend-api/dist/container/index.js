@@ -15,6 +15,11 @@ import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/R
 import { RegisterOrganizationPartnerUseCase } from '../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js';
 import { GetPartnerProfileUseCase } from '../modules/partner/use-cases/GetPartnerProfileUseCase.js';
 import { VerifyPartnerUseCase } from '../modules/partner/use-cases/VerifyPartnerUseCase.js';
+// Phase 9
+import { GoogleMapsProvider } from '../providers/maps/GoogleMapsProvider.js';
+import { GeocodeAddressUseCase } from '../modules/maps/use-cases/GeocodeAddressUseCase.js';
+import { ReverseGeocodeUseCase } from '../modules/maps/use-cases/ReverseGeocodeUseCase.js';
+import { CalculateDistanceUseCase } from '../modules/maps/use-cases/CalculateDistanceUseCase.js';
 let isRegistered = false;
 export function getContainer() {
     if (!isRegistered) {
@@ -49,6 +54,11 @@ export function getContainer() {
             registerOrganizationPartnerUseCase: asClass(RegisterOrganizationPartnerUseCase).classic().scoped(),
             getPartnerProfileUseCase: asClass(GetPartnerProfileUseCase).classic().scoped(),
             verifyPartnerUseCase: asClass(VerifyPartnerUseCase).classic().scoped(),
+            // Phase 9
+            mapsProvider: asClass(GoogleMapsProvider).classic().singleton(),
+            geocodeAddressUseCase: asClass(GeocodeAddressUseCase).classic().scoped(),
+            reverseGeocodeUseCase: asClass(ReverseGeocodeUseCase).classic().scoped(),
+            calculateDistanceUseCase: asClass(CalculateDistanceUseCase).classic().scoped(),
         });
         isRegistered = true;
     }

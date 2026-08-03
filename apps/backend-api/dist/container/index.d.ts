@@ -25,5 +25,9 @@ export interface Cradle {
     registerOrganizationPartnerUseCase: import('../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js').RegisterOrganizationPartnerUseCase;
     getPartnerProfileUseCase: import('../modules/partner/use-cases/GetPartnerProfileUseCase.js').GetPartnerProfileUseCase;
     verifyPartnerUseCase: import('../modules/partner/use-cases/VerifyPartnerUseCase.js').VerifyPartnerUseCase;
+    mapsProvider: import('@carbroz/common').IMapsProvider;
+    geocodeAddressUseCase: import('../modules/maps/use-cases/GeocodeAddressUseCase.js').GeocodeAddressUseCase;
+    reverseGeocodeUseCase: import('../modules/maps/use-cases/ReverseGeocodeUseCase.js').ReverseGeocodeUseCase;
+    calculateDistanceUseCase: import('../modules/maps/use-cases/CalculateDistanceUseCase.js').CalculateDistanceUseCase;
 }
 export declare function getContainer(): AwilixContainer<Cradle>;

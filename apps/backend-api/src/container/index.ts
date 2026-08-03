@@ -31,6 +31,12 @@ import { VerifyPartnerUseCase } from '../modules/partner/use-cases/VerifyPartner
 import { PartnerController } from '../modules/partner/api/partner.controller.js';
 import { AdminPartnerController } from '../modules/admin/api/admin-partner.controller.js';
 
+// Phase 9
+import { GoogleMapsProvider } from '../providers/maps/GoogleMapsProvider.js';
+import { GeocodeAddressUseCase } from '../modules/maps/use-cases/GeocodeAddressUseCase.js';
+import { ReverseGeocodeUseCase } from '../modules/maps/use-cases/ReverseGeocodeUseCase.js';
+import { CalculateDistanceUseCase } from '../modules/maps/use-cases/CalculateDistanceUseCase.js';
+
 export interface Cradle {
   prismaProvider: import('@carbroz/database').PrismaProvider;
   databaseProvider: import('@carbroz/common').IDatabaseProvider;
@@ -64,6 +70,12 @@ export interface Cradle {
   registerOrganizationPartnerUseCase: import('../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js').RegisterOrganizationPartnerUseCase;
   getPartnerProfileUseCase: import('../modules/partner/use-cases/GetPartnerProfileUseCase.js').GetPartnerProfileUseCase;
   verifyPartnerUseCase: import('../modules/partner/use-cases/VerifyPartnerUseCase.js').VerifyPartnerUseCase;
+
+  // Phase 9
+  mapsProvider: import('@carbroz/common').IMapsProvider;
+  geocodeAddressUseCase: import('../modules/maps/use-cases/GeocodeAddressUseCase.js').GeocodeAddressUseCase;
+  reverseGeocodeUseCase: import('../modules/maps/use-cases/ReverseGeocodeUseCase.js').ReverseGeocodeUseCase;
+  calculateDistanceUseCase: import('../modules/maps/use-cases/CalculateDistanceUseCase.js').CalculateDistanceUseCase;
 }
 
 let isRegistered = false;
@@ -106,6 +118,12 @@ export function getContainer(): AwilixContainer<Cradle> {
       registerOrganizationPartnerUseCase: asClass(RegisterOrganizationPartnerUseCase).classic().scoped(),
       getPartnerProfileUseCase: asClass(GetPartnerProfileUseCase).classic().scoped(),
       verifyPartnerUseCase: asClass(VerifyPartnerUseCase).classic().scoped(),
+
+      // Phase 9
+      mapsProvider: asClass(GoogleMapsProvider).classic().singleton(),
+      geocodeAddressUseCase: asClass(GeocodeAddressUseCase).classic().scoped(),
+      reverseGeocodeUseCase: asClass(ReverseGeocodeUseCase).classic().scoped(),
+      calculateDistanceUseCase: asClass(CalculateDistanceUseCase).classic().scoped(),
     });
     isRegistered = true;
   }

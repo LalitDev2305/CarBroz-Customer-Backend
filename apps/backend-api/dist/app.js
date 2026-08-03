@@ -18,6 +18,7 @@ import uiRoutes from './ui/ui.routes.js';
 import appRoutes from './app.routes.js';
 import { partnerRoutes } from './modules/partner/api/partner.routes.js';
 import { adminPartnerRoutes } from './modules/admin/api/admin-partner.routes.js';
+import { mapsRoutes } from './modules/maps/api/maps.routes.js';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -99,6 +100,7 @@ export const buildApp = async () => {
     await app.register(appRoutes, { prefix: '/api/v1/app' });
     await app.register(partnerRoutes, { prefix: '/api/v1/partners' });
     await app.register(adminPartnerRoutes, { prefix: '/api/v1/admin/partners' });
+    await app.register(mapsRoutes, { prefix: '/api/v1/maps' });
     return app;
 };
 //# sourceMappingURL=app.js.map
