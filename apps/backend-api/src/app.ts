@@ -34,6 +34,8 @@ import catalogRoutes from './modules/catalog/api/catalog.routes.js';
 import adminCatalogRoutes from './modules/admin/api/admin-catalog.routes.js';
 import sduiRegistryRoutes from './modules/sdui/api/sdui-registry.routes.js';
 import adminSduiRoutes from './modules/admin/api/admin-sdui.routes.js';
+import { reviewRoutes } from './modules/review/api/review.controller.js';
+import { couponRoutes } from './modules/coupon/api/coupon.controller.js';
 
 export const buildApp = async (): Promise<FastifyInstance> => {
   const app = Fastify({
@@ -149,6 +151,8 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   await app.register(adminCatalogRoutes, { prefix: '/api/v1/admin/catalog' });
   await app.register(sduiRegistryRoutes, { prefix: '/api/v1/sdui' });
   await app.register(adminSduiRoutes, { prefix: '/api/v1/admin/sdui' });
+  await app.register(reviewRoutes);
+  await app.register(couponRoutes);
 
   return app;
 };

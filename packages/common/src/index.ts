@@ -143,3 +143,11 @@ export * from './domain/coupon/repositories/ICouponRepository.js';
 export * from './domain/coupon/repositories/ICouponUsageRepository.js';
 export * from './domain/coupon/services/CouponDiscountCalculator.js';
 export * from './domain/events/ReviewEvents.js';
+
+// Phase 20 Production Hardening, Audit Logging & Error Codes
+export * from './domain/audit/AuditActor.js';
+export * from './domain/audit/AuditAction.js';
+export * from './domain/audit/AuditLog.js';
+export * from './domain/audit/repositories/IAuditLogRepository.js';
+export * from './domain/audit/services/AuditLogService.js';
+export * from './errors/ErrorCode.js';

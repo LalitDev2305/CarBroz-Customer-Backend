@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildApp } from '../../../app.js';
 import { FastifyInstance } from 'fastify';
 import { asValue } from 'awilix';
-import { getContainer } from '../../../container/index.js';
 
 describe('Health Module', () => {
   let app: FastifyInstance;
@@ -40,7 +39,10 @@ describe('Health Module', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.payload)).toEqual({ status: 'ok', type: 'liveness' });
+    const body = JSON.parse(response.payload);
+    expect(body.status).toBe('ok');
+    expect(body.type).toBe('liveness');
+    expect(body.timestamp).toBeDefined();
   });
 
   it('should return 200 OK for readiness check when DB is healthy', async () => {
@@ -50,7 +52,10 @@ describe('Health Module', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.payload)).toEqual({ status: 'ok', type: 'readiness' });
+    const body = JSON.parse(response.payload);
+    expect(body.status).toBe('ok');
+    expect(body.type).toBe('readiness');
+    expect(body.checks.database).toBe('ok');
   });
 
   it('should return 503 for readiness check when DB is down', async () => {
@@ -68,6 +73,8 @@ describe('Health Module', () => {
     });
 
     expect(response.statusCode).toBe(503);
-    expect(JSON.parse(response.payload)).toEqual({ status: 'error', message: 'Database connection failed' });
+    const body = JSON.parse(response.payload);
+    expect(body.status).toBe('degraded');
+    expect(body.checks.database).toBe('error');
   });
 });

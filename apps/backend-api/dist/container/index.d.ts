@@ -87,6 +87,7 @@ import { ArchiveCouponUseCase } from '../modules/coupon/use-cases/ArchiveCouponU
 import { ValidateCouponUseCase } from '../modules/coupon/use-cases/ValidateCouponUseCase.js';
 import { ApplyCouponUseCase } from '../modules/coupon/use-cases/ApplyCouponUseCase.js';
 import { ListCouponsUseCase } from '../modules/coupon/use-cases/ListCouponsUseCase.js';
+import { AuditLogService } from '@carbroz/common';
 export interface Cradle {
     prismaProvider: PrismaProvider;
     databaseProvider: PrismaDatabaseProvider;
@@ -219,5 +220,7 @@ export interface Cradle {
     validateCouponUseCase: ValidateCouponUseCase;
     applyCouponUseCase: ApplyCouponUseCase;
     listCouponsUseCase: ListCouponsUseCase;
+    auditLogRepository: import('@carbroz/common').IAuditLogRepository;
+    auditLogService: AuditLogService;
 }
 export declare function getContainer(): AwilixContainer<Cradle>;

@@ -36,4 +36,6 @@ export * from './repositories/PrismaDeviceTokenRepository.js';
 export * from './repositories/PrismaReviewRepository.js';
 export * from './repositories/PrismaCouponRepository.js';
 export * from './repositories/PrismaCouponUsageRepository.js';
+// Phase 20
+export * from './repositories/PrismaAuditLogRepository.js';
 //# sourceMappingURL=index.js.map

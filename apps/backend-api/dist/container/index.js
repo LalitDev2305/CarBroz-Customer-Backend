@@ -120,6 +120,9 @@ import { ArchiveCouponUseCase } from '../modules/coupon/use-cases/ArchiveCouponU
 import { ValidateCouponUseCase } from '../modules/coupon/use-cases/ValidateCouponUseCase.js';
 import { ApplyCouponUseCase } from '../modules/coupon/use-cases/ApplyCouponUseCase.js';
 import { ListCouponsUseCase } from '../modules/coupon/use-cases/ListCouponsUseCase.js';
+// Phase 20 Production Hardening, Audit Logging & Error Codes
+import { PrismaAuditLogRepository } from '@carbroz/database';
+import { AuditLogService } from '@carbroz/common';
 let isRegistered = false;
 export function getContainer() {
     if (!isRegistered) {
@@ -276,6 +279,9 @@ export function getContainer() {
             validateCouponUseCase: asClass(ValidateCouponUseCase).classic().scoped(),
             applyCouponUseCase: asClass(ApplyCouponUseCase).classic().scoped(),
             listCouponsUseCase: asClass(ListCouponsUseCase).classic().scoped(),
+            // Phase 20
+            auditLogRepository: asClass(PrismaAuditLogRepository).classic().singleton(),
+            auditLogService: asClass(AuditLogService).classic().scoped(),
         });
         isRegistered = true;
     }
