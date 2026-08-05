@@ -84,8 +84,17 @@ describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
       sessions.set(session.bookingId, session);
       return session;
     },
+    async findById(id) {
+      return Array.from(sessions.values()).find((s) => s.id === id) ?? null;
+    },
+    async findByPublicId(pubId) {
+      return Array.from(sessions.values()).find((s) => s.publicId === pubId) ?? null;
+    },
     async findByBookingId(bookingId) {
       return sessions.get(bookingId) ?? null;
+    },
+    async findActiveByPartnerId(partnerId) {
+      return Array.from(sessions.values()).find((s) => s.partnerId === partnerId && s.status === 'ACTIVE') ?? null;
     },
     async update(session) {
       sessions.set(session.bookingId, session);
@@ -94,12 +103,11 @@ describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
   };
 
   const mockMapsProvider: IMapsProvider = {
-    async calculateRoute(originLat, originLng, destLat, destLng) {
+    async calculateDistance(origin, destination) {
       mapsApiCallCount++;
       return {
         distanceMeters: 5000,
         durationSeconds: 900,
-        polyline: 'sample_polyline',
       };
     },
     async geocode() { throw new Error('Not implemented'); },
@@ -108,13 +116,17 @@ describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
 
   const mockDeviceTokenRepo: IDeviceTokenRepository = {
     async upsert(token) { return token; },
-    async findByUserId() { return []; },
-    async delete() { return; },
+    async findByToken() { return null; },
+    async listActiveByUserId() { return []; },
+    async deactivate() { return; },
   };
 
   const mockNotificationLogRepo: INotificationLogRepository = {
     async create(log) { return log; },
+    async findById(id) { return null; },
+    async findByPublicId(pubId) { return null; },
     async listByRecipientId() { return []; },
+    async listByBookingId() { return []; },
   };
 
   it('should start tracking session and compute initial ETA', async () => {
@@ -143,7 +155,6 @@ describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
     const updateUseCase = new UpdateLocationPingUseCase(mockTrackingRepo, mockBookingRepo, mockMapsProvider);
     const updated = await updateUseCase.execute({
       bookingPublicId: dummyBooking.publicId!,
-      partnerUserId: 20,
       latitude: 12.9500,
       longitude: 77.6000,
     });
@@ -153,8 +164,8 @@ describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
 
   it('should dispatch multi-channel push, sms and email notifications', async () => {
     const pushProvider = new FirebasePushProvider();
-    const smsProvider = new Msg91SmsProvider('mock_key', 'CARBRZ');
-    const emailProvider = new ResendEmailProvider('mock_key');
+    const smsProvider = new Msg91SmsProvider();
+    const emailProvider = new ResendEmailProvider();
     const multiProvider = new MultiChannelNotificationProvider(pushProvider, smsProvider, emailProvider);
 
     const service = new NotificationService(mockNotificationLogRepo, multiProvider);
