@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AuditActor, AuditLog, AuditLogService, IAuditLogRepository } from '../../src/index.js';
+import { AuditActor, AuditLog, AuditLogService, type IAuditLogRepository } from '../../src/index.js';
 
 describe('Phase 20 — Audit Logging Domain Model & Service', () => {
   it('should create a valid AuditLog entity with defaults', () => {
@@ -43,7 +43,7 @@ describe('Phase 20 — Audit Logging Domain Model & Service', () => {
 
     expect(result).not.toBeNull();
     expect(logs.length).toBe(1);
-    expect(logs[0].action).toBe('PAYMENT_CREATE');
+    expect(logs[0]?.action).toBe('PAYMENT_CREATE');
   });
 
   it('should swallow errors safely in AuditLogService without throwing', async () => {
