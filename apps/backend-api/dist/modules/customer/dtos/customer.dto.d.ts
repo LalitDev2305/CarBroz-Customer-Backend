@@ -4,9 +4,9 @@ export declare const updateProfileSchema: z.ZodObject<{
     lastName: z.ZodOptional<z.ZodString>;
     dateOfBirth: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<Date | undefined, string | undefined>>;
     gender: z.ZodOptional<z.ZodEnum<{
+        OTHER: "OTHER";
         MALE: "MALE";
         FEMALE: "FEMALE";
-        OTHER: "OTHER";
         PREFER_NOT_TO_SAY: "PREFER_NOT_TO_SAY";
     }>>;
     marketingOptIn: z.ZodOptional<z.ZodBoolean>;

@@ -443,6 +443,7 @@ model Booking {
   notificationLogs NotificationLog[]
   review           Review?
   couponUsages     CouponUsage[]
+  disputes         Dispute[]
 
   @@index([customerId, status])
   @@index([partnerId, status])
@@ -759,6 +760,32 @@ model AuditLog {
   @@index([createdAt])
   @@map("audit_logs")
 }
+
+model Dispute {
+  id                   Int       @id @default(autoincrement())
+  publicId             String    @unique @default(uuid())
+  bookingId            Int       @map("booking_id")
+  raisedByActorId      Int       @map("raised_by_actor_id")
+  raisedByActorType    String    @map("raised_by_actor_type")
+  disputeReason        String    @map("dispute_reason")
+  description          String?
+  requestedRefundPaise Int       @default(0) @map("requested_refund_paise")
+  refundedAmountPaise  Int       @default(0) @map("refunded_amount_paise")
+  status               String    @default("OPEN")
+  resolutionNotes      String?   @map("resolution_notes")
+  resolvedAt           DateTime? @map("resolved_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId])
+  @@index([status])
+  @@index([raisedByActorId, raisedByActorType])
+  @@index([createdAt])
+  @@map("disputes")
+}
+
 
 
 

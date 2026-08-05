@@ -46,6 +46,10 @@ export * from './repositories/PrismaCouponUsageRepository.js';
 // Phase 20
 export * from './repositories/PrismaAuditLogRepository.js';
 
+// Phase 21
+export * from './repositories/PrismaDisputeRepository.js';
+
+
 
 
 

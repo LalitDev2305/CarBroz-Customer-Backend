@@ -88,6 +88,11 @@ import { ValidateCouponUseCase } from '../modules/coupon/use-cases/ValidateCoupo
 import { ApplyCouponUseCase } from '../modules/coupon/use-cases/ApplyCouponUseCase.js';
 import { ListCouponsUseCase } from '../modules/coupon/use-cases/ListCouponsUseCase.js';
 import { AuditLogService } from '@carbroz/common';
+import { DisputeSettlementCalculator } from '@carbroz/common';
+import { RaiseDisputeUseCase } from '../modules/dispute/use-cases/RaiseDisputeUseCase.js';
+import { ResolveDisputeUseCase } from '../modules/dispute/use-cases/ResolveDisputeUseCase.js';
+import { GetDisputeUseCase } from '../modules/dispute/use-cases/GetDisputeUseCase.js';
+import { ListDisputesUseCase } from '../modules/dispute/use-cases/ListDisputesUseCase.js';
 export interface Cradle {
     prismaProvider: PrismaProvider;
     databaseProvider: PrismaDatabaseProvider;
@@ -222,5 +227,11 @@ export interface Cradle {
     listCouponsUseCase: ListCouponsUseCase;
     auditLogRepository: import('@carbroz/common').IAuditLogRepository;
     auditLogService: AuditLogService;
+    disputeRepository: import('@carbroz/common').IDisputeRepository;
+    disputeSettlementCalculator: DisputeSettlementCalculator;
+    raiseDisputeUseCase: RaiseDisputeUseCase;
+    resolveDisputeUseCase: ResolveDisputeUseCase;
+    getDisputeUseCase: GetDisputeUseCase;
+    listDisputesUseCase: ListDisputesUseCase;
 }
 export declare function getContainer(): AwilixContainer<Cradle>;

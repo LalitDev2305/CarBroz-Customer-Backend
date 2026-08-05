@@ -139,4 +139,10 @@ export * from './domain/audit/AuditLog.js';
 export * from './domain/audit/repositories/IAuditLogRepository.js';
 export * from './domain/audit/services/AuditLogService.js';
 export * from './errors/ErrorCode.js';
+// Phase 21 Booking Dispute Settlement & SLA Refund Engine
+export * from './domain/dispute/DisputeStatus.js';
+export * from './domain/dispute/DisputeReason.js';
+export * from './domain/dispute/Dispute.js';
+export * from './domain/dispute/repositories/IDisputeRepository.js';
+export * from './domain/dispute/services/DisputeSettlementCalculator.js';
 //# sourceMappingURL=index.js.map

@@ -123,6 +123,13 @@ import { ListCouponsUseCase } from '../modules/coupon/use-cases/ListCouponsUseCa
 // Phase 20 Production Hardening, Audit Logging & Error Codes
 import { PrismaAuditLogRepository } from '@carbroz/database';
 import { AuditLogService } from '@carbroz/common';
+// Phase 21 Booking Dispute Settlement & SLA Refund Engine
+import { PrismaDisputeRepository } from '@carbroz/database';
+import { DisputeSettlementCalculator } from '@carbroz/common';
+import { RaiseDisputeUseCase } from '../modules/dispute/use-cases/RaiseDisputeUseCase.js';
+import { ResolveDisputeUseCase } from '../modules/dispute/use-cases/ResolveDisputeUseCase.js';
+import { GetDisputeUseCase } from '../modules/dispute/use-cases/GetDisputeUseCase.js';
+import { ListDisputesUseCase } from '../modules/dispute/use-cases/ListDisputesUseCase.js';
 let isRegistered = false;
 export function getContainer() {
     if (!isRegistered) {
@@ -282,6 +289,13 @@ export function getContainer() {
             // Phase 20
             auditLogRepository: asClass(PrismaAuditLogRepository).classic().singleton(),
             auditLogService: asClass(AuditLogService).classic().scoped(),
+            // Phase 21
+            disputeRepository: asClass(PrismaDisputeRepository).classic().singleton(),
+            disputeSettlementCalculator: asClass(DisputeSettlementCalculator).classic().scoped(),
+            raiseDisputeUseCase: asClass(RaiseDisputeUseCase).classic().scoped(),
+            resolveDisputeUseCase: asClass(ResolveDisputeUseCase).classic().scoped(),
+            getDisputeUseCase: asClass(GetDisputeUseCase).classic().scoped(),
+            listDisputesUseCase: asClass(ListDisputesUseCase).classic().scoped(),
         });
         isRegistered = true;
     }

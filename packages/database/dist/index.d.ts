@@ -31,3 +31,4 @@ export * from './repositories/PrismaReviewRepository.js';
 export * from './repositories/PrismaCouponRepository.js';
 export * from './repositories/PrismaCouponUsageRepository.js';
 export * from './repositories/PrismaAuditLogRepository.js';
+export * from './repositories/PrismaDisputeRepository.js';
