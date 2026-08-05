@@ -48,7 +48,7 @@ export class PrismaPaymentRepository implements IPaymentRepository {
   }
 
   async create(payment: Payment): Promise<Payment> {
-    const record = await this.prisma.payment.create({
+    const record = await (this.prisma as any).payment.create({
       data: {
         bookingId: payment.bookingId,
         customerId: payment.customerId,
@@ -73,17 +73,17 @@ export class PrismaPaymentRepository implements IPaymentRepository {
   }
 
   async findById(id: number): Promise<Payment | null> {
-    const record = await this.prisma.payment.findUnique({ where: { id } });
+    const record = await (this.prisma as any).payment.findUnique({ where: { id } });
     return record ? this.mapPaymentToDomain(record) : null;
   }
 
   async findByPublicId(publicId: string): Promise<Payment | null> {
-    const record = await this.prisma.payment.findUnique({ where: { publicId } });
+    const record = await (this.prisma as any).payment.findUnique({ where: { publicId } });
     return record ? this.mapPaymentToDomain(record) : null;
   }
 
   async findByBookingId(bookingId: number): Promise<Payment | null> {
-    const record = await this.prisma.payment.findFirst({
+    const record = await (this.prisma as any).payment.findFirst({
       where: { bookingId },
       orderBy: { createdAt: 'desc' },
     });
@@ -91,22 +91,22 @@ export class PrismaPaymentRepository implements IPaymentRepository {
   }
 
   async findByProviderOrderId(orderId: string): Promise<Payment | null> {
-    const record = await this.prisma.payment.findUnique({ where: { providerOrderId: orderId } });
+    const record = await (this.prisma as any).payment.findUnique({ where: { providerOrderId: orderId } });
     return record ? this.mapPaymentToDomain(record) : null;
   }
 
   async findByProviderPaymentId(paymentId: string): Promise<Payment | null> {
-    const record = await this.prisma.payment.findUnique({ where: { providerPaymentId: paymentId } });
+    const record = await (this.prisma as any).payment.findUnique({ where: { providerPaymentId: paymentId } });
     return record ? this.mapPaymentToDomain(record) : null;
   }
 
   async findByIdempotencyKey(key: string): Promise<Payment | null> {
-    const record = await this.prisma.payment.findUnique({ where: { idempotencyKey: key } });
+    const record = await (this.prisma as any).payment.findUnique({ where: { idempotencyKey: key } });
     return record ? this.mapPaymentToDomain(record) : null;
   }
 
   async update(payment: Payment): Promise<Payment> {
-    const record = await this.prisma.payment.update({
+    const record = await (this.prisma as any).payment.update({
       where: { id: payment.id },
       data: {
         providerPaymentId: payment.providerPaymentId,
@@ -126,7 +126,7 @@ export class PrismaPaymentRepository implements IPaymentRepository {
   }
 
   async saveWebhook(webhook: PaymentWebhook): Promise<PaymentWebhook> {
-    const record = await this.prisma.paymentWebhook.create({
+    const record = await (this.prisma as any).paymentWebhook.create({
       data: {
         provider: webhook.provider,
         eventId: webhook.eventId,
@@ -143,14 +143,14 @@ export class PrismaPaymentRepository implements IPaymentRepository {
   }
 
   async findWebhookByEventId(provider: string, eventId: string): Promise<PaymentWebhook | null> {
-    const record = await this.prisma.paymentWebhook.findUnique({
+    const record = await (this.prisma as any).paymentWebhook.findUnique({
       where: { provider_eventId: { provider, eventId } },
     });
     return record ? this.mapWebhookToDomain(record) : null;
   }
 
   async updateWebhook(webhook: PaymentWebhook): Promise<PaymentWebhook> {
-    const record = await this.prisma.paymentWebhook.update({
+    const record = await (this.prisma as any).paymentWebhook.update({
       where: { id: webhook.id },
       data: {
         processingStatus: webhook.processingStatus,
