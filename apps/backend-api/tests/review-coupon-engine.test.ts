@@ -4,14 +4,16 @@ import {
   Coupon,
   CouponDiscountCalculator,
   CouponUsage,
+  PartnerRatingCalculator,
+  Review,
+} from '@carbroz/common';
+import type {
   IBookingRepository,
   ICouponRepository,
   ICouponUsageRepository,
   IPartnerRepository,
   IReviewRepository,
   Partner,
-  PartnerRatingCalculator,
-  Review,
 } from '@carbroz/common';
 import { SubmitReviewUseCase } from '../src/modules/review/use-cases/SubmitReviewUseCase.js';
 import { ModerateReviewUseCase } from '../src/modules/review/use-cases/ModerateReviewUseCase.js';
@@ -34,7 +36,6 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     slotStartTime: now,
     slotEndTime: new Date(now.getTime() + 3600000),
     totalPricePaise: 100000,
-    snapshotsJson: {},
     statusHistoryJson: [],
   });
 
@@ -55,16 +56,22 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     async findById(id) { return id === 101 ? dummyBooking : null; },
     async findByPublicId(pubId) { return pubId === dummyBooking.publicId ? dummyBooking : null; },
     async update(b) { return b; },
-    async findPendingExpired() { return []; },
-    async hasOverlappingBooking() { return false; },
+    async listByCustomerId() { return []; },
+    async listByPartnerId() { return []; },
+    async listAll() { return []; },
+    async findConflictingPartnerBooking() { return null; },
+    async findConflictingSlotBooking() { return null; },
+    async findExpiredPendingBookings() { return []; },
   };
 
   const mockPartnerRepo: IPartnerRepository = {
-    async create(p) { return p; },
+    async create(p: any) { return p; },
     async findById(id) { return id === 20 ? dummyPartner : null; },
     async findByPublicId(pubId) { return pubId === dummyPartner.publicId ? dummyPartner : null; },
-    async update(p) { return p; },
+    async update(p: any) { return p; },
     async findByUserId() { return null; },
+    async listPendingVerification() { return []; },
+    async updateVerificationStatus() { return dummyPartner; },
   };
 
   const mockReviewRepo: IReviewRepository = {
@@ -149,7 +156,7 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     const submitUseCase = new SubmitReviewUseCase(mockReviewRepo, mockBookingRepo, ratingCalculator);
 
     const review = await submitUseCase.execute({
-      bookingPublicId: dummyBooking.publicId,
+      bookingPublicId: dummyBooking.publicId!,
       customerUserId: 5,
       rating: 5,
       comment: 'Top quality service!',
@@ -165,14 +172,14 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     const submitUseCase = new SubmitReviewUseCase(mockReviewRepo, mockBookingRepo, ratingCalculator);
 
     await submitUseCase.execute({
-      bookingPublicId: dummyBooking.publicId,
+      bookingPublicId: dummyBooking.publicId!,
       customerUserId: 5,
       rating: 4,
     });
 
     await expect(
       submitUseCase.execute({
-        bookingPublicId: dummyBooking.publicId,
+        bookingPublicId: dummyBooking.publicId!,
         customerUserId: 5,
         rating: 5,
       })
@@ -211,7 +218,7 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     const usage = await applyUseCase.execute({
       code: 'FESTIVE500',
       userId: 5,
-      bookingPublicId: dummyBooking.publicId,
+      bookingPublicId: dummyBooking.publicId!,
     });
 
     expect(usage.discountAmountPaise).toBe(50000);

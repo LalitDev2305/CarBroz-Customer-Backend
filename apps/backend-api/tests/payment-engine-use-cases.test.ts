@@ -8,12 +8,14 @@ import { RazorpayPaymentGatewayProvider } from '../src/providers/payment/Razorpa
 import {
   Booking,
   Invoice,
-  IPaymentRepository,
-  IInvoiceRepository,
-  IPartnerPayoutRepository,
   PartnerPayout,
   Payment,
   PaymentWebhook,
+} from '@carbroz/common';
+import type {
+  IPaymentRepository,
+  IInvoiceRepository,
+  IPartnerPayoutRepository,
   ITransactionProvider,
 } from '@carbroz/common';
 

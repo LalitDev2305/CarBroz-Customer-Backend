@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Coupon, CouponDiscountCalculator, CouponUsage } from '../../src/index.js';
-import { ICouponUsageRepository } from '../../src/domain/coupon/repositories/ICouponUsageRepository.js';
+import type { ICouponUsageRepository } from '../../src/domain/coupon/repositories/ICouponUsageRepository.js';
 
 describe('Phase 19 — Coupon Domain Model & CouponDiscountCalculator', () => {
   const now = new Date('2026-08-05T10:00:00Z');
