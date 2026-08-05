@@ -37,6 +37,13 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     slotEndTime: new Date(now.getTime() + 3600000),
     totalPricePaise: 100000,
     statusHistory: [],
+    snapshots: {
+      address: {
+        fullAddress: 'Koramangala, Bangalore',
+        latitude: 12.9352,
+        longitude: 77.6245,
+      },
+    },
   });
 
   const dummyPartner: Partner = {
@@ -68,6 +75,9 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     async create(p: any) { return p; },
     async findById(id) { return id === 20 ? dummyPartner : null; },
     async findByPublicId(pubId) { return pubId === dummyPartner.publicId ? dummyPartner : null; },
+    async findAll() { return [dummyPartner]; },
+    async save(p) { return p; },
+    async delete() { return true; },
     setUnitOfWork() {},
   };
 
