@@ -20,7 +20,7 @@ export class UpdateLocationPingUseCase {
         const newPing = LocationPing.create(input.latitude, input.longitude, input.heading, input.speed);
         const lastPing = session.currentLocationPing;
         const distanceMovedMeters = lastPing.distanceToMeters(newPing);
-        const timeElapsedMs = session.updatedAt ? new Date().getTime() - session.updatedAt.getTime() : 300000;
+        const timeElapsedMs = session.updatedAt ? new Date().getTime() - session.updatedAt.getTime() : 0;
         let recalculatedEtaMinutes = session.etaMinutes;
         // Recalculate ETA via IMapsProvider only if distance moved > 500m OR time > 3 minutes (180,000 ms)
         if (distanceMovedMeters >= 500 || timeElapsedMs >= 180000 || session.etaMinutes === null) {

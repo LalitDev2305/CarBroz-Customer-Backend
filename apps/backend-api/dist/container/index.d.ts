@@ -77,6 +77,16 @@ import { RegisterDeviceTokenUseCase } from '../modules/notification/use-cases/Re
 import { DeactivateDeviceTokenUseCase } from '../modules/notification/use-cases/DeactivateDeviceTokenUseCase.js';
 import { SendNotificationUseCase } from '../modules/notification/use-cases/SendNotificationUseCase.js';
 import { ListNotificationHistoryUseCase } from '../modules/notification/use-cases/ListNotificationHistoryUseCase.js';
+import { PartnerRatingCalculator, CouponDiscountCalculator } from '@carbroz/common';
+import { SubmitReviewUseCase } from '../modules/review/use-cases/SubmitReviewUseCase.js';
+import { ModerateReviewUseCase } from '../modules/review/use-cases/ModerateReviewUseCase.js';
+import { GetPartnerReviewsUseCase } from '../modules/review/use-cases/GetPartnerReviewsUseCase.js';
+import { CreateCouponUseCase } from '../modules/coupon/use-cases/CreateCouponUseCase.js';
+import { UpdateCouponUseCase } from '../modules/coupon/use-cases/UpdateCouponUseCase.js';
+import { ArchiveCouponUseCase } from '../modules/coupon/use-cases/ArchiveCouponUseCase.js';
+import { ValidateCouponUseCase } from '../modules/coupon/use-cases/ValidateCouponUseCase.js';
+import { ApplyCouponUseCase } from '../modules/coupon/use-cases/ApplyCouponUseCase.js';
+import { ListCouponsUseCase } from '../modules/coupon/use-cases/ListCouponsUseCase.js';
 export interface Cradle {
     prismaProvider: PrismaProvider;
     databaseProvider: PrismaDatabaseProvider;
@@ -195,5 +205,19 @@ export interface Cradle {
     deactivateDeviceTokenUseCase: DeactivateDeviceTokenUseCase;
     sendNotificationUseCase: SendNotificationUseCase;
     listNotificationHistoryUseCase: ListNotificationHistoryUseCase;
+    reviewRepository: import('@carbroz/common').IReviewRepository;
+    couponRepository: import('@carbroz/common').ICouponRepository;
+    couponUsageRepository: import('@carbroz/common').ICouponUsageRepository;
+    partnerRatingCalculator: PartnerRatingCalculator;
+    couponDiscountCalculator: CouponDiscountCalculator;
+    submitReviewUseCase: SubmitReviewUseCase;
+    moderateReviewUseCase: ModerateReviewUseCase;
+    getPartnerReviewsUseCase: GetPartnerReviewsUseCase;
+    createCouponUseCase: CreateCouponUseCase;
+    updateCouponUseCase: UpdateCouponUseCase;
+    archiveCouponUseCase: ArchiveCouponUseCase;
+    validateCouponUseCase: ValidateCouponUseCase;
+    applyCouponUseCase: ApplyCouponUseCase;
+    listCouponsUseCase: ListCouponsUseCase;
 }
 export declare function getContainer(): AwilixContainer<Cradle>;

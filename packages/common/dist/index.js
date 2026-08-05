@@ -120,4 +120,16 @@ export * from './providers/IPushProvider.js';
 export * from './providers/ISmsProvider.js';
 export * from './providers/IEmailProvider.js';
 export * from './providers/INotificationProvider.js';
+// Phase 19 Customer Reviews, Partner Ratings & Promo Coupons Engine
+export * from './domain/review/ReviewStatus.js';
+export * from './domain/review/Review.js';
+export * from './domain/review/repositories/IReviewRepository.js';
+export * from './domain/review/services/PartnerRatingCalculator.js';
+export * from './domain/coupon/DiscountType.js';
+export * from './domain/coupon/Coupon.js';
+export * from './domain/coupon/CouponUsage.js';
+export * from './domain/coupon/repositories/ICouponRepository.js';
+export * from './domain/coupon/repositories/ICouponUsageRepository.js';
+export * from './domain/coupon/services/CouponDiscountCalculator.js';
+export * from './domain/events/ReviewEvents.js';
 //# sourceMappingURL=index.js.map

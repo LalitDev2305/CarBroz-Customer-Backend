@@ -134,6 +134,23 @@ import { DeactivateDeviceTokenUseCase } from '../modules/notification/use-cases/
 import { SendNotificationUseCase } from '../modules/notification/use-cases/SendNotificationUseCase.js';
 import { ListNotificationHistoryUseCase } from '../modules/notification/use-cases/ListNotificationHistoryUseCase.js';
 
+// Phase 19 Customer Reviews, Partner Ratings & Promo Coupon Engine
+import {
+  PrismaReviewRepository,
+  PrismaCouponRepository,
+  PrismaCouponUsageRepository,
+} from '@carbroz/database';
+import { PartnerRatingCalculator, CouponDiscountCalculator } from '@carbroz/common';
+import { SubmitReviewUseCase } from '../modules/review/use-cases/SubmitReviewUseCase.js';
+import { ModerateReviewUseCase } from '../modules/review/use-cases/ModerateReviewUseCase.js';
+import { GetPartnerReviewsUseCase } from '../modules/review/use-cases/GetPartnerReviewsUseCase.js';
+import { CreateCouponUseCase } from '../modules/coupon/use-cases/CreateCouponUseCase.js';
+import { UpdateCouponUseCase } from '../modules/coupon/use-cases/UpdateCouponUseCase.js';
+import { ArchiveCouponUseCase } from '../modules/coupon/use-cases/ArchiveCouponUseCase.js';
+import { ValidateCouponUseCase } from '../modules/coupon/use-cases/ValidateCouponUseCase.js';
+import { ApplyCouponUseCase } from '../modules/coupon/use-cases/ApplyCouponUseCase.js';
+import { ListCouponsUseCase } from '../modules/coupon/use-cases/ListCouponsUseCase.js';
+
 export interface Cradle {
   prismaProvider: PrismaProvider;
   databaseProvider: PrismaDatabaseProvider;
@@ -268,6 +285,22 @@ export interface Cradle {
   deactivateDeviceTokenUseCase: DeactivateDeviceTokenUseCase;
   sendNotificationUseCase: SendNotificationUseCase;
   listNotificationHistoryUseCase: ListNotificationHistoryUseCase;
+
+  // Phase 19
+  reviewRepository: import('@carbroz/common').IReviewRepository;
+  couponRepository: import('@carbroz/common').ICouponRepository;
+  couponUsageRepository: import('@carbroz/common').ICouponUsageRepository;
+  partnerRatingCalculator: PartnerRatingCalculator;
+  couponDiscountCalculator: CouponDiscountCalculator;
+  submitReviewUseCase: SubmitReviewUseCase;
+  moderateReviewUseCase: ModerateReviewUseCase;
+  getPartnerReviewsUseCase: GetPartnerReviewsUseCase;
+  createCouponUseCase: CreateCouponUseCase;
+  updateCouponUseCase: UpdateCouponUseCase;
+  archiveCouponUseCase: ArchiveCouponUseCase;
+  validateCouponUseCase: ValidateCouponUseCase;
+  applyCouponUseCase: ApplyCouponUseCase;
+  listCouponsUseCase: ListCouponsUseCase;
 }
 
 let isRegistered = false;
@@ -423,6 +456,22 @@ export function getContainer(): AwilixContainer<Cradle> {
       deactivateDeviceTokenUseCase: asClass(DeactivateDeviceTokenUseCase).classic().scoped(),
       sendNotificationUseCase: asClass(SendNotificationUseCase).classic().scoped(),
       listNotificationHistoryUseCase: asClass(ListNotificationHistoryUseCase).classic().scoped(),
+
+      // Phase 19
+      reviewRepository: asClass(PrismaReviewRepository).classic().singleton(),
+      couponRepository: asClass(PrismaCouponRepository).classic().singleton(),
+      couponUsageRepository: asClass(PrismaCouponUsageRepository).classic().singleton(),
+      partnerRatingCalculator: asClass(PartnerRatingCalculator).classic().scoped(),
+      couponDiscountCalculator: asClass(CouponDiscountCalculator).classic().scoped(),
+      submitReviewUseCase: asClass(SubmitReviewUseCase).classic().scoped(),
+      moderateReviewUseCase: asClass(ModerateReviewUseCase).classic().scoped(),
+      getPartnerReviewsUseCase: asClass(GetPartnerReviewsUseCase).classic().scoped(),
+      createCouponUseCase: asClass(CreateCouponUseCase).classic().scoped(),
+      updateCouponUseCase: asClass(UpdateCouponUseCase).classic().scoped(),
+      archiveCouponUseCase: asClass(ArchiveCouponUseCase).classic().scoped(),
+      validateCouponUseCase: asClass(ValidateCouponUseCase).classic().scoped(),
+      applyCouponUseCase: asClass(ApplyCouponUseCase).classic().scoped(),
+      listCouponsUseCase: asClass(ListCouponsUseCase).classic().scoped(),
     });
     isRegistered = true;
   }
