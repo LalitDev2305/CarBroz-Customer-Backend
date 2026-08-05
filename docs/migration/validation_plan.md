@@ -1,20 +1,17 @@
-# Milestone 4 — Validation & Verification Plan
+# Milestone 5 — Validation Plan
 
-Verification gates for Milestone 4 Engagement Domains.
+Validation suite and verification protocols for Milestone 5 (Legacy Pruning & Final Stabilization).
 
-## 1. Automated Gate Verification Criteria
+## 1. Automated Validation Protocols
 
-| Quality Gate | Command | Success Criteria |
-|---|---|---|
-| Workspace Build | `pnpm -r build` | 35/35 workspace projects compile cleanly with 0 TypeScript errors |
-| Workspace Tests | `pnpm test` | 100% pass rate across all unit and integration tests |
-| Workspace Linter | `pnpm lint` | 0 ESLint errors or boundary violations |
+1. **Compilation Suite**: `pnpm -r build` (All 35 workspace projects must build cleanly with zero TS errors).
+2. **Vitest Test Suite**: `pnpm test` (All 41+ test suites must pass 100% green).
+3. **Linter Suite**: `pnpm lint` (Zero ESLint errors across the workspace).
 
 ---
 
-## 2. Checklists
+## 2. Architectural Verification Protocols
 
-- [ ] All 7 engagement domain packages registered in `pnpm-workspace.yaml`.
-- [ ] Awilix container module registrations complete in `apps/backend-api/src/container/`.
-- [ ] Zero Prisma schema changes.
-- [ ] Zero breaking changes to public barrel exports.
+1. **Clean Architecture Layering**: `apps` -> `domains` -> `platform` -> `shared`.
+2. **Zero Schema Mutations**: Confirm `prisma/schema.prisma` is untouched.
+3. **Public Barrel Boundary Control**: All cross-domain calls must route via `@carbroz/domain-<name>`.

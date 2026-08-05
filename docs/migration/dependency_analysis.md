@@ -1,31 +1,31 @@
-# Milestone 4 — Dependency & Coupling Analysis
+# Milestone 5 — Dependency & Layering Analysis
 
-Dependency directional mapping for Engagement Domains.
+Comprehensive dependency architecture audit for Milestone 5 (Legacy Pruning & Final Stabilization).
+
+## 1. 4-Pillar Layering Matrix
 
 ```mermaid
 graph TD
-    Apps["apps/backend-api"] --> Notification["domains/notification"]
-    Apps --> Review["domains/review"]
-    Apps --> Coupon["domains/coupon"]
-    Apps --> Dispute["domains/dispute"]
-    Apps --> SduiRegistry["domains/sdui-registry"]
-    Apps --> Audit["domains/audit"]
-    Apps --> Config["domains/config"]
-
-    Notification --> Platform["platform/*"]
-    Review --> Platform
-    Coupon --> Platform
-    Dispute --> Platform
-    SduiRegistry --> Platform
-    Audit --> Platform
-    Config --> Platform
-
-    Platform --> SharedKernel["shared/kernel"]
-    Platform --> SharedUiSdk["shared/ui-sdk"]
+    Apps["Apps Layer (apps/backend-api)"] --> Domains["Domains Layer (domains/*)"]
+    Apps --> Platform["Platform Layer (platform/*)"]
+    Apps --> Shared["Shared Layer (shared/*)"]
+    Domains --> Platform
+    Domains --> Shared
+    Platform --> Shared
 ```
 
-## Directional Coupling Constraints
+---
 
-1. No domain package in `domains/` may import from `apps/`.
-2. Engagement domain packages must interact with each other via public barrels (`@carbroz/domain-notification`, etc.) or domain events.
-3. No direct circular imports between `review`, `coupon`, and `dispute`.
+## 2. Layering Rule Verification
+
+1. **`apps/`**: Depends on `domains/`, `platform/`, `shared/`. No domain imports from `apps/`.
+2. **`domains/`**: Depends on `platform/` and `shared/`. Cross-domain imports are restricted strictly to public barrels (`@carbroz/domain-<name>`).
+3. **`platform/`**: Depends on `shared/`. Cannot import from `domains/` or `apps/`.
+4. **`shared/`**: Base foundation (`kernel`, `ui-sdk`). Zero dependencies on `domains/`, `platform/`, or `apps/`.
+
+---
+
+## 3. Deep Imports & Public Barrel Auditing
+
+- **Rule**: All imports into domain packages must use `@carbroz/domain-<name>` public barrels. No relative path traversing (`../../domains/foo/src/...`).
+- **Audit Result**: Clean. All imports resolve via workspace package exports in `package.json` (`dist/public/index.js`).
