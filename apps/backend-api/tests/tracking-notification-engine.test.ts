@@ -45,6 +45,9 @@ describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
     slotEndTime: new Date(Date.now() + 3600000),
     totalPricePaise: 150000,
     snapshots: {
+      service: { serviceId: 1, name: 'Basic Wash', basePricePaise: 150000, estimatedDurationMinutes: 60 },
+      addons: [],
+      pricing: { basePricePaise: 150000, addonsTotalPaise: 0, vehicleMultiplier: 1.0, subtotalPaise: 150000, taxesPaise: 27000, totalPricePaise: 177000 },
       address: {
         addressLine1: 'Koramangala',
         city: 'Bangalore',
@@ -54,6 +57,7 @@ describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
         latitude: 12.9352,
         longitude: 77.6245,
       },
+      vehicle: { make: 'Hyundai', model: 'i20', year: 2022, registrationNumber: 'KA01AB1234', fuelType: 'PETROL' },
     },
   });
 

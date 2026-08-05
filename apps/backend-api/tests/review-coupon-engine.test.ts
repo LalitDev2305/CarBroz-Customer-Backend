@@ -38,6 +38,9 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     totalPricePaise: 100000,
     statusHistory: [],
     snapshots: {
+      service: { serviceId: 3, name: 'Full Service Wash', basePricePaise: 100000, estimatedDurationMinutes: 60 },
+      addons: [],
+      pricing: { basePricePaise: 100000, addonsTotalPaise: 0, vehicleMultiplier: 1.0, subtotalPaise: 100000, taxesPaise: 18000, totalPricePaise: 118000 },
       address: {
         addressLine1: 'Koramangala',
         city: 'Bangalore',
@@ -47,6 +50,7 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
         latitude: 12.9352,
         longitude: 77.6245,
       },
+      vehicle: { make: 'Hyundai', model: 'i20', year: 2022, registrationNumber: 'KA01AB1234', fuelType: 'PETROL' },
     },
   });
 
