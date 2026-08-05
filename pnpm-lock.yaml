@@ -641,6 +641,9 @@ importers:
       '@carbroz/common':
         specifier: workspace:*
         version: link:../../packages/common
+      '@carbroz/platform-storage':
+        specifier: workspace:*
+        version: link:../../platform/storage
       '@carbroz/shared-kernel':
         specifier: workspace:*
         version: link:../../shared/kernel
