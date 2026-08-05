@@ -39,7 +39,11 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     statusHistory: [],
     snapshots: {
       address: {
-        fullAddress: 'Koramangala, Bangalore',
+        addressLine1: 'Koramangala',
+        city: 'Bangalore',
+        state: 'Karnataka',
+        postalCode: '560034',
+        country: 'India',
         latitude: 12.9352,
         longitude: 77.6245,
       },
