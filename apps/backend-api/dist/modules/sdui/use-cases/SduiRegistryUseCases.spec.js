@@ -1,8 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GetSduiScreenUseCase } from './GetSduiScreenUseCase.js';
-import { RegisterSduiComponentUseCase } from './RegisterSduiComponentUseCase.js';
+import { CreateSduiComponentUseCase } from './CreateSduiComponentUseCase.js';
+import { CreateSduiSubcomponentUseCase } from './CreateSduiSubcomponentUseCase.js';
+import { CreateSduiChildUseCase } from './CreateSduiChildUseCase.js';
+import { CreateSduiChildrenDataUseCase } from './CreateSduiChildrenDataUseCase.js';
 import { UpdateSduiScreenLayoutUseCase } from './UpdateSduiScreenLayoutUseCase.js';
-import { SduiScreenEntity, SduiComponentRegistryEntity, ForbiddenError, NotFoundError } from '@carbroz/common';
+import { SduiScreenEntity, SduiComponentEntity, SduiSubcomponentEntity, SduiChildEntity, SduiChildrenDataEntity, ForbiddenError, NotFoundError } from '@carbroz/common';
 import { ScreenFactory, BaseScreenBuilder } from '@carbroz/ui-sdk';
 class MockLoginBuilder extends BaseScreenBuilder {
     screenId = 'auth_login';
@@ -22,6 +25,10 @@ describe('SDUI Registry UseCases', () => {
         repository = {
             findPublishedScreen: vi.fn(),
             upsertScreen: vi.fn(),
+            createComponent: vi.fn(),
+            createSubcomponent: vi.fn(),
+            createChild: vi.fn(),
+            createChildrenData: vi.fn(),
             registerComponent: vi.fn(),
         };
         factory = new ScreenFactory();
@@ -41,8 +48,9 @@ describe('SDUI Registry UseCases', () => {
                     templateType: 'dynamic_form',
                     template: { id: 'main', type: 'dynamic' }
                 },
-                version: 1,
-                isPublished: true,
+                versionNumber: 1,
+                status: 'PUBLISHED',
+                lockVersion: 1,
                 createdAt: new Date(),
                 updatedAt: new Date()
             });
@@ -65,10 +73,10 @@ describe('SDUI Registry UseCases', () => {
                 .rejects.toThrow(NotFoundError);
         });
     });
-    describe('RegisterSduiComponentUseCase', () => {
-        it('should allow admin to register component', async () => {
-            const useCase = new RegisterSduiComponentUseCase(repository);
-            const mockComponent = new SduiComponentRegistryEntity({
+    describe('CreateSduiComponentUseCase', () => {
+        it('should allow admin to create component', async () => {
+            const useCase = new CreateSduiComponentUseCase(repository);
+            const mockComponent = new SduiComponentEntity({
                 id: 10,
                 publicId: 'uuid-10',
                 name: 'banner_component',
@@ -77,20 +85,87 @@ describe('SDUI Registry UseCases', () => {
                 createdAt: new Date(),
                 updatedAt: new Date()
             });
-            repository.registerComponent.mockResolvedValue(mockComponent);
+            repository.createComponent.mockResolvedValue(mockComponent);
             const result = await useCase.execute({
                 context: { authenticatedUser: { id: 1, isAdmin: true } },
                 data: { name: 'banner_component', componentType: 'banner', schemaJson: { properties: ['imageUrl'] } }
             });
             expect(result.name).toBe('banner_component');
-            expect(repository.registerComponent).toHaveBeenCalled();
+            expect(result.nodeLevel).toBe('COMPONENT');
+            expect(repository.createComponent).toHaveBeenCalled();
         });
         it('should throw ForbiddenError if user is not admin', async () => {
-            const useCase = new RegisterSduiComponentUseCase(repository);
+            const useCase = new CreateSduiComponentUseCase(repository);
             await expect(useCase.execute({
                 context: { authenticatedUser: { id: 2, isAdmin: false } },
                 data: { name: 'banner', componentType: 'banner', schemaJson: {} }
             })).rejects.toThrow(ForbiddenError);
+        });
+    });
+    describe('CreateSduiSubcomponentUseCase', () => {
+        it('should allow admin to create subcomponent with nodeLevel SUBCOMPONENT', async () => {
+            const useCase = new CreateSduiSubcomponentUseCase(repository);
+            const mockSubcomponent = new SduiSubcomponentEntity({
+                id: 11,
+                publicId: 'uuid-11',
+                name: 'card_subcomponent',
+                componentType: 'card_container',
+                schemaJson: {},
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+            repository.createSubcomponent.mockResolvedValue(mockSubcomponent);
+            const result = await useCase.execute({
+                context: { authenticatedUser: { id: 1, isAdmin: true } },
+                data: { name: 'card_subcomponent', componentType: 'card_container', schemaJson: {} }
+            });
+            expect(result.name).toBe('card_subcomponent');
+            expect(result.nodeLevel).toBe('SUBCOMPONENT');
+            expect(repository.createSubcomponent).toHaveBeenCalledWith('card_subcomponent', 'card_container', {}, undefined, undefined);
+        });
+    });
+    describe('CreateSduiChildUseCase', () => {
+        it('should allow admin to create child with nodeLevel CHILD', async () => {
+            const useCase = new CreateSduiChildUseCase(repository);
+            const mockChild = new SduiChildEntity({
+                id: 12,
+                publicId: 'uuid-12',
+                name: 'button_group_child',
+                componentType: 'button_group',
+                schemaJson: {},
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+            repository.createChild.mockResolvedValue(mockChild);
+            const result = await useCase.execute({
+                context: { authenticatedUser: { id: 1, isAdmin: true } },
+                data: { name: 'button_group_child', componentType: 'button_group', schemaJson: {} }
+            });
+            expect(result.name).toBe('button_group_child');
+            expect(result.nodeLevel).toBe('CHILD');
+            expect(repository.createChild).toHaveBeenCalledWith('button_group_child', 'button_group', {}, undefined, undefined);
+        });
+    });
+    describe('CreateSduiChildrenDataUseCase', () => {
+        it('should allow admin to create childrenData with nodeLevel CHILDREN_DATA', async () => {
+            const useCase = new CreateSduiChildrenDataUseCase(repository);
+            const mockChildrenData = new SduiChildrenDataEntity({
+                id: 13,
+                publicId: 'uuid-13',
+                name: 'primary_action_btn',
+                componentType: 'atom_button',
+                schemaJson: {},
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+            repository.createChildrenData.mockResolvedValue(mockChildrenData);
+            const result = await useCase.execute({
+                context: { authenticatedUser: { id: 1, isAdmin: true } },
+                data: { name: 'primary_action_btn', componentType: 'atom_button', schemaJson: {} }
+            });
+            expect(result.name).toBe('primary_action_btn');
+            expect(result.nodeLevel).toBe('CHILDREN_DATA');
+            expect(repository.createChildrenData).toHaveBeenCalledWith('primary_action_btn', 'atom_button', {}, undefined, undefined);
         });
     });
     describe('UpdateSduiScreenLayoutUseCase', () => {
@@ -120,8 +195,9 @@ describe('SDUI Registry UseCases', () => {
                 screenId: 'auth_login',
                 targetApp: 'CUSTOMER',
                 layoutJson: validLayout,
-                version: 1,
-                isPublished: true,
+                versionNumber: 1,
+                status: 'PUBLISHED',
+                lockVersion: 1,
                 createdAt: new Date(),
                 updatedAt: new Date()
             });

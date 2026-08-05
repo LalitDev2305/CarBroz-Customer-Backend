@@ -265,15 +265,9 @@ importers:
       '@carbroz/logger':
         specifier: workspace:*
         version: link:../../packages/logger
-      '@carbroz/types':
-        specifier: workspace:*
-        version: link:../../packages/types
       '@carbroz/ui-sdk':
         specifier: workspace:*
         version: link:../../packages/ui-sdk
-      '@carbroz/validation':
-        specifier: workspace:*
-        version: link:../../packages/validation
       '@fastify/awilix':
         specifier: ^8.2.0
         version: 8.2.0(awilix@13.0.5)(fastify@5.9.0)
@@ -352,10 +346,6 @@ importers:
         version: 7.1.1
 
   packages/common:
-    dependencies:
-      '@carbroz/types':
-        specifier: workspace:*
-        version: link:../types
     devDependencies:
       '@types/node':
         specifier: ^26.1.0
@@ -413,8 +403,6 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/types: {}
-
   packages/ui-sdk:
     dependencies:
       zod:
@@ -427,12 +415,6 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
-
-  packages/validation:
-    dependencies:
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
 
 packages:
 

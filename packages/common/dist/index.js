@@ -68,9 +68,56 @@ export * from './domain/ServiceAddon.js';
 export * from './domain/PricingTier.js';
 export * from './domain/repositories/ICatalogRepository.js';
 export * from './domain/repositories/IPricingRepository.js';
-// Phase 13 SDUI Registry
-export * from './domain/SduiScreen.js';
-export * from './domain/SduiTemplate.js';
-export * from './domain/SduiComponent.js';
-export * from './domain/repositories/ISduiRegistryRepository.js';
+// Phase 13 SDUI Registry & Bounded Context
+export * from './domain/sdui/SduiScreen.js';
+export * from './domain/sdui/SduiTemplate.js';
+export * from './domain/sdui/SduiNodeLevel.js';
+export * from './domain/sdui/SduiNodeStatus.js';
+export * from './domain/sdui/SduiComponent.js';
+export * from './domain/sdui/SduiSubcomponent.js';
+export * from './domain/sdui/SduiChild.js';
+export * from './domain/sdui/SduiChildrenData.js';
+export * from './domain/sdui/repositories/ISduiRegistryRepository.js';
+// Phase 16 Vehicle & Booking Engine
+export * from './domain/vehicle/VehicleStatus.js';
+export * from './domain/vehicle/Vehicle.js';
+export * from './domain/vehicle/repositories/IVehicleRepository.js';
+export * from './domain/booking/BookingStatus.js';
+export * from './domain/booking/BookingStatusHistoryItem.js';
+export * from './domain/booking/BookingSnapshots.js';
+export * from './domain/booking/Booking.js';
+export * from './domain/booking/repositories/IBookingRepository.js';
+// Phase 17 Payment, Invoicing & Payout Engine
+export * from './domain/value-objects/Money.js';
+export * from './domain/config/FinancialConfiguration.js';
+export * from './domain/services/TaxCalculator.js';
+export * from './domain/payment/PaymentStatus.js';
+export * from './domain/payment/PaymentMethod.js';
+export * from './domain/payment/Payment.js';
+export * from './domain/payment/PaymentWebhook.js';
+export * from './domain/payment/repositories/IPaymentRepository.js';
+export * from './domain/invoice/InvoiceStatus.js';
+export * from './domain/invoice/Invoice.js';
+export * from './domain/invoice/repositories/IInvoiceRepository.js';
+export * from './domain/payout/PayoutStatus.js';
+export * from './domain/payout/PartnerPayout.js';
+export * from './domain/payout/repositories/IPartnerPayoutRepository.js';
+export * from './providers/IPaymentGatewayProvider.js';
+// Phase 18 Real-Time Tracking & Multi-Channel Notification Engine
+export * from './domain/location/TrackingStatus.js';
+export * from './domain/location/LocationPing.js';
+export * from './domain/location/TrackingSession.js';
+export * from './domain/location/repositories/ITrackingSessionRepository.js';
+export * from './domain/notification/NotificationChannel.js';
+export * from './domain/notification/NotificationStatus.js';
+export * from './domain/notification/NotificationPayload.js';
+export * from './domain/notification/NotificationLog.js';
+export * from './domain/notification/DeviceToken.js';
+export * from './domain/notification/repositories/INotificationLogRepository.js';
+export * from './domain/notification/repositories/IDeviceTokenRepository.js';
+export * from './domain/notification/services/NotificationService.js';
+export * from './providers/IPushProvider.js';
+export * from './providers/ISmsProvider.js';
+export * from './providers/IEmailProvider.js';
+export * from './providers/INotificationProvider.js';
 //# sourceMappingURL=index.js.map

@@ -23,3 +23,19 @@ export * from './repositories/PrismaPricingRepository.js';
 
 // Phase 13
 export * from './repositories/PrismaSduiRegistryRepository.js';
+
+// Phase 16
+export * from './repositories/PrismaVehicleRepository.js';
+export * from './repositories/PrismaBookingRepository.js';
+
+// Phase 17
+export * from './repositories/PrismaPaymentRepository.js';
+export * from './repositories/PrismaInvoiceRepository.js';
+export * from './repositories/PrismaPartnerPayoutRepository.js';
+
+// Phase 18
+export * from './repositories/PrismaTrackingSessionRepository.js';
+export * from './repositories/PrismaNotificationLogRepository.js';
+export * from './repositories/PrismaDeviceTokenRepository.js';
+
+

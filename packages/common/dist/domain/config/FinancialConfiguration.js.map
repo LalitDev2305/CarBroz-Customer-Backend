@@ -1,0 +1,1 @@
+{"version":3,"file":"FinancialConfiguration.js","sourceRoot":"","sources":["../../../src/domain/config/FinancialConfiguration.ts"],"names":[],"mappings":"AASA,MAAM,CAAC,MAAM,wBAAwB,GAA2B;IAC9D,eAAe,EAAE,CAAC;IAClB,eAAe,EAAE,CAAC;IAClB,eAAe,EAAE,EAAE;IACnB,yBAAyB,EAAE,EAAE;IAC7B,cAAc,EAAE,CAAC;IACjB,WAAW,EAAE,iBAAiB;CAC/B,CAAC"}

@@ -7,9 +7,6 @@
   "scripts": {
     "build": "tsc"
   },
-  "dependencies": {
-    "@carbroz/types": "workspace:*"
-  },
   "devDependencies": {
     "@types/node": "^26.1.0"
   }
