@@ -1,80 +1,31 @@
-# Core Business Domains Dependency Analysis — Milestone 2
+# Milestone 4 — Dependency & Coupling Analysis
 
-Detailed dependency mapping and coupling graph for Milestone 2 Core Domains.
-
-## Domain Dependency Graph
+Dependency directional mapping for Engagement Domains.
 
 ```mermaid
 graph TD
-    subgraph Delivery Layer [apps/backend-api]
-        Controllers[HTTP Controllers / Routes]
-    end
+    Apps["apps/backend-api"] --> Notification["domains/notification"]
+    Apps --> Review["domains/review"]
+    Apps --> Coupon["domains/coupon"]
+    Apps --> Dispute["domains/dispute"]
+    Apps --> SduiRegistry["domains/sdui-registry"]
+    Apps --> Audit["domains/audit"]
+    Apps --> Config["domains/config"]
 
-    subgraph Core Domains [domains/*]
-        Identity[domains/identity]
-        CustomerProfile[domains/customer-profile]
-        Address[domains/address]
-        PartnerProfile[domains/partner-profile]
-        PartnerKYC[domains/partner-kyc]
-        Catalog[domains/catalog]
-        Pricing[domains/pricing]
-        Garage[domains/garage]
-    end
+    Notification --> Platform["platform/*"]
+    Review --> Platform
+    Coupon --> Platform
+    Dispute --> Platform
+    SduiRegistry --> Platform
+    Audit --> Platform
+    Config --> Platform
 
-    subgraph Technical Platform [platform/*]
-        DB[platform/database]
-        Cache[platform/cache]
-        EventBus[platform/event-bus]
-        Storage[platform/storage]
-    end
-
-    subgraph Shared Kernel [shared/*]
-        Kernel[shared/kernel]
-        UISDK[shared/ui-sdk]
-    end
-
-    Controllers --> Identity
-    Controllers --> CustomerProfile
-    Controllers --> Address
-    Controllers --> PartnerProfile
-    Controllers --> PartnerKYC
-    Controllers --> Catalog
-    Controllers --> Pricing
-    Controllers --> Garage
-
-    Identity --> DB
-    Identity --> Kernel
-    Identity --> UISDK
-
-    CustomerProfile --> DB
-    CustomerProfile --> Kernel
-
-    Address --> DB
-    Address --> Kernel
-
-    PartnerProfile --> DB
-    PartnerProfile --> Kernel
-
-    PartnerKYC --> DB
-    PartnerKYC --> Storage
-    PartnerKYC --> Kernel
-
-    Catalog --> DB
-    Catalog --> Kernel
-
-    Pricing --> DB
-    Pricing --> Kernel
-
-    Garage --> DB
-    Garage --> Kernel
+    Platform --> SharedKernel["shared/kernel"]
+    Platform --> SharedUiSdk["shared/ui-sdk"]
 ```
 
----
+## Directional Coupling Constraints
 
-## Inter-Domain Dependency Rules & Directives
-
-1. **Strict Encapsulation**: Domains must import ONLY from another domain's `public/index.ts`. Deep imports into internal folders (`domain/`, `application/`, `infrastructure/`) across domain boundaries are strictly prohibited.
-2. **Unidirectional Dependency Flow**:
-   - `apps/` → `domains/` → `platform/` → `shared/`
-   - Zero upward dependencies from `shared/` or `platform/` to `domains/` or `apps/`.
-3. **DI Auto-Registration**: Each domain registers its dependencies (repositories, use cases) via its own Awilix DI module file (e.g. `identity.module.ts`).
+1. No domain package in `domains/` may import from `apps/`.
+2. Engagement domain packages must interact with each other via public barrels (`@carbroz/domain-notification`, etc.) or domain events.
+3. No direct circular imports between `review`, `coupon`, and `dispute`.
