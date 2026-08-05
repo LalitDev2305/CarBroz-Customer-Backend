@@ -163,6 +163,27 @@ import { ResolveDisputeUseCase } from '../modules/dispute/use-cases/ResolveDispu
 import { GetDisputeUseCase } from '../modules/dispute/use-cases/GetDisputeUseCase.js';
 import { ListDisputesUseCase } from '../modules/dispute/use-cases/ListDisputesUseCase.js';
 
+// Phase 22 Multi-Tenant Corporate Accounts, Fleet Management & B2B Billing Platform
+import {
+  PrismaCorporateAccountRepository,
+  PrismaCorporateMemberRepository,
+  PrismaCorporateFleetVehicleRepository,
+  PrismaCorporateCreditLedgerRepository,
+  PrismaCorporateInvoiceRepository,
+} from '@carbroz/database';
+import { RegisterCorporateAccountUseCase } from '../modules/corporate/use-cases/RegisterCorporateAccountUseCase.js';
+import { ApproveCorporateAccountUseCase } from '../modules/corporate/use-cases/ApproveCorporateAccountUseCase.js';
+import { AdjustCreditLimitUseCase } from '../modules/corporate/use-cases/AdjustCreditLimitUseCase.js';
+import { AddCorporateMemberUseCase } from '../modules/corporate/use-cases/AddCorporateMemberUseCase.js';
+import { RemoveCorporateMemberUseCase } from '../modules/corporate/use-cases/RemoveCorporateMemberUseCase.js';
+import { EnrollFleetVehicleUseCase } from '../modules/corporate/use-cases/EnrollFleetVehicleUseCase.js';
+import { RemoveFleetVehicleUseCase } from '../modules/corporate/use-cases/RemoveFleetVehicleUseCase.js';
+import { ValidateCorporateBookingUseCase } from '../modules/corporate/use-cases/ValidateCorporateBookingUseCase.js';
+import { GenerateCorporateInvoiceUseCase } from '../modules/corporate/use-cases/GenerateCorporateInvoiceUseCase.js';
+import { ReconcileCorporatePaymentUseCase } from '../modules/corporate/use-cases/ReconcileCorporatePaymentUseCase.js';
+import { CorporateController } from '../modules/corporate/controllers/CorporateController.js';
+import { AdminCorporateController } from '../modules/corporate/controllers/AdminCorporateController.js';
+
 export interface Cradle {
   prismaProvider: PrismaProvider;
   databaseProvider: PrismaDatabaseProvider;
@@ -325,6 +346,25 @@ export interface Cradle {
   resolveDisputeUseCase: ResolveDisputeUseCase;
   getDisputeUseCase: GetDisputeUseCase;
   listDisputesUseCase: ListDisputesUseCase;
+
+  // Phase 22
+  corporateAccountRepo: import('@carbroz/common').ICorporateAccountRepository;
+  corporateMemberRepo: import('@carbroz/common').ICorporateMemberRepository;
+  fleetVehicleRepo: import('@carbroz/common').ICorporateFleetVehicleRepository;
+  creditLedgerRepo: import('@carbroz/common').ICorporateCreditLedgerRepository;
+  corporateInvoiceRepo: import('@carbroz/common').ICorporateInvoiceRepository;
+  registerAccountUseCase: RegisterCorporateAccountUseCase;
+  approveAccountUseCase: ApproveCorporateAccountUseCase;
+  adjustCreditLimitUseCase: AdjustCreditLimitUseCase;
+  addMemberUseCase: AddCorporateMemberUseCase;
+  removeMemberUseCase: RemoveCorporateMemberUseCase;
+  enrollFleetVehicleUseCase: EnrollFleetVehicleUseCase;
+  removeFleetVehicleUseCase: RemoveFleetVehicleUseCase;
+  validateCorporateBookingUseCase: ValidateCorporateBookingUseCase;
+  generateCorporateInvoiceUseCase: GenerateCorporateInvoiceUseCase;
+  reconcilePaymentUseCase: ReconcileCorporatePaymentUseCase;
+  corporateController: CorporateController;
+  adminCorporateController: AdminCorporateController;
 }
 
 let isRegistered = false;
@@ -508,6 +548,25 @@ export function getContainer(): AwilixContainer<Cradle> {
       resolveDisputeUseCase: asClass(ResolveDisputeUseCase).classic().scoped(),
       getDisputeUseCase: asClass(GetDisputeUseCase).classic().scoped(),
       listDisputesUseCase: asClass(ListDisputesUseCase).classic().scoped(),
+
+      // Phase 22
+      corporateAccountRepo: asClass(PrismaCorporateAccountRepository).classic().singleton(),
+      corporateMemberRepo: asClass(PrismaCorporateMemberRepository).classic().singleton(),
+      fleetVehicleRepo: asClass(PrismaCorporateFleetVehicleRepository).classic().singleton(),
+      creditLedgerRepo: asClass(PrismaCorporateCreditLedgerRepository).classic().singleton(),
+      corporateInvoiceRepo: asClass(PrismaCorporateInvoiceRepository).classic().singleton(),
+      registerAccountUseCase: asClass(RegisterCorporateAccountUseCase).classic().scoped(),
+      approveAccountUseCase: asClass(ApproveCorporateAccountUseCase).classic().scoped(),
+      adjustCreditLimitUseCase: asClass(AdjustCreditLimitUseCase).classic().scoped(),
+      addMemberUseCase: asClass(AddCorporateMemberUseCase).classic().scoped(),
+      removeMemberUseCase: asClass(RemoveCorporateMemberUseCase).classic().scoped(),
+      enrollFleetVehicleUseCase: asClass(EnrollFleetVehicleUseCase).classic().scoped(),
+      removeFleetVehicleUseCase: asClass(RemoveFleetVehicleUseCase).classic().scoped(),
+      validateCorporateBookingUseCase: asClass(ValidateCorporateBookingUseCase).classic().scoped(),
+      generateCorporateInvoiceUseCase: asClass(GenerateCorporateInvoiceUseCase).classic().scoped(),
+      reconcilePaymentUseCase: asClass(ReconcileCorporatePaymentUseCase).classic().scoped(),
+      corporateController: asClass(CorporateController).classic().scoped(),
+      adminCorporateController: asClass(AdminCorporateController).classic().scoped(),
     });
     isRegistered = true;
   }

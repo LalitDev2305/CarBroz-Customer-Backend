@@ -35,6 +35,8 @@ import adminSduiRoutes from './modules/admin/api/admin-sdui.routes.js';
 import { reviewRoutes } from './modules/review/api/review.controller.js';
 import { couponRoutes } from './modules/coupon/api/coupon.controller.js';
 import { disputeRoutes } from './modules/dispute/api/dispute.controller.js';
+import { corporateRoutes } from './modules/corporate/routes/corporate.routes.js';
+import { adminCorporateRoutes } from './modules/corporate/routes/admin-corporate.routes.js';
 export const buildApp = async () => {
     const app = Fastify({
         logger: getFastifyLoggerConfig(LoggingConfig.logLevel),
@@ -127,6 +129,8 @@ export const buildApp = async () => {
     await app.register(reviewRoutes);
     await app.register(couponRoutes);
     await app.register(disputeRoutes);
+    await app.register(corporateRoutes, { prefix: '/api/v1/corporate' });
+    await app.register(adminCorporateRoutes, { prefix: '/api/v1/admin/corporate' });
     return app;
 };
 //# sourceMappingURL=app.js.map

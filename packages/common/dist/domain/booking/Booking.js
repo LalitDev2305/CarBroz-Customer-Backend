@@ -14,6 +14,8 @@ export class Booking {
     cancellationReason;
     snapshots;
     statusHistory;
+    corporateAccountId;
+    corporateFleetVehicleId;
     createdAt;
     updatedAt;
     constructor(props) {
@@ -51,6 +53,8 @@ export class Booking {
                 note: 'Booking slot created',
             },
         ];
+        this.corporateAccountId = props.corporateAccountId ?? null;
+        this.corporateFleetVehicleId = props.corporateFleetVehicleId ?? null;
         this.createdAt = props.createdAt;
         this.updatedAt = props.updatedAt;
     }

@@ -93,6 +93,18 @@ import { RaiseDisputeUseCase } from '../modules/dispute/use-cases/RaiseDisputeUs
 import { ResolveDisputeUseCase } from '../modules/dispute/use-cases/ResolveDisputeUseCase.js';
 import { GetDisputeUseCase } from '../modules/dispute/use-cases/GetDisputeUseCase.js';
 import { ListDisputesUseCase } from '../modules/dispute/use-cases/ListDisputesUseCase.js';
+import { RegisterCorporateAccountUseCase } from '../modules/corporate/use-cases/RegisterCorporateAccountUseCase.js';
+import { ApproveCorporateAccountUseCase } from '../modules/corporate/use-cases/ApproveCorporateAccountUseCase.js';
+import { AdjustCreditLimitUseCase } from '../modules/corporate/use-cases/AdjustCreditLimitUseCase.js';
+import { AddCorporateMemberUseCase } from '../modules/corporate/use-cases/AddCorporateMemberUseCase.js';
+import { RemoveCorporateMemberUseCase } from '../modules/corporate/use-cases/RemoveCorporateMemberUseCase.js';
+import { EnrollFleetVehicleUseCase } from '../modules/corporate/use-cases/EnrollFleetVehicleUseCase.js';
+import { RemoveFleetVehicleUseCase } from '../modules/corporate/use-cases/RemoveFleetVehicleUseCase.js';
+import { ValidateCorporateBookingUseCase } from '../modules/corporate/use-cases/ValidateCorporateBookingUseCase.js';
+import { GenerateCorporateInvoiceUseCase } from '../modules/corporate/use-cases/GenerateCorporateInvoiceUseCase.js';
+import { ReconcileCorporatePaymentUseCase } from '../modules/corporate/use-cases/ReconcileCorporatePaymentUseCase.js';
+import { CorporateController } from '../modules/corporate/controllers/CorporateController.js';
+import { AdminCorporateController } from '../modules/corporate/controllers/AdminCorporateController.js';
 export interface Cradle {
     prismaProvider: PrismaProvider;
     databaseProvider: PrismaDatabaseProvider;
@@ -233,5 +245,22 @@ export interface Cradle {
     resolveDisputeUseCase: ResolveDisputeUseCase;
     getDisputeUseCase: GetDisputeUseCase;
     listDisputesUseCase: ListDisputesUseCase;
+    corporateAccountRepo: import('@carbroz/common').ICorporateAccountRepository;
+    corporateMemberRepo: import('@carbroz/common').ICorporateMemberRepository;
+    fleetVehicleRepo: import('@carbroz/common').ICorporateFleetVehicleRepository;
+    creditLedgerRepo: import('@carbroz/common').ICorporateCreditLedgerRepository;
+    corporateInvoiceRepo: import('@carbroz/common').ICorporateInvoiceRepository;
+    registerAccountUseCase: RegisterCorporateAccountUseCase;
+    approveAccountUseCase: ApproveCorporateAccountUseCase;
+    adjustCreditLimitUseCase: AdjustCreditLimitUseCase;
+    addMemberUseCase: AddCorporateMemberUseCase;
+    removeMemberUseCase: RemoveCorporateMemberUseCase;
+    enrollFleetVehicleUseCase: EnrollFleetVehicleUseCase;
+    removeFleetVehicleUseCase: RemoveFleetVehicleUseCase;
+    validateCorporateBookingUseCase: ValidateCorporateBookingUseCase;
+    generateCorporateInvoiceUseCase: GenerateCorporateInvoiceUseCase;
+    reconcilePaymentUseCase: ReconcileCorporatePaymentUseCase;
+    corporateController: CorporateController;
+    adminCorporateController: AdminCorporateController;
 }
 export declare function getContainer(): AwilixContainer<Cradle>;

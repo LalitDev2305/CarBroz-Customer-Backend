@@ -18,6 +18,8 @@ export interface BookingProps {
   cancellationReason?: string | null;
   snapshots: BookingSnapshots;
   statusHistory?: BookingStatusHistoryItem[];
+  corporateAccountId?: number | null;
+  corporateFleetVehicleId?: number | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -38,6 +40,8 @@ export class Booking {
   cancellationReason: string | null;
   snapshots: BookingSnapshots;
   statusHistory: BookingStatusHistoryItem[];
+  corporateAccountId: number | null;
+  corporateFleetVehicleId: number | null;
   createdAt?: Date;
   updatedAt?: Date;
 
@@ -73,6 +77,8 @@ export class Booking {
         note: 'Booking slot created',
       },
     ];
+    this.corporateAccountId = props.corporateAccountId ?? null;
+    this.corporateFleetVehicleId = props.corporateFleetVehicleId ?? null;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }

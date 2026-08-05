@@ -17,6 +17,8 @@ export interface BookingProps {
     cancellationReason?: string | null;
     snapshots: BookingSnapshots;
     statusHistory?: BookingStatusHistoryItem[];
+    corporateAccountId?: number | null;
+    corporateFleetVehicleId?: number | null;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -36,6 +38,8 @@ export declare class Booking {
     cancellationReason: string | null;
     snapshots: BookingSnapshots;
     statusHistory: BookingStatusHistoryItem[];
+    corporateAccountId: number | null;
+    corporateFleetVehicleId: number | null;
     createdAt?: Date;
     updatedAt?: Date;
     constructor(props: BookingProps);

@@ -27,6 +27,7 @@ model User {
   addresses       Address[]
   deviceTokens    DeviceToken[]
   couponUsages    CouponUsage[]
+  corporateMembers CorporateMember[]
 }
 
 model Role {
@@ -405,6 +406,7 @@ model Vehicle {
 
   customer CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
   bookings Booking[]
+  fleetVehicles CorporateFleetVehicle[]
 
   @@unique([customerId, registrationNumber])
   @@index([customerId, status])
@@ -430,25 +432,34 @@ model Booking {
   createdAt          DateTime      @default(now()) @map("created_at")
   updatedAt          DateTime      @updatedAt @map("updated_at")
 
+  corporateAccountId      Int?                   @map("corporate_account_id")
+  corporateFleetVehicleId Int?                   @map("corporate_fleet_vehicle_id")
+
   customer CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Restrict)
   partner  Partner?        @relation(fields: [partnerId], references: [id], onDelete: SetNull)
   vehicle  Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
   address  Address         @relation(fields: [addressId], references: [id], onDelete: Restrict)
   service  Service         @relation(fields: [serviceId], references: [id], onDelete: Restrict)
 
-  payments         Payment[]
-  invoice          Invoice?
-  payout           PartnerPayout?
-  trackingSession  TrackingSession?
-  notificationLogs NotificationLog[]
-  review           Review?
-  couponUsages     CouponUsage[]
-  disputes         Dispute[]
+  corporateAccount      CorporateAccount?      @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
+  corporateFleetVehicle CorporateFleetVehicle? @relation(fields: [corporateFleetVehicleId], references: [id], onDelete: SetNull)
+
+  payments               Payment[]
+  invoice                Invoice?
+  payout                 PartnerPayout?
+  trackingSession        TrackingSession?
+  notificationLogs       NotificationLog[]
+  review                 Review?
+  couponUsages           CouponUsage[]
+  disputes               Dispute[]
+  corporateCreditLedgers CorporateCreditLedger[]
+  corporateInvoiceLine   CorporateInvoiceLine?
 
   @@index([customerId, status])
   @@index([partnerId, status])
   @@index([partnerId, slotStartTime, slotEndTime])
   @@index([status, expiryAt])
+  @@index([corporateAccountId])
   @@map("bookings")
 }
 
@@ -466,6 +477,7 @@ enum PaymentMethod {
   NETBANKING
   WALLET
   CASH_ON_DELIVERY
+  CORPORATE_CREDIT
 }
 
 enum InvoiceStatus {
@@ -784,6 +796,162 @@ model Dispute {
   @@index([raisedByActorId, raisedByActorType])
   @@index([createdAt])
   @@map("disputes")
+}
+
+enum CorporateAccountStatus {
+  PENDING_APPROVAL
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum CorporateMemberRole {
+  CORP_ADMIN
+  FLEET_MANAGER
+  EMPLOYEE
+}
+
+enum CorporateLedgerEntryType {
+  CREDIT_GRANTED
+  BOOKING_DEBIT
+  BOOKING_REFUND_CREDIT
+  PAYMENT_CREDIT
+  ADJUSTMENT
+}
+
+enum CorporateInvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+}
+
+model CorporateAccount {
+  id                  Int                    @id @default(autoincrement())
+  publicId            String                 @unique @default(uuid())
+  companyName         String                 @map("company_name")
+  legalName           String                 @map("legal_name")
+  gstin               String                 @unique
+  pan                 String
+  billingAddress      Json                   @map("billing_address")
+  creditLimitPaise    BigInt                 @default(0) @map("credit_limit_paise")
+  utilisedCreditPaise BigInt                 @default(0) @map("utilised_credit_paise")
+  status              CorporateAccountStatus @default(PENDING_APPROVAL)
+  paymentTermsDays    Int                    @default(30) @map("payment_terms_days")
+  createdAt           DateTime               @default(now()) @map("created_at")
+  updatedAt           DateTime               @updatedAt @map("updated_at")
+
+  members       CorporateMember[]
+  fleetVehicles CorporateFleetVehicle[]
+  ledgerEntries CorporateCreditLedger[]
+  invoices      CorporateInvoice[]
+  bookings      Booking[]
+
+  @@index([status])
+  @@map("corporate_accounts")
+}
+
+model CorporateMember {
+  id                 Int                 @id @default(autoincrement())
+  publicId           String              @unique @default(uuid())
+  corporateAccountId Int                 @map("corporate_account_id")
+  userId             Int                 @map("user_id")
+  role               CorporateMemberRole @default(EMPLOYEE)
+  status             String              @default("ACTIVE")
+  monthlyCapPaise    BigInt?             @map("monthly_cap_paise")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+
+  corporateAccount CorporateAccount @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([corporateAccountId, userId])
+  @@index([userId])
+  @@map("corporate_members")
+}
+
+model CorporateFleetVehicle {
+  id                 Int      @id @default(autoincrement())
+  publicId           String   @unique @default(uuid())
+  corporateAccountId Int      @map("corporate_account_id")
+  vehicleId          Int      @map("vehicle_id")
+  department         String?
+  costCenter         String?  @map("cost_center")
+  monthlyCapPaise    BigInt?  @map("monthly_cap_paise")
+  status             String   @default("ACTIVE")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  corporateAccount CorporateAccount @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  vehicle          Vehicle          @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  bookings         Booking[]
+
+  @@unique([corporateAccountId, vehicleId])
+  @@index([vehicleId])
+  @@map("corporate_fleet_vehicles")
+}
+
+model CorporateCreditLedger {
+  id                 Int                      @id @default(autoincrement())
+  publicId           String                   @unique @default(uuid())
+  corporateAccountId Int                      @map("corporate_account_id")
+  bookingId          Int?                     @map("booking_id")
+  invoiceId          Int?                     @map("invoice_id")
+  entryType          CorporateLedgerEntryType @map("entry_type")
+  amountPaise        BigInt                   @map("amount_paise")
+  balanceAfterPaise  BigInt                   @map("balance_after_paise")
+  referenceNotes     String?                  @map("reference_notes")
+  createdAt          DateTime                 @default(now()) @map("created_at")
+
+  corporateAccount CorporateAccount  @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  booking          Booking?          @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  invoice          CorporateInvoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@index([corporateAccountId, createdAt])
+  @@map("corporate_credit_ledgers")
+}
+
+model CorporateInvoice {
+  id                 Int                    @id @default(autoincrement())
+  publicId           String                 @unique @default(uuid())
+  invoiceNumber      String                 @unique @map("invoice_number")
+  corporateAccountId Int                    @map("corporate_account_id")
+  billingPeriodStart DateTime               @map("billing_period_start")
+  billingPeriodEnd   DateTime               @map("billing_period_end")
+  subtotalPaise      BigInt                 @map("subtotal_paise")
+  cgstPaise          BigInt                 @map("cgst_paise")
+  sgstPaise          BigInt                 @map("sgst_paise")
+  igstPaise          BigInt                 @map("igst_paise")
+  totalAmountPaise   BigInt                 @map("total_amount_paise")
+  paidAmountPaise    BigInt                 @default(0) @map("paid_amount_paise")
+  dueDate            DateTime               @map("due_date")
+  status             CorporateInvoiceStatus @default(DRAFT)
+  createdAt          DateTime               @default(now()) @map("created_at")
+  updatedAt          DateTime               @updatedAt @map("updated_at")
+
+  corporateAccount CorporateAccount        @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  lines            CorporateInvoiceLine[]
+  ledgerEntries    CorporateCreditLedger[]
+
+  @@index([corporateAccountId, status])
+  @@map("corporate_invoices")
+}
+
+model CorporateInvoiceLine {
+  id                 Int      @id @default(autoincrement())
+  publicId           String   @unique @default(uuid())
+  corporateInvoiceId Int      @map("corporate_invoice_id")
+  bookingId          Int      @unique @map("booking_id")
+  description        String
+  amountPaise        BigInt   @map("amount_paise")
+  taxRateBasis       Decimal  @map("tax_rate_basis") @db.Decimal(5, 2)
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  invoice CorporateInvoice @relation(fields: [corporateInvoiceId], references: [id], onDelete: Cascade)
+  booking Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("corporate_invoice_lines")
 }
 
 

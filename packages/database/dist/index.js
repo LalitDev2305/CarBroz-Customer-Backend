@@ -40,4 +40,10 @@ export * from './repositories/PrismaCouponUsageRepository.js';
 export * from './repositories/PrismaAuditLogRepository.js';
 // Phase 21
 export * from './repositories/PrismaDisputeRepository.js';
+// Phase 22
+export * from './repositories/PrismaCorporateAccountRepository.js';
+export * from './repositories/PrismaCorporateMemberRepository.js';
+export * from './repositories/PrismaCorporateFleetVehicleRepository.js';
+export * from './repositories/PrismaCorporateCreditLedgerRepository.js';
+export * from './repositories/PrismaCorporateInvoiceRepository.js';
 //# sourceMappingURL=index.js.map

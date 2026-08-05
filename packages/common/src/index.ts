@@ -158,3 +158,16 @@ export * from './domain/dispute/DisputeReason.js';
 export * from './domain/dispute/Dispute.js';
 export * from './domain/dispute/repositories/IDisputeRepository.js';
 export * from './domain/dispute/services/DisputeSettlementCalculator.js';
+
+// Phase 22 Multi-Tenant Corporate Accounts, Fleet Management & B2B Billing Platform
+export * from './domain/corporate/CorporateAccount.js';
+export * from './domain/corporate/CorporateMember.js';
+export * from './domain/corporate/CorporateFleetVehicle.js';
+export * from './domain/corporate/CorporateCreditLedger.js';
+export * from './domain/corporate/CorporateInvoiceLine.js';
+export * from './domain/corporate/CorporateInvoice.js';
+export * from './domain/corporate/repositories/ICorporateAccountRepository.js';
+export * from './domain/corporate/repositories/ICorporateMemberRepository.js';
+export * from './domain/corporate/repositories/ICorporateFleetVehicleRepository.js';
+export * from './domain/corporate/repositories/ICorporateCreditLedgerRepository.js';
+export * from './domain/corporate/repositories/ICorporateInvoiceRepository.js';
