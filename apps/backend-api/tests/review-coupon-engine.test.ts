@@ -36,7 +36,7 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     slotStartTime: now,
     slotEndTime: new Date(now.getTime() + 3600000),
     totalPricePaise: 100000,
-    statusHistoryJson: [],
+    statusHistory: [],
   });
 
   const dummyPartner: Partner = {
@@ -68,10 +68,7 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     async create(p: any) { return p; },
     async findById(id) { return id === 20 ? dummyPartner : null; },
     async findByPublicId(pubId) { return pubId === dummyPartner.publicId ? dummyPartner : null; },
-    async update(p: any) { return p; },
-    async findByUserId() { return null; },
-    async listPendingVerification() { return []; },
-    async updateVerificationStatus() { return dummyPartner; },
+    setUnitOfWork() {},
   };
 
   const mockReviewRepo: IReviewRepository = {
