@@ -21,7 +21,7 @@ export class PrismaInvoiceRepository implements IInvoiceRepository {
   }
 
   async create(invoice: Invoice): Promise<Invoice> {
-    const record = await this.prisma.invoice.create({
+    const record = await (this.prisma as any).invoice.create({
       data: {
         bookingId: invoice.bookingId,
         invoiceNumber: invoice.invoiceNumber,
@@ -36,28 +36,28 @@ export class PrismaInvoiceRepository implements IInvoiceRepository {
   }
 
   async findById(id: number): Promise<Invoice | null> {
-    const record = await this.prisma.invoice.findUnique({ where: { id } });
+    const record = await (this.prisma as any).invoice.findUnique({ where: { id } });
     return record ? this.mapToDomain(record) : null;
   }
 
   async findByPublicId(publicId: string): Promise<Invoice | null> {
-    const record = await this.prisma.invoice.findUnique({ where: { publicId } });
+    const record = await (this.prisma as any).invoice.findUnique({ where: { publicId } });
     return record ? this.mapToDomain(record) : null;
   }
 
   async findByBookingId(bookingId: number): Promise<Invoice | null> {
-    const record = await this.prisma.invoice.findUnique({ where: { bookingId } });
+    const record = await (this.prisma as any).invoice.findUnique({ where: { bookingId } });
     return record ? this.mapToDomain(record) : null;
   }
 
   async findByInvoiceNumber(invoiceNumber: string): Promise<Invoice | null> {
-    const record = await this.prisma.invoice.findUnique({ where: { invoiceNumber } });
+    const record = await (this.prisma as any).invoice.findUnique({ where: { invoiceNumber } });
     return record ? this.mapToDomain(record) : null;
   }
 
   async generateNextInvoiceNumber(): Promise<string> {
     const year = new Date().getFullYear();
-    const sequenceRecord = await this.prisma.invoiceSequence.upsert({
+    const sequenceRecord = await (this.prisma as any).invoiceSequence.upsert({
       where: { year },
       update: { lastSeq: { increment: 1 } },
       create: { year, lastSeq: 1 },
