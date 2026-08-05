@@ -1,88 +1,89 @@
 # Phase 23 — Customer SDUI Composition Engine Technical Implementation Plan
 
 ## Executive Summary
-Phase 23 designs and implements the complete Customer SDUI Composition Engine for CarBroz, establishing 28 dynamic screen builders in `apps/backend-api/src/modules/sdui/builders/customer/`. The engine reuses existing `@carbroz/ui-sdk` primitives (`ScreenFactory`, `TemplateFactory`, `ComponentFactory`, `SubComponentFactory`, `ActionRegistry`, `ValidatorRegistry`, `AnalyticsRegistry`), domain use cases, and versioning mechanisms to deliver rich, localized, feature-flagged, and cached SDUI JSON structures.
+Phase 23 implements the Customer SDUI Composition Engine for CarBroz across 6 modular backend feature areas (`apps/backend-api/src/modules/*/ui/`). The engine reuses existing `@carbroz/ui-sdk` primitives (`BaseScreenBuilder`, `ScreenFactory`, `BaseTemplate`, `GenericComponent`, `Subcomponent`, `Child`, `ChildrenData`, `UI` helper), existing builders (`AuthLoginBuilder`, `AuthOtpBuilder`, `DashboardBuilder`), domain use cases, and Phase 14 `SduiVersioning` to deliver rich, localized, feature-flagged, and cached SDUI JSON structures conforming strictly to `04_DYNAMIC_UI_SPECIFICATION.md`.
 
 ---
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Strict SDUI Rules Enforcement (`AGENTS.md`)**:
-> 1. Frontend renderers iterate dynamically over `node.children`. No hardcoded UI primitive texts/buttons in Compose/Flutter frontend.
-> 2. All 28 screen builders must conform strictly to `docs/architecture/04_DYNAMIC_UI_SPECIFICATION.md`.
-> 3. Zero breaking changes to existing domain repositories or API contracts.
+> **Strict Repository & Architecture Directives**:
+> 1. `@carbroz/ui-sdk` remains 100% infrastructure-independent. No imports of Fastify, Prisma, or backend modules into `ui-sdk`.
+> 2. Builders compose layouts using single `ScreenFactory` and node builders (`BaseTemplate`, `GenericComponent`, `Subcomponent`, `Child`, `ChildrenData`, `UI` helper). No non-existent factories or registries.
+> 3. Existing builders (`AuthLoginBuilder`, `AuthOtpBuilder`, `DashboardBuilder`) are preserved in their respective feature modules and registered in DI without code duplication or JSON breaking changes.
 
 ---
 
-## Proposed Technical Changes
+## Screen Inventory & Implementation Batches
 
-### 1. Common UI SDK Extensions (`packages/ui-sdk/`)
-#### [MODIFY] [ScreenFactory.ts](file:///d:/Backend/CarBroz/backend/packages/ui-sdk/src/factories/ScreenFactory.ts)
-- Register all 28 Customer screen builders upon container startup.
+### Batch 1 — Authentication & Foundation (5 Screens)
+- `SplashBuilder` (`splash_main`): App splash & config init loading screen.
+- `GuestLoginBuilder` (`guest_login_main`): Guest onboarding screen.
+- `AuthLoginBuilder` (`auth_login`) — **REUSED**: Mobile OTP login screen (`modules/auth/ui/AuthLoginBuilder.ts`).
+- `AuthOtpBuilder` (`auth_otp`) — **REUSED**: OTP verification screen (`modules/auth/ui/AuthOtpBuilder.ts`).
+- `DashboardBuilder` (`dashboard_main`) — **REUSED**: Home dashboard screen (`modules/config/ui/DashboardBuilder.ts`).
 
----
+### Batch 2 — Catalog & Discovery (4 Screens)
+- `SearchBuilder` (`catalog_search`): Universal search for services and packages.
+- `CategoryBuilder` (`catalog_category`): Category listing screen.
+- `ServiceListingBuilder` (`catalog_service_list`): Package listing screen.
+- `ServiceDetailBuilder` (`catalog_service_detail`): Detailed service specs & pricing breakdown.
 
-### 2. Customer SDUI Builders (`apps/backend-api/src/modules/sdui/builders/customer/`)
-#### [NEW] `BaseCustomerBuilder.ts`
-- Base class providing shared header/footer injection, localization token lookup, and feature-flag filter evaluation.
+### Batch 3 — Garage & Location (3 Screens)
+- `GarageBuilder` (`garage_main`): Customer garage vehicle listing screen.
+- `VehicleBuilder` (`vehicle_add_edit`): Vehicle creation and spec entry screen.
+- `AddressBuilder` (`customer_address_manage`): Saved addresses management screen.
 
-#### [NEW] Auth & Access Builders (4 Builders)
-- `SplashBuilder.ts`
-- `GuestLoginBuilder.ts`
-- `LoginBuilder.ts`
-- `OTPBuilder.ts`
+### Batch 4 — Booking & Tracking (5 Screens)
+- `SlotSelectionBuilder` (`booking_slot_select`): Date & time slot picker screen.
+- `BookingConfirmationBuilder` (`booking_checkout_confirm`): Booking review & payment selection screen.
+- `ActiveBookingBuilder` (`booking_active_status`): Active booking status overview screen.
+- `BookingTrackingBuilder` (`booking_live_tracking`): Real-time live partner tracking screen.
+- `BookingHistoryBuilder` (`booking_history_list`): Past booking history screen.
 
-#### [NEW] Discovery & Catalog Builders (5 Builders)
-- `DashboardBuilder.ts`
-- `SearchBuilder.ts`
-- `CategoryBuilder.ts`
-- `ServiceListingBuilder.ts`
-- `ServiceDetailBuilder.ts`
+### Batch 5 — Payments, Reviews, Notifications & Support (8 Screens)
+- `InvoiceBuilder` (`invoice_detail`): Itemized GST tax invoice screen.
+- `CouponBuilder` (`coupon_list_apply`): Available promo coupons screen.
+- `ReviewBuilder` (`review_submit_list`): Customer rating & review submission screen.
+- `NotificationBuilder` (`notification_inbox`): Push notification history screen.
+- `ProfileBuilder` (`customer_profile`): Customer profile details screen.
+- `SettingsBuilder` (`app_settings`): App preferences screen.
+- `HelpSupportBuilder` (`help_support_static`): FAQ & customer support contact screen.
+- `CorporateBookingBuilder` (`corporate_booking_checkout`): Corporate credit booking checkout screen.
 
-#### [NEW] Garage & Location Builders (3 Builders)
-- `VehicleBuilder.ts`
-- `GarageBuilder.ts`
-- `AddressBuilder.ts`
-
-#### [NEW] Booking Flow Builders (5 Builders)
-- `SlotSelectionBuilder.ts`
-- `BookingConfirmationBuilder.ts`
-- `ActiveBookingBuilder.ts`
-- `BookingTrackingBuilder.ts`
-- `BookingHistoryBuilder.ts`
-
-#### [NEW] Payments, Offers & Rewards Builders (6 Builders)
-- `InvoiceBuilder.ts`
-- `CouponBuilder.ts`
-- `ReviewBuilder.ts`
-- `WalletBuilder.ts`
-- `ReferralBuilder.ts`
-- `SubscriptionBuilder.ts`
-
-#### [NEW] Corporate, Account & Support Builders (5 Builders)
-- `CorporateBookingBuilder.ts`
-- `ProfileBuilder.ts`
-- `SettingsBuilder.ts`
-- `HelpSupportBuilder.ts`
+### Batch 6 — Deferred Screens (3 Screens)
+- `WalletBuilder` (Deferred: Wallet domain backend not implemented)
+- `ReferralBuilder` (Deferred: Referral domain backend not implemented)
+- `SubscriptionBuilder` (Deferred: Subscription domain backend not implemented)
 
 ---
 
-### 3. API & Controller Layer (`apps/backend-api/src/modules/sdui/`)
-#### [NEW] `CustomerSduiController.ts`
-- Single API controller handling `/api/v1/sdui/customer/screens/:screenKey`.
+## Proposed Technical Changes (Modular Builder Ownership)
 
-#### [NEW] `customer-sdui.routes.ts`
-- Fastify route registration for customer SDUI endpoints.
+### 1. Awilix DI Registration (`apps/backend-api/src/container/index.ts`)
+- Register new concrete screen builders and populate `ScreenFactory` via DI container initialization.
+
+### 2. Feature Module UI Builders (`apps/backend-api/src/modules/`)
+- `modules/config/ui/`: `SplashBuilder.ts`, `SettingsBuilder.ts`
+- `modules/auth/ui/`: `GuestLoginBuilder.ts`
+- `modules/catalog/ui/`: `SearchBuilder.ts`, `CategoryBuilder.ts`, `ServiceListingBuilder.ts`, `ServiceDetailBuilder.ts`
+- `modules/vehicle/ui/`: `GarageBuilder.ts`, `VehicleBuilder.ts`
+- `modules/customer/ui/`: `AddressBuilder.ts`, `ProfileBuilder.ts`
+- `modules/booking/ui/`: `SlotSelectionBuilder.ts`, `BookingConfirmationBuilder.ts`, `ActiveBookingBuilder.ts`, `BookingHistoryBuilder.ts`
+- `modules/tracking/ui/`: `BookingTrackingBuilder.ts`
+- `modules/invoice/ui/`: `InvoiceBuilder.ts`
+- `modules/coupon/ui/`: `CouponBuilder.ts`
+- `modules/review/ui/`: `ReviewBuilder.ts`
+- `modules/notification/ui/`: `NotificationBuilder.ts`
+- `modules/corporate/ui/`: `CorporateBookingBuilder.ts`
+- `modules/support/ui/`: `HelpSupportBuilder.ts`
 
 ---
 
 ## Verification Plan
 
 ### Automated Tests
-- Workspace build: `pnpm build`
-- Unit & integration test suite: `pnpm test` (adding `apps/backend-api/tests/customer-sdui-engine.test.ts`)
-- Linter verification: `pnpm exec eslint --quiet .`
-
-### Manual Verification
-- Validate SDUI JSON output against `04_DYNAMIC_UI_SPECIFICATION.md` schema for all 28 screen keys.
+- `pnpm build`: Verify monorepo compilation.
+- `pnpm test`: Execute all 41 test suites including existing regression tests.
+- `pnpm exec eslint --quiet .`: Verify code cleanliness.

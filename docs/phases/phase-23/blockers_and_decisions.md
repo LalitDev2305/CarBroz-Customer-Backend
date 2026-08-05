@@ -2,29 +2,23 @@
 
 ## Architectural Decisions
 
-### ADR-23.1: Separation of UI SDK Primitives and Backend Customer Builders
-- **Decision**: Keep base abstractions (`ScreenFactory`, `BaseBuilder`, generic registries) in `@carbroz/ui-sdk`, while implementing all 28 concrete Customer builders in `apps/backend-api/src/modules/sdui/builders/customer/`.
-- **Rationale**: Keeps `@carbroz/ui-sdk` lightweight and platform-agnostic, preventing backend database and business logic dependencies from leaking into shared SDKs.
+### ADR-23.1: Strict Infrastructure Independence of `@carbroz/ui-sdk`
+- **Decision**: `@carbroz/ui-sdk` will not import backend modules, Fastify, Prisma, or concrete feature builders.
+- **Rationale**: Preserves `@carbroz/ui-sdk` as a pure, lightweight UI SDK and prevents circular dependency leaks between backend services and shared SDKs.
 
-### ADR-23.2: BaseCustomerBuilder Shared Template Abstraction
-- **Decision**: All 28 customer builders inherit from `BaseCustomerBuilder`, which automatically injects default headers, navigation bars, localization keys, and feature-flag checks.
-- **Rationale**: Eliminates repetitive layout boilerplate across 28 screens and enforces uniform visual hierarchy and branding.
+### ADR-23.2: Reuse of Existing Builders Without Duplication
+- **Decision**: Preserve `AuthLoginBuilder`, `AuthOtpBuilder`, and `DashboardBuilder` in `apps/backend-api/src/modules/auth/ui/` and `config/ui/`.
+- **Rationale**: Reuses working production code, protects locked JSON layout regression tests, and avoids duplicate builder maintenance.
 
-### ADR-23.3: Two-Layer SDUI JSON Caching Strategy
-- **Decision**: Implement L1 In-Memory LRU Cache + L2 Redis Cache keying on `sdui:customer:{screenKey}:{locale}:{version}:{role}`.
-- **Rationale**: Delivers sub-5ms SDUI JSON response times under high concurrency while allowing instant cache invalidation upon catalog/pricing updates or version deployment.
+### ADR-23.3: Feature Module Builder Ownership
+- **Decision**: Place concrete builders inside their respective feature modules (e.g. `modules/catalog/ui/`, `modules/booking/ui/`) rather than one giant `sdui/builders/` directory.
+- **Rationale**: Adheres to Bounded Context DDD principles and keeps UI composition code adjacent to domain models and use cases.
 
----
-
-## Risks & Mitigation
-
-| Risk | Impact | Mitigation Strategy |
-|---|---|---|
-| High JSON payload size on complex screens | Increased network latency on mobile networks | Implement child property payload minification and gzip compression |
-| Stale SDUI layouts after catalog or price changes | Inconsistent service pricing displayed to customer | Trigger event-driven cache invalidation upon Catalog/Pricing domain events |
-| Deeply nested component trees causing slow frontend rendering | UI lag during Compose/Flutter layout pass | Enforce maximum 4-level component/subcomponent nesting limit in builders |
+### ADR-23.4: Application-Level LRU Caching
+- **Decision**: Implement L1 In-Memory LRU Cache with key format `sdui:customer:{screenKey}:{locale}:{version}:{role}`. No Redis dependency will be added without explicit project approval.
+- **Rationale**: Delivers high-throughput SDUI resolution without introducing unapproved third-party infrastructure.
 
 ---
 
 ## Current Blockers
-- **None**: All Phase 1–22 domain repositories, services, and `@carbroz/ui-sdk` primitives are fully built, tested, and ready for integration.
+- **None**: All Phase 1–22 domain repositories, services, and `@carbroz/ui-sdk` primitives are fully built and tested.
