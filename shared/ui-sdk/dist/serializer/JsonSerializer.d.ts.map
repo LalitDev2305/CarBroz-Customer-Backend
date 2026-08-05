@@ -1,0 +1,1 @@
+{"version":3,"file":"JsonSerializer.d.ts","sourceRoot":"","sources":["../../src/serializer/JsonSerializer.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,wBAAwB,CAAC;AAEjD,qBAAa,cAAc;WACX,SAAS,CAAC,MAAM,EAAE,OAAO,GAAG,GAAG;CAQ9C"}

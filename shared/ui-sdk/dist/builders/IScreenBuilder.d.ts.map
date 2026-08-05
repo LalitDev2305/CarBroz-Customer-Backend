@@ -1,0 +1,1 @@
+{"version":3,"file":"IScreenBuilder.d.ts","sourceRoot":"","sources":["../../src/builders/IScreenBuilder.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,wBAAwB,CAAC;AAEjD,MAAM,WAAW,YAAY;IAC3B,UAAU,EAAE,OAAO,CAAC;IACpB,IAAI,CAAC,EAAE,GAAG,CAAC;CACZ;AAED,MAAM,WAAW,cAAc;IAC7B,KAAK,CAAC,OAAO,CAAC,EAAE,YAAY,GAAG,OAAO,CAAC,OAAO,CAAC,CAAC;CACjD"}
