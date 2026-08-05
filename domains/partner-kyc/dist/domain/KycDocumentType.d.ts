@@ -1,0 +1,7 @@
+export declare enum KycDocumentType {
+    NATIONAL_ID = "NATIONAL_ID",
+    BUSINESS_LICENSE = "BUSINESS_LICENSE",
+    TAX_CERTIFICATE = "TAX_CERTIFICATE",
+    INSURANCE_POLICY = "INSURANCE_POLICY"
+}
+//# sourceMappingURL=KycDocumentType.d.ts.map

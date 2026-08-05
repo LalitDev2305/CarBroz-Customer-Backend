@@ -1,0 +1,20 @@
+{
+  "name": "@carbroz/domain-identity",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/public/index.js",
+  "types": "dist/public/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@carbroz/common": "workspace:*",
+    "@carbroz/shared-kernel": "workspace:*",
+    "@carbroz/shared-ui-sdk": "workspace:*",
+    "@prisma/client": "^6.19.3",
+    "awilix": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0"
+  }
+}

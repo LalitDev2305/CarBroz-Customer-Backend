@@ -345,6 +345,161 @@ importers:
         specifier: ^7.1.1
         version: 7.1.1
 
+  domains/address:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@carbroz/shared-kernel':
+        specifier: workspace:*
+        version: link:../../shared/kernel
+      '@prisma/client':
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
+  domains/catalog:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@carbroz/shared-kernel':
+        specifier: workspace:*
+        version: link:../../shared/kernel
+      '@prisma/client':
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
+  domains/customer-profile:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@carbroz/shared-kernel':
+        specifier: workspace:*
+        version: link:../../shared/kernel
+      '@prisma/client':
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
+  domains/garage:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@carbroz/shared-kernel':
+        specifier: workspace:*
+        version: link:../../shared/kernel
+      '@prisma/client':
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
+  domains/identity:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@carbroz/shared-kernel':
+        specifier: workspace:*
+        version: link:../../shared/kernel
+      '@carbroz/shared-ui-sdk':
+        specifier: workspace:*
+        version: link:../../shared/ui-sdk
+      '@prisma/client':
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
+  domains/partner-kyc:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@carbroz/shared-kernel':
+        specifier: workspace:*
+        version: link:../../shared/kernel
+      '@prisma/client':
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
+  domains/partner-profile:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@carbroz/shared-kernel':
+        specifier: workspace:*
+        version: link:../../shared/kernel
+      '@prisma/client':
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
+  domains/pricing:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@carbroz/shared-kernel':
+        specifier: workspace:*
+        version: link:../../shared/kernel
+      '@prisma/client':
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
   packages/common:
     devDependencies:
       '@types/node':
@@ -1333,6 +1488,10 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       awilix: '>=9.0.0'
+
+  awilix@12.1.1:
+    resolution: {integrity: sha512-A93ak7Ypot8YlkfulCBL4GCkZozuwdfwOJs+4l8+svJYCfXKuokLxWe/usTiatN1dlPOdT5HO0MBpNNTzZSWug==}
+    engines: {node: '>=16.3.0'}
 
   awilix@13.0.5:
     resolution: {integrity: sha512-ORtca6suBdYA1FyTzqHEZDvEuUwo3lPDDBRm7GrzHgi6STESzJKdBtpqfTzObdMj1NGQUWX6k26E3EbQaGJX5Q==}
@@ -3049,6 +3208,11 @@ snapshots:
       prisma: 6.19.3(typescript@6.0.3)
       typescript: 6.0.3
 
+  '@prisma/client@6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)':
+    optionalDependencies:
+      prisma: 7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
+      typescript: 6.0.3
+
   '@prisma/client@7.8.0(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)':
     dependencies:
       '@prisma/client-runtime-utils': 7.8.0
@@ -3522,6 +3686,10 @@ snapshots:
   awilix-manager@6.4.0(awilix@13.0.5):
     dependencies:
       awilix: 13.0.5
+
+  awilix@12.1.1:
+    dependencies:
+      fast-glob: 3.3.3
 
   awilix@13.0.5:
     dependencies:
