@@ -1,0 +1,1 @@
+{"version":3,"file":"IAggregateRoot.d.ts","sourceRoot":"","sources":["../../../src/domain/base/IAggregateRoot.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,cAAc,CAAC;AAE5C,MAAM,WAAW,cAAc,CAAC,GAAG,CAAE,SAAQ,OAAO,CAAC,GAAG,CAAC;CAExD"}
