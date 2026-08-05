@@ -29,6 +29,15 @@ import { registerPaymentModule } from '@carbroz/domain-payment';
 import { registerInvoiceModule } from '@carbroz/domain-invoice';
 import { registerPayoutModule } from '@carbroz/domain-payout';
 
+// Milestone 4 Engagement Domain Modules
+import { registerNotificationModule } from '@carbroz/domain-notification';
+import { registerReviewModule } from '@carbroz/domain-review';
+import { registerCouponModule } from '@carbroz/domain-coupon';
+import { registerDisputeModule } from '@carbroz/domain-dispute';
+import { registerSduiRegistryModule } from '@carbroz/domain-sdui-registry';
+import { registerAuditModule } from '@carbroz/domain-audit';
+import { registerConfigModule } from '@carbroz/domain-config';
+
 // Phase 8
 import { PrismaPartnerRepository, PrismaPartnerMemberRepository } from '@carbroz/database';
 import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js';
@@ -581,6 +590,14 @@ export function getContainer(): AwilixContainer<Cradle> {
     registerPaymentModule(diContainer);
     registerInvoiceModule(diContainer);
     registerPayoutModule(diContainer);
+
+    registerNotificationModule(diContainer);
+    registerReviewModule(diContainer);
+    registerCouponModule(diContainer);
+    registerDisputeModule(diContainer);
+    registerSduiRegistryModule(diContainer);
+    registerAuditModule(diContainer);
+    registerConfigModule(diContainer);
 
     isRegistered = true;
   }

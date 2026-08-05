@@ -1,23 +1,20 @@
-# Milestone 2 — Comprehensive Validation Plan
+# Milestone 4 — Validation & Verification Plan
 
-Quality assurance and architectural verification plan for Milestone 2 Core Domains migration.
+Verification gates for Milestone 4 Engagement Domains.
 
-## 1. Automated Verification Commands
+## 1. Automated Gate Verification Criteria
 
-| Step | Command | Success Criteria |
+| Quality Gate | Command | Success Criteria |
 |---|---|---|
-| **1. Workspace Build** | `pnpm -r build` | 0 TypeScript errors across all 15 workspace projects |
-| **2. Monorepo Tests** | `pnpm test` | 100% pass rate (41 test files, 162/162 unit & integration tests) |
-| **3. ESLint Audit** | `pnpm exec eslint --quiet .` | 0 lint or import resolution errors |
-| **4. Prisma Schema Check** | `npx prisma validate` | Prisma schema valid and in sync |
+| Workspace Build | `pnpm -r build` | 35/35 workspace projects compile cleanly with 0 TypeScript errors |
+| Workspace Tests | `pnpm test` | 100% pass rate across all unit and integration tests |
+| Workspace Linter | `pnpm lint` | 0 ESLint errors or boundary violations |
 
 ---
 
-## 2. Public API & Boundary Check
-- Verify that `domains/<domain>/` exposes ONLY `public/index.ts`.
-- Verify that no external package imports directly from `domains/<domain>/domain/*` or `domains/<domain>/infrastructure/*`.
+## 2. Checklists
 
----
-
-## 3. Backward Compatibility Verification
-- Verify that legacy imports from `@carbroz/common` and `@carbroz/database` continue to work cleanly without breakage.
+- [ ] All 7 engagement domain packages registered in `pnpm-workspace.yaml`.
+- [ ] Awilix container module registrations complete in `apps/backend-api/src/container/`.
+- [ ] Zero Prisma schema changes.
+- [ ] Zero breaking changes to public barrel exports.

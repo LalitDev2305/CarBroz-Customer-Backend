@@ -1,0 +1,1 @@
+{"version":3,"file":"sdui-registry.module.js","sourceRoot":"","sources":["../sdui-registry.module.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAwB,MAAM,QAAQ,CAAC;AACvD,OAAO,EAAE,4BAA4B,EAAE,MAAM,+DAA+D,CAAC;AAE7G,MAAM,UAAU,0BAA0B,CAAC,SAA0B;IACnE,SAAS,CAAC,QAAQ,CAAC;QACjB,sBAAsB,EAAE,OAAO,CAAC,4BAA4B,CAAC,CAAC,SAAS,EAAE;KAC1E,CAAC,CAAC;AACL,CAAC"}
