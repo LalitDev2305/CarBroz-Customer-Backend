@@ -22,6 +22,13 @@ import { VerifyOtpUseCase } from '../modules/auth/use-cases/VerifyOtpUseCase.js'
 import { RefreshTokenUseCase } from '../modules/auth/use-cases/RefreshTokenUseCase.js';
 import { LogoutUseCase } from '../modules/auth/use-cases/LogoutUseCase.js';
 
+// Milestone 3 Transactional Domain Modules
+import { registerBookingModule } from '@carbroz/domain-booking';
+import { registerTrackingModule } from '@carbroz/domain-tracking';
+import { registerPaymentModule } from '@carbroz/domain-payment';
+import { registerInvoiceModule } from '@carbroz/domain-invoice';
+import { registerPayoutModule } from '@carbroz/domain-payout';
+
 // Phase 8
 import { PrismaPartnerRepository, PrismaPartnerMemberRepository } from '@carbroz/database';
 import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js';
@@ -568,6 +575,13 @@ export function getContainer(): AwilixContainer<Cradle> {
       corporateController: asClass(CorporateController).classic().scoped(),
       adminCorporateController: asClass(AdminCorporateController).classic().scoped(),
     });
+
+    registerBookingModule(diContainer);
+    registerTrackingModule(diContainer);
+    registerPaymentModule(diContainer);
+    registerInvoiceModule(diContainer);
+    registerPayoutModule(diContainer);
+
     isRegistered = true;
   }
   return diContainer as unknown as AwilixContainer<Cradle>;

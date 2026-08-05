@@ -1,0 +1,1 @@
+{"version":3,"file":"AuthLoginBuilder.d.ts","sourceRoot":"","sources":["../../ui/AuthLoginBuilder.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,OAAO,EAAkC,iBAAiB,EAAE,KAAK,YAAY,EAAE,MAAM,wBAAwB,CAAC;AAE5H,qBAAa,gBAAiB,SAAQ,iBAAiB;IACrD,SAAgB,QAAQ,gBAAgB;IAE3B,KAAK,CAAC,OAAO,CAAC,EAAE,YAAY,GAAG,OAAO,CAAC,OAAO,CAAC;CAqL7D"}
