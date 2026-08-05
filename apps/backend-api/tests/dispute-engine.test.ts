@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   AuditLogService,
   Dispute,
+  NotificationService,
+} from '@carbroz/common';
+import type {
   IBookingRepository,
   IDisputeRepository,
   IPaymentRepository,
-  NotificationService,
 } from '@carbroz/common';
 import { RaiseDisputeUseCase } from '../src/modules/dispute/use-cases/RaiseDisputeUseCase.js';
 import { ResolveDisputeUseCase } from '../src/modules/dispute/use-cases/ResolveDisputeUseCase.js';
@@ -57,10 +59,12 @@ describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
     },
     async create() { throw new Error('Not implemented'); },
     async update() { throw new Error('Not implemented'); },
-    async findByCustomerId() { return []; },
-    async findByPartnerId() { return []; },
-    async findOverlapping() { return []; },
-    async findPendingExpired() { return []; },
+    async listByCustomerId() { return []; },
+    async listByPartnerId() { return []; },
+    async listAll() { return []; },
+    async findConflictingPartnerBooking() { return null; },
+    async findConflictingSlotBooking() { return null; },
+    async findExpiredPendingBookings() { return []; },
   };
 
   const mockPaymentRepo: IPaymentRepository = {
@@ -81,7 +85,7 @@ describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
 
   const notificationsSent: any[] = [];
   const mockNotificationService: NotificationService = {
-    async send(payload) {
+    async send(payload: any) {
       notificationsSent.push(payload);
       return {} as any;
     },
@@ -89,7 +93,7 @@ describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
 
   const auditLogs: any[] = [];
   const mockAuditLogService: AuditLogService = {
-    async log(props) {
+    async log(props: any) {
       auditLogs.push(props);
       return props as any;
     },
