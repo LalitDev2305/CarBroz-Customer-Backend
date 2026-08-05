@@ -106,8 +106,8 @@ describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
     async calculateDistance(origin, destination) {
       mapsApiCallCount++;
       return {
-        distanceMeters: 5000,
-        durationSeconds: 900,
+        distanceInMeters: 5000,
+        durationInSeconds: 900,
       };
     },
     async geocode() { throw new Error('Not implemented'); },
