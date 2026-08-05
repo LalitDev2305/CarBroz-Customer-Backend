@@ -6,16 +6,16 @@ import { CancelBookingUseCase } from '../src/modules/booking/use-cases/CancelBoo
 import { ExpirePendingBookingsUseCase } from '../src/modules/booking/use-cases/ExpirePendingBookingsUseCase.js';
 import {
   Booking,
-  BookingStatus,
-  IAddressRepository,
-  IBookingRepository,
-  ICatalogRepository,
-  ICustomerProfileRepository,
-  IPartnerRepository,
-  IPricingRepository,
-  ITransactionProvider,
-  IVehicleRepository,
   Vehicle,
+  type BookingStatus,
+  type IAddressRepository,
+  type IBookingRepository,
+  type ICatalogRepository,
+  type ICustomerProfileRepository,
+  type IPartnerRepository,
+  type IPricingRepository,
+  type ITransactionProvider,
+  type IVehicleRepository,
 } from '@carbroz/common';
 
 class MemoryBookingRepository implements IBookingRepository {
