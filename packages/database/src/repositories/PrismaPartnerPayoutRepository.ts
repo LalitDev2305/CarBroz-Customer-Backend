@@ -26,7 +26,7 @@ export class PrismaPartnerPayoutRepository implements IPartnerPayoutRepository {
   }
 
   async create(payout: PartnerPayout): Promise<PartnerPayout> {
-    const record = await this.prisma.partnerPayout.create({
+    const record = await (this.prisma as any).partnerPayout.create({
       data: {
         bookingId: payout.bookingId,
         partnerId: payout.partnerId,
@@ -46,43 +46,43 @@ export class PrismaPartnerPayoutRepository implements IPartnerPayoutRepository {
   }
 
   async findById(id: number): Promise<PartnerPayout | null> {
-    const record = await this.prisma.partnerPayout.findUnique({ where: { id } });
+    const record = await (this.prisma as any).partnerPayout.findUnique({ where: { id } });
     return record ? this.mapToDomain(record) : null;
   }
 
   async findByPublicId(publicId: string): Promise<PartnerPayout | null> {
-    const record = await this.prisma.partnerPayout.findUnique({ where: { publicId } });
+    const record = await (this.prisma as any).partnerPayout.findUnique({ where: { publicId } });
     return record ? this.mapToDomain(record) : null;
   }
 
   async findByBookingId(bookingId: number): Promise<PartnerPayout | null> {
-    const record = await this.prisma.partnerPayout.findUnique({ where: { bookingId } });
+    const record = await (this.prisma as any).partnerPayout.findUnique({ where: { bookingId } });
     return record ? this.mapToDomain(record) : null;
   }
 
   async listByPartnerId(partnerId: number, status?: PayoutStatus): Promise<PartnerPayout[]> {
-    const records = await this.prisma.partnerPayout.findMany({
+    const records = await (this.prisma as any).partnerPayout.findMany({
       where: {
         partnerId,
         status: status ? status : undefined,
       },
       orderBy: { scheduledAt: 'desc' },
     });
-    return records.map((r) => this.mapToDomain(r));
+    return records.map((r: any) => this.mapToDomain(r));
   }
 
   async listByStatus(status: PayoutStatus, limit = 50, offset = 0): Promise<PartnerPayout[]> {
-    const records = await this.prisma.partnerPayout.findMany({
+    const records = await (this.prisma as any).partnerPayout.findMany({
       where: { status },
       take: limit,
       skip: offset,
       orderBy: { scheduledAt: 'asc' },
     });
-    return records.map((r) => this.mapToDomain(r));
+    return records.map((r: any) => this.mapToDomain(r));
   }
 
   async update(payout: PartnerPayout): Promise<PartnerPayout> {
-    const record = await this.prisma.partnerPayout.update({
+    const record = await (this.prisma as any).partnerPayout.update({
       where: { id: payout.id },
       data: {
         status: payout.status,
