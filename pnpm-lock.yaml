@@ -817,6 +817,63 @@ importers:
       '@carbroz/config':
         specifier: workspace:*
         version: link:../config
+      '@carbroz/domain-address':
+        specifier: workspace:*
+        version: link:../../domains/address
+      '@carbroz/domain-audit':
+        specifier: workspace:*
+        version: link:../../domains/audit
+      '@carbroz/domain-booking':
+        specifier: workspace:*
+        version: link:../../domains/booking
+      '@carbroz/domain-catalog':
+        specifier: workspace:*
+        version: link:../../domains/catalog
+      '@carbroz/domain-config':
+        specifier: workspace:*
+        version: link:../../domains/config
+      '@carbroz/domain-coupon':
+        specifier: workspace:*
+        version: link:../../domains/coupon
+      '@carbroz/domain-customer-profile':
+        specifier: workspace:*
+        version: link:../../domains/customer-profile
+      '@carbroz/domain-dispute':
+        specifier: workspace:*
+        version: link:../../domains/dispute
+      '@carbroz/domain-garage':
+        specifier: workspace:*
+        version: link:../../domains/garage
+      '@carbroz/domain-invoice':
+        specifier: workspace:*
+        version: link:../../domains/invoice
+      '@carbroz/domain-notification':
+        specifier: workspace:*
+        version: link:../../domains/notification
+      '@carbroz/domain-partner-kyc':
+        specifier: workspace:*
+        version: link:../../domains/partner-kyc
+      '@carbroz/domain-partner-profile':
+        specifier: workspace:*
+        version: link:../../domains/partner-profile
+      '@carbroz/domain-payment':
+        specifier: workspace:*
+        version: link:../../domains/payment
+      '@carbroz/domain-payout':
+        specifier: workspace:*
+        version: link:../../domains/payout
+      '@carbroz/domain-pricing':
+        specifier: workspace:*
+        version: link:../../domains/pricing
+      '@carbroz/domain-review':
+        specifier: workspace:*
+        version: link:../../domains/review
+      '@carbroz/domain-sdui-registry':
+        specifier: workspace:*
+        version: link:../../domains/sdui-registry
+      '@carbroz/domain-tracking':
+        specifier: workspace:*
+        version: link:../../domains/tracking
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)

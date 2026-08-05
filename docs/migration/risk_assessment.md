@@ -1,18 +1,22 @@
-# Milestone 4 — Risk Assessment & Mitigation Plan
+# Milestone 5 — Risk Assessment & Mitigation Plan
 
-Technical risk matrix for Milestone 4 Engagement Domains migration.
+Risk evaluation for Milestone 5 (Legacy Pruning & Final Stabilization).
 
-## 1. Risk Matrix
+## 1. Identified Risks & Impact Analysis
 
-| Risk ID | Scenario | Probability | Impact | Mitigation |
+| Risk ID | Risk Description | Severity | Likelihood | Mitigation Strategy |
 |---|---|---|---|---|
-| R-M4-01 | Circular dependency between SDUI Registry and UI SDK | Low | High | `shared/ui-sdk` defines layout contracts; `domains/sdui-registry` handles persistence only. |
-| R-M4-02 | Notification provider token invalidation during migration | Low | Medium | Keep `IDeviceTokenRepository` interface contract identical. |
-| R-M4-03 | Audit log interception performance degradation | Low | Low | Non-blocking asynchronous log dispatching. |
+| R1 | Unintentional deletion of legacy repositories used by unmigrated utilities | High | Low | Conduct full codebase search (`grep_search`) before deleting any file in `packages/database/src/repositories/` |
+| R2 | Broken exports in `@carbroz/common` breaking legacy controllers | Critical | Low | Maintain all backward compatibility re-exports in `@carbroz/common/src/domain/` |
+| R3 | Stale `dist/` artifacts causing build or test mismatches | Medium | Medium | Run `pnpm -r build` and `git clean -fd` between execution batches |
 
 ---
 
-## 2. Rollback Strategy
+## 2. Emergency Rollback Plan
 
-1. **Git Level**: Delete branch `feature/m4-engagement-domains` or checkout `feature/architecture-stabilization`.
-2. **Database Level**: Zero Prisma schema modifications introduced in Milestone 4.
+If any critical validation step fails during Phase 7 implementation:
+
+```bash
+git checkout feature/m5-legacy-pruning
+git reset --hard HEAD
+```
