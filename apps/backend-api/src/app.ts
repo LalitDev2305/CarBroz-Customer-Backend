@@ -2,7 +2,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import fastifyRateLimit from '@fastify/rate-limit';
-import { getFastifyLoggerConfig } from '@carbroz/logger';
+import { getFastifyLoggerConfig } from '@carbroz/platform-observability';
 import { AppConfig, SecurityConfig, LoggingConfig } from '@carbroz/config';
 import { globalErrorHandler } from './middlewares/error-handler.js';
 import diPlugin from './plugins/di.plugin.js';

@@ -1,6 +1,7 @@
 import pino from 'pino';
 
 export const createLogger = (name: string, level: string = 'info') => {
+
   const isProduction = process.env.NODE_ENV === 'production';
   return pino({
     name,

@@ -1,5 +1,5 @@
 import { ILoggerProvider } from '@carbroz/common';
-import { logger } from '@carbroz/logger';
+import { logger } from '@carbroz/platform-observability';
 
 export class LoggerProvider implements ILoggerProvider {
   info(message: string, context?: Record<string, unknown>): void {
