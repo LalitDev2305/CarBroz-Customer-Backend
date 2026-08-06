@@ -1,1 +1,1 @@
-export type NotificationStatus = 'SENT' | 'FAILED';
+export type NotificationStatus = 'SENT' | 'DELIVERED' | 'READ' | 'FAILED';

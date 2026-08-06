@@ -1,22 +1,10 @@
-# Milestone 5 — Risk Assessment & Mitigation Plan
+# Phase P2 Risk Assessment & Mitigation Strategy
 
-Risk evaluation for Milestone 5 (Legacy Pruning & Final Stabilization).
+Assessment of technical risks in Phase P2.
 
-## 1. Identified Risks & Impact Analysis
-
-| Risk ID | Risk Description | Severity | Likelihood | Mitigation Strategy |
-|---|---|---|---|---|
-| R1 | Unintentional deletion of legacy repositories used by unmigrated utilities | High | Low | Conduct full codebase search (`grep_search`) before deleting any file in `packages/database/src/repositories/` |
-| R2 | Broken exports in `@carbroz/common` breaking legacy controllers | Critical | Low | Maintain all backward compatibility re-exports in `@carbroz/common/src/domain/` |
-| R3 | Stale `dist/` artifacts causing build or test mismatches | Medium | Medium | Run `pnpm -r build` and `git clean -fd` between execution batches |
-
----
-
-## 2. Emergency Rollback Plan
-
-If any critical validation step fails during Phase 7 implementation:
-
-```bash
-git checkout feature/m5-legacy-pruning
-git reset --hard HEAD
-```
+1. **High-Frequency GPS Location Pings**:
+   - Risk: Database socket exhaustion from frequent driver location updates.
+   - Mitigation: In-memory Redis caching of recent GPS coordinates with periodic flush to Postgres.
+2. **Third-Party Push Notification Rate Limits**:
+   - Risk: FCM / SMS rate limits during peak usage.
+   - Mitigation: BullMQ queue buffer with exponential backoff retries and dead-letter queue.

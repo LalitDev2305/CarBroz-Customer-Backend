@@ -1,35 +1,40 @@
-# Phase P1 Execution Plan — Partner KYC, Slot Booking & Media Storage
+# Phase P2 Execution Plan — Real-time Tracking & Multi-Channel Notifications
 
-Detailed execution plan for Phase P1 production capabilities.
+Comprehensive execution plan for Phase P2 capabilities.
 
-## 1. Scope & Capabilities
-- **Partner KYC Approval Workflow**: Upload PAN/Aadhar/GST/License, Admin verification use cases, state transitions (`PENDING` → `APPROVED` / `REJECTED`).
-- **Service Slot Management**: Open slot calculation engine considering partner radius, buffer times, and maximum hourly capacity.
-- **Media Storage Integration**: Supabase / S3 Presigned URL generation for vehicle photos and partner KYC documents (`platform/storage`).
+## 1. Capabilities Overview
+
+1. **Real-time Tracking Engine**:
+   - `StartTrackingSessionUseCase.ts`
+   - `UpdateLiveGpsLocationUseCase.ts`
+   - `GetLiveTrackingTimelineUseCase.ts`
+   - State Machine: `VEHICLE_PICKUP` → `IN_TRANSIT` → `SERVICE_IN_PROGRESS` → `QUALITY_CHECK` → `COMPLETED`.
+2. **Notification Orchestration Engine**:
+   - Multi-channel dispatch (Push via FCM, SMS, Email, In-App).
+   - Template engine, retry strategy, and dead-letter queues.
 
 ---
 
-## 2. APIs & Endpoints
-- `POST /api/v1/partners/kyc/upload` (Partner document upload)
-- `POST /api/v1/admin/partners/kyc/verify` (Admin KYC review & status update)
-- `GET /api/v1/slots/available` (Fetch open service slots)
-- `POST /api/v1/storage/presigned-url` (Generate presigned upload URL)
+## 2. API & Endpoint Inventory
+
+- `POST /api/v1/tracking/sessions/start` (Initialize live tracking session)
+- `PUT /api/v1/tracking/sessions/:id/location` (Partner GPS coordinate ping)
+- `GET /api/v1/tracking/sessions/:bookingId` (Fetch customer live timeline)
+- `POST /api/v1/notifications/device-token` (Register FCM device token)
+- `POST /api/v1/notifications/send` (Internal multi-channel notification dispatch)
 
 ---
 
 ## 3. SDUI Screens
-- `partner_kyc_screen`
-- `slot_picker_screen`
+
+- `tracking_timeline_screen`
+- `live_job_map_screen`
+- `notification_center_screen`
 
 ---
 
-## 4. Technology & Swappable Provider
-- **Storage Provider**: Supabase Storage (S3 Protocol - **FREE Tier**). Swappable to AWS S3, Cloudflare R2, MinIO via `.env` `S3StorageProvider`.
+## 4. Technology & Swappable Providers
 
----
-
-## 5. Quality & Coverage Targets
-- Domain Layer: 100%
-- Application Use Cases: 100%
-- Repositories: 100%
-- Overall Coverage Target: 95%+
+- **Push Notifications**: Firebase Cloud Messaging (FCM - **FREE**). Swappable to OneSignal via `IPushNotificationProvider`.
+- **Email Notifications**: Resend (**FREE Tier** 3,000/mo). Swappable to AWS SES / SendGrid via `IEmailProvider`.
+- **SMS Notifications**: Fast2SMS (**Low Cost**). Swappable to Twilio / Msg91 via `ISmsProvider`.
