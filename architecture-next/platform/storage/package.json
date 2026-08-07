@@ -1,0 +1,17 @@
+{
+  "name": "@carbroz/platform-storage",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@carbroz/common": "workspace:*",
+    "minio": "^8.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0"
+  }
+}

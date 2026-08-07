@@ -1,0 +1,19 @@
+{
+   name: @carbroz/domain-commerce,
+  version: 1.0.0,
+  type: module,
+  main: dist/public/index.js,
+  types: dist/public/index.d.ts,
+  scripts: {
+    build: tsc
+  },
+  dependencies: {
+    @carbroz/foundation-kernel: workspace:*,
+    @carbroz/sdui-engine: workspace:*,
+    @prisma/client: ^6.19.3,
+    awilix: ^12.0.0
+  },
+  devDependencies: {
+    @types/node: ^26.1.0
+  }
+}
