@@ -8,8 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@carbroz/common": "workspace:*",
-    "@carbroz/shared-kernel": "workspace:*"
+    "@carbroz/foundation-kernel": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.1.0"

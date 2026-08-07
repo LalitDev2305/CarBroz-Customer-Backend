@@ -1,8 +1,13 @@
-import { ServiceCategory, Service, ServiceAddon } from '@carbroz/common';
+import { ServiceCategory } from '../../domain/ServiceCategory.js';
+import { Service } from '../../domain/Service.js';
+import { ServiceAddon } from '../../domain/ServiceAddon.js';
 export class PrismaCatalogRepository {
-    prisma;
-    constructor(prisma) {
-        this.prisma = prisma;
+    prismaProvider;
+    constructor(prismaProvider) {
+        this.prismaProvider = prismaProvider;
+    }
+    get prisma() {
+        return this.prismaProvider.getClient();
     }
     async findById(id) {
         const model = await this.prisma.serviceCategory.findUnique({ where: { id, deletedAt: null } });

@@ -1,4 +1,4 @@
-import { User, IUserRepository } from '@carbroz/common';
+import { User, IUserRepository } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 export declare class PrismaUserRepository implements IUserRepository {
     private readonly prisma;

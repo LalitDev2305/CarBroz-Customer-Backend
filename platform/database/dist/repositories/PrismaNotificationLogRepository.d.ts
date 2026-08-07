@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { INotificationLogRepository, NotificationLog } from '@carbroz/common';
+import { INotificationLogRepository, NotificationLog } from '@carbroz/foundation-kernel';
 export declare class PrismaNotificationLogRepository implements INotificationLogRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

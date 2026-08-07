@@ -1,4 +1,4 @@
-import { Dispute, Money } from '@carbroz/common';
+import { Dispute, Money } from '@carbroz/foundation-kernel';
 export class PrismaDisputeRepository {
     prisma;
     constructor(prisma) {

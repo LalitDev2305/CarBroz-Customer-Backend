@@ -1,4 +1,4 @@
-import { PartnerProfile, IPartnerProfileRepository } from '@carbroz/common';
+import { PartnerProfile, IPartnerProfileRepository } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 export declare class PrismaPartnerProfileRepository implements IPartnerProfileRepository {
     private readonly prismaProvider;

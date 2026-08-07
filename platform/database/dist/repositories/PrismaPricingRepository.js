@@ -1,4 +1,4 @@
-import { PricingTier, VehicleTypeMultiplierEntity } from '@carbroz/common';
+import { PricingTier, VehicleTypeMultiplierEntity } from '@carbroz/foundation-kernel';
 export class PrismaPricingRepository {
     prismaProvider;
     constructor(prismaProvider) {

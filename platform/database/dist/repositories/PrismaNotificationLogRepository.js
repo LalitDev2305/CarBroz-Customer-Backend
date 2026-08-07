@@ -1,4 +1,4 @@
-import { NotificationLog } from '@carbroz/common';
+import { NotificationLog } from '@carbroz/foundation-kernel';
 export class PrismaNotificationLogRepository {
     prisma;
     constructor(prisma) {

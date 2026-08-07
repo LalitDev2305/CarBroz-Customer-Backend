@@ -1,5 +1,5 @@
-import { ICustomerProfileRepository } from '@carbroz/common';
-import { CustomerProfile } from '@carbroz/common';
+import { ICustomerProfileRepository } from '@carbroz/foundation-kernel';
+import { CustomerProfile } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 export declare class PrismaCustomerProfileRepository implements ICustomerProfileRepository {
     private readonly prismaProvider;

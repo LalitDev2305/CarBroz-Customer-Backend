@@ -1,9 +1,9 @@
-import { IPermissionRepository } from '@carbroz/common';
-import { Permission } from '@carbroz/common';
-import { PrismaClient } from '@prisma/client';
-export declare class PrismaPermissionRepository implements IPermissionRepository {
-    private readonly prisma;
-    constructor(prisma: PrismaClient);
+import { PrismaProvider } from '@carbroz/platform-database';
+import { Permission } from '../../domain/Permission.js';
+export declare class PrismaPermissionRepository {
+    private readonly prismaProvider;
+    constructor(prismaProvider: PrismaProvider);
+    private get prisma();
     findById(id: number): Promise<Permission | null>;
     findAll(): Promise<Permission[]>;
     findByKey(key: string): Promise<Permission | null>;

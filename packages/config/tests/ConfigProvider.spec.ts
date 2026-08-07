@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ConfigProvider } from '../src/providers/ConfigProvider.js';
-import { IConfigRepository } from '@carbroz/common';
+import { IConfigRepository } from '@carbroz/foundation-kernel';
 
 describe('ConfigProvider', () => {
   let repository: IConfigRepository;

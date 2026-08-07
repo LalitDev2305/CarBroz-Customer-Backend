@@ -1,4 +1,4 @@
-import { CorporateCreditLedger } from '@carbroz/common';
+import { CorporateCreditLedger } from '@carbroz/foundation-kernel';
 export class PrismaCorporateCreditLedgerRepository {
     prisma;
     constructor(prisma) {

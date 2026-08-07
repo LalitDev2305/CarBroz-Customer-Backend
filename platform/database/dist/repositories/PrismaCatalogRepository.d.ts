@@ -1,4 +1,4 @@
-import { ICatalogRepository, ServiceCategory, Service, ServiceAddon } from '@carbroz/common';
+import { ICatalogRepository, ServiceCategory, Service, ServiceAddon } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 export declare class PrismaCatalogRepository implements ICatalogRepository {
     private readonly prismaProvider;

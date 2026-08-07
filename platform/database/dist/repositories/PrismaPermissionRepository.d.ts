@@ -1,5 +1,5 @@
-import { IPermissionRepository } from '@carbroz/common';
-import { Permission } from '@carbroz/common';
+import { IPermissionRepository } from '@carbroz/foundation-kernel';
+import { Permission } from '@carbroz/foundation-kernel';
 import { PrismaClient } from '@prisma/client';
 export declare class PrismaPermissionRepository implements IPermissionRepository {
     private readonly prisma;

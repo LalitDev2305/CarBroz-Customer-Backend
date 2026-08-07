@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { CouponUsage, ICouponUsageRepository } from '@carbroz/common';
+import { CouponUsage, ICouponUsageRepository } from '@carbroz/foundation-kernel';
 export declare class PrismaCouponUsageRepository implements ICouponUsageRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

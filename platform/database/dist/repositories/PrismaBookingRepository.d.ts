@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Booking, BookingStatus, IBookingRepository } from '@carbroz/common';
+import { Booking, BookingStatus, IBookingRepository } from '@carbroz/foundation-kernel';
 export declare class PrismaBookingRepository implements IBookingRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

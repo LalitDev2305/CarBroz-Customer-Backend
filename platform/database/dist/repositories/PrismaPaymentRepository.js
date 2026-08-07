@@ -1,4 +1,4 @@
-import { Payment, PaymentWebhook } from '@carbroz/common';
+import { Payment, PaymentWebhook } from '@carbroz/foundation-kernel';
 export class PrismaPaymentRepository {
     prisma;
     constructor(prisma) {

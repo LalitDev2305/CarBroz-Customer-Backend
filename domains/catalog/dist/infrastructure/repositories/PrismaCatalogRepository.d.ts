@@ -1,8 +1,12 @@
-import { PrismaClient } from '@prisma/client';
-import { ICatalogRepository, ServiceCategory, Service, ServiceAddon } from '@carbroz/common';
+import { PrismaProvider } from '@carbroz/platform-database';
+import { ICatalogRepository } from '../../domain/ICatalogRepository.js';
+import { ServiceCategory } from '../../domain/ServiceCategory.js';
+import { Service } from '../../domain/Service.js';
+import { ServiceAddon } from '../../domain/ServiceAddon.js';
 export declare class PrismaCatalogRepository implements ICatalogRepository {
-    private readonly prisma;
-    constructor(prisma: PrismaClient);
+    private readonly prismaProvider;
+    constructor(prismaProvider: PrismaProvider);
+    private get prisma();
     findById(id: number): Promise<ServiceCategory | null>;
     findAll(): Promise<ServiceCategory[]>;
     save(entity: ServiceCategory): Promise<ServiceCategory>;

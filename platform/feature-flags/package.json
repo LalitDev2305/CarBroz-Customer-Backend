@@ -8,6 +8,6 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@carbroz/common": "workspace:*"
+    "@carbroz/foundation-kernel": "workspace:*"
   }
 }

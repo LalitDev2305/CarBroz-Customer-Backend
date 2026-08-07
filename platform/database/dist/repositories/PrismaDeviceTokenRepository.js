@@ -1,4 +1,4 @@
-import { DeviceToken } from '@carbroz/common';
+import { DeviceToken } from '@carbroz/foundation-kernel';
 export class PrismaDeviceTokenRepository {
     prisma;
     constructor(prisma) {

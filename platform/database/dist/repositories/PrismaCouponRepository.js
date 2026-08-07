@@ -1,4 +1,4 @@
-import { Coupon } from '@carbroz/common';
+import { Coupon } from '@carbroz/foundation-kernel';
 export class PrismaCouponRepository {
     prisma;
     constructor(prisma) {

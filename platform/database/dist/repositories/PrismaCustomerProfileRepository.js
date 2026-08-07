@@ -1,4 +1,4 @@
-import { CustomerProfile } from '@carbroz/common';
+import { CustomerProfile } from '@carbroz/foundation-kernel';
 export class PrismaCustomerProfileRepository {
     prismaProvider;
     constructor(prismaProvider) {

@@ -1,7 +1,10 @@
 export class PrismaPermissionRepository {
-    prisma;
-    constructor(prisma) {
-        this.prisma = prisma;
+    prismaProvider;
+    constructor(prismaProvider) {
+        this.prismaProvider = prismaProvider;
+    }
+    get prisma() {
+        return this.prismaProvider.getClient();
     }
     async findById(id) {
         const permission = await this.prisma.permission.findUnique({ where: { id } });

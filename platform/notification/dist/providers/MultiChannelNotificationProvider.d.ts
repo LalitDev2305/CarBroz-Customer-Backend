@@ -1,4 +1,4 @@
-import { IEmailProvider, INotificationProvider, IPushProvider, ISmsProvider, NotificationDispatchResult, NotificationPayload } from '@carbroz/common';
+import { IEmailProvider, INotificationProvider, IPushProvider, ISmsProvider, NotificationDispatchResult, NotificationPayload } from '@carbroz/foundation-kernel';
 export declare class MultiChannelNotificationProvider implements INotificationProvider {
     private readonly pushProvider;
     private readonly smsProvider;

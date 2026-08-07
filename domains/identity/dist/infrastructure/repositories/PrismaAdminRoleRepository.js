@@ -1,7 +1,10 @@
 export class PrismaAdminRoleRepository {
-    prisma;
-    constructor(prisma) {
-        this.prisma = prisma;
+    prismaProvider;
+    constructor(prismaProvider) {
+        this.prismaProvider = prismaProvider;
+    }
+    get prisma() {
+        return this.prismaProvider.getClient();
     }
     async assignRole(userId, roleId, assignedBy) {
         const record = await this.prisma.adminUserRole.create({

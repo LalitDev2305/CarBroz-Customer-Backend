@@ -1,5 +1,5 @@
 import { PartnerMember as PrismaPartnerMember } from '@prisma/client';
-import { PartnerMember, IPartnerMemberRepository } from '@carbroz/common';
+import { PartnerMember, IPartnerMemberRepository } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 export declare class PrismaPartnerMemberRepository implements IPartnerMemberRepository {
     private readonly prismaProvider;

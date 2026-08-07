@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { ICorporateAccountRepository, CorporateAccount, CorporateAccountStatus } from '@carbroz/common';
+import { ICorporateAccountRepository, CorporateAccount, CorporateAccountStatus } from '@carbroz/foundation-kernel';
 export declare class PrismaCorporateAccountRepository implements ICorporateAccountRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

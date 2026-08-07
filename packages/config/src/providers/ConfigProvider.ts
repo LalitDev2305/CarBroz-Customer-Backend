@@ -1,11 +1,13 @@
-import { IConfigProvider, IConfigRepository } from '@carbroz/common';
+import { IConfigProvider } from '@carbroz/foundation-kernel';
+
 
 export class ConfigProvider implements IConfigProvider {
-  private repository: IConfigRepository;
+  private repository: any;
 
-  constructor(configRepository: IConfigRepository) {
+  constructor(configRepository: any) {
     this.repository = configRepository;
   }
+
 
   public async get<T>(key: string, defaultValue?: T): Promise<T> {
     const config = await this.repository.findByKey(key);

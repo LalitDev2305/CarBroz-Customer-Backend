@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { AuditLog, IAuditLogRepository } from '@carbroz/common';
+import { AuditLog, IAuditLogRepository } from '@carbroz/foundation-kernel';
 export declare class PrismaAuditLogRepository implements IAuditLogRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

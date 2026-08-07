@@ -1,4 +1,4 @@
-import { Address } from '@carbroz/common';
+import { Address } from '@carbroz/foundation-kernel';
 export class PrismaAddressRepository {
     prismaProvider;
     constructor(prismaProvider) {

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { ICorporateCreditLedgerRepository, CorporateCreditLedger } from '@carbroz/common';
+import { ICorporateCreditLedgerRepository, CorporateCreditLedger } from '@carbroz/foundation-kernel';
 export declare class PrismaCorporateCreditLedgerRepository implements ICorporateCreditLedgerRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

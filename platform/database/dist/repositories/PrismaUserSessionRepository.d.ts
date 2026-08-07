@@ -1,4 +1,4 @@
-import { UserSession, IUserSessionRepository } from '@carbroz/common';
+import { UserSession, IUserSessionRepository } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 export declare class PrismaUserSessionRepository implements IUserSessionRepository {
     private readonly prisma;

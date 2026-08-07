@@ -1,4 +1,4 @@
-import { IDatabaseProvider } from '@carbroz/common';
+import { IDatabaseProvider } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from './PrismaProvider.js';
 export declare class PrismaDatabaseProvider implements IDatabaseProvider {
     private prismaProvider;

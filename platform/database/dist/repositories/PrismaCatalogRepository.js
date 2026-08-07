@@ -1,4 +1,4 @@
-import { ServiceCategory, Service, ServiceAddon } from '@carbroz/common';
+import { ServiceCategory, Service, ServiceAddon } from '@carbroz/foundation-kernel';
 export class PrismaCatalogRepository {
     prismaProvider;
     constructor(prismaProvider) {

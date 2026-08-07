@@ -1,7 +1,10 @@
 export class PrismaRoleRepository {
-    prisma;
-    constructor(prisma) {
-        this.prisma = prisma;
+    prismaProvider;
+    constructor(prismaProvider) {
+        this.prismaProvider = prismaProvider;
+    }
+    get prisma() {
+        return this.prismaProvider.getClient();
     }
     async findById(id) {
         const role = await this.prisma.role.findUnique({ where: { id } });

@@ -1,5 +1,5 @@
 import { PrismaRepositoryBase } from './PrismaRepositoryBase.js';
-import { IConfigRepository, SystemConfig } from '@carbroz/common';
+import { IConfigRepository, SystemConfig } from '@carbroz/foundation-kernel';
 export declare class PrismaConfigRepository extends PrismaRepositoryBase<SystemConfig, number, any, any, any, any, any> implements IConfigRepository {
     constructor(prismaProvider: import('../providers/PrismaProvider.js').PrismaProvider);
     protected mapToDomain(model: any): SystemConfig;

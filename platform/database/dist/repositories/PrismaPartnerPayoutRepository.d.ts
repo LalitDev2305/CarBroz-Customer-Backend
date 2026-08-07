@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { IPartnerPayoutRepository, PartnerPayout, PayoutStatus } from '@carbroz/common';
+import { IPartnerPayoutRepository, PartnerPayout, PayoutStatus } from '@carbroz/foundation-kernel';
 export declare class PrismaPartnerPayoutRepository implements IPartnerPayoutRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

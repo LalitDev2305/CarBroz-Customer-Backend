@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { IReviewRepository, PartnerRatingStats, Review } from '@carbroz/common';
+import { IReviewRepository, PartnerRatingStats, Review } from '@carbroz/foundation-kernel';
 export declare class PrismaReviewRepository implements IReviewRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

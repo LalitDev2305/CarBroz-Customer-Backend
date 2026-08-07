@@ -1,4 +1,4 @@
-import { PartnerPayout } from '@carbroz/common';
+import { PartnerPayout } from '@carbroz/foundation-kernel';
 export class PrismaPartnerPayoutRepository {
     prisma;
     constructor(prisma) {

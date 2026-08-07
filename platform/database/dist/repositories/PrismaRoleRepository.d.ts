@@ -1,5 +1,5 @@
-import { IRoleRepository } from '@carbroz/common';
-import { Role } from '@carbroz/common';
+import { IRoleRepository } from '@carbroz/foundation-kernel';
+import { Role } from '@carbroz/foundation-kernel';
 import { PrismaClient } from '@prisma/client';
 export declare class PrismaRoleRepository implements IRoleRepository {
     private readonly prisma;

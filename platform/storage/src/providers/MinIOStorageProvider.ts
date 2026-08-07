@@ -1,4 +1,5 @@
-import { IStorageProvider, ILoggerProvider, IConfigProvider } from '@carbroz/common';
+import { IStorageProvider, ILoggerProvider, IConfigProvider } from '@carbroz/foundation-kernel';
+
 import * as Minio from 'minio';
 import path from 'path';
 import fs from 'fs';

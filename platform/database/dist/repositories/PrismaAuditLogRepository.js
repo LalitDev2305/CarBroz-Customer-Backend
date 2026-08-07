@@ -1,4 +1,4 @@
-import { AuditLog } from '@carbroz/common';
+import { AuditLog } from '@carbroz/foundation-kernel';
 export class PrismaAuditLogRepository {
     prisma;
     constructor(prisma) {

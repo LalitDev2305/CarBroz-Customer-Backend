@@ -1,11 +1,12 @@
-import { UserSession, IUserSessionRepository } from '@carbroz/common';
-import { PrismaProvider } from '../providers/PrismaProvider.js';
+import { PrismaProvider } from '@carbroz/platform-database';
+import { UserSession } from '../../domain/UserSession.js';
 
-export class PrismaUserSessionRepository implements IUserSessionRepository {
+export class PrismaUserSessionRepository {
   private readonly prisma;
   constructor(prismaProvider: PrismaProvider) {
     this.prisma = prismaProvider.getClient();
   }
+
 
   async findById(id: number): Promise<UserSession | null> {
     const session = await this.prisma.userSession.findUnique({

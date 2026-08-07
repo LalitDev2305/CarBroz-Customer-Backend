@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Dispute, DisputeStatus, IDisputeRepository } from '@carbroz/common';
+import { Dispute, DisputeStatus, IDisputeRepository } from '@carbroz/foundation-kernel';
 export declare class PrismaDisputeRepository implements IDisputeRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

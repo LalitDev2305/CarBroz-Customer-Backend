@@ -1,5 +1,5 @@
-import { IAddressRepository } from '@carbroz/common';
-import { Address } from '@carbroz/common';
+import { IAddressRepository } from '@carbroz/foundation-kernel';
+import { Address } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 export declare class PrismaAddressRepository implements IAddressRepository {
     private readonly prismaProvider;

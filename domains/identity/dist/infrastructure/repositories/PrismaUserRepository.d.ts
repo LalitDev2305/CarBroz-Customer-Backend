@@ -1,6 +1,6 @@
-import { User, IUserRepository } from '@carbroz/common';
-import { PrismaProvider } from '../providers/PrismaProvider.js';
-export declare class PrismaUserRepository implements IUserRepository {
+import { PrismaProvider } from '@carbroz/platform-database';
+import { User } from '../../domain/User.js';
+export declare class PrismaUserRepository {
     private readonly prisma;
     constructor(prismaProvider: PrismaProvider);
     findById(id: number): Promise<User | null>;

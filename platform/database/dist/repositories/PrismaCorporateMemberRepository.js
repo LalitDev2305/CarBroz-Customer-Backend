@@ -1,4 +1,4 @@
-import { CorporateMember } from '@carbroz/common';
+import { CorporateMember } from '@carbroz/foundation-kernel';
 export class PrismaCorporateMemberRepository {
     prisma;
     constructor(prisma) {

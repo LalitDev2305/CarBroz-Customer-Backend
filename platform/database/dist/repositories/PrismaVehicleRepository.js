@@ -1,4 +1,4 @@
-import { Vehicle } from '@carbroz/common';
+import { Vehicle } from '@carbroz/foundation-kernel';
 export class PrismaVehicleRepository {
     prisma;
     constructor(prisma) {

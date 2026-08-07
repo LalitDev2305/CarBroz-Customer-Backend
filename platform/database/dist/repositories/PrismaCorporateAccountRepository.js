@@ -1,4 +1,4 @@
-import { CorporateAccount } from '@carbroz/common';
+import { CorporateAccount } from '@carbroz/foundation-kernel';
 export class PrismaCorporateAccountRepository {
     prisma;
     constructor(prisma) {

@@ -1,4 +1,4 @@
-import { ITransactionProvider } from '@carbroz/common';
+import { ITransactionProvider } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from './PrismaProvider.js';
 export declare class PrismaTransactionProvider implements ITransactionProvider {
     private prismaProvider;

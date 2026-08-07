@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { ICorporateMemberRepository, CorporateMember } from '@carbroz/common';
+import { ICorporateMemberRepository, CorporateMember } from '@carbroz/foundation-kernel';
 export declare class PrismaCorporateMemberRepository implements ICorporateMemberRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

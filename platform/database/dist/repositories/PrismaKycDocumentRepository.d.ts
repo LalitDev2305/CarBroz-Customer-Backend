@@ -1,4 +1,4 @@
-import { KycDocument, IKycDocumentRepository, KycDocumentStatus } from '@carbroz/common';
+import { KycDocument, IKycDocumentRepository, KycDocumentStatus } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 export declare class PrismaKycDocumentRepository implements IKycDocumentRepository {
     private readonly prismaProvider;

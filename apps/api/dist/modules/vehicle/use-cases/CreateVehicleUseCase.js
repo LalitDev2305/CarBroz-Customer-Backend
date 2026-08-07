@@ -1,0 +1,30 @@
+import { Vehicle } from '@carbroz/foundation-kernel';
+export class CreateVehicleUseCase {
+    vehicleRepository;
+    constructor(vehicleRepository) {
+        this.vehicleRepository = vehicleRepository;
+    }
+    async execute(input) {
+        const existing = await this.vehicleRepository.findByCustomerAndRegistration(input.customerId, input.registrationNumber);
+        if (existing) {
+            throw new Error(`Vehicle with registration ${input.registrationNumber} already registered for this customer`);
+        }
+        if (input.isDefault) {
+            await this.vehicleRepository.unsetCustomerDefaultVehicles(input.customerId);
+        }
+        const vehicle = new Vehicle({
+            customerId: input.customerId,
+            make: input.make,
+            model: input.model,
+            variant: input.variant,
+            year: input.year,
+            registrationNumber: input.registrationNumber,
+            fuelType: input.fuelType,
+            color: input.color,
+            nickname: input.nickname,
+            isDefault: input.isDefault ?? false,
+        });
+        return await this.vehicleRepository.create(vehicle);
+    }
+}
+//# sourceMappingURL=CreateVehicleUseCase.js.map

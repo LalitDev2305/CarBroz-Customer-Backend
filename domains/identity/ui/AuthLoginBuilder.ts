@@ -1,4 +1,5 @@
-import { type IScreen, type UITheme, BaseTemplate, UI, BaseScreenBuilder, type BuildContext } from '@carbroz/shared-ui-sdk';
+import { type IScreen, type UITheme, BaseTemplate, UI, BaseScreenBuilder, type BuildContext } from '@carbroz/sdui-engine';
+
 
 export class AuthLoginBuilder extends BaseScreenBuilder {
   public readonly screenId = 'auth_login';

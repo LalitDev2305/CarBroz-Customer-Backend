@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { FeatureFlagProvider } from '../src/providers/FeatureFlagProvider.js';
-import { IFeatureFlagRepository } from '@carbroz/common';
+import { IFeatureFlagRepository } from '@carbroz/foundation-kernel';
 
 describe('FeatureFlagProvider', () => {
   let repository: IFeatureFlagRepository;

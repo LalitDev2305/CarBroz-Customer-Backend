@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { IInvoiceRepository, Invoice } from '@carbroz/common';
+import { IInvoiceRepository, Invoice } from '@carbroz/foundation-kernel';
 export declare class PrismaInvoiceRepository implements IInvoiceRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

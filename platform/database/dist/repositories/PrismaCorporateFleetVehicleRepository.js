@@ -1,4 +1,4 @@
-import { CorporateFleetVehicle } from '@carbroz/common';
+import { CorporateFleetVehicle } from '@carbroz/foundation-kernel';
 export class PrismaCorporateFleetVehicleRepository {
     prisma;
     constructor(prisma) {

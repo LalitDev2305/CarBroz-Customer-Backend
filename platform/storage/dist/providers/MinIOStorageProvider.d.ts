@@ -1,4 +1,4 @@
-import { IStorageProvider, ILoggerProvider, IConfigProvider } from '@carbroz/common';
+import { IStorageProvider, ILoggerProvider, IConfigProvider } from '@carbroz/foundation-kernel';
 export declare class MinIOStorageProvider implements IStorageProvider {
     private readonly configProvider;
     private readonly logger;

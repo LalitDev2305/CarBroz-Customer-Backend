@@ -1,4 +1,0 @@
-export enum PartnerType {
-  INDIVIDUAL = 'INDIVIDUAL',
-  ORGANIZATION = 'ORGANIZATION'
-}

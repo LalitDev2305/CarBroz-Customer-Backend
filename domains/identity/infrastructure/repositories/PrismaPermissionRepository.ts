@@ -1,9 +1,13 @@
-import { IPermissionRepository } from '@carbroz/common';
-import { Permission } from '@carbroz/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaProvider } from '@carbroz/platform-database';
+import { Permission } from '../../domain/Permission.js';
 
-export class PrismaPermissionRepository implements IPermissionRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+export class PrismaPermissionRepository {
+  constructor(private readonly prismaProvider: PrismaProvider) {}
+
+  private get prisma() {
+    return this.prismaProvider.getClient();
+  }
+
 
   async findById(id: number): Promise<Permission | null> {
     const permission = await this.prisma.permission.findUnique({ where: { id } });

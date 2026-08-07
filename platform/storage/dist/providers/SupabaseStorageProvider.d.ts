@@ -1,4 +1,4 @@
-import { IStorageProvider } from '@carbroz/common';
+import { IStorageProvider } from '@carbroz/foundation-kernel';
 export interface PresignedUrlOptions {
     bucket: string;
     objectName: string;

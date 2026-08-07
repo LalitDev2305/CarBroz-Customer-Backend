@@ -1,5 +1,5 @@
 import { PrismaRepositoryBase } from './PrismaRepositoryBase.js';
-import { IFeatureFlagRepository, FeatureFlag } from '@carbroz/common';
+import { IFeatureFlagRepository, FeatureFlag } from '@carbroz/foundation-kernel';
 export declare class PrismaFeatureFlagRepository extends PrismaRepositoryBase<FeatureFlag, number, any, any, any, any, any> implements IFeatureFlagRepository {
     constructor(prismaProvider: import('../providers/PrismaProvider.js').PrismaProvider);
     protected mapToDomain(model: any): FeatureFlag;

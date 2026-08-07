@@ -1,9 +1,13 @@
-import { IAdminRoleRepository } from '@carbroz/common';
-import { AdminUserRole } from '@carbroz/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaProvider } from '@carbroz/platform-database';
+import { AdminUserRole } from '../../domain/AdminUserRole.js';
 
-export class PrismaAdminRoleRepository implements IAdminRoleRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+export class PrismaAdminRoleRepository {
+  constructor(private readonly prismaProvider: PrismaProvider) {}
+
+  private get prisma() {
+    return this.prismaProvider.getClient();
+  }
+
 
   async assignRole(userId: number, roleId: number, assignedBy?: number): Promise<AdminUserRole> {
     const record = await this.prisma.adminUserRole.create({

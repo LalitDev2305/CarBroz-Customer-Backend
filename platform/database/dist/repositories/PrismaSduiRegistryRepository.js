@@ -1,4 +1,4 @@
-import { SduiScreenEntity, SduiTemplateEntity, SduiComponentEntity, SduiSubcomponentEntity, SduiChildEntity, SduiChildrenDataEntity, ConflictError, NotFoundError, BadRequestError } from '@carbroz/common';
+import { SduiScreenEntity, SduiTemplateEntity, SduiComponentEntity, SduiSubcomponentEntity, SduiChildEntity, SduiChildrenDataEntity, ConflictError, NotFoundError, BadRequestError } from '@carbroz/foundation-kernel';
 export class PrismaSduiRegistryRepository {
     prismaProvider;
     constructor(prismaProvider) {

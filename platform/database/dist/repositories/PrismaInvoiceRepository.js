@@ -1,4 +1,4 @@
-import { Invoice } from '@carbroz/common';
+import { Invoice } from '@carbroz/foundation-kernel';
 export class PrismaInvoiceRepository {
     prisma;
     constructor(prisma) {

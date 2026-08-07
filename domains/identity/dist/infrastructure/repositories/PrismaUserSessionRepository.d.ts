@@ -1,6 +1,6 @@
-import { UserSession, IUserSessionRepository } from '@carbroz/common';
-import { PrismaProvider } from '../providers/PrismaProvider.js';
-export declare class PrismaUserSessionRepository implements IUserSessionRepository {
+import { PrismaProvider } from '@carbroz/platform-database';
+import { UserSession } from '../../domain/UserSession.js';
+export declare class PrismaUserSessionRepository {
     private readonly prisma;
     constructor(prismaProvider: PrismaProvider);
     findById(id: number): Promise<UserSession | null>;

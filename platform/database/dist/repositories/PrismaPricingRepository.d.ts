@@ -1,4 +1,4 @@
-import { IPricingRepository, PricingTier, VehicleTypeMultiplierEntity } from '@carbroz/common';
+import { IPricingRepository, PricingTier, VehicleTypeMultiplierEntity } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 export declare class PrismaPricingRepository implements IPricingRepository {
     private readonly prismaProvider;

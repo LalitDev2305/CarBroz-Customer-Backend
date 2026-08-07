@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { DeviceToken, IDeviceTokenRepository } from '@carbroz/common';
+import { DeviceToken, IDeviceTokenRepository } from '@carbroz/foundation-kernel';
 export declare class PrismaDeviceTokenRepository implements IDeviceTokenRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

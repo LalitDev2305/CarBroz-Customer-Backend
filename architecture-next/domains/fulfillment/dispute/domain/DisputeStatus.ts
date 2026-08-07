@@ -1,6 +1,0 @@
-export type DisputeStatus =
-  | 'OPEN'
-  | 'UNDER_REVIEW'
-  | 'RESOLVED_REFUNDED'
-  | 'RESOLVED_REJECTED'
-  | 'CANCELLED';

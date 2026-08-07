@@ -1,4 +1,4 @@
-import { Review } from '@carbroz/common';
+import { Review } from '@carbroz/foundation-kernel';
 export class PrismaReviewRepository {
     prisma;
     constructor(prisma) {

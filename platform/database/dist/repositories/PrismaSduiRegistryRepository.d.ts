@@ -1,4 +1,4 @@
-import { ISduiRegistryRepository, SduiScreenEntity, SduiTemplateEntity, SduiComponentEntity, SduiSubcomponentEntity, SduiChildEntity, SduiChildrenDataEntity, CreateDraftInput, UpdateDraftInput } from '@carbroz/common';
+import { ISduiRegistryRepository, SduiScreenEntity, SduiTemplateEntity, SduiComponentEntity, SduiSubcomponentEntity, SduiChildEntity, SduiChildrenDataEntity, CreateDraftInput, UpdateDraftInput } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 export declare class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     private readonly prismaProvider;

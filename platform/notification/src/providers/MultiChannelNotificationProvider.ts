@@ -5,7 +5,8 @@ import {
   ISmsProvider,
   NotificationDispatchResult,
   NotificationPayload,
-} from '@carbroz/common';
+} from '@carbroz/foundation-kernel';
+
 
 export class MultiChannelNotificationProvider implements INotificationProvider {
   constructor(

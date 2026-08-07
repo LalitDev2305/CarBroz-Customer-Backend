@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { ITrackingSessionRepository, TrackingSession } from '@carbroz/common';
+import { ITrackingSessionRepository, TrackingSession } from '@carbroz/foundation-kernel';
 export declare class PrismaTrackingSessionRepository implements ITrackingSessionRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

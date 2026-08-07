@@ -1,4 +1,4 @@
-import { Booking } from '@carbroz/common';
+import { Booking } from '@carbroz/foundation-kernel';
 export class PrismaBookingRepository {
     prisma;
     constructor(prisma) {

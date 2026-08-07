@@ -1,9 +1,9 @@
-import { IRoleRepository } from '@carbroz/common';
-import { Role } from '@carbroz/common';
-import { PrismaClient } from '@prisma/client';
-export declare class PrismaRoleRepository implements IRoleRepository {
-    private readonly prisma;
-    constructor(prisma: PrismaClient);
+import { PrismaProvider } from '@carbroz/platform-database';
+import { Role } from '../../domain/Role.js';
+export declare class PrismaRoleRepository {
+    private readonly prismaProvider;
+    constructor(prismaProvider: PrismaProvider);
+    private get prisma();
     findById(id: number): Promise<Role | null>;
     findAll(): Promise<Role[]>;
     findByName(name: string): Promise<Role | null>;

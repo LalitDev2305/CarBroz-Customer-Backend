@@ -1,5 +1,5 @@
-import { IAdminRoleRepository } from '@carbroz/common';
-import { AdminUserRole } from '@carbroz/common';
+import { IAdminRoleRepository } from '@carbroz/foundation-kernel';
+import { AdminUserRole } from '@carbroz/foundation-kernel';
 import { PrismaClient } from '@prisma/client';
 export declare class PrismaAdminRoleRepository implements IAdminRoleRepository {
     private readonly prisma;

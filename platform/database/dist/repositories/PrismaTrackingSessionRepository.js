@@ -1,4 +1,4 @@
-import { TrackingSession } from '@carbroz/common';
+import { TrackingSession } from '@carbroz/foundation-kernel';
 export class PrismaTrackingSessionRepository {
     prisma;
     constructor(prisma) {

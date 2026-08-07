@@ -1,1 +1,0 @@
-{"version":3,"file":"AuditActor.js","sourceRoot":"","sources":["../../../src/domain/audit/AuditActor.ts"],"names":[],"mappings":"AAOA,MAAM,OAAO,UAAU;IACrB,OAAO,CAAgB;IACvB,SAAS,CAAY;IAErB,YAAY,KAAsB;QAChC,IAAI,CAAC,OAAO,GAAG,KAAK,CAAC,OAAO,IAAI,IAAI,CAAC;QACrC,IAAI,CAAC,SAAS,GAAG,KAAK,CAAC,SAAS,IAAI,QAAQ,CAAC;IAC/C,CAAC;CACF"}

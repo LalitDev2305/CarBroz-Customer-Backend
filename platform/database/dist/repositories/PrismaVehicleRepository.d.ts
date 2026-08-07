@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { IVehicleRepository, Vehicle } from '@carbroz/common';
+import { IVehicleRepository, Vehicle } from '@carbroz/foundation-kernel';
 export declare class PrismaVehicleRepository implements IVehicleRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);

@@ -1,4 +1,5 @@
-import { IFeatureFlagProvider, IFeatureFlagRepository } from '@carbroz/common';
+import { IFeatureFlagProvider, IFeatureFlagRepository } from '@carbroz/foundation-kernel';
+
 
 export class FeatureFlagProvider implements IFeatureFlagProvider {
   private repository: IFeatureFlagRepository;

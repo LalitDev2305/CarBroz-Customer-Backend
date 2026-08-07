@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { IPaymentRepository, Payment, PaymentWebhook } from '@carbroz/common';
+import { IPaymentRepository, Payment, PaymentWebhook } from '@carbroz/foundation-kernel';
 export declare class PrismaPaymentRepository implements IPaymentRepository {
     private readonly prisma;
     constructor(prisma: PrismaClient);
