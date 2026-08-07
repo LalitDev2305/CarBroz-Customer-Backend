@@ -1,1 +1,0 @@
-{"version":3,"file":"customer-profile.module.js","sourceRoot":"","sources":["../../profile/customer-profile.module.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAwB,MAAM,QAAQ,CAAC;AACvD,OAAO,EAAE,+BAA+B,EAAE,MAAM,kEAAkE,CAAC;AAEnH,MAAM,UAAU,6BAA6B,CAAC,SAA0B;IACtE,SAAS,CAAC,QAAQ,CAAC;QACjB,yBAAyB,EAAE,OAAO,CAAC,+BAA+B,CAAC,CAAC,SAAS,EAAE;KAChF,CAAC,CAAC;AACL,CAAC"}

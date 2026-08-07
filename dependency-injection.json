@@ -1,0 +1,709 @@
+[
+  {
+    "class": "Service",
+    "dependency": "Partial<Service>",
+    "param": "data",
+    "file": "domains\\catalog\\src\\domain\\entities\\Service.ts",
+    "line": 19
+  },
+  {
+    "class": "ServiceAddon",
+    "dependency": "Partial<ServiceAddon>",
+    "param": "data",
+    "file": "domains\\catalog\\src\\domain\\entities\\ServiceAddon.ts",
+    "line": 13
+  },
+  {
+    "class": "ServiceCategory",
+    "dependency": "Partial<ServiceCategory>",
+    "param": "data",
+    "file": "domains\\catalog\\src\\domain\\entities\\ServiceCategory.ts",
+    "line": 14
+  },
+  {
+    "class": "PrismaCatalogRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 8
+  },
+  {
+    "class": "PrismaAdminRoleRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "line": 5
+  },
+  {
+    "class": "PrismaPermissionRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 5
+  },
+  {
+    "class": "PrismaRoleRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 5
+  },
+  {
+    "class": "PrismaUserRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 6
+  },
+  {
+    "class": "PrismaUserSessionRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 6
+  },
+  {
+    "class": "Booking",
+    "dependency": "BookingProps",
+    "param": "props",
+    "file": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 49
+  },
+  {
+    "class": "PrismaBookingRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 8
+  },
+  {
+    "class": "MarkNotificationReadCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\MarkNotificationReadCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "RegisterDeviceTokenCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\RegisterDeviceTokenCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "SendMultiChannelNotificationCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\SendMultiChannelNotificationCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "UnregisterDeviceTokenCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\UnregisterDeviceTokenCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "ListNotificationsQueryHandler",
+    "dependency": "PrismaNotificationLogRepository",
+    "param": "notificationRepository",
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\ListNotificationsQueryHandler.ts",
+    "line": 6
+  },
+  {
+    "class": "MarkNotificationReadCommandHandler",
+    "dependency": "PrismaNotificationLogRepository",
+    "param": "notificationRepository",
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\MarkNotificationReadCommandHandler.ts",
+    "line": 6
+  },
+  {
+    "class": "RegisterDeviceTokenCommandHandler",
+    "dependency": "PrismaDeviceTokenRepository",
+    "param": "tokenRepository",
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\RegisterDeviceTokenCommandHandler.ts",
+    "line": 14
+  },
+  {
+    "class": "SendMultiChannelNotificationCommandHandler",
+    "dependency": "PrismaNotificationLogRepository",
+    "param": "notificationRepository",
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\SendMultiChannelNotificationCommandHandler.ts",
+    "line": 17
+  },
+  {
+    "class": "UnregisterDeviceTokenCommandHandler",
+    "dependency": "PrismaDeviceTokenRepository",
+    "param": "tokenRepository",
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\UnregisterDeviceTokenCommandHandler.ts",
+    "line": 10
+  },
+  {
+    "class": "ListNotificationsQuery",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\application\\queries\\ListNotificationsQuery.ts",
+    "line": 6
+  },
+  {
+    "class": "Coupon",
+    "dependency": "CouponProps",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\Coupon.ts",
+    "line": 40
+  },
+  {
+    "class": "CouponUsage",
+    "dependency": "CouponUsageProps",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\CouponUsage.ts",
+    "line": 20
+  },
+  {
+    "class": "DeviceToken",
+    "dependency": "DeviceTokenProps",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\DeviceToken.ts",
+    "line": 28
+  },
+  {
+    "class": "NotificationLog",
+    "dependency": "NotificationLogProps",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\NotificationLog.ts",
+    "line": 35
+  },
+  {
+    "class": "Review",
+    "dependency": "ReviewProps",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\Review.ts",
+    "line": 32
+  },
+  {
+    "class": "NotificationPayload",
+    "dependency": "NotificationPayloadProps",
+    "param": "props",
+    "file": "domains\\operations\\engagement\\src\\domain\\value-objects\\NotificationPayload.ts",
+    "line": 24
+  },
+  {
+    "class": "PrismaCouponRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 8
+  },
+  {
+    "class": "PrismaCouponUsageRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "line": 7
+  },
+  {
+    "class": "PrismaDeviceTokenRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 7
+  },
+  {
+    "class": "PrismaNotificationLogRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 9
+  },
+  {
+    "class": "PrismaReviewRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 10
+  },
+  {
+    "class": "Invoice",
+    "dependency": "InvoiceProps",
+    "param": "props",
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Invoice.ts",
+    "line": 49
+  },
+  {
+    "class": "PartnerPayout",
+    "dependency": "PartnerPayoutProps",
+    "param": "props",
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\PartnerPayout.ts",
+    "line": 50
+  },
+  {
+    "class": "Payment",
+    "dependency": "PaymentProps",
+    "param": "props",
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 75
+  },
+  {
+    "class": "PaymentWebhook",
+    "dependency": "PaymentWebhookProps",
+    "param": "props",
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\PaymentWebhook.ts",
+    "line": 28
+  },
+  {
+    "class": "PrismaInvoiceRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 8
+  },
+  {
+    "class": "PrismaPartnerPayoutRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 8
+  },
+  {
+    "class": "PrismaPaymentRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 10
+  },
+  {
+    "class": "CancelTrackingSessionCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\CancelTrackingSessionCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "CompleteTrackingSessionCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\CompleteTrackingSessionCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "StartTrackingSessionCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\StartTrackingSessionCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "SyncOfflineGpsLocationsCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\SyncOfflineGpsLocationsCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "UpdateLiveGpsLocationCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\UpdateLiveGpsLocationCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "CancelTrackingSessionCommandHandler",
+    "dependency": "PrismaTrackingSessionRepository",
+    "param": "trackingRepository",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CancelTrackingSessionCommandHandler.ts",
+    "line": 6
+  },
+  {
+    "class": "CompleteTrackingSessionCommandHandler",
+    "dependency": "PrismaTrackingSessionRepository",
+    "param": "trackingRepository",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CompleteTrackingSessionCommandHandler.ts",
+    "line": 6
+  },
+  {
+    "class": "GetLiveTrackingTimelineQueryHandler",
+    "dependency": "PrismaTrackingSessionRepository",
+    "param": "trackingRepository",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\GetLiveTrackingTimelineQueryHandler.ts",
+    "line": 6
+  },
+  {
+    "class": "StartTrackingSessionCommandHandler",
+    "dependency": "PrismaTrackingSessionRepository",
+    "param": "trackingRepository",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\StartTrackingSessionCommandHandler.ts",
+    "line": 14
+  },
+  {
+    "class": "SyncOfflineGpsLocationsCommandHandler",
+    "dependency": "PrismaTrackingSessionRepository",
+    "param": "trackingRepository",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 20
+  },
+  {
+    "class": "UpdateLiveGpsLocationCommandHandler",
+    "dependency": "PrismaTrackingSessionRepository",
+    "param": "trackingRepository",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\UpdateLiveGpsLocationCommandHandler.ts",
+    "line": 16
+  },
+  {
+    "class": "GetLiveTrackingTimelineQuery",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\fulfillment\\src\\application\\queries\\GetLiveTrackingTimelineQuery.ts",
+    "line": 6
+  },
+  {
+    "class": "Dispute",
+    "dependency": "DisputeProps",
+    "param": "props",
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\Dispute.ts",
+    "line": 40
+  },
+  {
+    "class": "LocationPing",
+    "dependency": "LocationPingProps",
+    "param": "props",
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 16
+  },
+  {
+    "class": "TrackingSession",
+    "dependency": "TrackingSessionProps",
+    "param": "props",
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\TrackingSession.ts",
+    "line": 39
+  },
+  {
+    "class": "PrismaDisputeRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 9
+  },
+  {
+    "class": "PrismaTrackingSessionRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 6
+  },
+  {
+    "class": "GetAvailableSlotsQuery",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\operations\\scheduling\\src\\application\\queries\\GetAvailableSlotsQuery.ts",
+    "line": 6
+  },
+  {
+    "class": "PricingTier",
+    "dependency": "Partial<PricingTier>",
+    "param": "data",
+    "file": "domains\\pricing\\src\\domain\\entities\\PricingTier.ts",
+    "line": 11
+  },
+  {
+    "class": "VehicleTypeMultiplierEntity",
+    "dependency": "Partial<VehicleTypeMultiplierEntity>",
+    "param": "data",
+    "file": "domains\\pricing\\src\\domain\\entities\\PricingTier.ts",
+    "line": 32
+  },
+  {
+    "class": "PrismaPricingRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 7
+  },
+  {
+    "class": "Address",
+    "dependency": "Partial<Address>",
+    "param": "data",
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\Address.ts",
+    "line": 19
+  },
+  {
+    "class": "CustomerProfile",
+    "dependency": "Partial<CustomerProfile>",
+    "param": "data",
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\CustomerProfile.ts",
+    "line": 14
+  },
+  {
+    "class": "Vehicle",
+    "dependency": "VehicleProps",
+    "param": "props",
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\Vehicle.ts",
+    "line": 40
+  },
+  {
+    "class": "PrismaAddressRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 5
+  },
+  {
+    "class": "PrismaCustomerProfileRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 5
+  },
+  {
+    "class": "PrismaVehicleRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 5
+  },
+  {
+    "class": "UploadPartnerKycDocumentCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\principals\\partner\\src\\application\\commands\\UploadPartnerKycDocumentCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "VerifyPartnerKycDocumentCommand",
+    "dependency": "any",
+    "param": "props",
+    "file": "domains\\principals\\partner\\src\\application\\commands\\VerifyPartnerKycDocumentCommand.ts",
+    "line": 6
+  },
+  {
+    "class": "UploadPartnerKycDocumentCommandHandler",
+    "dependency": "PrismaKycDocumentRepository",
+    "param": "kycRepository",
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 20
+  },
+  {
+    "class": "UploadPartnerKycDocumentCommandHandler",
+    "dependency": "IStorageProvider",
+    "param": "storageProvider",
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 21
+  },
+  {
+    "class": "VerifyPartnerKycDocumentCommandHandler",
+    "dependency": "PrismaKycDocumentRepository",
+    "param": "kycRepository",
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\VerifyPartnerKycDocumentCommandHandler.ts",
+    "line": 14
+  },
+  {
+    "class": "PrismaKycDocumentRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 9
+  },
+  {
+    "class": "PrismaPartnerMemberRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 9
+  },
+  {
+    "class": "PrismaPartnerProfileRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 7
+  },
+  {
+    "class": "PrismaPartnerRepository",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 9
+  },
+  {
+    "class": "Money",
+    "dependency": "number",
+    "param": "amount",
+    "file": "foundation\\kernel\\src\\domain\\Money.ts",
+    "line": 3
+  },
+  {
+    "class": "Money",
+    "dependency": "string",
+    "param": "currency",
+    "file": "foundation\\kernel\\src\\domain\\Money.ts",
+    "line": 4
+  },
+  {
+    "class": "KernelError",
+    "dependency": "KernelErrorCode | string",
+    "param": "code",
+    "file": "foundation\\kernel\\src\\errors\\errors.ts",
+    "line": 12
+  },
+  {
+    "class": "KernelError",
+    "dependency": "string",
+    "param": "message",
+    "file": "foundation\\kernel\\src\\errors\\errors.ts",
+    "line": 13
+  },
+  {
+    "class": "KernelError",
+    "dependency": "number",
+    "param": "statusCode",
+    "file": "foundation\\kernel\\src\\errors\\errors.ts",
+    "line": 14
+  },
+  {
+    "class": "KernelError",
+    "dependency": "any",
+    "param": "details",
+    "file": "foundation\\kernel\\src\\errors\\errors.ts",
+    "line": 15
+  },
+  {
+    "class": "ConfigProvider",
+    "dependency": "any",
+    "param": "configRepository",
+    "file": "packages\\config\\src\\providers\\ConfigProvider.ts",
+    "line": 7
+  },
+  {
+    "class": "Child",
+    "dependency": "string",
+    "param": "id",
+    "file": "packages\\sdui-engine\\src\\schema\\child\\Child.ts",
+    "line": 18
+  },
+  {
+    "class": "Child",
+    "dependency": "string",
+    "param": "type",
+    "file": "packages\\sdui-engine\\src\\schema\\child\\Child.ts",
+    "line": 18
+  },
+  {
+    "class": "ChildrenData",
+    "dependency": "string",
+    "param": "id",
+    "file": "packages\\sdui-engine\\src\\schema\\child-data\\ChildrenData.ts",
+    "line": 19
+  },
+  {
+    "class": "ChildrenData",
+    "dependency": "string",
+    "param": "type",
+    "file": "packages\\sdui-engine\\src\\schema\\child-data\\ChildrenData.ts",
+    "line": 19
+  },
+  {
+    "class": "Component",
+    "dependency": "string",
+    "param": "id",
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 28
+  },
+  {
+    "class": "Component",
+    "dependency": "string",
+    "param": "type",
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 28
+  },
+  {
+    "class": "SubComponent",
+    "dependency": "string",
+    "param": "id",
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponent.ts",
+    "line": 18
+  },
+  {
+    "class": "SubComponent",
+    "dependency": "string",
+    "param": "type",
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponent.ts",
+    "line": 18
+  },
+  {
+    "class": "Template",
+    "dependency": "string",
+    "param": "id",
+    "file": "packages\\sdui-engine\\src\\schema\\template\\Template.ts",
+    "line": 18
+  },
+  {
+    "class": "Template",
+    "dependency": "string",
+    "param": "type",
+    "file": "packages\\sdui-engine\\src\\schema\\template\\Template.ts",
+    "line": 18
+  },
+  {
+    "class": "PrismaDatabaseProvider",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "platform\\database\\src\\providers\\PrismaDatabaseProvider.ts",
+    "line": 7
+  },
+  {
+    "class": "PrismaTransactionProvider",
+    "dependency": "PrismaProvider",
+    "param": "prismaProvider",
+    "file": "platform\\database\\src\\providers\\PrismaTransactionProvider.ts",
+    "line": 7
+  },
+  {
+    "class": "FeatureFlagProvider",
+    "dependency": "IFeatureFlagRepository",
+    "param": "featureFlagRepository",
+    "file": "platform\\feature-flags\\src\\providers\\FeatureFlagProvider.ts",
+    "line": 7
+  },
+  {
+    "class": "MultiChannelNotificationProvider",
+    "dependency": "IPushProvider",
+    "param": "pushProvider",
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 13
+  },
+  {
+    "class": "MultiChannelNotificationProvider",
+    "dependency": "ISmsProvider",
+    "param": "smsProvider",
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 14
+  },
+  {
+    "class": "MultiChannelNotificationProvider",
+    "dependency": "IEmailProvider",
+    "param": "emailProvider",
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 15
+  },
+  {
+    "class": "MinIOStorageProvider",
+    "dependency": "IConfigProvider",
+    "param": "configProvider",
+    "file": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 14
+  },
+  {
+    "class": "MinIOStorageProvider",
+    "dependency": "ILoggerProvider",
+    "param": "logger",
+    "file": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 15
+  },
+  {
+    "class": "SupabaseStorageProvider",
+    "dependency": "{ baseUrl?: string; defaultBucket?: string }",
+    "param": "config",
+    "file": "platform\\storage\\src\\providers\\SupabaseStorageProvider.ts",
+    "line": 20
+  }
+]

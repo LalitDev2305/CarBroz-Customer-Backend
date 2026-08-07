@@ -13,4 +13,3 @@ export declare class InMemoryCacheProvider implements CacheProvider {
     delete(key: string): Promise<void>;
     clear(): Promise<void>;
 }
-//# sourceMappingURL=InMemoryCacheProvider.d.ts.map

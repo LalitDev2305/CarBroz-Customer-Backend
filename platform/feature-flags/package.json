@@ -2,12 +2,18 @@
   "name": "@carbroz/platform-feature-flags",
   "version": "1.0.0",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/src/public/index.js",
+  "types": "./dist/src/public/index.d.ts",
   "scripts": {
     "build": "tsc"
   },
   "dependencies": {
     "@carbroz/foundation-kernel": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/public/index.d.ts",
+      "default": "./dist/src/public/index.js"
+    }
   }
 }

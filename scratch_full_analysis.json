@@ -1,0 +1,3379 @@
+[
+  {
+    "file": "apps\\api\\src\\app.routes.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "apps\\api\\src\\app.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.test.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "apps\\api\\src\\server.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\entities\\Service.ts",
+    "classes": [
+      {
+        "name": "Service",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\entities\\ServiceAddon.ts",
+    "classes": [
+      {
+        "name": "ServiceAddon",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\entities\\ServiceCategory.ts",
+    "classes": [
+      {
+        "name": "ServiceCategory",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\repositories\\CatalogRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "CatalogRepository",
+        "extends": []
+      },
+      {
+        "name": "ICatalogRepository",
+        "extends": [
+          "CatalogRepository"
+        ]
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaCatalogRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "ICatalogRepository"
+        ]
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\catalog\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\AdminUserRole.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "AdminUserRole",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\Permission.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "Permission",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\Role.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "Role",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\RolePermission.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "RolePermission",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\User.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "User",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\UserSession.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "UserSession",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\AdminRoleRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "AdminRoleRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\PermissionRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PermissionRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\RoleRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "RoleRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\UserRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "UserRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\UserSessionRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "UserSessionRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaAdminRoleRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaPermissionRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaRoleRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaUserRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaUserSessionRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "classes": [
+      {
+        "name": "AuthLoginBuilder",
+        "isAbstract": false,
+        "extends": "BaseScreenBuilder",
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\identity\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "classes": [
+      {
+        "name": "Booking",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "BookingProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\entities\\BookingStatusHistoryItem.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "BookingStatusHistoryItem",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\enums\\BookingStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "BookingStatus"
+    ]
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\repositories\\BookingRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "BookingRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\value-objects\\BookingSnapshots.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "ServiceSnapshot",
+        "extends": []
+      },
+      {
+        "name": "AddonSnapshot",
+        "extends": []
+      },
+      {
+        "name": "PriceSnapshot",
+        "extends": []
+      },
+      {
+        "name": "AddressSnapshot",
+        "extends": []
+      },
+      {
+        "name": "VehicleSnapshot",
+        "extends": []
+      },
+      {
+        "name": "BookingSnapshots",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaBookingRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\MarkNotificationReadCommand.ts",
+    "classes": [
+      {
+        "name": "MarkNotificationReadCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "MarkNotificationReadCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\RegisterDeviceTokenCommand.ts",
+    "classes": [
+      {
+        "name": "RegisterDeviceTokenCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "RegisterDeviceTokenCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\SendMultiChannelNotificationCommand.ts",
+    "classes": [
+      {
+        "name": "SendMultiChannelNotificationCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "SendMultiChannelNotificationCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\UnregisterDeviceTokenCommand.ts",
+    "classes": [
+      {
+        "name": "UnregisterDeviceTokenCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "UnregisterDeviceTokenCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\ListNotificationsQueryHandler.ts",
+    "classes": [
+      {
+        "name": "ListNotificationsQueryHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\MarkNotificationReadCommandHandler.ts",
+    "classes": [
+      {
+        "name": "MarkNotificationReadCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\RegisterDeviceTokenCommandHandler.ts",
+    "classes": [
+      {
+        "name": "RegisterDeviceTokenCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "RegisterTokenInput",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\SendMultiChannelNotificationCommandHandler.ts",
+    "classes": [
+      {
+        "name": "SendMultiChannelNotificationCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "SendNotificationInput",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\UnregisterDeviceTokenCommandHandler.ts",
+    "classes": [
+      {
+        "name": "UnregisterDeviceTokenCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "UnregisterTokenInput",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\queries\\ListNotificationsQuery.ts",
+    "classes": [
+      {
+        "name": "ListNotificationsQuery",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "ListNotificationsQueryProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\Coupon.ts",
+    "classes": [
+      {
+        "name": "Coupon",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "CouponProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\CouponUsage.ts",
+    "classes": [
+      {
+        "name": "CouponUsage",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "CouponUsageProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\DeviceToken.ts",
+    "classes": [
+      {
+        "name": "DeviceToken",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "DeviceTokenProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\NotificationLog.ts",
+    "classes": [
+      {
+        "name": "NotificationLog",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "NotificationLogProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\PartnerRatingStats.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PartnerRatingStats",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\Review.ts",
+    "classes": [
+      {
+        "name": "Review",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "ReviewProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\enums\\DiscountType.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "DiscountType"
+    ]
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\enums\\NotificationChannel.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "NotificationChannel"
+    ]
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\enums\\NotificationStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "NotificationStatus"
+    ]
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\enums\\ReviewStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "ReviewStatus"
+    ]
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\CouponRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "CouponRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\CouponUsageRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "CouponUsageRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\DeviceTokenRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "DeviceTokenRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\NotificationLogRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "NotificationLogRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\ReviewRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "ReviewRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\value-objects\\NotificationPayload.ts",
+    "classes": [
+      {
+        "name": "NotificationPayload",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "NotificationPayloadProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaCouponRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaCouponUsageRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaDeviceTokenRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaNotificationLogRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaReviewRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Invoice.ts",
+    "classes": [
+      {
+        "name": "Invoice",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "InvoiceDocument",
+        "extends": []
+      },
+      {
+        "name": "InvoiceProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\PartnerPayout.ts",
+    "classes": [
+      {
+        "name": "PartnerPayout",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "PayoutCalculation",
+        "extends": []
+      },
+      {
+        "name": "PartnerPayoutProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "classes": [
+      {
+        "name": "Payment",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "PaymentAttempt",
+        "extends": []
+      },
+      {
+        "name": "PaymentRefund",
+        "extends": []
+      },
+      {
+        "name": "PaymentProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\PaymentWebhook.ts",
+    "classes": [
+      {
+        "name": "PaymentWebhook",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "PaymentWebhookProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\enums\\InvoiceStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "InvoiceStatus"
+    ]
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\enums\\PaymentMethod.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "PaymentMethod"
+    ]
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\enums\\PaymentStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "PaymentStatus"
+    ]
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\enums\\PayoutStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "PayoutStatus"
+    ]
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\repositories\\InvoiceRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "InvoiceRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\repositories\\PartnerPayoutRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PartnerPayoutRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\repositories\\PaymentRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PaymentRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaInvoiceRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaPartnerPayoutRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaPaymentRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\CancelTrackingSessionCommand.ts",
+    "classes": [
+      {
+        "name": "CancelTrackingSessionCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "CancelTrackingSessionCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\CompleteTrackingSessionCommand.ts",
+    "classes": [
+      {
+        "name": "CompleteTrackingSessionCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "CompleteTrackingSessionCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\StartTrackingSessionCommand.ts",
+    "classes": [
+      {
+        "name": "StartTrackingSessionCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "StartTrackingSessionCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\SyncOfflineGpsLocationsCommand.ts",
+    "classes": [
+      {
+        "name": "SyncOfflineGpsLocationsCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "SyncOfflineGpsLocationsCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\UpdateLiveGpsLocationCommand.ts",
+    "classes": [
+      {
+        "name": "UpdateLiveGpsLocationCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "UpdateLiveGpsLocationCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CancelTrackingSessionCommandHandler.ts",
+    "classes": [
+      {
+        "name": "CancelTrackingSessionCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CompleteTrackingSessionCommandHandler.ts",
+    "classes": [
+      {
+        "name": "CompleteTrackingSessionCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\GetLiveTrackingTimelineQueryHandler.ts",
+    "classes": [
+      {
+        "name": "GetLiveTrackingTimelineQueryHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\StartTrackingSessionCommandHandler.ts",
+    "classes": [
+      {
+        "name": "StartTrackingSessionCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "StartTrackingInput",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "classes": [
+      {
+        "name": "SyncOfflineGpsLocationsCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "OfflineGpsPing",
+        "extends": []
+      },
+      {
+        "name": "SyncOfflineGpsInput",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\UpdateLiveGpsLocationCommandHandler.ts",
+    "classes": [
+      {
+        "name": "UpdateLiveGpsLocationCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "UpdateGpsInput",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\queries\\GetLiveTrackingTimelineQuery.ts",
+    "classes": [
+      {
+        "name": "GetLiveTrackingTimelineQuery",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "GetLiveTrackingTimelineQueryProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\Dispute.ts",
+    "classes": [
+      {
+        "name": "Dispute",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "DisputeProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "classes": [
+      {
+        "name": "LocationPing",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "LocationPingProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\TrackingSession.ts",
+    "classes": [
+      {
+        "name": "TrackingSession",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "TrackingSessionProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\enums\\DisputeReason.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "DisputeReason"
+    ]
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\enums\\DisputeStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "DisputeStatus"
+    ]
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\enums\\TrackingStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "TrackingStatus"
+    ]
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\repositories\\DisputeRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "DisputeRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\repositories\\TrackingSessionRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "TrackingSessionRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaDisputeRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaTrackingSessionRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\application\\handlers\\GetAvailableSlotsQueryHandler.ts",
+    "classes": [
+      {
+        "name": "GetAvailableSlotsQueryHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "SlotQueryInput",
+        "extends": []
+      },
+      {
+        "name": "AvailableSlot",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\application\\queries\\GetAvailableSlotsQuery.ts",
+    "classes": [
+      {
+        "name": "GetAvailableSlotsQuery",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "GetAvailableSlotsQueryProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\domain\\entities\\ServiceSlot.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "ServiceSlot",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\domain\\enums\\SlotStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "name": "SlotStatus",
+        "values": [
+          "AVAILABLE",
+          "LOCKED",
+          "BOOKED",
+          "UNAVAILABLE"
+        ]
+      }
+    ],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\domain\\repositories\\ServiceSlotRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "ServiceSlotRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\pricing\\src\\domain\\entities\\PricingTier.ts",
+    "classes": [
+      {
+        "name": "PricingTier",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      },
+      {
+        "name": "VehicleTypeMultiplierEntity",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\pricing\\src\\domain\\repositories\\PricingRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PricingRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaPricingRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\pricing\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\administrator\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\Address.ts",
+    "classes": [
+      {
+        "name": "Address",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\CustomerProfile.ts",
+    "classes": [
+      {
+        "name": "CustomerProfile",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\Vehicle.ts",
+    "classes": [
+      {
+        "name": "Vehicle",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "VehicleProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\enums\\VehicleStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "VehicleStatus"
+    ]
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\repositories\\AddressRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "AddressRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\repositories\\CustomerProfileRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "CustomerProfileRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\repositories\\VehicleRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "VehicleRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaAddressRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaCustomerProfileRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaVehicleRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "classes": [
+      {
+        "name": "CustomerDashboardBuilder",
+        "isAbstract": false,
+        "extends": "BaseScreenBuilder",
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\commands\\UploadPartnerKycDocumentCommand.ts",
+    "classes": [
+      {
+        "name": "UploadPartnerKycDocumentCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "UploadPartnerKycDocumentCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\commands\\VerifyPartnerKycDocumentCommand.ts",
+    "classes": [
+      {
+        "name": "VerifyPartnerKycDocumentCommand",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "VerifyPartnerKycDocumentCommandProps",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "classes": [
+      {
+        "name": "UploadPartnerKycDocumentCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "UploadKycInput",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\VerifyPartnerKycDocumentCommandHandler.ts",
+    "classes": [
+      {
+        "name": "VerifyPartnerKycDocumentCommandHandler",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "VerifyKycInput",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\KycDocument.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "KycDocument",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\Partner.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "Partner",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\PartnerMember.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PartnerMember",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\PartnerProfile.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PartnerProfile",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\KycDocumentStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "name": "KycDocumentStatus",
+        "values": [
+          "PENDING",
+          "APPROVED",
+          "REJECTED"
+        ]
+      }
+    ],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\KycDocumentType.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "name": "KycDocumentType",
+        "values": [
+          "NATIONAL_ID",
+          "BUSINESS_LICENSE",
+          "TAX_CERTIFICATE",
+          "INSURANCE_POLICY"
+        ]
+      }
+    ],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\PartnerMemberRole.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "name": "PartnerMemberRole",
+        "values": [
+          "OWNER",
+          "MANAGER",
+          "SUPERVISOR",
+          "EMPLOYEE"
+        ]
+      }
+    ],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\PartnerMemberStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "name": "PartnerMemberStatus",
+        "values": [
+          "ACTIVE",
+          "INVITED",
+          "SUSPENDED"
+        ]
+      }
+    ],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\PartnerStatus.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "name": "PartnerStatus",
+        "values": [
+          "PENDING",
+          "ACTIVE",
+          "SUSPENDED",
+          "REJECTED"
+        ]
+      }
+    ],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\PartnerType.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "name": "PartnerType",
+        "values": [
+          "INDIVIDUAL",
+          "ORGANIZATION"
+        ]
+      }
+    ],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\KycDocumentRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "KycDocumentRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\PartnerMemberRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PartnerMemberRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\PartnerProfileRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PartnerProfileRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\PartnerRepository.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PartnerRepository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaKycDocumentRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaPartnerMemberRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaPartnerProfileRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "classes": [
+      {
+        "name": "PrismaPartnerRepository",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "foundation\\kernel\\src\\application\\contracts.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "RequestContext",
+        "extends": []
+      },
+      {
+        "name": "ApiResponse",
+        "extends": []
+      },
+      {
+        "name": "UseCase",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "foundation\\kernel\\src\\domain\\Money.ts",
+    "classes": [
+      {
+        "name": "Money",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "foundation\\kernel\\src\\domain\\primitives.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "Entity",
+        "extends": []
+      },
+      {
+        "name": "AggregateRoot",
+        "extends": []
+      },
+      {
+        "name": "DomainEvent",
+        "extends": []
+      },
+      {
+        "name": "ReadRepository",
+        "extends": []
+      },
+      {
+        "name": "WriteRepository",
+        "extends": []
+      },
+      {
+        "name": "Repository",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "foundation\\kernel\\src\\errors\\errors.ts",
+    "classes": [
+      {
+        "name": "KernelError",
+        "isAbstract": false,
+        "extends": "Error",
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [
+      {
+        "name": "KernelErrorCode",
+        "values": [
+          "INVALID_INPUT",
+          "UNAUTHORIZED",
+          "FORBIDDEN",
+          "NOT_FOUND",
+          "CONFLICT",
+          "INTERNAL_ERROR"
+        ]
+      }
+    ],
+    "types": []
+  },
+  {
+    "file": "foundation\\kernel\\src\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "foundation\\kernel\\src\\ports\\ports.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "IDatabaseProvider",
+        "extends": []
+      },
+      {
+        "name": "ITransactionProvider",
+        "extends": []
+      },
+      {
+        "name": "ILoggerProvider",
+        "extends": []
+      },
+      {
+        "name": "IConfigProvider",
+        "extends": []
+      },
+      {
+        "name": "IConfigRepository",
+        "extends": []
+      },
+      {
+        "name": "IFeatureFlagProvider",
+        "extends": []
+      },
+      {
+        "name": "IFeatureFlagRepository",
+        "extends": []
+      },
+      {
+        "name": "IStorageProvider",
+        "extends": []
+      },
+      {
+        "name": "NotificationPayload",
+        "extends": []
+      },
+      {
+        "name": "NotificationDispatchResult",
+        "extends": []
+      },
+      {
+        "name": "IPushProvider",
+        "extends": []
+      },
+      {
+        "name": "ISmsProvider",
+        "extends": []
+      },
+      {
+        "name": "IEmailProvider",
+        "extends": []
+      },
+      {
+        "name": "INotificationProvider",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "foundation\\kernel\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "generated\\prisma\\browser.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "generated\\prisma\\client.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "PrismaClient"
+    ]
+  },
+  {
+    "file": "generated\\prisma\\commonInputTypes.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "generated\\prisma\\enums.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "generated\\prisma\\internal\\class.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "PrismaClientConstructor",
+        "extends": []
+      },
+      {
+        "name": "PrismaClient",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": [
+      "LogOptions"
+    ]
+  },
+  {
+    "file": "generated\\prisma\\internal\\prismaNamespace.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "TypeMapCb",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": [
+      "DMMF",
+      "PrismaPromise",
+      "PrismaClientKnownRequestError",
+      "PrismaClientUnknownRequestError",
+      "PrismaClientRustPanicError",
+      "PrismaClientInitializationError",
+      "PrismaClientValidationError",
+      "Sql",
+      "Decimal",
+      "DecimalJsLike",
+      "Extension",
+      "Args",
+      "Payload",
+      "Result",
+      "Exact",
+      "PrismaVersion",
+      "Bytes",
+      "JsonObject",
+      "JsonArray",
+      "JsonValue",
+      "InputJsonObject",
+      "InputJsonArray",
+      "InputJsonValue",
+      "Enumerable",
+      "Subset",
+      "SelectSubset",
+      "SubsetIntersection",
+      "XOR",
+      "UnEnumerate",
+      "Either",
+      "Union",
+      "PatchUndefined",
+      "IntersectOf",
+      "Overwrite",
+      "At",
+      "ComputeRaw",
+      "OptionalFlat",
+      "AtLeast",
+      "Strict",
+      "Merge",
+      "Boolean",
+      "True",
+      "False",
+      "Not",
+      "Extends",
+      "Has",
+      "Or",
+      "Keys",
+      "GetScalarType",
+      "GetHavingFields",
+      "MaybeTupleToUnion",
+      "PickEnumerable",
+      "ExcludeUnderscoreKeys",
+      "FieldRef",
+      "ModelName",
+      "TypeMap",
+      "TransactionIsolationLevel",
+      "BatchPayload",
+      "DefaultPrismaClient",
+      "ErrorFormat",
+      "PrismaClientOptions",
+      "GlobalOmitConfig",
+      "LogLevel",
+      "LogDefinition",
+      "CheckIsLogLevel",
+      "GetLogType",
+      "GetEvents",
+      "QueryEvent",
+      "LogEvent",
+      "PrismaAction",
+      "TransactionClient"
+    ]
+  },
+  {
+    "file": "generated\\prisma\\internal\\prismaNamespaceBrowser.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "ModelName",
+      "TransactionIsolationLevel"
+    ]
+  },
+  {
+    "file": "generated\\prisma\\models.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\config\\src\\AppConfig.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "AppConfigType"
+    ]
+  },
+  {
+    "file": "packages\\config\\src\\DatabaseConfig.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "DatabaseConfigType"
+    ]
+  },
+  {
+    "file": "packages\\config\\src\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\config\\src\\JwtConfig.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "JwtConfigType"
+    ]
+  },
+  {
+    "file": "packages\\config\\src\\LoggingConfig.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "LoggingConfigType"
+    ]
+  },
+  {
+    "file": "packages\\config\\src\\providers\\ConfigProvider.ts",
+    "classes": [
+      {
+        "name": "ConfigProvider",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "IConfigProvider"
+        ]
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\config\\src\\ProvidersConfig.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "ProvidersConfigType"
+    ]
+  },
+  {
+    "file": "packages\\config\\src\\RedisConfig.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "RedisConfigType"
+    ]
+  },
+  {
+    "file": "packages\\config\\src\\SecurityConfig.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": [
+      "SecurityConfigType"
+    ]
+  },
+  {
+    "file": "packages\\config\\tests\\config.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\builder\\ScreenBuilder.ts",
+    "classes": [
+      {
+        "name": "ScreenBuilder",
+        "isAbstract": true,
+        "extends": null,
+        "implements": [
+          "IScreenBuilder"
+        ]
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\builder\\ScreenBuilderContract.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "BuildContext",
+        "extends": []
+      },
+      {
+        "name": "IScreenBuilder",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\cache\\SduiCacheKey.ts",
+    "classes": [
+      {
+        "name": "SduiCacheKey",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\cache\\SduiCachePolicy.ts",
+    "classes": [
+      {
+        "name": "SduiCachePolicy",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "classes": [
+      {
+        "name": "ScreenFactory",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\generator\\SduiGenerator.ts",
+    "classes": [
+      {
+        "name": "SduiGenerator",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\index.ts",
+    "classes": [
+      {
+        "name": "UI",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\registry\\ScreenRegistry.ts",
+    "classes": [
+      {
+        "name": "ScreenRegistry",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child\\Child.ts",
+    "classes": [
+      {
+        "name": "Child",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "IChild"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "IChild",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child\\ChildProperties.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "ChildProperties",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child-data\\ChildrenData.ts",
+    "classes": [
+      {
+        "name": "ChildrenData",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "IChildrenData"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "IChildrenData",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child-data\\ChildrenDataProperties.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "ActionPayload",
+        "extends": []
+      },
+      {
+        "name": "UIAction",
+        "extends": []
+      },
+      {
+        "name": "ChildrenDataProperties",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "classes": [
+      {
+        "name": "Component",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "IComponent"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "IComponent",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\ComponentProperties.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "ComponentProperties",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\Screen.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "IScreen",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\ScreenProperties.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "UITheme",
+        "extends": []
+      },
+      {
+        "name": "ScreenProperties",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponent.ts",
+    "classes": [
+      {
+        "name": "SubComponent",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "ISubcomponent"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "ISubcomponent",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponentProperties.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "SubComponentProperties",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\template\\Template.ts",
+    "classes": [
+      {
+        "name": "Template",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "ITemplate"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "ITemplate",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\template\\TemplateProperties.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "ThemeColor",
+        "extends": []
+      },
+      {
+        "name": "ThemeGradient",
+        "extends": []
+      },
+      {
+        "name": "TemplateProperties",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "classes": [
+      {
+        "name": "SduiValidator",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\versioning\\SchemaVersion.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\versioning\\ScreenVersionResolver.ts",
+    "classes": [
+      {
+        "name": "ScreenVersionResolver",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\cache\\src\\configuration\\CacheConfig.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "RedisCacheConfig",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\cache\\src\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "classes": [
+      {
+        "name": "InMemoryCacheProvider",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "CacheProvider"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "CacheProvider",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\cache\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\database\\prisma\\seed.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\database\\src\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaDatabaseProvider.ts",
+    "classes": [
+      {
+        "name": "PrismaDatabaseProvider",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "IDatabaseProvider"
+        ]
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaProvider.ts",
+    "classes": [
+      {
+        "name": "PrismaProvider",
+        "isAbstract": false,
+        "extends": null,
+        "implements": []
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaTransactionProvider.ts",
+    "classes": [
+      {
+        "name": "PrismaTransactionProvider",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "ITransactionProvider"
+        ]
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\database\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\event-bus\\src\\configuration\\EventBusConfig.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "EventBusConfig",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\event-bus\\src\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "classes": [
+      {
+        "name": "InMemoryEventBus",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "EventBus"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "EventBus",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\event-bus\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\feature-flags\\src\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\feature-flags\\src\\providers\\FeatureFlagProvider.ts",
+    "classes": [
+      {
+        "name": "FeatureFlagProvider",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "IFeatureFlagProvider"
+        ]
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\feature-flags\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\notification\\src\\configuration\\NotificationConfig.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "NotificationConfig",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\notification\\src\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "classes": [
+      {
+        "name": "MultiChannelNotificationProvider",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "INotificationProvider"
+        ]
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\notification\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\observability\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\observability\\src\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\observability\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\queue\\src\\configuration\\QueueConfig.ts",
+    "classes": [],
+    "interfaces": [
+      {
+        "name": "QueueConfig",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\queue\\src\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "classes": [
+      {
+        "name": "InMemoryQueueProvider",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "QueueProvider"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "QueueJobOptions",
+        "extends": []
+      },
+      {
+        "name": "QueueJob",
+        "extends": []
+      },
+      {
+        "name": "QueueProvider",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\queue\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\storage\\src\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "classes": [
+      {
+        "name": "MinIOStorageProvider",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "IStorageProvider"
+        ]
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\storage\\src\\providers\\SupabaseStorageProvider.ts",
+    "classes": [
+      {
+        "name": "SupabaseStorageProvider",
+        "isAbstract": false,
+        "extends": null,
+        "implements": [
+          "IStorageProvider"
+        ]
+      }
+    ],
+    "interfaces": [
+      {
+        "name": "PresignedUrlOptions",
+        "extends": []
+      },
+      {
+        "name": "FileValidationOptions",
+        "extends": []
+      }
+    ],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\storage\\src\\public\\index.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "prisma.config.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "vitest.config.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  },
+  {
+    "file": "vitest.workspace.ts",
+    "classes": [],
+    "interfaces": [],
+    "enums": [],
+    "types": []
+  }
+]

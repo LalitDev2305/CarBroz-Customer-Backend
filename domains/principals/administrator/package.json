@@ -1,0 +1,16 @@
+{
+  "name": "@carbroz/domain-principal-administrator",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/src/public/index.js",
+  "types": "./dist/src/public/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/public/index.d.ts",
+      "default": "./dist/src/public/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}

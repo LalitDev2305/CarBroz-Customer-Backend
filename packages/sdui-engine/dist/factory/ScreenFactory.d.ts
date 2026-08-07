@@ -1,10 +1,8 @@
-import { IScreenBuilder } from '../builders/IScreenBuilder.js';
-import { IScreen } from '../models/ui.models.js';
-import { BaseScreenBuilder } from '../builders/BaseScreenBuilder.js';
+import { IScreenBuilder } from '../builder/ScreenBuilderContract.js';
+import { IScreen } from '../schema/screen/Screen.js';
+import { ScreenBuilder } from '../builder/ScreenBuilder.js';
 export declare class ScreenFactory {
-    private builders;
     registerBuilder(screenId: string, builder: IScreenBuilder): void;
-    registerBuilders(builders: BaseScreenBuilder[]): void;
-    initialize(customBuildersDir?: string): Promise<void>;
+    registerBuilders(builders: ScreenBuilder[]): void;
     buildScreen(screenId: string, context?: any): Promise<IScreen>;
 }

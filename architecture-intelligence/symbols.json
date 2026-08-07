@@ -1,0 +1,644 @@
+[
+  {
+    "name": "Service",
+    "kind": "Class",
+    "file": "domains\\catalog\\src\\domain\\entities\\Service.ts",
+    "line": 3
+  },
+  {
+    "name": "ServiceAddon",
+    "kind": "Class",
+    "file": "domains\\catalog\\src\\domain\\entities\\ServiceAddon.ts",
+    "line": 1
+  },
+  {
+    "name": "ServiceCategory",
+    "kind": "Class",
+    "file": "domains\\catalog\\src\\domain\\entities\\ServiceCategory.ts",
+    "line": 1
+  },
+  {
+    "name": "PrismaCatalogRepository",
+    "kind": "Class",
+    "file": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 7
+  },
+  {
+    "name": "PrismaAdminRoleRepository",
+    "kind": "Class",
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "PrismaPermissionRepository",
+    "kind": "Class",
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "PrismaRoleRepository",
+    "kind": "Class",
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "PrismaUserRepository",
+    "kind": "Class",
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "PrismaUserSessionRepository",
+    "kind": "Class",
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "AuthLoginBuilder",
+    "kind": "Class",
+    "file": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 4
+  },
+  {
+    "name": "BookingStateMachine",
+    "kind": "Class",
+    "file": "domains\\operations\\booking\\src\\domain\\BookingStateMachine.ts",
+    "line": 8
+  },
+  {
+    "name": "Booking",
+    "kind": "Class",
+    "file": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 28
+  },
+  {
+    "name": "PrismaBookingRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 5
+  },
+  {
+    "name": "MarkNotificationReadCommand",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\MarkNotificationReadCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "RegisterDeviceTokenCommand",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\RegisterDeviceTokenCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "SendMultiChannelNotificationCommand",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\SendMultiChannelNotificationCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "UnregisterDeviceTokenCommand",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\UnregisterDeviceTokenCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "ListNotificationsQueryHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\ListNotificationsQueryHandler.ts",
+    "line": 5
+  },
+  {
+    "name": "MarkNotificationReadCommandHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\MarkNotificationReadCommandHandler.ts",
+    "line": 5
+  },
+  {
+    "name": "RegisterDeviceTokenCommandHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\RegisterDeviceTokenCommandHandler.ts",
+    "line": 13
+  },
+  {
+    "name": "SendMultiChannelNotificationCommandHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\SendMultiChannelNotificationCommandHandler.ts",
+    "line": 16
+  },
+  {
+    "name": "UnregisterDeviceTokenCommandHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\UnregisterDeviceTokenCommandHandler.ts",
+    "line": 9
+  },
+  {
+    "name": "ListNotificationsQuery",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\application\\queries\\ListNotificationsQuery.ts",
+    "line": 5
+  },
+  {
+    "name": "Coupon",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\Coupon.ts",
+    "line": 22
+  },
+  {
+    "name": "CouponUsage",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\CouponUsage.ts",
+    "line": 11
+  },
+  {
+    "name": "DeviceToken",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\DeviceToken.ts",
+    "line": 15
+  },
+  {
+    "name": "NotificationLog",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\NotificationLog.ts",
+    "line": 20
+  },
+  {
+    "name": "Review",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\Review.ts",
+    "line": 18
+  },
+  {
+    "name": "NotificationPayload",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\domain\\value-objects\\NotificationPayload.ts",
+    "line": 14
+  },
+  {
+    "name": "PrismaCouponRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 5
+  },
+  {
+    "name": "PrismaCouponUsageRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "PrismaDeviceTokenRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "PrismaNotificationLogRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 6
+  },
+  {
+    "name": "PrismaReviewRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 7
+  },
+  {
+    "name": "Invoice",
+    "kind": "Class",
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Invoice.ts",
+    "line": 36
+  },
+  {
+    "name": "PartnerPayout",
+    "kind": "Class",
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\PartnerPayout.ts",
+    "line": 32
+  },
+  {
+    "name": "Payment",
+    "kind": "Class",
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 51
+  },
+  {
+    "name": "PaymentWebhook",
+    "kind": "Class",
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\PaymentWebhook.ts",
+    "line": 15
+  },
+  {
+    "name": "PrismaInvoiceRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 5
+  },
+  {
+    "name": "PrismaPartnerPayoutRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 5
+  },
+  {
+    "name": "PrismaPaymentRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 7
+  },
+  {
+    "name": "CancelTrackingSessionCommand",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\CancelTrackingSessionCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "CompleteTrackingSessionCommand",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\CompleteTrackingSessionCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "StartTrackingSessionCommand",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\StartTrackingSessionCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "SyncOfflineGpsLocationsCommand",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\SyncOfflineGpsLocationsCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "UpdateLiveGpsLocationCommand",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\UpdateLiveGpsLocationCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "CancelTrackingSessionCommandHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CancelTrackingSessionCommandHandler.ts",
+    "line": 5
+  },
+  {
+    "name": "CompleteTrackingSessionCommandHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CompleteTrackingSessionCommandHandler.ts",
+    "line": 5
+  },
+  {
+    "name": "GetLiveTrackingTimelineQueryHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\GetLiveTrackingTimelineQueryHandler.ts",
+    "line": 5
+  },
+  {
+    "name": "StartTrackingSessionCommandHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\StartTrackingSessionCommandHandler.ts",
+    "line": 13
+  },
+  {
+    "name": "SyncOfflineGpsLocationsCommandHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 19
+  },
+  {
+    "name": "UpdateLiveGpsLocationCommandHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\UpdateLiveGpsLocationCommandHandler.ts",
+    "line": 15
+  },
+  {
+    "name": "GetLiveTrackingTimelineQuery",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\application\\queries\\GetLiveTrackingTimelineQuery.ts",
+    "line": 5
+  },
+  {
+    "name": "Dispute",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\Dispute.ts",
+    "line": 24
+  },
+  {
+    "name": "LocationPing",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 9
+  },
+  {
+    "name": "TrackingSession",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\TrackingSession.ts",
+    "line": 22
+  },
+  {
+    "name": "PrismaDisputeRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 6
+  },
+  {
+    "name": "PrismaTrackingSessionRepository",
+    "kind": "Class",
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 5
+  },
+  {
+    "name": "GetAvailableSlotsQueryHandler",
+    "kind": "Class",
+    "file": "domains\\operations\\scheduling\\src\\application\\handlers\\GetAvailableSlotsQueryHandler.ts",
+    "line": 19
+  },
+  {
+    "name": "GetAvailableSlotsQuery",
+    "kind": "Class",
+    "file": "domains\\operations\\scheduling\\src\\application\\queries\\GetAvailableSlotsQuery.ts",
+    "line": 5
+  },
+  {
+    "name": "PricingTier",
+    "kind": "Class",
+    "file": "domains\\pricing\\src\\domain\\entities\\PricingTier.ts",
+    "line": 1
+  },
+  {
+    "name": "VehicleTypeMultiplierEntity",
+    "kind": "Class",
+    "file": "domains\\pricing\\src\\domain\\entities\\PricingTier.ts",
+    "line": 23
+  },
+  {
+    "name": "PrismaPricingRepository",
+    "kind": "Class",
+    "file": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 6
+  },
+  {
+    "name": "Address",
+    "kind": "Class",
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\Address.ts",
+    "line": 1
+  },
+  {
+    "name": "CustomerProfile",
+    "kind": "Class",
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\CustomerProfile.ts",
+    "line": 1
+  },
+  {
+    "name": "Vehicle",
+    "kind": "Class",
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\Vehicle.ts",
+    "line": 22
+  },
+  {
+    "name": "PrismaAddressRepository",
+    "kind": "Class",
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "PrismaCustomerProfileRepository",
+    "kind": "Class",
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "PrismaVehicleRepository",
+    "kind": "Class",
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "CustomerDashboardBuilder",
+    "kind": "Class",
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 3
+  },
+  {
+    "name": "UploadPartnerKycDocumentCommand",
+    "kind": "Class",
+    "file": "domains\\principals\\partner\\src\\application\\commands\\UploadPartnerKycDocumentCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "VerifyPartnerKycDocumentCommand",
+    "kind": "Class",
+    "file": "domains\\principals\\partner\\src\\application\\commands\\VerifyPartnerKycDocumentCommand.ts",
+    "line": 5
+  },
+  {
+    "name": "UploadPartnerKycDocumentCommandHandler",
+    "kind": "Class",
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 18
+  },
+  {
+    "name": "VerifyPartnerKycDocumentCommandHandler",
+    "kind": "Class",
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\VerifyPartnerKycDocumentCommandHandler.ts",
+    "line": 13
+  },
+  {
+    "name": "PrismaKycDocumentRepository",
+    "kind": "Class",
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 6
+  },
+  {
+    "name": "PrismaPartnerMemberRepository",
+    "kind": "Class",
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 6
+  },
+  {
+    "name": "PrismaPartnerProfileRepository",
+    "kind": "Class",
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 4
+  },
+  {
+    "name": "PrismaPartnerRepository",
+    "kind": "Class",
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 6
+  },
+  {
+    "name": "Money",
+    "kind": "Class",
+    "file": "foundation\\kernel\\src\\domain\\Money.ts",
+    "line": 1
+  },
+  {
+    "name": "KernelError",
+    "kind": "Class",
+    "file": "foundation\\kernel\\src\\errors\\errors.ts",
+    "line": 10
+  },
+  {
+    "name": "ConfigProvider",
+    "kind": "Class",
+    "file": "packages\\config\\src\\providers\\ConfigProvider.ts",
+    "line": 4
+  },
+  {
+    "name": "ScreenBuilder",
+    "kind": "AbstractClass",
+    "file": "packages\\sdui-engine\\src\\builder\\ScreenBuilder.ts",
+    "line": 4
+  },
+  {
+    "name": "SduiCacheKey",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\cache\\SduiCacheKey.ts",
+    "line": 1
+  },
+  {
+    "name": "SduiCachePolicy",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\cache\\SduiCachePolicy.ts",
+    "line": 1
+  },
+  {
+    "name": "ScreenFactory",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "line": 6
+  },
+  {
+    "name": "SduiGenerator",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\generator\\SduiGenerator.ts",
+    "line": 3
+  },
+  {
+    "name": "UI",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\index.ts",
+    "line": 10
+  },
+  {
+    "name": "ScreenRegistry",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\registry\\ScreenRegistry.ts",
+    "line": 4
+  },
+  {
+    "name": "Child",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\schema\\child\\Child.ts",
+    "line": 12
+  },
+  {
+    "name": "ChildrenData",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\schema\\child-data\\ChildrenData.ts",
+    "line": 12
+  },
+  {
+    "name": "Component",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 18
+  },
+  {
+    "name": "SubComponent",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponent.ts",
+    "line": 12
+  },
+  {
+    "name": "Template",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\schema\\template\\Template.ts",
+    "line": 12
+  },
+  {
+    "name": "SduiValidator",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 62
+  },
+  {
+    "name": "ScreenVersionResolver",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\src\\versioning\\ScreenVersionResolver.ts",
+    "line": 1
+  },
+  {
+    "name": "TestScreenBuilder",
+    "kind": "Class",
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 4
+  },
+  {
+    "name": "InMemoryCacheProvider",
+    "kind": "Class",
+    "file": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "line": 10
+  },
+  {
+    "name": "PrismaDatabaseProvider",
+    "kind": "Class",
+    "file": "platform\\database\\src\\providers\\PrismaDatabaseProvider.ts",
+    "line": 4
+  },
+  {
+    "name": "PrismaProvider",
+    "kind": "Class",
+    "file": "platform\\database\\src\\providers\\PrismaProvider.ts",
+    "line": 3
+  },
+  {
+    "name": "PrismaTransactionProvider",
+    "kind": "Class",
+    "file": "platform\\database\\src\\providers\\PrismaTransactionProvider.ts",
+    "line": 4
+  },
+  {
+    "name": "InMemoryEventBus",
+    "kind": "Class",
+    "file": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 10
+  },
+  {
+    "name": "TestDomainEvent",
+    "kind": "Class",
+    "file": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 9
+  },
+  {
+    "name": "FeatureFlagProvider",
+    "kind": "Class",
+    "file": "platform\\feature-flags\\src\\providers\\FeatureFlagProvider.ts",
+    "line": 4
+  },
+  {
+    "name": "MultiChannelNotificationProvider",
+    "kind": "Class",
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 11
+  },
+  {
+    "name": "InMemoryQueueProvider",
+    "kind": "Class",
+    "file": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 25
+  },
+  {
+    "name": "MinIOStorageProvider",
+    "kind": "Class",
+    "file": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 8
+  },
+  {
+    "name": "SupabaseStorageProvider",
+    "kind": "Class",
+    "file": "platform\\storage\\src\\providers\\SupabaseStorageProvider.ts",
+    "line": 16
+  }
+]

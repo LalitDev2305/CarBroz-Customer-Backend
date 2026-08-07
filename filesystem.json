@@ -1,0 +1,990 @@
+[
+  {
+    "file": "apps\\api\\src\\app.routes.ts",
+    "size": 235
+  },
+  {
+    "file": "apps\\api\\src\\app.ts",
+    "size": 635
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.test.ts",
+    "size": 482
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.ts",
+    "size": 612
+  },
+  {
+    "file": "apps\\api\\src\\server.ts",
+    "size": 993
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\entities\\Service.ts",
+    "size": 1021
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\entities\\ServiceAddon.ts",
+    "size": 674
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\entities\\ServiceCategory.ts",
+    "size": 746
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\repositories\\CatalogRepository.ts",
+    "size": 1398
+  },
+  {
+    "file": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "size": 6952
+  },
+  {
+    "file": "domains\\catalog\\src\\public\\index.ts",
+    "size": 215
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\AdminUserRole.ts",
+    "size": 126
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\Permission.ts",
+    "size": 203
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\Role.ts",
+    "size": 201
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\RolePermission.ts",
+    "size": 82
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\User.ts",
+    "size": 225
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\UserSession.ts",
+    "size": 397
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\AdminRoleRepository.ts",
+    "size": 244
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\PermissionRepository.ts",
+    "size": 135
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\RoleRepository.ts",
+    "size": 177
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\UserRepository.ts",
+    "size": 308
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\UserSessionRepository.ts",
+    "size": 285
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "size": 1333
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "size": 2021
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "size": 2202
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "size": 2872
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "size": 4606
+  },
+  {
+    "file": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "size": 5201
+  },
+  {
+    "file": "domains\\identity\\src\\public\\index.ts",
+    "size": 662
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "size": 5111
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\entities\\BookingStatusHistoryItem.ts",
+    "size": 251
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\enums\\BookingStatus.ts",
+    "size": 146
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\repositories\\BookingRepository.ts",
+    "size": 414
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\value-objects\\BookingSnapshots.ts",
+    "size": 1062
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "size": 5504
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\public\\index.ts",
+    "size": 283
+  },
+  {
+    "file": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "size": 1279
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\MarkNotificationReadCommand.ts",
+    "size": 167
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\RegisterDeviceTokenCommand.ts",
+    "size": 165
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\SendMultiChannelNotificationCommand.ts",
+    "size": 183
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\commands\\UnregisterDeviceTokenCommand.ts",
+    "size": 169
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\ListNotificationsQueryHandler.ts",
+    "size": 493
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\MarkNotificationReadCommandHandler.ts",
+    "size": 661
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\RegisterDeviceTokenCommandHandler.ts",
+    "size": 891
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\SendMultiChannelNotificationCommandHandler.ts",
+    "size": 1047
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\UnregisterDeviceTokenCommandHandler.ts",
+    "size": 496
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\queries\\ListNotificationsQuery.ts",
+    "size": 157
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\Coupon.ts",
+    "size": 2689
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\CouponUsage.ts",
+    "size": 1192
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\DeviceToken.ts",
+    "size": 1522
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\NotificationLog.ts",
+    "size": 1753
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\PartnerRatingStats.ts",
+    "size": 210
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\Review.ts",
+    "size": 1922
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\enums\\DiscountType.ts",
+    "size": 59
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\enums\\NotificationChannel.ts",
+    "size": 61
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\enums\\NotificationStatus.ts",
+    "size": 76
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\enums\\ReviewStatus.ts",
+    "size": 66
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\CouponRepository.ts",
+    "size": 358
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\CouponUsageRepository.ts",
+    "size": 261
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\DeviceTokenRepository.ts",
+    "size": 271
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\NotificationLogRepository.ts",
+    "size": 287
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\ReviewRepository.ts",
+    "size": 308
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\value-objects\\NotificationPayload.ts",
+    "size": 1266
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "size": 3798
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "size": 1656
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "size": 2279
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "size": 2816
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "size": 4460
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\public\\index.ts",
+    "size": 1659
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Invoice.ts",
+    "size": 1914
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\PartnerPayout.ts",
+    "size": 2864
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "size": 4898
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\PaymentWebhook.ts",
+    "size": 1568
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\enums\\InvoiceStatus.ts",
+    "size": 57
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\enums\\PaymentMethod.ts",
+    "size": 113
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\enums\\PaymentStatus.ts",
+    "size": 91
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\enums\\PayoutStatus.ts",
+    "size": 123
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\repositories\\InvoiceRepository.ts",
+    "size": 288
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\repositories\\PartnerPayoutRepository.ts",
+    "size": 324
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\repositories\\PaymentRepository.ts",
+    "size": 334
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "size": 2739
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "size": 3783
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "size": 6566
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\public\\index.ts",
+    "size": 589
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\CancelTrackingSessionCommand.ts",
+    "size": 169
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\CompleteTrackingSessionCommand.ts",
+    "size": 173
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\StartTrackingSessionCommand.ts",
+    "size": 167
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\SyncOfflineGpsLocationsCommand.ts",
+    "size": 173
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\commands\\UpdateLiveGpsLocationCommand.ts",
+    "size": 169
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CancelTrackingSessionCommandHandler.ts",
+    "size": 682
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CompleteTrackingSessionCommandHandler.ts",
+    "size": 686
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\GetLiveTrackingTimelineQueryHandler.ts",
+    "size": 500
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\StartTrackingSessionCommandHandler.ts",
+    "size": 1111
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "size": 1621
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\UpdateLiveGpsLocationCommandHandler.ts",
+    "size": 1142
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\queries\\GetLiveTrackingTimelineQuery.ts",
+    "size": 169
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\Dispute.ts",
+    "size": 2956
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "size": 1652
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\TrackingSession.ts",
+    "size": 3009
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\enums\\DisputeReason.ts",
+    "size": 162
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\enums\\DisputeStatus.ts",
+    "size": 129
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\enums\\TrackingStatus.ts",
+    "size": 79
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\repositories\\DisputeRepository.ts",
+    "size": 342
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\repositories\\TrackingSessionRepository.ts",
+    "size": 245
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "size": 3575
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "size": 3225
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\public\\index.ts",
+    "size": 1358
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "size": 435
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\application\\handlers\\GetAvailableSlotsQueryHandler.ts",
+    "size": 1700
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\application\\queries\\GetAvailableSlotsQuery.ts",
+    "size": 157
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\domain\\entities\\ServiceSlot.ts",
+    "size": 200
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\domain\\enums\\SlotStatus.ts",
+    "size": 127
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\domain\\repositories\\ServiceSlotRepository.ts",
+    "size": 225
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\public\\index.ts",
+    "size": 303
+  },
+  {
+    "file": "domains\\pricing\\src\\domain\\entities\\PricingTier.ts",
+    "size": 1072
+  },
+  {
+    "file": "domains\\pricing\\src\\domain\\repositories\\PricingRepository.ts",
+    "size": 195
+  },
+  {
+    "file": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "size": 2279
+  },
+  {
+    "file": "domains\\pricing\\src\\public\\index.ts",
+    "size": 112
+  },
+  {
+    "file": "domains\\principals\\administrator\\src\\public\\index.ts",
+    "size": 60
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\Address.ts",
+    "size": 1057
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\CustomerProfile.ts",
+    "size": 802
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\Vehicle.ts",
+    "size": 2104
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\enums\\VehicleStatus.ts",
+    "size": 52
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\repositories\\AddressRepository.ts",
+    "size": 277
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\repositories\\CustomerProfileRepository.ts",
+    "size": 239
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\repositories\\VehicleRepository.ts",
+    "size": 277
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "size": 2565
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "size": 2002
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "size": 3881
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "size": 11623
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\public\\index.ts",
+    "size": 456
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\commands\\UploadPartnerKycDocumentCommand.ts",
+    "size": 175
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\commands\\VerifyPartnerKycDocumentCommand.ts",
+    "size": 175
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "size": 1696
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\VerifyPartnerKycDocumentCommandHandler.ts",
+    "size": 1162
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\KycDocument.ts",
+    "size": 437
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\Partner.ts",
+    "size": 314
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\PartnerMember.ts",
+    "size": 344
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\PartnerProfile.ts",
+    "size": 252
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\KycDocumentStatus.ts",
+    "size": 112
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\KycDocumentType.ts",
+    "size": 190
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\PartnerMemberRole.ts",
+    "size": 135
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\PartnerMemberStatus.ts",
+    "size": 111
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\PartnerStatus.ts",
+    "size": 131
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\enums\\PartnerType.ts",
+    "size": 93
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\KycDocumentRepository.ts",
+    "size": 270
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\PartnerMemberRepository.ts",
+    "size": 235
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\PartnerProfileRepository.ts",
+    "size": 239
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\PartnerRepository.ts",
+    "size": 183
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "size": 3650
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "size": 3149
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "size": 2170
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "size": 3151
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\public\\index.ts",
+    "size": 1098
+  },
+  {
+    "file": "foundation\\kernel\\src\\application\\contracts.ts",
+    "size": 465
+  },
+  {
+    "file": "foundation\\kernel\\src\\domain\\Money.ts",
+    "size": 1216
+  },
+  {
+    "file": "foundation\\kernel\\src\\domain\\primitives.ts",
+    "size": 588
+  },
+  {
+    "file": "foundation\\kernel\\src\\errors\\errors.ts",
+    "size": 489
+  },
+  {
+    "file": "foundation\\kernel\\src\\index.ts",
+    "size": 35
+  },
+  {
+    "file": "foundation\\kernel\\src\\ports\\ports.ts",
+    "size": 2268
+  },
+  {
+    "file": "foundation\\kernel\\src\\public\\index.ts",
+    "size": 201
+  },
+  {
+    "file": "generated\\prisma\\browser.ts",
+    "size": 689
+  },
+  {
+    "file": "generated\\prisma\\client.ts",
+    "size": 1643
+  },
+  {
+    "file": "generated\\prisma\\commonInputTypes.ts",
+    "size": 480
+  },
+  {
+    "file": "generated\\prisma\\enums.ts",
+    "size": 334
+  },
+  {
+    "file": "generated\\prisma\\internal\\class.ts",
+    "size": 7161
+  },
+  {
+    "file": "generated\\prisma\\internal\\prismaNamespace.ts",
+    "size": 16434
+  },
+  {
+    "file": "generated\\prisma\\internal\\prismaNamespaceBrowser.ts",
+    "size": 2409
+  },
+  {
+    "file": "generated\\prisma\\models.ts",
+    "size": 314
+  },
+  {
+    "file": "packages\\config\\src\\AppConfig.ts",
+    "size": 293
+  },
+  {
+    "file": "packages\\config\\src\\DatabaseConfig.ts",
+    "size": 178
+  },
+  {
+    "file": "packages\\config\\src\\index.ts",
+    "size": 1939
+  },
+  {
+    "file": "packages\\config\\src\\JwtConfig.ts",
+    "size": 373
+  },
+  {
+    "file": "packages\\config\\src\\LoggingConfig.ts",
+    "size": 232
+  },
+  {
+    "file": "packages\\config\\src\\providers\\ConfigProvider.ts",
+    "size": 1105
+  },
+  {
+    "file": "packages\\config\\src\\ProvidersConfig.ts",
+    "size": 387
+  },
+  {
+    "file": "packages\\config\\src\\RedisConfig.ts",
+    "size": 200
+  },
+  {
+    "file": "packages\\config\\src\\SecurityConfig.ts",
+    "size": 294
+  },
+  {
+    "file": "packages\\config\\tests\\config.spec.ts",
+    "size": 1034
+  },
+  {
+    "file": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "size": 2097
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\builder\\ScreenBuilder.ts",
+    "size": 342
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\builder\\ScreenBuilderContract.ts",
+    "size": 265
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\cache\\SduiCacheKey.ts",
+    "size": 152
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\cache\\SduiCachePolicy.ts",
+    "size": 111
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "size": 853
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\generator\\SduiGenerator.ts",
+    "size": 365
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\index.ts",
+    "size": 1742
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\public\\index.ts",
+    "size": 1687
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\registry\\ScreenRegistry.ts",
+    "size": 502
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child\\Child.ts",
+    "size": 885
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child\\ChildProperties.ts",
+    "size": 246
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child-data\\ChildrenData.ts",
+    "size": 874
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child-data\\ChildrenDataProperties.ts",
+    "size": 789
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "size": 1880
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\ComponentProperties.ts",
+    "size": 395
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\Screen.ts",
+    "size": 640
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\ScreenProperties.ts",
+    "size": 324
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponent.ts",
+    "size": 872
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponentProperties.ts",
+    "size": 298
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\template\\Template.ts",
+    "size": 880
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\template\\TemplateProperties.ts",
+    "size": 249
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "size": 2238
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\versioning\\SchemaVersion.ts",
+    "size": 46
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\versioning\\ScreenVersionResolver.ts",
+    "size": 118
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "size": 1184
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "size": 1358
+  },
+  {
+    "file": "platform\\cache\\src\\configuration\\CacheConfig.ts",
+    "size": 145
+  },
+  {
+    "file": "platform\\cache\\src\\index.ts",
+    "size": 35
+  },
+  {
+    "file": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "size": 1077
+  },
+  {
+    "file": "platform\\cache\\src\\public\\index.ts",
+    "size": 104
+  },
+  {
+    "file": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "size": 1292
+  },
+  {
+    "file": "platform\\database\\prisma\\seed.ts",
+    "size": 4880
+  },
+  {
+    "file": "platform\\database\\src\\index.ts",
+    "size": 213
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaDatabaseProvider.ts",
+    "size": 619
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaProvider.ts",
+    "size": 804
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaTransactionProvider.ts",
+    "size": 589
+  },
+  {
+    "file": "platform\\database\\src\\public\\index.ts",
+    "size": 29
+  },
+  {
+    "file": "platform\\event-bus\\src\\configuration\\EventBusConfig.ts",
+    "size": 88
+  },
+  {
+    "file": "platform\\event-bus\\src\\index.ts",
+    "size": 35
+  },
+  {
+    "file": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "size": 1034
+  },
+  {
+    "file": "platform\\event-bus\\src\\public\\index.ts",
+    "size": 102
+  },
+  {
+    "file": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "size": 1086
+  },
+  {
+    "file": "platform\\feature-flags\\src\\index.ts",
+    "size": 53
+  },
+  {
+    "file": "platform\\feature-flags\\src\\providers\\FeatureFlagProvider.ts",
+    "size": 773
+  },
+  {
+    "file": "platform\\feature-flags\\src\\public\\index.ts",
+    "size": 29
+  },
+  {
+    "file": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "size": 1671
+  },
+  {
+    "file": "platform\\notification\\src\\configuration\\NotificationConfig.ts",
+    "size": 112
+  },
+  {
+    "file": "platform\\notification\\src\\index.ts",
+    "size": 35
+  },
+  {
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "size": 1963
+  },
+  {
+    "file": "platform\\notification\\src\\public\\index.ts",
+    "size": 122
+  },
+  {
+    "file": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "size": 1638
+  },
+  {
+    "file": "platform\\observability\\index.ts",
+    "size": 11
+  },
+  {
+    "file": "platform\\observability\\src\\index.ts",
+    "size": 1073
+  },
+  {
+    "file": "platform\\observability\\src\\public\\index.ts",
+    "size": 29
+  },
+  {
+    "file": "platform\\queue\\src\\configuration\\QueueConfig.ts",
+    "size": 156
+  },
+  {
+    "file": "platform\\queue\\src\\index.ts",
+    "size": 35
+  },
+  {
+    "file": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "size": 1804
+  },
+  {
+    "file": "platform\\queue\\src\\public\\index.ts",
+    "size": 104
+  },
+  {
+    "file": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "size": 1055
+  },
+  {
+    "file": "platform\\storage\\src\\index.ts",
+    "size": 35
+  },
+  {
+    "file": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "size": 3704
+  },
+  {
+    "file": "platform\\storage\\src\\providers\\SupabaseStorageProvider.ts",
+    "size": 2832
+  },
+  {
+    "file": "platform\\storage\\src\\public\\index.ts",
+    "size": 55
+  },
+  {
+    "file": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "size": 1964
+  },
+  {
+    "file": "prisma.config.ts",
+    "size": 522
+  },
+  {
+    "file": "vitest.config.ts",
+    "size": 473
+  },
+  {
+    "file": "vitest.workspace.ts",
+    "size": 462
+  }
+]

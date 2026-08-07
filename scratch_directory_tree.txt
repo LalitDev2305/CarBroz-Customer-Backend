@@ -1,0 +1,888 @@
+├── .agents/
+│   └── AGENTS.md
+├── .dockerignore
+├── .env
+├── .env.development
+├── .env.example
+├── .env.test
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── .gitignore
+├── .npmrc
+├── .vscode/
+│   └── settings.json
+├── AGENTS.md
+├── apps/
+│   └── api/
+│       ├── Dockerfile
+│       ├── package.json
+│       ├── public/
+│       │   └── images/
+│       │       ├── carbroz_logo.png
+│       │       ├── car_stars.png
+│       │       ├── img_splash_car.png
+│       │       └── logo_washx.png
+│       ├── src/
+│       │   ├── app.routes.ts
+│       │   ├── app.ts
+│       │   ├── container/
+│       │   │   ├── index.test.ts
+│       │   │   └── index.ts
+│       │   └── server.ts
+│       ├── test.http
+│       ├── tests/
+│       │   (empty)
+│       ├── tsconfig.json
+│       └── tsconfig.tsbuildinfo
+├── coverage/
+│   ├── base.css
+│   ├── block-navigation.js
+│   ├── coverage-final.json
+│   ├── domains/
+│   │   ├── notification/
+│   │   │   ├── application/
+│   │   │   │   ├── index.html
+│   │   │   │   ├── ListNotificationsUseCase.ts.html
+│   │   │   │   ├── MarkNotificationReadUseCase.ts.html
+│   │   │   │   ├── RegisterDeviceTokenUseCase.ts.html
+│   │   │   │   ├── SendMultiChannelNotificationUseCase.ts.html
+│   │   │   │   └── UnregisterDeviceTokenUseCase.ts.html
+│   │   │   └── domain/
+│   │   │       ├── DeviceToken.ts.html
+│   │   │       ├── index.html
+│   │   │       └── NotificationLog.ts.html
+│   │   └── tracking/
+│   │       ├── application/
+│   │       │   ├── CancelTrackingSessionUseCase.ts.html
+│   │       │   ├── CompleteTrackingSessionUseCase.ts.html
+│   │       │   ├── GetLiveTrackingTimelineUseCase.ts.html
+│   │       │   ├── index.html
+│   │       │   ├── StartTrackingSessionUseCase.ts.html
+│   │       │   ├── SyncOfflineGpsLocationsUseCase.ts.html
+│   │       │   └── UpdateLiveGpsLocationUseCase.ts.html
+│   │       └── domain/
+│   │           ├── index.html
+│   │           ├── LocationPing.ts.html
+│   │           └── TrackingSession.ts.html
+│   ├── favicon.png
+│   ├── index.html
+│   ├── platform/
+│   │   └── storage/
+│   │       └── src/
+│   │           └── providers/
+│   │               ├── index.html
+│   │               └── SupabaseStorageProvider.ts.html
+│   ├── prettify.css
+│   ├── prettify.js
+│   ├── sort-arrow-sprite.png
+│   └── sorter.js
+├── docker-compose.prod.yml
+├── docker-compose.yml
+├── Dockerfile
+├── docs/
+│   ├── adr/
+│   │   ├── ARCHITECTURE_DECISIONS.md
+│   │   └── README.md
+│   ├── architecture/
+│   │   ├── 00_ENGINEERING_STANDARDS.md
+│   │   ├── 01_ARCHITECTURE_BLUEPRINT.md
+│   │   ├── 02_DEVELOPMENT_WORKFLOW.md
+│   │   ├── 03_EXECUTION_ROADMAP.md
+│   │   ├── 04_DYNAMIC_UI_SPECIFICATION.md
+│   │   ├── 05_API_STANDARDS.md
+│   │   ├── 06_DATABASE_STANDARDS.md
+│   │   ├── 07_PROVIDER_GUIDELINES.md
+│   │   ├── 08_SECURITY_STANDARDS.md
+│   │   ├── 09_BRANCHING_STRATEGY.md
+│   │   ├── 10_NAMING_CONVENTIONS.md
+│   │   ├── 11_ERROR_CODES.md
+│   │   ├── 12_CONFIGURATION_MATRIX.md
+│   │   ├── 13_PROJECT_GOVERNANCE.md
+│   │   └── ARCHITECTURE.md
+│   ├── architecture-audit/
+│   │   ├── 00_EXECUTIVE_SUMMARY.md
+│   │   ├── 01_CURRENT_STRUCTURE_INVENTORY.md
+│   │   ├── 01_REPOSITORY_INVENTORY.md
+│   │   ├── 02_CLEAN_ARCHITECTURE_AUDIT.md
+│   │   ├── 02_DEPENDENCY_AND_COUPLING_REPORT.md
+│   │   ├── 03_BOUNDED_CONTEXT_REVIEW.md
+│   │   ├── 03_PACKAGE_AND_BOUNDED_CONTEXT_AUDIT.md
+│   │   ├── 04_DUPLICATE_AND_CLEANUP_CANDIDATES.md
+│   │   ├── 04_DUPLICATION_AND_REPOSITORY_HYGIENE.md
+│   │   ├── 05_NAMING_AUDIT.md
+│   │   ├── 05_TARGET_MODULAR_ARCHITECTURE.md
+│   │   ├── 06_CODE_QUALITY_AUDIT.md
+│   │   ├── 06_RESTRUCTURING_ROADMAP.md
+│   │   ├── 07_DATABASE_AND_MIGRATION_AUDIT.md
+│   │   ├── 07_NAMING_AND_DEPENDENCY_RULES.md
+│   │   ├── 08_API_AND_SECURITY_AUDIT.md
+│   │   ├── 08_FUTURE_FEATURE_TEMPLATE.md
+│   │   ├── 09_TESTING_AUDIT.md
+│   │   ├── 10_TECHNOLOGY_AND_PROVIDER_AUDIT.md
+│   │   ├── 11_MVP_TECHNOLOGY_DECISIONS.md
+│   │   ├── 12_INFRASTRUCTURE_AND_DEPLOYMENT_PLAN.md
+│   │   ├── 13_CONSOLIDATED_MVP_ROADMAP.md
+│   │   ├── 14_CORRECTION_EXECUTION_PLAN.md
+│   │   ├── 15_DELETION_AND_ARCHIVE_PLAN.md
+│   │   ├── 16_DECISION_LOG.md
+│   │   └── 17_ACCEPTANCE_CRITERIA.md
+│   ├── architecture-governance/
+│   │   └── IMPLEMENTATION_GOVERNANCE_PLAN.md
+│   ├── architecture-redesign/
+│   │   ├── 01_COMPLETE_REPOSITORY_ARCHITECTURE.md
+│   │   ├── 02_CURRENT_PROBLEMS.md
+│   │   ├── 03_TARGET_PACKAGE_STRUCTURE.md
+│   │   ├── 04_FEATURE_OWNERSHIP_MATRIX.md
+│   │   ├── 05_SHARED_KERNEL_DESIGN.md
+│   │   ├── 06_DEPENDENCY_RULES.md
+│   │   ├── 07_MODULE_TEMPLATE.md
+│   │   ├── 08_SDUI_ARCHITECTURE.md
+│   │   ├── 09_DATABASE_ARCHITECTURE.md
+│   │   ├── 10_DELIVERY_LAYER_ARCHITECTURE.md
+│   │   ├── 11_MIGRATION_STRATEGY.md
+│   │   ├── 12_REFACTORING_PHASES.md
+│   │   ├── 13_RISKS_AND_BLOCKERS.md
+│   │   ├── 14_ARCHITECTURE_DECISION_RECORDS.md
+│   │   └── 15_IMPLEMENTATION_PLAN.md
+│   ├── archive/
+│   │   ├── 00_ENGINEERING_STANDARDS.md
+│   │   ├── 01_ARCHITECTURE_BLUEPRINT.md
+│   │   ├── 02_DEVELOPMENT_WORKFLOW.md
+│   │   ├── 03_EXECUTION_ROADMAP.md
+│   │   ├── 04_DYNAMIC_UI_SPECIFICATION.md
+│   │   ├── 05_API_STANDARDS.md
+│   │   ├── 06_DATABASE_STANDARDS.md
+│   │   ├── 07_PROVIDER_GUIDELINES.md
+│   │   ├── 08_SECURITY_STANDARDS.md
+│   │   ├── 09_BRANCHING_STRATEGY.md
+│   │   ├── 10_NAMING_CONVENTIONS.md
+│   │   ├── 11_ERROR_CODES.md
+│   │   ├── 12_CONFIGURATION_MATRIX.md
+│   │   └── 13_PROJECT_GOVERNANCE.md
+│   ├── CI_CD_PLAN.md
+│   ├── CURRENT_PROJECT_ANALYSIS.md
+│   ├── decisions/
+│   │   (empty)
+│   ├── DEPENDENCY_GRAPH.md
+│   ├── DEVELOPER_GUIDE.md
+│   ├── diagrams/
+│   │   └── README.md
+│   ├── DOMAIN_OWNERSHIP.md
+│   ├── FINAL_ARCHITECTURE.md
+│   ├── HARDENING_REPORT.md
+│   ├── migration/
+│   │   ├── dependency_analysis.md
+│   │   ├── execution_plan.md
+│   │   ├── m3_execution_plan.md
+│   │   ├── m4_execution_plan.md
+│   │   ├── m5_execution_plan.md
+│   │   ├── migration_inventory.md
+│   │   ├── migration_summary.md
+│   │   ├── milestone2_execution_plan.md
+│   │   ├── MILESTONE_1_EXECUTION_PLAN.md
+│   │   ├── risk_assessment.md
+│   │   ├── validation_plan.md
+│   │   └── validation_report.md
+│   ├── NEXT_PHASE_ROADMAP.md
+│   ├── OBSERVABILITY.md
+│   ├── PERFORMANCE_REVIEW.md
+│   ├── phases/
+│   │   ├── phase-01/
+│   │   │   ├── blocker_resolution.md
+│   │   │   ├── implementation_plan.md
+│   │   │   ├── release_notes.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-02/
+│   │   │   ├── blocker_report.md
+│   │   │   ├── implementation_plan.md
+│   │   │   ├── release_notes.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-03/
+│   │   │   ├── blocker_report.md
+│   │   │   ├── release_notes.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-04/
+│   │   │   ├── blocker_report.md
+│   │   │   ├── implementation_plan.md
+│   │   │   ├── release_notes.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-05/
+│   │   │   ├── implementation_plan.md
+│   │   │   ├── release_notes.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-06/
+│   │   │   ├── blocker_report.md
+│   │   │   ├── implementation_plan.md
+│   │   │   ├── release_notes.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-07/
+│   │   │   ├── implementation_plan.md
+│   │   │   ├── release_notes.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-08/
+│   │   │   └── implementation_plan.md
+│   │   ├── phase-09/
+│   │   │   └── implementation_plan.md
+│   │   ├── phase-10/
+│   │   │   ├── implementation_plan.md
+│   │   │   ├── release_notes.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-11/
+│   │   │   └── implementation_plan.md
+│   │   ├── phase-12/
+│   │   │   ├── implementation_plan.md
+│   │   │   ├── release_notes.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-13/
+│   │   │   ├── implementation_plan.md
+│   │   │   └── release_notes.md
+│   │   ├── phase-14/
+│   │   │   ├── 01_IMPLEMENTATION_PLAN.md
+│   │   │   ├── 02_BLOCKERS_AND_DECISIONS.md
+│   │   │   ├── release_notes.md
+│   │   │   ├── sdui-hierarchy-completion-plan.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-15/
+│   │   │   ├── implementation_plan.md
+│   │   │   ├── release_notes.md
+│   │   │   └── walkthrough.md
+│   │   ├── phase-16/
+│   │   │   ├── blockers_and_decisions.md
+│   │   │   └── implementation_plan.md
+│   │   ├── phase-17/
+│   │   │   ├── blockers_and_decisions.md
+│   │   │   └── implementation_plan.md
+│   │   ├── phase-22/
+│   │   │   ├── blockers_and_decisions.md
+│   │   │   └── implementation_plan.md
+│   │   ├── phase-23/
+│   │   │   ├── architecture_report.md
+│   │   │   ├── blockers_and_decisions.md
+│   │   │   └── implementation_plan.md
+│   │   └── README.md
+│   ├── PRODUCT_COMPLETION_MASTER_PLAN.md
+│   ├── PROJECT_BASELINE.md
+│   ├── PROJECT_STATUS.md
+│   ├── PROJECT_STRUCTURE.md
+│   ├── release_notes.md
+│   ├── RELEASE_READINESS.md
+│   ├── reviews/
+│   │   ├── COMPLETE_REPOSITORY_ARCHITECTURE_REVIEW.md
+│   │   ├── ENTERPRISE_ARCHITECTURE_GOVERNANCE_REPORT.md
+│   │   ├── ENTERPRISE_ARCHITECTURE_V4_FROZEN_BLUEPRINT.md
+│   │   ├── ENTERPRISE_ARCHITECTURE_V4_HYBRID_BLUEPRINT.md
+│   │   ├── ENTERPRISE_ARCHITECTURE_V5_GOLD_BLUEPRINT.md
+│   │   ├── ENTERPRISE_ARCHITECTURE_VNEXT_FREEZE_REVIEW.md
+│   │   ├── FINAL_ARCHITECTURE_REVIEW_AND_BLUEPRINT.md
+│   │   ├── FINAL_CHALLENGE_REVIEW_AND_GATE.md
+│   │   ├── FINAL_ENTERPRISE_GOVERNANCE_GATE.md
+│   │   ├── FINAL_FROZEN_ENTERPRISE_ARCHITECTURE.md
+│   │   ├── GREENFIELD_ENTERPRISE_ARCHITECTURE_V6.md
+│   │   ├── IMPLEMENTATION_READINESS_REVIEW.md
+│   │   ├── PHASE_0_DOCUMENTATION_AUDIT.md
+│   │   ├── PHASE_10_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_10_PLAN_REVIEW.md
+│   │   ├── PHASE_11_PLAN_REVIEW.md
+│   │   ├── PHASE_12_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_12_PLAN_REVIEW.md
+│   │   ├── PHASE_13_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_13_PLAN_REVIEW.md
+│   │   ├── PHASE_14_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_14_PLAN_REVIEW.md
+│   │   ├── PHASE_14_SDUI_HIERARCHY_PLAN_REVIEW.md
+│   │   ├── PHASE_15_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_16_PLAN_REVIEW.md
+│   │   ├── PHASE_17_PLAN_REVIEW.md
+│   │   ├── PHASE_1_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_1_LINT_REVIEW.md
+│   │   ├── PHASE_22_PLAN_REVIEW.md
+│   │   ├── PHASE_23_PLAN_REVIEW.md
+│   │   ├── PHASE_2_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_2_PLAN_REVIEW.md
+│   │   ├── PHASE_3_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_4_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_4_PLAN_REVIEW.md
+│   │   ├── PHASE_5_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_5_PLAN_REVIEW.md
+│   │   ├── PHASE_6_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_6_PLAN_REVIEW.md
+│   │   ├── PHASE_7_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_7_PLAN_REVIEW.md
+│   │   ├── PHASE_8_ARCHITECTURE_REVIEW.md
+│   │   ├── PHASE_8_PLAN_REVIEW.md
+│   │   ├── PHASE_9_PLAN_REVIEW.md
+│   │   ├── PROJECT_ARCHITECTURE_AUDIT_REVIEW.md
+│   │   ├── README.md
+│   │   ├── ROUND_2_FINAL_ARCHITECTURE_REVIEW.md
+│   │   └── ROUND_3_PRODUCTION_ARCHITECTURE_BLUEPRINT.md
+│   ├── SCALABILITY_AND_PRODUCTION_SCENARIOS.md
+│   ├── SECURITY_REVIEW.md
+│   ├── standards/
+│   │   (empty)
+│   ├── SYSTEM_ARCHITECTURE.md
+│   ├── TECHNICAL_DEBT.md
+│   ├── walkthrough.md
+│   └── WORKSPACE_AUDIT.md
+├── domains/
+│   ├── catalog/
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── domain/
+│   │   │   │   ├── entities/
+│   │   │   │   │   ├── Service.ts
+│   │   │   │   │   ├── ServiceAddon.ts
+│   │   │   │   │   └── ServiceCategory.ts
+│   │   │   │   └── repositories/
+│   │   │   │       └── CatalogRepository.ts
+│   │   │   ├── infrastructure/
+│   │   │   │   └── persistence/
+│   │   │   │       └── prisma/
+│   │   │   │           └── PrismaCatalogRepository.ts
+│   │   │   └── public/
+│   │   │       └── index.ts
+│   │   └── tsconfig.json
+│   ├── identity/
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── domain/
+│   │   │   │   ├── entities/
+│   │   │   │   │   ├── AdminUserRole.ts
+│   │   │   │   │   ├── Permission.ts
+│   │   │   │   │   ├── Role.ts
+│   │   │   │   │   ├── RolePermission.ts
+│   │   │   │   │   ├── User.ts
+│   │   │   │   │   └── UserSession.ts
+│   │   │   │   └── repositories/
+│   │   │   │       ├── AdminRoleRepository.ts
+│   │   │   │       ├── PermissionRepository.ts
+│   │   │   │       ├── RoleRepository.ts
+│   │   │   │       ├── UserRepository.ts
+│   │   │   │       └── UserSessionRepository.ts
+│   │   │   ├── infrastructure/
+│   │   │   │   └── persistence/
+│   │   │   │       └── prisma/
+│   │   │   │           ├── PrismaAdminRoleRepository.ts
+│   │   │   │           ├── PrismaPermissionRepository.ts
+│   │   │   │           ├── PrismaRoleRepository.ts
+│   │   │   │           ├── PrismaUserRepository.ts
+│   │   │   │           └── PrismaUserSessionRepository.ts
+│   │   │   ├── presentation/
+│   │   │   │   └── sdui/
+│   │   │   │       └── AuthLoginBuilder.ts
+│   │   │   └── public/
+│   │   │       └── index.ts
+│   │   └── tsconfig.json
+│   ├── operations/
+│   │   ├── booking/
+│   │   │   ├── package.json
+│   │   │   ├── src/
+│   │   │   │   ├── application/
+│   │   │   │   │   (empty)
+│   │   │   │   ├── domain/
+│   │   │   │   │   ├── entities/
+│   │   │   │   │   │   ├── Booking.ts
+│   │   │   │   │   │   └── BookingStatusHistoryItem.ts
+│   │   │   │   │   ├── enums/
+│   │   │   │   │   │   └── BookingStatus.ts
+│   │   │   │   │   ├── repositories/
+│   │   │   │   │   │   └── BookingRepository.ts
+│   │   │   │   │   └── value-objects/
+│   │   │   │   │       └── BookingSnapshots.ts
+│   │   │   │   ├── infrastructure/
+│   │   │   │   │   └── persistence/
+│   │   │   │   │       └── prisma/
+│   │   │   │   │           └── PrismaBookingRepository.ts
+│   │   │   │   └── public/
+│   │   │   │       └── index.ts
+│   │   │   ├── tests/
+│   │   │   │   └── Booking.spec.ts
+│   │   │   └── tsconfig.json
+│   │   ├── engagement/
+│   │   │   ├── package.json
+│   │   │   ├── src/
+│   │   │   │   ├── application/
+│   │   │   │   │   ├── commands/
+│   │   │   │   │   │   ├── MarkNotificationReadCommand.ts
+│   │   │   │   │   │   ├── RegisterDeviceTokenCommand.ts
+│   │   │   │   │   │   ├── SendMultiChannelNotificationCommand.ts
+│   │   │   │   │   │   └── UnregisterDeviceTokenCommand.ts
+│   │   │   │   │   ├── handlers/
+│   │   │   │   │   │   ├── ListNotificationsQueryHandler.ts
+│   │   │   │   │   │   ├── MarkNotificationReadCommandHandler.ts
+│   │   │   │   │   │   ├── RegisterDeviceTokenCommandHandler.ts
+│   │   │   │   │   │   ├── SendMultiChannelNotificationCommandHandler.ts
+│   │   │   │   │   │   └── UnregisterDeviceTokenCommandHandler.ts
+│   │   │   │   │   ├── queries/
+│   │   │   │   │   │   └── ListNotificationsQuery.ts
+│   │   │   │   │   └── use-cases/
+│   │   │   │   │       (empty)
+│   │   │   │   ├── domain/
+│   │   │   │   │   ├── entities/
+│   │   │   │   │   │   ├── Coupon.ts
+│   │   │   │   │   │   ├── CouponUsage.ts
+│   │   │   │   │   │   ├── DeviceToken.ts
+│   │   │   │   │   │   ├── NotificationLog.ts
+│   │   │   │   │   │   ├── PartnerRatingStats.ts
+│   │   │   │   │   │   └── Review.ts
+│   │   │   │   │   ├── enums/
+│   │   │   │   │   │   ├── DiscountType.ts
+│   │   │   │   │   │   ├── NotificationChannel.ts
+│   │   │   │   │   │   ├── NotificationStatus.ts
+│   │   │   │   │   │   └── ReviewStatus.ts
+│   │   │   │   │   ├── repositories/
+│   │   │   │   │   │   ├── CouponRepository.ts
+│   │   │   │   │   │   ├── CouponUsageRepository.ts
+│   │   │   │   │   │   ├── DeviceTokenRepository.ts
+│   │   │   │   │   │   ├── NotificationLogRepository.ts
+│   │   │   │   │   │   └── ReviewRepository.ts
+│   │   │   │   │   └── value-objects/
+│   │   │   │   │       └── NotificationPayload.ts
+│   │   │   │   ├── infrastructure/
+│   │   │   │   │   └── persistence/
+│   │   │   │   │       └── prisma/
+│   │   │   │   │           ├── PrismaCouponRepository.ts
+│   │   │   │   │           ├── PrismaCouponUsageRepository.ts
+│   │   │   │   │           ├── PrismaDeviceTokenRepository.ts
+│   │   │   │   │           ├── PrismaNotificationLogRepository.ts
+│   │   │   │   │           └── PrismaReviewRepository.ts
+│   │   │   │   └── public/
+│   │   │   │       └── index.ts
+│   │   │   └── tsconfig.json
+│   │   ├── financials/
+│   │   │   ├── package.json
+│   │   │   ├── src/
+│   │   │   │   ├── domain/
+│   │   │   │   │   ├── entities/
+│   │   │   │   │   │   ├── Invoice.ts
+│   │   │   │   │   │   ├── PartnerPayout.ts
+│   │   │   │   │   │   ├── Payment.ts
+│   │   │   │   │   │   └── PaymentWebhook.ts
+│   │   │   │   │   ├── enums/
+│   │   │   │   │   │   ├── InvoiceStatus.ts
+│   │   │   │   │   │   ├── PaymentMethod.ts
+│   │   │   │   │   │   ├── PaymentStatus.ts
+│   │   │   │   │   │   └── PayoutStatus.ts
+│   │   │   │   │   └── repositories/
+│   │   │   │   │       ├── InvoiceRepository.ts
+│   │   │   │   │       ├── PartnerPayoutRepository.ts
+│   │   │   │   │       └── PaymentRepository.ts
+│   │   │   │   ├── infrastructure/
+│   │   │   │   │   └── persistence/
+│   │   │   │   │       └── prisma/
+│   │   │   │   │           ├── PrismaInvoiceRepository.ts
+│   │   │   │   │           ├── PrismaPartnerPayoutRepository.ts
+│   │   │   │   │           └── PrismaPaymentRepository.ts
+│   │   │   │   └── public/
+│   │   │   │       └── index.ts
+│   │   │   └── tsconfig.json
+│   │   ├── fulfillment/
+│   │   │   ├── package.json
+│   │   │   ├── src/
+│   │   │   │   ├── application/
+│   │   │   │   │   ├── commands/
+│   │   │   │   │   │   ├── CancelTrackingSessionCommand.ts
+│   │   │   │   │   │   ├── CompleteTrackingSessionCommand.ts
+│   │   │   │   │   │   ├── StartTrackingSessionCommand.ts
+│   │   │   │   │   │   ├── SyncOfflineGpsLocationsCommand.ts
+│   │   │   │   │   │   └── UpdateLiveGpsLocationCommand.ts
+│   │   │   │   │   ├── handlers/
+│   │   │   │   │   │   ├── CancelTrackingSessionCommandHandler.ts
+│   │   │   │   │   │   ├── CompleteTrackingSessionCommandHandler.ts
+│   │   │   │   │   │   ├── GetLiveTrackingTimelineQueryHandler.ts
+│   │   │   │   │   │   ├── StartTrackingSessionCommandHandler.ts
+│   │   │   │   │   │   ├── SyncOfflineGpsLocationsCommandHandler.ts
+│   │   │   │   │   │   └── UpdateLiveGpsLocationCommandHandler.ts
+│   │   │   │   │   ├── queries/
+│   │   │   │   │   │   └── GetLiveTrackingTimelineQuery.ts
+│   │   │   │   │   └── use-cases/
+│   │   │   │   │       (empty)
+│   │   │   │   ├── domain/
+│   │   │   │   │   ├── entities/
+│   │   │   │   │   │   ├── Dispute.ts
+│   │   │   │   │   │   ├── LocationPing.ts
+│   │   │   │   │   │   └── TrackingSession.ts
+│   │   │   │   │   ├── enums/
+│   │   │   │   │   │   ├── DisputeReason.ts
+│   │   │   │   │   │   ├── DisputeStatus.ts
+│   │   │   │   │   │   └── TrackingStatus.ts
+│   │   │   │   │   ├── repositories/
+│   │   │   │   │   │   ├── DisputeRepository.ts
+│   │   │   │   │   │   └── TrackingSessionRepository.ts
+│   │   │   │   │   └── value-objects/
+│   │   │   │   │       (empty)
+│   │   │   │   ├── infrastructure/
+│   │   │   │   │   └── persistence/
+│   │   │   │   │       └── prisma/
+│   │   │   │   │           ├── PrismaDisputeRepository.ts
+│   │   │   │   │           └── PrismaTrackingSessionRepository.ts
+│   │   │   │   └── public/
+│   │   │   │       └── index.ts
+│   │   │   ├── tests/
+│   │   │   │   └── TrackingCqrs.spec.ts
+│   │   │   └── tsconfig.json
+│   │   └── scheduling/
+│   │       ├── package.json
+│   │       ├── src/
+│   │       │   ├── application/
+│   │       │   │   ├── handlers/
+│   │       │   │   │   └── GetAvailableSlotsQueryHandler.ts
+│   │       │   │   ├── queries/
+│   │       │   │   │   └── GetAvailableSlotsQuery.ts
+│   │       │   │   └── use-cases/
+│   │       │   │       (empty)
+│   │       │   ├── domain/
+│   │       │   │   ├── entities/
+│   │       │   │   │   └── ServiceSlot.ts
+│   │       │   │   ├── enums/
+│   │       │   │   │   └── SlotStatus.ts
+│   │       │   │   └── repositories/
+│   │       │   │       └── ServiceSlotRepository.ts
+│   │       │   └── public/
+│   │       │       └── index.ts
+│   │       ├── tsconfig.json
+│   │       └── tsconfig.tsbuildinfo
+│   ├── pricing/
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── domain/
+│   │   │   │   ├── entities/
+│   │   │   │   │   └── PricingTier.ts
+│   │   │   │   ├── enums/
+│   │   │   │   │   (empty)
+│   │   │   │   └── repositories/
+│   │   │   │       └── PricingRepository.ts
+│   │   │   ├── infrastructure/
+│   │   │   │   └── persistence/
+│   │   │   │       └── prisma/
+│   │   │   │           └── PrismaPricingRepository.ts
+│   │   │   └── public/
+│   │   │       └── index.ts
+│   │   └── tsconfig.json
+│   └── principals/
+│       ├── administrator/
+│       │   ├── package.json
+│       │   ├── src/
+│       │   │   └── public/
+│       │   │       └── index.ts
+│       │   ├── tsconfig.json
+│       │   └── tsconfig.tsbuildinfo
+│       ├── customer/
+│       │   ├── package.json
+│       │   ├── src/
+│       │   │   ├── domain/
+│       │   │   │   ├── entities/
+│       │   │   │   │   ├── Address.ts
+│       │   │   │   │   ├── CustomerProfile.ts
+│       │   │   │   │   └── Vehicle.ts
+│       │   │   │   ├── enums/
+│       │   │   │   │   └── VehicleStatus.ts
+│       │   │   │   └── repositories/
+│       │   │   │       ├── AddressRepository.ts
+│       │   │   │       ├── CustomerProfileRepository.ts
+│       │   │   │       └── VehicleRepository.ts
+│       │   │   ├── infrastructure/
+│       │   │   │   └── persistence/
+│       │   │   │       └── prisma/
+│       │   │   │           ├── PrismaAddressRepository.ts
+│       │   │   │           ├── PrismaCustomerProfileRepository.ts
+│       │   │   │           └── PrismaVehicleRepository.ts
+│       │   │   ├── presentation/
+│       │   │   │   └── sdui/
+│       │   │   │       └── CustomerDashboardBuilder.ts
+│       │   │   └── public/
+│       │   │       └── index.ts
+│       │   └── tsconfig.json
+│       └── partner/
+│           ├── package.json
+│           ├── src/
+│           │   ├── application/
+│           │   │   ├── commands/
+│           │   │   │   ├── UploadPartnerKycDocumentCommand.ts
+│           │   │   │   └── VerifyPartnerKycDocumentCommand.ts
+│           │   │   ├── handlers/
+│           │   │   │   ├── UploadPartnerKycDocumentCommandHandler.ts
+│           │   │   │   └── VerifyPartnerKycDocumentCommandHandler.ts
+│           │   │   └── use-cases/
+│           │   │       (empty)
+│           │   ├── domain/
+│           │   │   ├── entities/
+│           │   │   │   ├── KycDocument.ts
+│           │   │   │   ├── Partner.ts
+│           │   │   │   ├── PartnerMember.ts
+│           │   │   │   └── PartnerProfile.ts
+│           │   │   ├── enums/
+│           │   │   │   ├── KycDocumentStatus.ts
+│           │   │   │   ├── KycDocumentType.ts
+│           │   │   │   ├── PartnerMemberRole.ts
+│           │   │   │   ├── PartnerMemberStatus.ts
+│           │   │   │   ├── PartnerStatus.ts
+│           │   │   │   └── PartnerType.ts
+│           │   │   └── repositories/
+│           │   │       ├── KycDocumentRepository.ts
+│           │   │       ├── PartnerMemberRepository.ts
+│           │   │       ├── PartnerProfileRepository.ts
+│           │   │       └── PartnerRepository.ts
+│           │   ├── infrastructure/
+│           │   │   └── persistence/
+│           │   │       └── prisma/
+│           │   │           ├── PrismaKycDocumentRepository.ts
+│           │   │           ├── PrismaPartnerMemberRepository.ts
+│           │   │           ├── PrismaPartnerProfileRepository.ts
+│           │   │           └── PrismaPartnerRepository.ts
+│           │   └── public/
+│           │       └── index.ts
+│           └── tsconfig.json
+├── eslint.config.mjs
+├── foundation/
+│   └── kernel/
+│       ├── package.json
+│       ├── src/
+│       │   ├── application/
+│       │   │   └── contracts.ts
+│       │   ├── domain/
+│       │   │   ├── Money.ts
+│       │   │   └── primitives.ts
+│       │   ├── errors/
+│       │   │   └── errors.ts
+│       │   ├── index.ts
+│       │   ├── ports/
+│       │   │   └── ports.ts
+│       │   └── public/
+│       │       └── index.ts
+│       ├── tests/
+│       │   (empty)
+│       ├── tsconfig.json
+│       └── tsconfig.tsbuildinfo
+├── generated/
+│   └── prisma/
+│       ├── browser.ts
+│       ├── client.ts
+│       ├── commonInputTypes.ts
+│       ├── enums.ts
+│       ├── internal/
+│       │   ├── class.ts
+│       │   ├── prismaNamespace.ts
+│       │   └── prismaNamespaceBrowser.ts
+│       ├── models/
+│       │   (empty)
+│       └── models.ts
+├── package.json
+├── packages/
+│   ├── config/
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── AppConfig.ts
+│   │   │   ├── DatabaseConfig.ts
+│   │   │   ├── index.ts
+│   │   │   ├── JwtConfig.ts
+│   │   │   ├── LoggingConfig.ts
+│   │   │   ├── providers/
+│   │   │   │   └── ConfigProvider.ts
+│   │   │   ├── ProvidersConfig.ts
+│   │   │   ├── RedisConfig.ts
+│   │   │   └── SecurityConfig.ts
+│   │   ├── tests/
+│   │   │   ├── config.spec.ts
+│   │   │   └── ConfigProvider.spec.ts
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.tsbuildinfo
+│   └── sdui-engine/
+│       ├── package.json
+│       ├── src/
+│       │   ├── builder/
+│       │   │   ├── ScreenBuilder.ts
+│       │   │   └── ScreenBuilderContract.ts
+│       │   ├── cache/
+│       │   │   ├── SduiCacheKey.ts
+│       │   │   └── SduiCachePolicy.ts
+│       │   ├── factory/
+│       │   │   └── ScreenFactory.ts
+│       │   ├── generator/
+│       │   │   └── SduiGenerator.ts
+│       │   ├── index.ts
+│       │   ├── public/
+│       │   │   └── index.ts
+│       │   ├── registry/
+│       │   │   └── ScreenRegistry.ts
+│       │   ├── schema/
+│       │   │   ├── child/
+│       │   │   │   ├── Child.ts
+│       │   │   │   └── ChildProperties.ts
+│       │   │   ├── child-data/
+│       │   │   │   ├── ChildrenData.ts
+│       │   │   │   └── ChildrenDataProperties.ts
+│       │   │   ├── component/
+│       │   │   │   ├── Component.ts
+│       │   │   │   └── ComponentProperties.ts
+│       │   │   ├── screen/
+│       │   │   │   ├── Screen.ts
+│       │   │   │   └── ScreenProperties.ts
+│       │   │   ├── subcomponent/
+│       │   │   │   ├── SubComponent.ts
+│       │   │   │   └── SubComponentProperties.ts
+│       │   │   └── template/
+│       │   │       ├── Template.ts
+│       │   │       └── TemplateProperties.ts
+│       │   ├── validator/
+│       │   │   └── SduiValidator.ts
+│       │   └── versioning/
+│       │       ├── SchemaVersion.ts
+│       │       └── ScreenVersionResolver.ts
+│       ├── tests/
+│       │   ├── ScreenFactory.spec.ts
+│       │   └── SduiGenerator.spec.ts
+│       ├── tsconfig.json
+│       └── tsconfig.tsbuildinfo
+├── platform/
+│   ├── cache/
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── configuration/
+│   │   │   │   └── CacheConfig.ts
+│   │   │   ├── index.ts
+│   │   │   ├── providers/
+│   │   │   │   └── InMemoryCacheProvider.ts
+│   │   │   └── public/
+│   │   │       └── index.ts
+│   │   ├── tests/
+│   │   │   └── InMemoryCacheProvider.spec.ts
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.tsbuildinfo
+│   ├── database/
+│   │   ├── package.json
+│   │   ├── prisma/
+│   │   │   ├── migrations/
+│   │   │   │   ├── 20260802152802_init/
+│   │   │   │   │   └── migration.sql
+│   │   │   │   ├── 20260802180107_phase4/
+│   │   │   │   │   └── migration.sql
+│   │   │   │   ├── 20260803001500_phase6/
+│   │   │   │   │   └── migration.sql
+│   │   │   │   ├── 20260803010000_phase7/
+│   │   │   │   │   └── migration.sql
+│   │   │   │   ├── 20260803064324_phase8/
+│   │   │   │   │   └── migration.sql
+│   │   │   │   ├── 20260803074417_phase10/
+│   │   │   │   │   └── migration.sql
+│   │   │   │   ├── 20260803084023_phase11/
+│   │   │   │   │   └── migration.sql
+│   │   │   │   ├── 20260803092349_phase12/
+│   │   │   │   │   └── migration.sql
+│   │   │   │   ├── 20260803094125_phase13/
+│   │   │   │   │   └── migration.sql
+│   │   │   │   ├── 20260803120000_phase14/
+│   │   │   │   │   └── migration.sql
+│   │   │   │   └── migration_lock.toml
+│   │   │   ├── schema.prisma
+│   │   │   └── seed.ts
+│   │   ├── src/
+│   │   │   ├── client/
+│   │   │   │   (empty)
+│   │   │   ├── index.ts
+│   │   │   ├── mappers/
+│   │   │   │   (empty)
+│   │   │   ├── providers/
+│   │   │   │   ├── PrismaDatabaseProvider.ts
+│   │   │   │   ├── PrismaProvider.ts
+│   │   │   │   └── PrismaTransactionProvider.ts
+│   │   │   ├── public/
+│   │   │   │   └── index.ts
+│   │   │   └── transaction/
+│   │   │       (empty)
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.tsbuildinfo
+│   ├── event-bus/
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── configuration/
+│   │   │   │   └── EventBusConfig.ts
+│   │   │   ├── index.ts
+│   │   │   ├── providers/
+│   │   │   │   └── InMemoryEventBus.ts
+│   │   │   └── public/
+│   │   │       └── index.ts
+│   │   ├── tests/
+│   │   │   └── InMemoryEventBus.spec.ts
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.tsbuildinfo
+│   ├── feature-flags/
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── index.ts
+│   │   │   ├── providers/
+│   │   │   │   └── FeatureFlagProvider.ts
+│   │   │   └── public/
+│   │   │       └── index.ts
+│   │   ├── tests/
+│   │   │   └── FeatureFlagProvider.spec.ts
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.tsbuildinfo
+│   ├── notification/
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── configuration/
+│   │   │   │   └── NotificationConfig.ts
+│   │   │   ├── index.ts
+│   │   │   ├── providers/
+│   │   │   │   └── MultiChannelNotificationProvider.ts
+│   │   │   └── public/
+│   │   │       └── index.ts
+│   │   ├── tests/
+│   │   │   └── MultiChannelNotificationProvider.spec.ts
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.tsbuildinfo
+│   ├── observability/
+│   │   ├── index.ts
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── index.ts
+│   │   │   └── public/
+│   │   │       └── index.ts
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.tsbuildinfo
+│   ├── queue/
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── configuration/
+│   │   │   │   └── QueueConfig.ts
+│   │   │   ├── index.ts
+│   │   │   ├── providers/
+│   │   │   │   └── InMemoryQueueProvider.ts
+│   │   │   └── public/
+│   │   │       └── index.ts
+│   │   ├── tests/
+│   │   │   └── InMemoryQueueProvider.spec.ts
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.tsbuildinfo
+│   └── storage/
+│       ├── package.json
+│       ├── src/
+│       │   ├── configuration/
+│       │   │   (empty)
+│       │   ├── index.ts
+│       │   ├── providers/
+│       │   │   ├── MinIOStorageProvider.ts
+│       │   │   └── SupabaseStorageProvider.ts
+│       │   └── public/
+│       │       └── index.ts
+│       ├── tests/
+│       │   └── storage-provider.spec.ts
+│       ├── tsconfig.json
+│       └── tsconfig.tsbuildinfo
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── prisma.config.ts
+├── prompts/
+│   └── MASTER_PROMPT.md
+├── README.md
+├── scratch_analysis.json
+├── scratch_directory_tree.txt
+├── scratch_final_stats.json
+├── scratch_full_analysis.json
+├── scratch_pattern_evidence.json
+├── scratch_source_files.json
+├── tsconfig.base.json
+├── tsconfig.json
+├── vitest.config.ts
+└── vitest.workspace.ts

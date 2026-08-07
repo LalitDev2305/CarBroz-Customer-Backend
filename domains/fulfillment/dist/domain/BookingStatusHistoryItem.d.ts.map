@@ -1,1 +1,0 @@
-{"version":3,"file":"BookingStatusHistoryItem.d.ts","sourceRoot":"","sources":["../../domain/BookingStatusHistoryItem.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,oBAAoB,CAAC;AAEnD,MAAM,WAAW,wBAAwB;IACvC,UAAU,EAAE,aAAa,GAAG,IAAI,CAAC;IACjC,QAAQ,EAAE,aAAa,CAAC;IACxB,SAAS,EAAE,IAAI,GAAG,MAAM,CAAC;IACzB,OAAO,EAAE,MAAM,GAAG,MAAM,CAAC;IACzB,IAAI,CAAC,EAAE,MAAM,CAAC;CACf"}

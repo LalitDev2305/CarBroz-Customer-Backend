@@ -5,4 +5,3 @@ export interface QueueConfig {
     defaultAttempts?: number;
     defaultBackoffDelay?: number;
 }
-//# sourceMappingURL=QueueConfig.d.ts.map

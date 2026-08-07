@@ -1,0 +1,156 @@
+[
+  {
+    "child": "PrismaCatalogRepository",
+    "parent": "ICatalogRepository",
+    "kind": "implements",
+    "file": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 7
+  },
+  {
+    "child": "AuthLoginBuilder",
+    "parent": "BaseScreenBuilder",
+    "kind": "extends",
+    "file": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 4
+  },
+  {
+    "child": "CustomerDashboardBuilder",
+    "parent": "BaseScreenBuilder",
+    "kind": "extends",
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 3
+  },
+  {
+    "child": "KernelError",
+    "parent": "Error",
+    "kind": "extends",
+    "file": "foundation\\kernel\\src\\errors\\errors.ts",
+    "line": 10
+  },
+  {
+    "child": "ConfigProvider",
+    "parent": "IConfigProvider",
+    "kind": "implements",
+    "file": "packages\\config\\src\\providers\\ConfigProvider.ts",
+    "line": 4
+  },
+  {
+    "child": "ScreenBuilder",
+    "parent": "IScreenBuilder",
+    "kind": "implements",
+    "file": "packages\\sdui-engine\\src\\builder\\ScreenBuilder.ts",
+    "line": 4
+  },
+  {
+    "child": "Child",
+    "parent": "IChild",
+    "kind": "implements",
+    "file": "packages\\sdui-engine\\src\\schema\\child\\Child.ts",
+    "line": 12
+  },
+  {
+    "child": "ChildrenData",
+    "parent": "IChildrenData",
+    "kind": "implements",
+    "file": "packages\\sdui-engine\\src\\schema\\child-data\\ChildrenData.ts",
+    "line": 12
+  },
+  {
+    "child": "Component",
+    "parent": "IComponent",
+    "kind": "implements",
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 18
+  },
+  {
+    "child": "SubComponent",
+    "parent": "ISubcomponent",
+    "kind": "implements",
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponent.ts",
+    "line": 12
+  },
+  {
+    "child": "Template",
+    "parent": "ITemplate",
+    "kind": "implements",
+    "file": "packages\\sdui-engine\\src\\schema\\template\\Template.ts",
+    "line": 12
+  },
+  {
+    "child": "TestScreenBuilder",
+    "parent": "BaseScreenBuilder",
+    "kind": "extends",
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 4
+  },
+  {
+    "child": "InMemoryCacheProvider",
+    "parent": "CacheProvider",
+    "kind": "implements",
+    "file": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "line": 10
+  },
+  {
+    "child": "PrismaDatabaseProvider",
+    "parent": "IDatabaseProvider",
+    "kind": "implements",
+    "file": "platform\\database\\src\\providers\\PrismaDatabaseProvider.ts",
+    "line": 4
+  },
+  {
+    "child": "PrismaTransactionProvider",
+    "parent": "ITransactionProvider",
+    "kind": "implements",
+    "file": "platform\\database\\src\\providers\\PrismaTransactionProvider.ts",
+    "line": 4
+  },
+  {
+    "child": "InMemoryEventBus",
+    "parent": "EventBus",
+    "kind": "implements",
+    "file": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 10
+  },
+  {
+    "child": "TestDomainEvent",
+    "parent": "IDomainEvent",
+    "kind": "implements",
+    "file": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 9
+  },
+  {
+    "child": "FeatureFlagProvider",
+    "parent": "IFeatureFlagProvider",
+    "kind": "implements",
+    "file": "platform\\feature-flags\\src\\providers\\FeatureFlagProvider.ts",
+    "line": 4
+  },
+  {
+    "child": "MultiChannelNotificationProvider",
+    "parent": "INotificationProvider",
+    "kind": "implements",
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 11
+  },
+  {
+    "child": "InMemoryQueueProvider",
+    "parent": "QueueProvider",
+    "kind": "implements",
+    "file": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 25
+  },
+  {
+    "child": "MinIOStorageProvider",
+    "parent": "IStorageProvider",
+    "kind": "implements",
+    "file": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 8
+  },
+  {
+    "child": "SupabaseStorageProvider",
+    "parent": "IStorageProvider",
+    "kind": "implements",
+    "file": "platform\\storage\\src\\providers\\SupabaseStorageProvider.ts",
+    "line": 16
+  }
+]

@@ -10,4 +10,3 @@ export declare class InMemoryEventBus implements EventBus {
     publishAll(events: DomainEvent[]): Promise<void>;
     subscribe(eventName: string, handler: (event: DomainEvent) => Promise<void>): void;
 }
-//# sourceMappingURL=InMemoryEventBus.d.ts.map

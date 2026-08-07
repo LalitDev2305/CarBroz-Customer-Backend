@@ -7,4 +7,3 @@ export declare class PrismaProvider {
     health(): Promise<boolean>;
     getClient(): PrismaClient;
 }
-//# sourceMappingURL=PrismaProvider.d.ts.map

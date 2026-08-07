@@ -27,4 +27,3 @@ export declare class InMemoryQueueProvider implements QueueProvider {
     process<T>(queueName: string, handler: (job: QueueJob<T>) => Promise<void>): void;
     close(): Promise<void>;
 }
-//# sourceMappingURL=InMemoryQueueProvider.d.ts.map

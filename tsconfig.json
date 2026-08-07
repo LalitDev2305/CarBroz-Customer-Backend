@@ -1,37 +1,109 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-    // "rootDir": "./src",
-    // "outDir": "./dist",
-
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
     "types": [],
-    // For nodejs:
-    // "lib": ["esnext"],
-    // "types": ["node"],
-    // and npm install -D @types/node
-
-    // Other Outputs
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-
-    // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": false,
-
-    // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": false,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
-  }
+    "skipLibCheck": true
+  },
+  "files": [],
+  "include": [],
+  "exclude": [
+    "**/node_modules",
+    "**/dist",
+    "apps/admin",
+    "apps/customer",
+    "apps/partner",
+    "domains/booking",
+    "domains/commerce",
+    "domains/customer",
+    "domains/engagement",
+    "domains/financials",
+    "domains/fulfillment",
+    "domains/partner",
+    "domains/administration"
+  ],
 
+
+  "references": [
+    {
+      "path": "./apps/api"
+    },
+    {
+      "path": "./foundation/kernel"
+    },
+    {
+      "path": "./packages/config"
+    },
+    {
+      "path": "./packages/sdui-engine"
+    },
+    {
+      "path": "./platform/cache"
+    },
+    {
+      "path": "./platform/database"
+    },
+    {
+      "path": "./platform/event-bus"
+    },
+    {
+      "path": "./platform/feature-flags"
+    },
+    {
+      "path": "./platform/notification"
+    },
+    {
+      "path": "./platform/observability"
+    },
+    {
+      "path": "./platform/queue"
+    },
+    {
+      "path": "./platform/storage"
+    },
+    {
+      "path": "./domains/principals/customer"
+    },
+    {
+      "path": "./domains/principals/partner"
+    },
+    {
+      "path": "./domains/principals/administrator"
+    },
+    {
+      "path": "./domains/operations/booking"
+    },
+    {
+      "path": "./domains/operations/scheduling"
+    },
+    {
+      "path": "./domains/operations/fulfillment"
+    },
+    {
+      "path": "./domains/operations/financials"
+    },
+    {
+      "path": "./domains/operations/engagement"
+    },
+    {
+      "path": "./domains/catalog"
+    },
+    {
+      "path": "./domains/pricing"
+    },
+    {
+      "path": "./domains/identity"
+    }
+  ]
 }

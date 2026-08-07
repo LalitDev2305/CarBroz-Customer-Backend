@@ -8,41 +8,26 @@ export class Money {
     }
   }
 
-  get amountPaise(): number {
-    return this.amount;
+  public static zero(currency: string = 'INR'): Money {
+    return new Money(0, currency);
   }
 
-
-
-  add(other: Money): Money {
-    this.ensureSameCurrency(other);
-    return new Money(this.amount + other.amount, this.currency);
+  public get amountPaise(): number {
+    return Math.round(this.amount * 100);
   }
 
-  subtract(other: Money): Money {
-    this.ensureSameCurrency(other);
-    return new Money(this.amount - other.amount, this.currency);
+  public static fromPaise(paise: number, currency: string = 'INR'): Money {
+    return new Money(paise / 100, currency);
   }
 
-  multiply(multiplier: number): Money {
-    return new Money(Math.round(this.amount * multiplier), this.currency);
-  }
-
-  equals(other: Money): boolean {
+  public equals(other: Money): boolean {
     return this.amount === other.amount && this.currency === other.currency;
   }
 
-  private ensureSameCurrency(other: Money): void {
+  public add(other: Money): Money {
     if (this.currency !== other.currency) {
-      throw new Error(`Cannot operate on different currencies: ${this.currency} and ${other.currency}`);
+      throw new Error('Currency mismatch');
     }
-  }
-
-  static fromPaise(amountInPaise: number, currency: string = 'INR'): Money {
-    return new Money(amountInPaise, currency);
-  }
-
-  static zero(currency: string = 'INR'): Money {
-    return new Money(0, currency);
+    return new Money(this.amount + other.amount, this.currency);
   }
 }

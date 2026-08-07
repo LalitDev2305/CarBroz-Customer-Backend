@@ -1,0 +1,10 @@
+[
+  {
+    "rule": "SpecificationPattern",
+    "evidence": "Zero specification pattern classes exist in source code database",
+    "whyItViolates": "Query criteria handled directly via Prisma filter objects instead of explicit Specification pattern objects.",
+    "suggestedFix": "None required unless dynamic multi-criteria domain filtering is needed.",
+    "priority": "LOW",
+    "affectedFiles": []
+  }
+]

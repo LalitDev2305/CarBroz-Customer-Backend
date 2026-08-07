@@ -46,13 +46,15 @@
     "@carbroz/platform-notification": "workspace:*",
     "@carbroz/foundation-kernel": "workspace:*",
     "@carbroz/sdui-engine": "workspace:*",
-    "@carbroz/domain-customer": "workspace:*",
-    "@carbroz/domain-partner": "workspace:*",
-    "@carbroz/domain-commerce": "workspace:*",
+    "@carbroz/domain-pricing": "workspace:*",
+    "@carbroz/domain-booking": "workspace:*",
     "@carbroz/domain-scheduling": "workspace:*",
     "@carbroz/domain-fulfillment": "workspace:*",
     "@carbroz/domain-financials": "workspace:*",
-    "@carbroz/domain-engagement": "workspace:*"
+    "@carbroz/domain-engagement": "workspace:*",
+    "@carbroz/domain-principal-customer": "workspace:*",
+    "@carbroz/domain-principal-partner": "workspace:*",
+    "@carbroz/domain-principal-administrator": "workspace:*"
   },
   "devDependencies": {
     "@types/minio": "^7.1.1",

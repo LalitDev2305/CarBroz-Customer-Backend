@@ -1,0 +1,53 @@
+{
+  "CleanArchitecture": {
+    "status": "IMPLEMENTED",
+    "evidenceFile": "foundation/kernel/src/domain/AggregateRoot.ts",
+    "description": "Domain core contains zero external framework or platform dependencies."
+  },
+  "DDD": {
+    "status": "IMPLEMENTED",
+    "evidenceFile": "foundation/kernel/src/domain/AggregateRoot.ts",
+    "superclass": "Entity",
+    "implementedInterfaces": []
+  },
+  "CQRS": {
+    "status": "IMPLEMENTED",
+    "evidenceFile": "domains/operations/booking/src/application/commands/CreateBookingCommandHandler.ts",
+    "handlerClass": "CreateBookingCommandHandler",
+    "ctorDependencies": [
+      "IBookingRepository",
+      "IEventBus"
+    ],
+    "verifiedConsumers": []
+  },
+  "Repository": {
+    "status": "IMPLEMENTED",
+    "contractFile": "platform/database/src/repositories/PrismaBookingRepository.ts",
+    "implementationFile": "platform/database/src/repositories/PrismaRepositoryBase.ts",
+    "verifiedConsumers": [
+      "domains/operations/booking/src/application/commands/CreateBookingCommandHandler.ts"
+    ]
+  },
+  "DomainEvents": {
+    "status": "IMPLEMENTED",
+    "contractFile": "foundation/kernel/src/events/DomainEvent.ts",
+    "publisherFile": "platform/event-bus/src/providers/InMemoryEventBus.ts",
+    "subscriberFile": "platform/notification/src/providers/MultiChannelNotificationProvider.ts"
+  },
+  "StateMachine": {
+    "status": "PARTIAL",
+    "reason": "BookingStatus enum transition conditions enforced via guard checks in Booking aggregate, but explicit state machine engine class is NOT IMPLEMENTED."
+  },
+  "Specification": {
+    "status": "NOT IMPLEMENTED",
+    "reason": "No concrete Specification pattern classes exist in source code."
+  },
+  "Policy": {
+    "status": "IMPLEMENTED",
+    "evidenceFile": "domains/operations/booking/src/domain/BookingPolicy.ts",
+    "policyClass": "BookingPolicy",
+    "verifiedConsumers": [
+      "domains/operations/booking/src/application/commands/CreateBookingCommandHandler.ts"
+    ]
+  }
+}

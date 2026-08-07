@@ -1,8 +1,0 @@
-import { TrackingSession } from '../domain/TrackingSession.js';
-import { PrismaTrackingSessionRepository } from '../infrastructure/repositories/PrismaTrackingSessionRepository.js';
-export declare class CompleteTrackingSessionUseCase {
-    private readonly trackingRepository;
-    constructor(trackingRepository: PrismaTrackingSessionRepository);
-    execute(sessionId: number): Promise<TrackingSession>;
-}
-//# sourceMappingURL=CompleteTrackingSessionUseCase.d.ts.map

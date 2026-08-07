@@ -1,0 +1,5922 @@
+[
+  {
+    "callerFile": "apps\\api\\src\\app.routes.ts",
+    "line": 4,
+    "call": "app.get"
+  },
+  {
+    "callerFile": "apps\\api\\src\\app.routes.ts",
+    "line": 5,
+    "call": "new Date().toISOString"
+  },
+  {
+    "callerFile": "apps\\api\\src\\app.ts",
+    "line": 9,
+    "call": "Fastify"
+  },
+  {
+    "callerFile": "apps\\api\\src\\app.ts",
+    "line": 13,
+    "call": "app.register"
+  },
+  {
+    "callerFile": "apps\\api\\src\\app.ts",
+    "line": 14,
+    "call": "app.register"
+  },
+  {
+    "callerFile": "apps\\api\\src\\app.ts",
+    "line": 15,
+    "call": "app.register"
+  },
+  {
+    "callerFile": "apps\\api\\src\\app.ts",
+    "line": 17,
+    "call": "getContainer"
+  },
+  {
+    "callerFile": "apps\\api\\src\\app.ts",
+    "line": 19,
+    "call": "app.register"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.test.ts",
+    "line": 5,
+    "call": "describe"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.test.ts",
+    "line": 6,
+    "call": "it"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.test.ts",
+    "line": 7,
+    "call": "getContainer"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.test.ts",
+    "line": 10,
+    "call": "container.register"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.test.ts",
+    "line": 10,
+    "call": "asValue"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.test.ts",
+    "line": 12,
+    "call": "container.resolve"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.test.ts",
+    "line": 13,
+    "call": "expect(resolved).toBe"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.test.ts",
+    "line": 13,
+    "call": "expect"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.ts",
+    "line": 8,
+    "call": "diContainer.register"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.ts",
+    "line": 9,
+    "call": "asClass"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.ts",
+    "line": 10,
+    "call": "asClass"
+  },
+  {
+    "callerFile": "apps\\api\\src\\container\\index.ts",
+    "line": 11,
+    "call": "asClass"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 7,
+    "call": "buildApp"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 11,
+    "call": "app.listen"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 15,
+    "call": "app.log.info"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 17,
+    "call": "getContainer().resolve"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 17,
+    "call": "getContainer"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 18,
+    "call": "dbProvider.disconnect"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 21,
+    "call": "app.log.warn"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 23,
+    "call": "app.close"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 24,
+    "call": "process.exit"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 27,
+    "call": "process.on"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 27,
+    "call": "gracefulShutdown"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 28,
+    "call": "process.on"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 28,
+    "call": "gracefulShutdown"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 31,
+    "call": "console.error"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 32,
+    "call": "process.exit"
+  },
+  {
+    "callerFile": "apps\\api\\src\\server.ts",
+    "line": 36,
+    "call": "start"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 11,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 17,
+    "call": "this.prisma.serviceCategory.findUnique"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 22,
+    "call": "this.prisma.serviceCategory.findMany"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 23,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 28,
+    "call": "this.updateCategory"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 30,
+    "call": "this.createCategory"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 35,
+    "call": "this.prisma.serviceCategory.update"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 46,
+    "call": "this.prisma.serviceCategory.findMany"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 50,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 54,
+    "call": "this.prisma.serviceCategory.findUnique"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 59,
+    "call": "this.prisma.serviceCategory.findUnique"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 64,
+    "call": "this.prisma.service.findMany"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 68,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 70,
+    "call": "m.addons.map"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 75,
+    "call": "this.prisma.service.findUnique"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 79,
+    "call": "model.addons.map"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 83,
+    "call": "this.prisma.service.findUnique"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 87,
+    "call": "model.addons.map"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 91,
+    "call": "this.prisma.service.findUnique"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 95,
+    "call": "model.addons.map"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 99,
+    "call": "this.prisma.serviceCategory.create"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 113,
+    "call": "this.prisma.serviceCategory.update"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 128,
+    "call": "this.prisma.service.create"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 144,
+    "call": "this.prisma.service.update"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 160,
+    "call": "this.prisma.serviceAddon.findMany"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 163,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 167,
+    "call": "this.prisma.serviceAddon.findUnique"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 172,
+    "call": "this.prisma.serviceAddon.findMany"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 175,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 179,
+    "call": "this.prisma.serviceAddon.create"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "line": 8,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "line": 13,
+    "call": "this.prisma.adminUserRole.create"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "line": 20,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "line": 24,
+    "call": "this.prisma.adminUserRole.delete"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "line": 36,
+    "call": "this.prisma.adminUserRole.findMany"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "line": 40,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 8,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 13,
+    "call": "this.prisma.permission.findUnique"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 15,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 19,
+    "call": "this.prisma.permission.findMany"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 20,
+    "call": "permissions.map"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 24,
+    "call": "this.prisma.permission.findUnique"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 26,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 38,
+    "call": "this.prisma.permission.update"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 43,
+    "call": "this.prisma.permission.create"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 50,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 54,
+    "call": "this.prisma.permission.delete"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 8,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 13,
+    "call": "this.prisma.role.findUnique"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 15,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 19,
+    "call": "this.prisma.role.findMany"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 20,
+    "call": "roles.map"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 24,
+    "call": "this.prisma.role.findUnique"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 26,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 30,
+    "call": "this.prisma.role.findUnique"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 36,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 37,
+    "call": "role.permissions.map"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 50,
+    "call": "this.prisma.role.update"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 55,
+    "call": "this.prisma.role.create"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 62,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 66,
+    "call": "this.prisma.role.delete"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 7,
+    "call": "prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 12,
+    "call": "this.prisma.user.findUnique"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 15,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 19,
+    "call": "this.prisma.user.findMany"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 22,
+    "call": "users.map"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 26,
+    "call": "this.prisma.user.create"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 34,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 38,
+    "call": "this.prisma.user.update"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 47,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 52,
+    "call": "this.update"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 54,
+    "call": "this.create"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 59,
+    "call": "this.prisma.user.update"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 70,
+    "call": "this.prisma.user.findUnique"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 73,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 77,
+    "call": "this.prisma.user.upsert"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 91,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 7,
+    "call": "prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 12,
+    "call": "this.prisma.userSession.findUnique"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 16,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 20,
+    "call": "this.prisma.userSession.findMany"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 24,
+    "call": "sessions.map"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 28,
+    "call": "this.prisma.userSession.create"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 39,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 43,
+    "call": "this.prisma.userSession.update"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 55,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 60,
+    "call": "this.update"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 62,
+    "call": "this.create"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 67,
+    "call": "this.prisma.userSession.update"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 78,
+    "call": "this.prisma.userSession.findUnique"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 86,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 90,
+    "call": "this.prisma.userSession.findFirst"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 99,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 103,
+    "call": "this.prisma.userSession.upsert"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 125,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 129,
+    "call": "this.prisma.userSession.updateMany"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 8,
+    "call": "new BaseTemplate('login_main', 'form_template')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 13,
+    "call": "UI.component('login_root_component', 'default_component_layout')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 13,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 20,
+    "call": "UI.component('login_main_subcomponent', 'default_subcomponent_layout')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 20,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 32,
+    "call": "UI.child('login_top_section')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 32,
+    "call": "UI.child"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 42,
+    "call": "topSection.addChildData"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 43,
+    "call": "UI.component('login_logo_atom', 'atom_image')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 43,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 52,
+    "call": "topSection.addChildData"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 53,
+    "call": "UI.component('login_tagline_atom', 'atom_text')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 53,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 66,
+    "call": "topSection.addChildData"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 67,
+    "call": "UI.component('login_circle_icon_atom', 'atom_avatar')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 67,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 82,
+    "call": "topSection.addChildData"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 83,
+    "call": "UI.component('login_welcome_atom', 'atom_text')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 83,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 95,
+    "call": "topSection.addChildData"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 96,
+    "call": "UI.component('login_subtitle_atom', 'atom_text')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 96,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 108,
+    "call": "topSection.addChildData"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 109,
+    "call": "UI.component('phoneNumber', 'atom_input_field')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 109,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 120,
+    "call": "topSection.addChildData"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 121,
+    "call": "UI.component('login_get_otp_btn', 'atom_button')\r\n        .setProperties({\r\n          text: 'Continue',\r\n          backgroundColor: '#007A53',\r\n          textColor: '#FFFFFF',\r\n          width: 'match',\r\n          height: 'wrap',\r\n          cornerRadius: 8\r\n        })\r\n        .setSingleAction"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 121,
+    "call": "UI.component('login_get_otp_btn', 'atom_button')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 121,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 140,
+    "call": "UI.child('login_bottom_section')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 140,
+    "call": "UI.child"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 149,
+    "call": "bottomSection.addChildData"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 150,
+    "call": "UI.component('login_bottom_image_atom', 'atom_image')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 150,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 159,
+    "call": "mainSubcomponent.addChild"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 160,
+    "call": "mainSubcomponent.addChild"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 162,
+    "call": "rootComponent.addSubcomponent"
+  },
+  {
+    "callerFile": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 163,
+    "call": "template.addComponent"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 92,
+    "call": "this.transitionTo"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 96,
+    "call": "this.transitionTo"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 104,
+    "call": "this.transitionTo"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 111,
+    "call": "this.transitionTo"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 118,
+    "call": "this.transitionTo"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 127,
+    "call": "this.transitionTo"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 133,
+    "call": "this.transitionTo"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 139,
+    "call": "this.statusHistory.push"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 11,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 38,
+    "call": "this.prisma.booking.create"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 55,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 59,
+    "call": "this.prisma.booking.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 60,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 64,
+    "call": "this.prisma.booking.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 65,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 69,
+    "call": "this.prisma.booking.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 76,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 76,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 80,
+    "call": "this.prisma.booking.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 87,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 87,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 91,
+    "call": "this.prisma.booking.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 97,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 97,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 101,
+    "call": "this.prisma.booking.findFirst"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 122,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 126,
+    "call": "this.prisma.booking.findFirst"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 134,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 138,
+    "call": "this.prisma.booking.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 144,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 144,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 149,
+    "call": "this.prisma.booking.update"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 160,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 5,
+    "call": "describe"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 6,
+    "call": "it"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 8,
+    "call": "now.getTime"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 29,
+    "call": "expect(booking.customerId).toBe"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 29,
+    "call": "expect"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 30,
+    "call": "expect(booking.status).toBe"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 30,
+    "call": "expect"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 31,
+    "call": "expect(booking.totalPricePaise).toBe"
+  },
+  {
+    "callerFile": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 31,
+    "call": "expect"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\application\\handlers\\ListNotificationsQueryHandler.ts",
+    "line": 9,
+    "call": "this.notificationRepository.listByRecipientId"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\application\\handlers\\MarkNotificationReadCommandHandler.ts",
+    "line": 9,
+    "call": "this.notificationRepository.findById"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\application\\handlers\\RegisterDeviceTokenCommandHandler.ts",
+    "line": 27,
+    "call": "this.tokenRepository.upsert"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\application\\handlers\\SendMultiChannelNotificationCommandHandler.ts",
+    "line": 29,
+    "call": "this.notificationRepository.create"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\application\\handlers\\UnregisterDeviceTokenCommandHandler.ts",
+    "line": 13,
+    "call": "this.tokenRepository.deactivate"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\domain\\entities\\Coupon.ts",
+    "line": 42,
+    "call": "Number.isInteger"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\domain\\entities\\Coupon.ts",
+    "line": 54,
+    "call": "props.code.trim().toUpperCase"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\domain\\entities\\Coupon.ts",
+    "line": 54,
+    "call": "props.code.trim"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\domain\\entities\\CouponUsage.ts",
+    "line": 24,
+    "call": "Number.isInteger"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\domain\\entities\\Review.ts",
+    "line": 37,
+    "call": "Number.isInteger"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 11,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 37,
+    "call": "this.prisma.coupon.create"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 53,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 57,
+    "call": "this.prisma.coupon.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 58,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 62,
+    "call": "this.prisma.coupon.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 63,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 67,
+    "call": "code.trim().toUpperCase"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 67,
+    "call": "code.trim"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 68,
+    "call": "this.prisma.coupon.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 69,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 73,
+    "call": "this.prisma.coupon.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 81,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 81,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 86,
+    "call": "this.prisma.coupon.update"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 101,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 105,
+    "call": "this.prisma.coupon.update"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "line": 10,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "line": 27,
+    "call": "this.prisma.couponUsage.create"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "line": 36,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "line": 40,
+    "call": "this.prisma.couponUsage.count"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "line": 46,
+    "call": "this.prisma.couponUsage.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "line": 54,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 10,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 31,
+    "call": "this.prisma.deviceToken.upsert"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 51,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 55,
+    "call": "this.prisma.deviceToken.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 56,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 60,
+    "call": "this.prisma.deviceToken.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 64,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 64,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 69,
+    "call": "this.prisma.deviceToken.updateMany"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 12,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 35,
+    "call": "this.prisma.notificationLog.create"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 49,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 53,
+    "call": "this.prisma.notificationLog.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 54,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 58,
+    "call": "this.prisma.notificationLog.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 59,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 63,
+    "call": "this.prisma.notificationLog.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 69,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 69,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 73,
+    "call": "this.prisma.notificationLog.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 77,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 77,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 13,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 35,
+    "call": "this.prisma.review.create"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 47,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 51,
+    "call": "this.prisma.review.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 52,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 56,
+    "call": "this.prisma.review.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 57,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 61,
+    "call": "this.prisma.review.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 62,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 66,
+    "call": "this.prisma.review.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 72,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 72,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 77,
+    "call": "this.prisma.review.update"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 84,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 88,
+    "call": "this.prisma.review.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 118,
+    "call": "Number"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 118,
+    "call": "(sum / totalReviews).toFixed"
+  },
+  {
+    "callerFile": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 132,
+    "call": "this.prisma.partnerProfile.updateMany"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\domain\\entities\\Invoice.ts",
+    "line": 52,
+    "call": "Number.isInteger"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 80,
+    "call": "Money.fromPaise"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 110,
+    "call": "Money.fromPaise"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 119,
+    "call": "this.attemptsJson.push"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 120,
+    "call": "Date.now"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 134,
+    "call": "this.attemptsJson.push"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 135,
+    "call": "Date.now"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 149,
+    "call": "this.refundsJson.push"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 150,
+    "call": "Date.now"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 11,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 32,
+    "call": "(this.prisma as any).invoice.create"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 43,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 47,
+    "call": "(this.prisma as any).invoice.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 48,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 52,
+    "call": "(this.prisma as any).invoice.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 53,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 57,
+    "call": "(this.prisma as any).invoice.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 58,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 62,
+    "call": "(this.prisma as any).invoice.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 63,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 67,
+    "call": "new Date().getFullYear"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 68,
+    "call": "(this.prisma as any).invoiceSequence.upsert"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 73,
+    "call": "sequenceRecord.lastSeq.toString().padStart"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 73,
+    "call": "sequenceRecord.lastSeq.toString"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 11,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 37,
+    "call": "(this.prisma as any).partnerPayout.create"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 53,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 57,
+    "call": "(this.prisma as any).partnerPayout.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 58,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 62,
+    "call": "(this.prisma as any).partnerPayout.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 63,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 67,
+    "call": "(this.prisma as any).partnerPayout.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 68,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 72,
+    "call": "(this.prisma as any).partnerPayout.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 79,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 79,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 83,
+    "call": "(this.prisma as any).partnerPayout.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 89,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 89,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 93,
+    "call": "(this.prisma as any).partnerPayout.update"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 102,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 13,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 61,
+    "call": "(this.prisma as any).payment.create"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 82,
+    "call": "this.mapPaymentToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 86,
+    "call": "(this.prisma as any).payment.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 87,
+    "call": "this.mapPaymentToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 91,
+    "call": "(this.prisma as any).payment.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 92,
+    "call": "this.mapPaymentToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 96,
+    "call": "(this.prisma as any).payment.findFirst"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 100,
+    "call": "this.mapPaymentToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 104,
+    "call": "(this.prisma as any).payment.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 105,
+    "call": "this.mapPaymentToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 109,
+    "call": "(this.prisma as any).payment.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 110,
+    "call": "this.mapPaymentToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 114,
+    "call": "(this.prisma as any).payment.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 115,
+    "call": "this.mapPaymentToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 119,
+    "call": "(this.prisma as any).payment.update"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 135,
+    "call": "this.mapPaymentToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 139,
+    "call": "(this.prisma as any).paymentWebhook.create"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 152,
+    "call": "this.mapWebhookToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 156,
+    "call": "(this.prisma as any).paymentWebhook.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 159,
+    "call": "this.mapWebhookToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 163,
+    "call": "(this.prisma as any).paymentWebhook.update"
+  },
+  {
+    "callerFile": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 172,
+    "call": "this.mapWebhookToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\CancelTrackingSessionCommandHandler.ts",
+    "line": 9,
+    "call": "this.trackingRepository.findById"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\CancelTrackingSessionCommandHandler.ts",
+    "line": 14,
+    "call": "session.cancel"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\CancelTrackingSessionCommandHandler.ts",
+    "line": 15,
+    "call": "this.trackingRepository.update"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\CompleteTrackingSessionCommandHandler.ts",
+    "line": 9,
+    "call": "this.trackingRepository.findById"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\CompleteTrackingSessionCommandHandler.ts",
+    "line": 14,
+    "call": "session.complete"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\CompleteTrackingSessionCommandHandler.ts",
+    "line": 15,
+    "call": "this.trackingRepository.update"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\GetLiveTrackingTimelineQueryHandler.ts",
+    "line": 9,
+    "call": "this.trackingRepository.findByBookingId"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\StartTrackingSessionCommandHandler.ts",
+    "line": 17,
+    "call": "this.trackingRepository.findByBookingId"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\StartTrackingSessionCommandHandler.ts",
+    "line": 31,
+    "call": "this.trackingRepository.create"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 23,
+    "call": "this.trackingRepository.findById"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 33,
+    "call": "[...input.pings].sort"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 33,
+    "call": "new Date(a.timestamp).getTime"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 33,
+    "call": "new Date(b.timestamp).getTime"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 47,
+    "call": "session.updateLocation"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 48,
+    "call": "this.trackingRepository.update"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\UpdateLiveGpsLocationCommandHandler.ts",
+    "line": 19,
+    "call": "this.trackingRepository.findById"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\UpdateLiveGpsLocationCommandHandler.ts",
+    "line": 31,
+    "call": "session.updateLocation"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\application\\handlers\\UpdateLiveGpsLocationCommandHandler.ts",
+    "line": 32,
+    "call": "this.trackingRepository.update"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\Dispute.ts",
+    "line": 53,
+    "call": "Money.zero"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\Dispute.ts",
+    "line": 78,
+    "call": "Money.zero"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 40,
+    "call": "Math.sin"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 40,
+    "call": "Math.sin"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 41,
+    "call": "Math.cos"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 42,
+    "call": "Math.cos"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 43,
+    "call": "Math.sin"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 44,
+    "call": "Math.sin"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 45,
+    "call": "Math.atan2"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 45,
+    "call": "Math.sqrt"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 45,
+    "call": "Math.sqrt"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\domain\\entities\\LocationPing.ts",
+    "line": 46,
+    "call": "Math.round"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 12,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 25,
+    "call": "Money.fromPaise"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 26,
+    "call": "Money.fromPaise"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 36,
+    "call": "this.prisma.dispute.create"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 48,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 52,
+    "call": "this.prisma.dispute.update"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 61,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 65,
+    "call": "this.prisma.dispute.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 66,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 70,
+    "call": "this.prisma.dispute.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 71,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 75,
+    "call": "this.prisma.dispute.findFirst"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 81,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 85,
+    "call": "this.prisma.dispute.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 89,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 89,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 93,
+    "call": "this.prisma.dispute.findMany"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 99,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 99,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 9,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 34,
+    "call": "this.prisma.trackingSession.create"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 49,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 53,
+    "call": "this.prisma.trackingSession.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 54,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 58,
+    "call": "this.prisma.trackingSession.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 59,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 63,
+    "call": "this.prisma.trackingSession.findUnique"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 64,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 68,
+    "call": "this.prisma.trackingSession.findFirst"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 72,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 76,
+    "call": "this.prisma.trackingSession.update"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 88,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "line": 4,
+    "call": "describe"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "line": 5,
+    "call": "it"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "line": 7,
+    "call": "expect(cmd.props.bookingId).toBe"
+  },
+  {
+    "callerFile": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "line": 7,
+    "call": "expect"
+  },
+  {
+    "callerFile": "domains\\operations\\scheduling\\src\\application\\handlers\\GetAvailableSlotsQueryHandler.ts",
+    "line": 36,
+    "call": "slotStart.setHours"
+  },
+  {
+    "callerFile": "domains\\operations\\scheduling\\src\\application\\handlers\\GetAvailableSlotsQueryHandler.ts",
+    "line": 36,
+    "call": "Math.floor"
+  },
+  {
+    "callerFile": "domains\\operations\\scheduling\\src\\application\\handlers\\GetAvailableSlotsQueryHandler.ts",
+    "line": 39,
+    "call": "slotEnd.setMinutes"
+  },
+  {
+    "callerFile": "domains\\operations\\scheduling\\src\\application\\handlers\\GetAvailableSlotsQueryHandler.ts",
+    "line": 39,
+    "call": "slotEnd.getMinutes"
+  },
+  {
+    "callerFile": "domains\\operations\\scheduling\\src\\application\\handlers\\GetAvailableSlotsQueryHandler.ts",
+    "line": 41,
+    "call": "slots.push"
+  },
+  {
+    "callerFile": "domains\\operations\\scheduling\\src\\application\\handlers\\GetAvailableSlotsQueryHandler.ts",
+    "line": 43,
+    "call": "slotStart.toISOString"
+  },
+  {
+    "callerFile": "domains\\operations\\scheduling\\src\\application\\handlers\\GetAvailableSlotsQueryHandler.ts",
+    "line": 44,
+    "call": "slotEnd.toISOString"
+  },
+  {
+    "callerFile": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 10,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 15,
+    "call": "this.prisma.pricingTier.findMany"
+  },
+  {
+    "callerFile": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 18,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 22,
+    "call": "this.prisma.pricingTier.findFirst"
+  },
+  {
+    "callerFile": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 30,
+    "call": "this.prisma.pricingTier.updateMany"
+  },
+  {
+    "callerFile": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 35,
+    "call": "this.prisma.pricingTier.create"
+  },
+  {
+    "callerFile": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 47,
+    "call": "this.prisma.vehicleTypeMultiplier.findUnique"
+  },
+  {
+    "callerFile": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 59,
+    "call": "this.prisma.vehicleTypeMultiplier.upsert"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\domain\\entities\\Vehicle.ts",
+    "line": 52,
+    "call": "props.registrationNumber.trim().toUpperCase"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\domain\\entities\\Vehicle.ts",
+    "line": 52,
+    "call": "props.registrationNumber.trim"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 8,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 14,
+    "call": "this.prisma.address.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 19,
+    "call": "this.prisma.address.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 23,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 27,
+    "call": "this.prisma.address.findFirst"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 34,
+    "call": "this.prisma.address.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 35,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 54,
+    "call": "this.prisma.$transaction"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 56,
+    "call": "tx.address.updateMany"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 63,
+    "call": "tx.address.update"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 69,
+    "call": "tx.address.create"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 79,
+    "call": "this.prisma.address.update"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 8,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 13,
+    "call": "(this.prisma as any).customerProfile.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 18,
+    "call": "(this.prisma as any).customerProfile.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 23,
+    "call": "(this.prisma as any).customerProfile.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 24,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 38,
+    "call": "(this.prisma as any).customerProfile.update"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 44,
+    "call": "(this.prisma as any).customerProfile.create"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 53,
+    "call": "(this.prisma as any).customerProfile.update"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 8,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 34,
+    "call": "(this.prisma as any).vehicle.create"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 49,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 53,
+    "call": "(this.prisma as any).vehicle.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 54,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 58,
+    "call": "(this.prisma as any).vehicle.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 59,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 63,
+    "call": "(this.prisma as any).vehicle.findFirst"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 66,
+    "call": "registrationNumber.trim().toUpperCase"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 66,
+    "call": "registrationNumber.trim"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 70,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 74,
+    "call": "(this.prisma as any).vehicle.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 78,
+    "call": "records.map"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 78,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 82,
+    "call": "(this.prisma as any).vehicle.update"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 98,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 102,
+    "call": "(this.prisma as any).vehicle.updateMany"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 112,
+    "call": "(this.prisma as any).vehicle.update"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 10,
+    "call": "new BaseTemplate('dashboard_layout', 'dashboard_template')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 15,
+    "call": "UI.component('dashboard_root', 'default_component_layout')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 15,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 23,
+    "call": "rootComponent.addSubcomponent"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 23,
+    "call": "this.buildHeader"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 26,
+    "call": "rootComponent.addSubcomponent"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 26,
+    "call": "this.buildSearchBox"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 28,
+    "call": "template.addComponent"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 29,
+    "call": "template.addComponent"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 29,
+    "call": "this.buildHeroBanner"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 32,
+    "call": "template.addComponent"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 32,
+    "call": "this.buildServicesCard"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 59,
+    "call": "UI.component('header_main_subcomponent', 'default_subcomponent_layout')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 59,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 68,
+    "call": "UI.child('header_left_child')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 68,
+    "call": "UI.child"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 76,
+    "call": "leftChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 77,
+    "call": "UI.component('header_location_avatar', 'atom_avatar')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 77,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 93,
+    "call": "UI.child('header_location_text_layout')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 93,
+    "call": "UI.child"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 99,
+    "call": "textLayout.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 100,
+    "call": "UI.component('header_location_title', 'atom_text')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 100,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 109,
+    "call": "textLayout.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 110,
+    "call": "UI.component('header_location_subtitle', 'atom_text')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 110,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 122,
+    "call": "leftChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 125,
+    "call": "UI.child('header_right_child')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 125,
+    "call": "UI.child"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 132,
+    "call": "rightChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 133,
+    "call": "UI.component('header_profile_avatar', 'atom_avatar')\r\n          .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 133,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 148,
+    "call": "rightChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 149,
+    "call": "UI.component('header_login_btn', 'atom_button')\r\n          .setProperties({\r\n            text: 'Login',\r\n            backgroundColor: '#007A53',\r\n            textColor: '#FFFFFF',\r\n            cornerRadius: 8,\r\n            width: 'wrap',\r\n            height: 'wrap'\r\n          })\r\n          .setSingleAction"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 149,
+    "call": "UI.component('header_login_btn', 'atom_button')\r\n          .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 149,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 165,
+    "call": "headerSubcomponent.addChild"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 166,
+    "call": "headerSubcomponent.addChild"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 172,
+    "call": "UI.component('search_subcomponent', 'default_subcomponent_layout')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 172,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 181,
+    "call": "UI.child('search_child')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 181,
+    "call": "UI.child"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 189,
+    "call": "searchChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 190,
+    "call": "UI.component('search_input_atom', 'atom_input_field')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 190,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 205,
+    "call": "searchChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 206,
+    "call": "UI.component('search_filter_avatar', 'atom_avatar')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 206,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 221,
+    "call": "searchSubcomponent.addChild"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 227,
+    "call": "UI.component('hero_component', 'default_component_layout')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 227,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 245,
+    "call": "UI.component('hero_subcomponent', 'default_subcomponent_layout')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 245,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 253,
+    "call": "UI.child('hero_text_child')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 253,
+    "call": "UI.child"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 261,
+    "call": "textChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 262,
+    "call": "UI.component('hero_badge_atom', 'atom_badge')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 262,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 271,
+    "call": "textChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 272,
+    "call": "UI.component('hero_title_atom', 'atom_text')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 272,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 282,
+    "call": "textChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 283,
+    "call": "UI.component('hero_book_btn_atom', 'atom_button')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 283,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 301,
+    "call": "UI.child('hero_image_child')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 301,
+    "call": "UI.child"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 307,
+    "call": "imageChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 308,
+    "call": "UI.component('hero_car_image_atom', 'atom_image')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 308,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 317,
+    "call": "heroSubcomponent.addChild"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 318,
+    "call": "heroSubcomponent.addChild"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 320,
+    "call": "heroComponent.addSubcomponent"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 326,
+    "call": "UI.component('services_component', 'default_component_layout')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 326,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 340,
+    "call": "UI.component('services_subcomponent', 'default_subcomponent_layout')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 340,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 350,
+    "call": "UI.child(`service_${id}_child`)\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 350,
+    "call": "UI.child"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 357,
+    "call": "child.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 358,
+    "call": "UI.component(`service_${id}_avatar`, 'atom_avatar')\r\n          .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 358,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 369,
+    "call": "child.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 370,
+    "call": "UI.component(`service_${id}_text`, 'atom_text')\r\n          .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 370,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 379,
+    "call": "servicesSubcomponent.addChild"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 382,
+    "call": "addServiceItem"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 383,
+    "call": "addServiceItem"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 384,
+    "call": "addServiceItem"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 385,
+    "call": "addServiceItem"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 387,
+    "call": "UI.child('service_arrow_child')\r\n      .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 387,
+    "call": "UI.child"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 394,
+    "call": "arrowChild.addChildData"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 395,
+    "call": "UI.component('service_arrow_avatar', 'atom_avatar')\r\n        .setProperties"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 395,
+    "call": "UI.component"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 406,
+    "call": "servicesSubcomponent.addChild"
+  },
+  {
+    "callerFile": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 407,
+    "call": "servicesComponent.addSubcomponent"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 25,
+    "call": "Date.now"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 28,
+    "call": "this.storageProvider.uploadFile"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 31,
+    "call": "this.storageProvider.getFileUrl"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 35,
+    "call": "this.kycRepository.create"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\application\\handlers\\VerifyPartnerKycDocumentCommandHandler.ts",
+    "line": 17,
+    "call": "this.kycRepository.findById"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\application\\handlers\\VerifyPartnerKycDocumentCommandHandler.ts",
+    "line": 26,
+    "call": "this.kycRepository.updateStatus"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 12,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 33,
+    "call": "this.client.kycDocument.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 34,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 38,
+    "call": "this.client.kycDocument.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 39,
+    "call": "entities.map"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 39,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 43,
+    "call": "this.client.kycDocument.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 44,
+    "call": "entities.map"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 44,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 49,
+    "call": "this.client.kycDocument.create"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 60,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 64,
+    "call": "this.client.kycDocument.update"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 75,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 79,
+    "call": "this.client.kycDocument.update"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 87,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 92,
+    "call": "this.client.kycDocument.delete"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 101,
+    "call": "this.client.kycDocument.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 102,
+    "call": "entities.map"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 102,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 107,
+    "call": "this.update"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 12,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 35,
+    "call": "this.prisma.partnerMember.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 38,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 42,
+    "call": "this.prisma.partnerMember.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 50,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 54,
+    "call": "this.prisma.partnerMember.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 57,
+    "call": "entities.map"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 57,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 61,
+    "call": "this.prisma.partnerMember.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 64,
+    "call": "entities.map"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 64,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 68,
+    "call": "this.prisma.partnerMember.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 71,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 75,
+    "call": "this.prisma.partnerMember.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 76,
+    "call": "entities.map"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 76,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 85,
+    "call": "this.prisma.partnerMember.create"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 93,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 97,
+    "call": "this.prisma.partnerMember.delete"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 10,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 30,
+    "call": "this.prisma.partnerProfile.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 31,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 35,
+    "call": "this.prisma.partnerProfile.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 36,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 40,
+    "call": "(profile as any).toPersistence"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 41,
+    "call": "this.prisma.partnerProfile.upsert"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 46,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 50,
+    "call": "this.prisma.partnerProfile.update"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 54,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 59,
+    "call": "this.prisma.partnerProfile.delete"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 12,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 35,
+    "call": "this.prisma.partner.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 36,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 40,
+    "call": "this.prisma.partner.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 41,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 45,
+    "call": "this.prisma.partner.findUnique"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 46,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 50,
+    "call": "this.prisma.partner.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 51,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 51,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 55,
+    "call": "this.prisma.partner.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 56,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 56,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 60,
+    "call": "this.prisma.partner.findMany"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 61,
+    "call": "models.map"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 61,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 65,
+    "call": "(partner as any).toPersistence"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 67,
+    "call": "this.prisma.partner.update"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 68,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 70,
+    "call": "this.prisma.partner.create"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 71,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 76,
+    "call": "this.prisma.partner.update"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 77,
+    "call": "this.mapToDomain"
+  },
+  {
+    "callerFile": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 82,
+    "call": "this.prisma.partner.update"
+  },
+  {
+    "callerFile": "foundation\\kernel\\src\\domain\\Money.ts",
+    "line": 18,
+    "call": "this.ensureSameCurrency"
+  },
+  {
+    "callerFile": "foundation\\kernel\\src\\domain\\Money.ts",
+    "line": 23,
+    "call": "this.ensureSameCurrency"
+  },
+  {
+    "callerFile": "foundation\\kernel\\src\\domain\\Money.ts",
+    "line": 28,
+    "call": "Math.round"
+  },
+  {
+    "callerFile": "foundation\\kernel\\src\\errors\\errors.ts",
+    "line": 17,
+    "call": "super"
+  },
+  {
+    "callerFile": "generated\\prisma\\client.ts",
+    "line": 16,
+    "call": "path.dirname"
+  },
+  {
+    "callerFile": "generated\\prisma\\client.ts",
+    "line": 16,
+    "call": "fileURLToPath"
+  },
+  {
+    "callerFile": "generated\\prisma\\client.ts",
+    "line": 40,
+    "call": "$Class.getPrismaClientClass"
+  },
+  {
+    "callerFile": "generated\\prisma\\internal\\class.ts",
+    "line": 35,
+    "call": "JSON.parse"
+  },
+  {
+    "callerFile": "generated\\prisma\\internal\\class.ts",
+    "line": 37,
+    "call": "JSON.parse"
+  },
+  {
+    "callerFile": "generated\\prisma\\internal\\class.ts",
+    "line": 42,
+    "call": "import"
+  },
+  {
+    "callerFile": "generated\\prisma\\internal\\class.ts",
+    "line": 43,
+    "call": "Buffer.from"
+  },
+  {
+    "callerFile": "generated\\prisma\\internal\\class.ts",
+    "line": 48,
+    "call": "import"
+  },
+  {
+    "callerFile": "generated\\prisma\\internal\\class.ts",
+    "line": 51,
+    "call": "import"
+  },
+  {
+    "callerFile": "generated\\prisma\\internal\\class.ts",
+    "line": 52,
+    "call": "decodeBase64AsWasm"
+  },
+  {
+    "callerFile": "generated\\prisma\\internal\\class.ts",
+    "line": 195,
+    "call": "runtime.getPrismaClient"
+  },
+  {
+    "callerFile": "generated\\prisma\\internal\\prismaNamespace.ts",
+    "line": 435,
+    "call": "runtime.makeStrictEnum"
+  },
+  {
+    "callerFile": "generated\\prisma\\internal\\prismaNamespaceBrowser.ts",
+    "line": 63,
+    "call": "runtime.makeStrictEnum"
+  },
+  {
+    "callerFile": "packages\\config\\src\\AppConfig.ts",
+    "line": 3,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\config\\src\\AppConfig.ts",
+    "line": 4,
+    "call": "z.enum(['development', 'test', 'production']).default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\AppConfig.ts",
+    "line": 4,
+    "call": "z.enum"
+  },
+  {
+    "callerFile": "packages\\config\\src\\AppConfig.ts",
+    "line": 5,
+    "call": "z.coerce.number().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\AppConfig.ts",
+    "line": 5,
+    "call": "z.coerce.number"
+  },
+  {
+    "callerFile": "packages\\config\\src\\AppConfig.ts",
+    "line": 6,
+    "call": "z.string().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\AppConfig.ts",
+    "line": 6,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\DatabaseConfig.ts",
+    "line": 3,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\config\\src\\DatabaseConfig.ts",
+    "line": 4,
+    "call": "z.string().url"
+  },
+  {
+    "callerFile": "packages\\config\\src\\DatabaseConfig.ts",
+    "line": 4,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 12,
+    "call": "path.resolve"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 12,
+    "call": "process.cwd"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 13,
+    "call": "fs.existsSync"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 14,
+    "call": "path.resolve"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 14,
+    "call": "process.cwd"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 16,
+    "call": "dotenv.config"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 18,
+    "call": "appSchema\r\n  .merge(databaseSchema)\r\n  .merge(jwtSchema)\r\n  .merge(redisSchema)\r\n  .merge(loggingSchema)\r\n  .merge(securitySchema)\r\n  .merge"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 18,
+    "call": "appSchema\r\n  .merge(databaseSchema)\r\n  .merge(jwtSchema)\r\n  .merge(redisSchema)\r\n  .merge(loggingSchema)\r\n  .merge"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 18,
+    "call": "appSchema\r\n  .merge(databaseSchema)\r\n  .merge(jwtSchema)\r\n  .merge(redisSchema)\r\n  .merge"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 18,
+    "call": "appSchema\r\n  .merge(databaseSchema)\r\n  .merge(jwtSchema)\r\n  .merge"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 18,
+    "call": "appSchema\r\n  .merge(databaseSchema)\r\n  .merge"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 18,
+    "call": "appSchema\r\n  .merge"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 26,
+    "call": "rootSchema.safeParse"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 29,
+    "call": "console.error"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 29,
+    "call": "_env.error.format"
+  },
+  {
+    "callerFile": "packages\\config\\src\\index.ts",
+    "line": 30,
+    "call": "process.exit"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 3,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 4,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 4,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 5,
+    "call": "z.string().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 5,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 6,
+    "call": "z.string().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 6,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 7,
+    "call": "z.string().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 7,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 8,
+    "call": "z.string().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\JwtConfig.ts",
+    "line": 8,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\LoggingConfig.ts",
+    "line": 3,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\config\\src\\LoggingConfig.ts",
+    "line": 4,
+    "call": "z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\LoggingConfig.ts",
+    "line": 4,
+    "call": "z.enum"
+  },
+  {
+    "callerFile": "packages\\config\\src\\providers\\ConfigProvider.ts",
+    "line": 13,
+    "call": "this.repository.findByKey"
+  },
+  {
+    "callerFile": "packages\\config\\src\\providers\\ConfigProvider.ts",
+    "line": 22,
+    "call": "JSON.parse"
+  },
+  {
+    "callerFile": "packages\\config\\src\\providers\\ConfigProvider.ts",
+    "line": 29,
+    "call": "this.repository.findByKey"
+  },
+  {
+    "callerFile": "packages\\config\\src\\providers\\ConfigProvider.ts",
+    "line": 34,
+    "call": "this.repository.findAllConfig"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 3,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 4,
+    "call": "z.string().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 4,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 5,
+    "call": "z.coerce.number().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 5,
+    "call": "z.coerce.number"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 6,
+    "call": "z.coerce.boolean().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 6,
+    "call": "z.coerce.boolean"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 7,
+    "call": "z.string().optional"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 7,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 8,
+    "call": "z.string().optional"
+  },
+  {
+    "callerFile": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 8,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\RedisConfig.ts",
+    "line": 3,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\config\\src\\RedisConfig.ts",
+    "line": 4,
+    "call": "z.string().url().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\RedisConfig.ts",
+    "line": 4,
+    "call": "z.string().url"
+  },
+  {
+    "callerFile": "packages\\config\\src\\RedisConfig.ts",
+    "line": 4,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\SecurityConfig.ts",
+    "line": 3,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\config\\src\\SecurityConfig.ts",
+    "line": 4,
+    "call": "z.string().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\SecurityConfig.ts",
+    "line": 4,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\config\\src\\SecurityConfig.ts",
+    "line": 5,
+    "call": "z.coerce.number().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\SecurityConfig.ts",
+    "line": 5,
+    "call": "z.coerce.number"
+  },
+  {
+    "callerFile": "packages\\config\\src\\SecurityConfig.ts",
+    "line": 6,
+    "call": "z.coerce.number().default"
+  },
+  {
+    "callerFile": "packages\\config\\src\\SecurityConfig.ts",
+    "line": 6,
+    "call": "z.coerce.number"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 5,
+    "call": "describe"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 8,
+    "call": "beforeEach"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 9,
+    "call": "vi.resetModules"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 13,
+    "call": "afterEach"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 17,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 22,
+    "call": "appSchema.safeParse"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 23,
+    "call": "expect(result.success).toBe"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 23,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 25,
+    "call": "expect(result.data.PORT).toBe"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 25,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 26,
+    "call": "expect(result.data.HOST).toBe"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 26,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 30,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 33,
+    "call": "databaseSchema.safeParse"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 34,
+    "call": "expect(result.success).toBe"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\config.spec.ts",
+    "line": 34,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 5,
+    "call": "describe"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 9,
+    "call": "beforeEach"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 11,
+    "call": "vi.fn"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 12,
+    "call": "vi.fn"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 18,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 19,
+    "call": "(repository.findByKey as any).mockResolvedValueOnce"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 20,
+    "call": "provider.get"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 21,
+    "call": "expect(result).toBe"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 21,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 22,
+    "call": "expect(repository.findByKey).toHaveBeenCalledWith"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 22,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 25,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 26,
+    "call": "(repository.findByKey as any).mockResolvedValueOnce"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 27,
+    "call": "provider.get"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 28,
+    "call": "expect(result).toBe"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 28,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 31,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 32,
+    "call": "(repository.findByKey as any).mockResolvedValueOnce"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 33,
+    "call": "expect(provider.get<string>('unknown-key')).rejects.toThrow"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 33,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 33,
+    "call": "provider.get"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 36,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 37,
+    "call": "(repository.findByKey as any).mockResolvedValueOnce"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 38,
+    "call": "provider.has"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 39,
+    "call": "expect(result).toBe"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 39,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 42,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 43,
+    "call": "(repository.findByKey as any).mockResolvedValueOnce"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 44,
+    "call": "provider.has"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 45,
+    "call": "expect(result).toBe"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 45,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 48,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 49,
+    "call": "(repository.findAllConfig as any).mockResolvedValueOnce"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 53,
+    "call": "provider.getAll"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 54,
+    "call": "expect(result).toEqual"
+  },
+  {
+    "callerFile": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 54,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "line": 8,
+    "call": "ScreenRegistry.register"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "line": 13,
+    "call": "this.registerBuilder"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "line": 18,
+    "call": "ScreenRegistry.get"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "line": 22,
+    "call": "builder.build"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\generator\\SduiGenerator.ts",
+    "line": 5,
+    "call": "JSON.parse"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\generator\\SduiGenerator.ts",
+    "line": 5,
+    "call": "JSON.stringify"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\index.ts",
+    "line": 32,
+    "call": "new ChildrenData(id, 'atom_text').setProperties"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\index.ts",
+    "line": 36,
+    "call": "new ChildrenData(id, 'atom_image').setProperties"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\index.ts",
+    "line": 40,
+    "call": "new ChildrenData(id, 'atom_icon').setProperties"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\index.ts",
+    "line": 44,
+    "call": "new ChildrenData(id, 'atom_button').setProperties"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\index.ts",
+    "line": 48,
+    "call": "new ChildrenData(id, 'atom_input_field').setProperties"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\registry\\ScreenRegistry.ts",
+    "line": 8,
+    "call": "this.builders.set"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\registry\\ScreenRegistry.ts",
+    "line": 12,
+    "call": "this.builders.get"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\registry\\ScreenRegistry.ts",
+    "line": 16,
+    "call": "this.builders.has"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\schema\\child\\Child.ts",
+    "line": 30,
+    "call": "this.childrenData.push"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 45,
+    "call": "this.subComponents.push"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 52,
+    "call": "this.children.push"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 58,
+    "call": "this.childrenData.push"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponent.ts",
+    "line": 30,
+    "call": "this.children.push"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\schema\\template\\Template.ts",
+    "line": 30,
+    "call": "this.components.push"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 3,
+    "call": "z.object({\n  id: z.string().min(1),\n  type: z.string().min(1),\n  properties: z.record(z.string(), z.any()).optional(),\n  action: z.union([z.record(z.string(), z.any()), z.any()]).optional(),\n  analytics: z.record(z.string(), z.any()).optional(),\n}).passthrough"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 3,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 4,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 4,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 5,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 5,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 6,
+    "call": "z.record(z.string(), z.any()).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 6,
+    "call": "z.record"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 6,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 6,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 7,
+    "call": "z.union([z.record(z.string(), z.any()), z.any()]).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 7,
+    "call": "z.union"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 7,
+    "call": "z.record"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 7,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 7,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 7,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 8,
+    "call": "z.record(z.string(), z.any()).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 8,
+    "call": "z.record"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 8,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 8,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 11,
+    "call": "z.object({\n  id: z.string().min(1),\n  type: z.string().min(1),\n  properties: z.record(z.string(), z.any()).optional(),\n  childrenData: z.array(childrenDataSchema).optional(),\n}).passthrough"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 11,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 12,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 12,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 13,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 13,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 14,
+    "call": "z.record(z.string(), z.any()).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 14,
+    "call": "z.record"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 14,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 14,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 15,
+    "call": "z.array(childrenDataSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 15,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 18,
+    "call": "z.object({\n  id: z.string().min(1),\n  type: z.string().min(1),\n  properties: z.record(z.string(), z.any()).optional(),\n  children: z.array(childSchema).optional(),\n}).passthrough"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 18,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 19,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 19,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 20,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 20,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 21,
+    "call": "z.record(z.string(), z.any()).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 21,
+    "call": "z.record"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 21,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 21,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 22,
+    "call": "z.array(childSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 22,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 25,
+    "call": "z.object({\n  id: z.string().min(1),\n  type: z.string().min(1),\n  properties: z.record(z.string(), z.any()).optional(),\n  action: z.union([z.record(z.string(), z.any()), z.any()]).optional(),\n  subComponents: z.array(subcomponentSchema).optional(),\n  subcomponents: z.array(subcomponentSchema).optional(),\n  children: z.array(childSchema).optional(),\n  childrenData: z.array(childrenDataSchema).optional(),\n}).passthrough"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 25,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 26,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 26,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 27,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 27,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 28,
+    "call": "z.record(z.string(), z.any()).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 28,
+    "call": "z.record"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 28,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 28,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 29,
+    "call": "z.union([z.record(z.string(), z.any()), z.any()]).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 29,
+    "call": "z.union"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 29,
+    "call": "z.record"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 29,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 29,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 29,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 30,
+    "call": "z.array(subcomponentSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 30,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 31,
+    "call": "z.array(subcomponentSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 31,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 32,
+    "call": "z.array(childSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 32,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 33,
+    "call": "z.array(childrenDataSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 33,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 36,
+    "call": "z.object({\n  id: z.string().optional(),\n  type: z.string().optional(),\n  properties: z.record(z.string(), z.any()).optional(),\n  components: z.array(componentSchema).optional(),\n}).passthrough"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 36,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 37,
+    "call": "z.string().optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 37,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 38,
+    "call": "z.string().optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 38,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 39,
+    "call": "z.record(z.string(), z.any()).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 39,
+    "call": "z.record"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 39,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 39,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 40,
+    "call": "z.array(componentSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 40,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 43,
+    "call": "z.object({\n  theme: z.enum(['light', 'dark']).optional(),\n  showBackButton: z.boolean().optional(),\n  statusBar: z.string().optional(),\n  backgroundGradient: z.any().optional(),\n}).passthrough"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 43,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 44,
+    "call": "z.enum(['light', 'dark']).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 44,
+    "call": "z.enum"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 45,
+    "call": "z.boolean().optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 45,
+    "call": "z.boolean"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 46,
+    "call": "z.string().optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 46,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 47,
+    "call": "z.any().optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 47,
+    "call": "z.any"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 50,
+    "call": "z.object({\n  screenId: z.string().min(1),\n  templateId: z.string().min(1),\n  templateType: z.string().min(1),\n  template: templateSchema,\n  components: z.array(componentSchema).optional(),\n  subcomponents: z.array(subcomponentSchema).optional(),\n  children: z.array(childSchema).optional(),\n  childrenData: z.array(childrenDataSchema).optional(),\n  theme: themeSchema.optional(),\n}).passthrough"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 50,
+    "call": "z.object"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 51,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 51,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 52,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 52,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 53,
+    "call": "z.string().min"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 53,
+    "call": "z.string"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 55,
+    "call": "z.array(componentSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 55,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 56,
+    "call": "z.array(subcomponentSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 56,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 57,
+    "call": "z.array(childSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 57,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 58,
+    "call": "z.array(childrenDataSchema).optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 58,
+    "call": "z.array"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 59,
+    "call": "themeSchema.optional"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 64,
+    "call": "screenSchema.safeParse"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 16,
+    "call": "describe"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 18,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 21,
+    "call": "factory.registerBuilder"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 23,
+    "call": "factory.buildScreen"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 24,
+    "call": "expect(screen.screenId).toBe"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 24,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 25,
+    "call": "expect(screen.templateId).toBe"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 25,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 28,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 30,
+    "call": "expect(factory.buildScreen('non_existent')).rejects.toThrow"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 30,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 30,
+    "call": "factory.buildScreen"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 4,
+    "call": "describe"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 5,
+    "call": "it"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 41,
+    "call": "SduiGenerator.generateJson"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 42,
+    "call": "expect(json.screenId).toBe"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 42,
+    "call": "expect"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 44,
+    "call": "SduiValidator.validateScreen"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 45,
+    "call": "expect(isValid).toBe"
+  },
+  {
+    "callerFile": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 45,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "line": 14,
+    "call": "this.cache.get"
+  },
+  {
+    "callerFile": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "line": 16,
+    "call": "Date.now"
+  },
+  {
+    "callerFile": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "line": 17,
+    "call": "this.cache.delete"
+  },
+  {
+    "callerFile": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "line": 26,
+    "call": "Date.now"
+  },
+  {
+    "callerFile": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "line": 28,
+    "call": "this.cache.set"
+  },
+  {
+    "callerFile": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "line": 32,
+    "call": "this.cache.delete"
+  },
+  {
+    "callerFile": "platform\\cache\\src\\providers\\InMemoryCacheProvider.ts",
+    "line": 36,
+    "call": "this.cache.clear"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 4,
+    "call": "describe"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 7,
+    "call": "beforeEach"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 11,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 12,
+    "call": "cache.set"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 13,
+    "call": "cache.get"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 14,
+    "call": "expect(result).toBe"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 14,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 17,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 18,
+    "call": "cache.get"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 19,
+    "call": "expect(result).toBeNull"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 19,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 22,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 23,
+    "call": "cache.set"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 24,
+    "call": "cache.get"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 25,
+    "call": "expect(result).toBeNull"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 25,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 28,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 29,
+    "call": "cache.set"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 30,
+    "call": "cache.delete"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 31,
+    "call": "cache.get"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 32,
+    "call": "expect(result).toBeNull"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 32,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 35,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 36,
+    "call": "cache.set"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 37,
+    "call": "cache.set"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 38,
+    "call": "cache.clear"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 39,
+    "call": "expect(await cache.get('k1')).toBeNull"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 39,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 39,
+    "call": "cache.get"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 40,
+    "call": "expect(await cache.get('k2')).toBeNull"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 40,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 40,
+    "call": "cache.get"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 6,
+    "call": "console.log"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 9,
+    "call": "prisma.systemConfig.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 19,
+    "call": "prisma.systemConfig.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 30,
+    "call": "prisma.systemConfig.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 40,
+    "call": "prisma.systemConfig.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 51,
+    "call": "prisma.systemConfig.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 61,
+    "call": "prisma.systemConfig.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 72,
+    "call": "prisma.featureFlag.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 82,
+    "call": "prisma.featureFlag.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 100,
+    "call": "prisma.role.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 124,
+    "call": "prisma.permission.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 132,
+    "call": "prisma.role.findUnique"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 133,
+    "call": "prisma.permission.findMany"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 138,
+    "call": "prisma.rolePermission.upsert"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 154,
+    "call": "console.log"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 157,
+    "call": "main()\r\n  .catch((e) => {\r\n    console.error(e);\r\n    process.exit(1);\r\n  })\r\n  .finally"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 157,
+    "call": "main()\r\n  .catch"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 157,
+    "call": "main"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 159,
+    "call": "console.error"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 160,
+    "call": "process.exit"
+  },
+  {
+    "callerFile": "platform\\database\\prisma\\seed.ts",
+    "line": 163,
+    "call": "prisma.$disconnect"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaDatabaseProvider.ts",
+    "line": 12,
+    "call": "this.prismaProvider.connect"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaDatabaseProvider.ts",
+    "line": 16,
+    "call": "this.prismaProvider.disconnect"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaDatabaseProvider.ts",
+    "line": 20,
+    "call": "this.prismaProvider.health"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaProvider.ts",
+    "line": 14,
+    "call": "PrismaProvider.getInstance().$connect"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaProvider.ts",
+    "line": 14,
+    "call": "PrismaProvider.getInstance"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaProvider.ts",
+    "line": 18,
+    "call": "PrismaProvider.getInstance().$disconnect"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaProvider.ts",
+    "line": 18,
+    "call": "PrismaProvider.getInstance"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaProvider.ts",
+    "line": 23,
+    "call": "PrismaProvider.getInstance"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaProvider.ts",
+    "line": 31,
+    "call": "PrismaProvider.getInstance"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaTransactionProvider.ts",
+    "line": 12,
+    "call": "this.prismaProvider.getClient"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaTransactionProvider.ts",
+    "line": 13,
+    "call": "client.$transaction"
+  },
+  {
+    "callerFile": "platform\\database\\src\\providers\\PrismaTransactionProvider.ts",
+    "line": 14,
+    "call": "operation"
+  },
+  {
+    "callerFile": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 16,
+    "call": "this.handlers.get"
+  },
+  {
+    "callerFile": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 17,
+    "call": "Promise.all"
+  },
+  {
+    "callerFile": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 17,
+    "call": "subscribers.map"
+  },
+  {
+    "callerFile": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 17,
+    "call": "handler"
+  },
+  {
+    "callerFile": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 22,
+    "call": "this.publish"
+  },
+  {
+    "callerFile": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 27,
+    "call": "this.handlers.has"
+  },
+  {
+    "callerFile": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 28,
+    "call": "this.handlers.set"
+  },
+  {
+    "callerFile": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 30,
+    "call": "this.handlers.get(eventName)!.push"
+  },
+  {
+    "callerFile": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 30,
+    "call": "this.handlers.get"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 15,
+    "call": "describe"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 18,
+    "call": "beforeEach"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 22,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 25,
+    "call": "eventBus.subscribe"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 27,
+    "call": "expect(evt.eventId).toBe"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 27,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 30,
+    "call": "eventBus.publish"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 31,
+    "call": "expect(received).toBe"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 31,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 34,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 37,
+    "call": "eventBus.subscribe"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 41,
+    "call": "eventBus.publishAll"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 42,
+    "call": "expect(count).toBe"
+  },
+  {
+    "callerFile": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 42,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\src\\providers\\FeatureFlagProvider.ts",
+    "line": 12,
+    "call": "this.repository.findByKey"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\src\\providers\\FeatureFlagProvider.ts",
+    "line": 17,
+    "call": "this.repository.findAllFlags"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 5,
+    "call": "describe"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 9,
+    "call": "beforeEach"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 11,
+    "call": "vi.fn"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 12,
+    "call": "vi.fn"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 18,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 19,
+    "call": "(repository.findByKey as any).mockResolvedValueOnce"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 20,
+    "call": "provider.isEnabled"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 21,
+    "call": "expect(result).toBe"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 21,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 22,
+    "call": "expect(repository.findByKey).toHaveBeenCalledWith"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 22,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 25,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 26,
+    "call": "(repository.findByKey as any).mockResolvedValueOnce"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 27,
+    "call": "provider.isEnabled"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 28,
+    "call": "expect(result).toBe"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 28,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 31,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 32,
+    "call": "(repository.findByKey as any).mockResolvedValueOnce"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 33,
+    "call": "provider.isEnabled"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 34,
+    "call": "expect(result).toBe"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 34,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 37,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 38,
+    "call": "(repository.findAllFlags as any).mockResolvedValueOnce"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 42,
+    "call": "provider.getAllFlags"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 43,
+    "call": "expect(result).toEqual"
+  },
+  {
+    "callerFile": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 43,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 21,
+    "call": "this.pushProvider.sendPush"
+  },
+  {
+    "callerFile": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 34,
+    "call": "this.smsProvider.sendSms"
+  },
+  {
+    "callerFile": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 47,
+    "call": "this.emailProvider.sendEmail"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 4,
+    "call": "describe"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 6,
+    "call": "vi.fn().mockResolvedValue"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 6,
+    "call": "vi.fn"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 9,
+    "call": "vi.fn().mockResolvedValue"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 9,
+    "call": "vi.fn"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 12,
+    "call": "vi.fn().mockResolvedValue"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 12,
+    "call": "vi.fn"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 21,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 22,
+    "call": "provider.dispatch"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 28,
+    "call": "expect(result.success).toBe"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 28,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 29,
+    "call": "expect(result.provider).toBe"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 29,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 32,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 33,
+    "call": "provider.dispatch"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 38,
+    "call": "expect(result.success).toBe"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 38,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 39,
+    "call": "expect(result.provider).toBe"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 39,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 42,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 43,
+    "call": "provider.dispatch"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 49,
+    "call": "expect(result.success).toBe"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 49,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 50,
+    "call": "expect(result.provider).toBe"
+  },
+  {
+    "callerFile": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 50,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\observability\\src\\index.ts",
+    "line": 6,
+    "call": "pino"
+  },
+  {
+    "callerFile": "platform\\observability\\src\\index.ts",
+    "line": 41,
+    "call": "createLogger"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 35,
+    "call": "Date.now"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 38,
+    "call": "this.queues.has"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 39,
+    "call": "this.queues.set"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 46,
+    "call": "this.queues.get(queueName)!.push"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 46,
+    "call": "this.queues.get"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 48,
+    "call": "this.handlers.get"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 50,
+    "call": "setTimeout"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 51,
+    "call": "handler(job).catch"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 51,
+    "call": "handler"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 59,
+    "call": "this.handlers.set"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 63,
+    "call": "this.queues.clear"
+  },
+  {
+    "callerFile": "platform\\queue\\src\\providers\\InMemoryQueueProvider.ts",
+    "line": 64,
+    "call": "this.handlers.clear"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 4,
+    "call": "describe"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 7,
+    "call": "beforeEach"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 11,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 12,
+    "call": "queueProvider.enqueue"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 13,
+    "call": "expect(job).toBeDefined"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 13,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 14,
+    "call": "expect(job.id).toContain"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 14,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 15,
+    "call": "expect(job.name).toBe"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 15,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 16,
+    "call": "expect(job.data).toEqual"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 16,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 19,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 22,
+    "call": "queueProvider.process"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 26,
+    "call": "queueProvider.enqueue"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 28,
+    "call": "setTimeout"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 29,
+    "call": "expect(processedData).toEqual"
+  },
+  {
+    "callerFile": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 29,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 21,
+    "call": "this.configProvider.get"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 22,
+    "call": "this.configProvider.get"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 23,
+    "call": "this.configProvider.get"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 24,
+    "call": "this.configProvider.get"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 27,
+    "call": "this.logger.warn"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 29,
+    "call": "path.join"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 29,
+    "call": "os.tmpdir"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 30,
+    "call": "fs.existsSync"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 31,
+    "call": "fs.mkdirSync"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 36,
+    "call": "parseInt"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 41,
+    "call": "endPoint.includes"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 50,
+    "call": "this.getClient"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 52,
+    "call": "path.join"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 53,
+    "call": "fs.existsSync"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 54,
+    "call": "fs.mkdirSync"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 56,
+    "call": "path.join"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 57,
+    "call": "path.dirname"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 58,
+    "call": "fs.existsSync"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 59,
+    "call": "fs.mkdirSync"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 61,
+    "call": "fs.writeFileSync"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 67,
+    "call": "client.bucketExists"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 69,
+    "call": "client.makeBucket"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 70,
+    "call": "this.logger.info"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 73,
+    "call": "client.putObject"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 74,
+    "call": "this.configProvider.get"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 75,
+    "call": "this.configProvider.get"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 76,
+    "call": "this.configProvider.get"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 81,
+    "call": "this.getClient"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 89,
+    "call": "client.presignedGetObject"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 93,
+    "call": "this.getClient"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 96,
+    "call": "path.join"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 97,
+    "call": "fs.existsSync"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 98,
+    "call": "fs.unlinkSync"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 105,
+    "call": "client.removeObject"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\SupabaseStorageProvider.ts",
+    "line": 65,
+    "call": "options.allowedMimeTypes.includes"
+  },
+  {
+    "callerFile": "platform\\storage\\src\\providers\\SupabaseStorageProvider.ts",
+    "line": 67,
+    "call": "options.allowedMimeTypes.join"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 4,
+    "call": "describe"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 10,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 11,
+    "call": "provider.getFileUrl"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 12,
+    "call": "expect(url).toBe"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 12,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 15,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 16,
+    "call": "provider.getPresignedUploadUrl"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 21,
+    "call": "expect(presignedUrl).toContain"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 21,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 22,
+    "call": "expect(presignedUrl).toContain"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 22,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 25,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 26,
+    "call": "Buffer.from"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 27,
+    "call": "provider.validateFile"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 31,
+    "call": "expect(isValid).toBe"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 31,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 34,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 35,
+    "call": "Buffer.alloc"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 36,
+    "call": "expect(\r\n      provider.validateFile(largeBuffer, 'application/pdf', {\r\n        maxSizeBytes: 1000,\r\n      })\r\n    ).rejects.toThrow"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 36,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 37,
+    "call": "provider.validateFile"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 43,
+    "call": "it"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 44,
+    "call": "Buffer.from"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 45,
+    "call": "expect(\r\n      provider.validateFile(buffer, 'application/x-msdownload', {\r\n        allowedMimeTypes: ['image/jpeg', 'image/png'],\r\n      })\r\n    ).rejects.toThrow"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 45,
+    "call": "expect"
+  },
+  {
+    "callerFile": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 46,
+    "call": "provider.validateFile"
+  },
+  {
+    "callerFile": "prisma.config.ts",
+    "line": 6,
+    "call": "path.resolve"
+  },
+  {
+    "callerFile": "prisma.config.ts",
+    "line": 6,
+    "call": "process.cwd"
+  },
+  {
+    "callerFile": "prisma.config.ts",
+    "line": 7,
+    "call": "fs.existsSync"
+  },
+  {
+    "callerFile": "prisma.config.ts",
+    "line": 8,
+    "call": "path.resolve"
+  },
+  {
+    "callerFile": "prisma.config.ts",
+    "line": 8,
+    "call": "process.cwd"
+  },
+  {
+    "callerFile": "prisma.config.ts",
+    "line": 10,
+    "call": "dotenv.config"
+  },
+  {
+    "callerFile": "prisma.config.ts",
+    "line": 12,
+    "call": "defineConfig"
+  },
+  {
+    "callerFile": "vitest.config.ts",
+    "line": 3,
+    "call": "defineConfig"
+  },
+  {
+    "callerFile": "vitest.workspace.ts",
+    "line": 3,
+    "call": "defineConfig"
+  }
+]

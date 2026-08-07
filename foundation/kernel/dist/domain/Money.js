@@ -8,33 +8,23 @@ export class Money {
             throw new Error('Money amount cannot be negative');
         }
     }
+    static zero(currency = 'INR') {
+        return new Money(0, currency);
+    }
     get amountPaise() {
-        return this.amount;
+        return Math.round(this.amount * 100);
     }
-    add(other) {
-        this.ensureSameCurrency(other);
-        return new Money(this.amount + other.amount, this.currency);
-    }
-    subtract(other) {
-        this.ensureSameCurrency(other);
-        return new Money(this.amount - other.amount, this.currency);
-    }
-    multiply(multiplier) {
-        return new Money(Math.round(this.amount * multiplier), this.currency);
+    static fromPaise(paise, currency = 'INR') {
+        return new Money(paise / 100, currency);
     }
     equals(other) {
         return this.amount === other.amount && this.currency === other.currency;
     }
-    ensureSameCurrency(other) {
+    add(other) {
         if (this.currency !== other.currency) {
-            throw new Error(`Cannot operate on different currencies: ${this.currency} and ${other.currency}`);
+            throw new Error('Currency mismatch');
         }
-    }
-    static fromPaise(amountInPaise, currency = 'INR') {
-        return new Money(amountInPaise, currency);
-    }
-    static zero(currency = 'INR') {
-        return new Money(0, currency);
+        return new Money(this.amount + other.amount, this.currency);
     }
 }
 //# sourceMappingURL=Money.js.map

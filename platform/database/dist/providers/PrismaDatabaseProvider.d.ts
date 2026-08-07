@@ -7,4 +7,3 @@ export declare class PrismaDatabaseProvider implements IDatabaseProvider {
     disconnect(): Promise<void>;
     health(): Promise<boolean>;
 }
-//# sourceMappingURL=PrismaDatabaseProvider.d.ts.map

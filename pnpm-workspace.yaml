@@ -4,6 +4,8 @@ packages:
   - "platform/*"
   - "foundation/*"
   - "domains/*"
+  - "domains/**"
+
 
 allowBuilds:
   '@prisma/client': true

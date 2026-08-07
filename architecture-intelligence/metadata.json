@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-08-07T19:48:52.563Z",
+  "root": "D:\\Backend\\CarBroz\\backend",
+  "filesScanned": 604,
+  "tsFilesScanned": 249,
+  "checksums": {
+    "filesystem.json": "f87f346ef4ccaf7d0de676ade8c6a34c59feeba73d9a68c51b87072234418332",
+    "inheritance.json": "f481452b76a8c4366e8bfbcf19518527eba3cb6d7c4321fe2db30433579ccf27",
+    "symbols.json": "042b288012a2f36d6b55d8a7f6ca4d8b2ef39f93ae89387befcf6ca66c9ed317"
+  }
+}

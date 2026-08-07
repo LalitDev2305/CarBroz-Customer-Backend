@@ -11,4 +11,3 @@ export declare class MinIOStorageProvider implements IStorageProvider {
     getFileUrl(bucket: string, objectName: string): Promise<string>;
     deleteFile(bucket: string, objectName: string): Promise<void>;
 }
-//# sourceMappingURL=MinIOStorageProvider.d.ts.map

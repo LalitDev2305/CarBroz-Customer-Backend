@@ -5,4 +5,3 @@ export declare class PrismaTransactionProvider implements ITransactionProvider {
     constructor(prismaProvider: PrismaProvider);
     runInTransaction<T>(operation: (transaction: unknown) => Promise<T>): Promise<T>;
 }
-//# sourceMappingURL=PrismaTransactionProvider.d.ts.map

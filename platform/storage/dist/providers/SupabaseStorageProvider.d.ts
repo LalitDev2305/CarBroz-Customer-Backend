@@ -25,4 +25,3 @@ export declare class SupabaseStorageProvider implements IStorageProvider {
     getPresignedDownloadUrl(options: PresignedUrlOptions): Promise<string>;
     validateFile(buffer: Buffer, mimeType: string, options: FileValidationOptions): Promise<boolean>;
 }
-//# sourceMappingURL=SupabaseStorageProvider.d.ts.map

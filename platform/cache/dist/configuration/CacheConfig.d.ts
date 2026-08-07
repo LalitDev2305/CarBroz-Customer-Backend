@@ -5,4 +5,3 @@ export interface RedisCacheConfig {
     keyPrefix?: string;
     defaultTtlSeconds?: number;
 }
-//# sourceMappingURL=CacheConfig.d.ts.map

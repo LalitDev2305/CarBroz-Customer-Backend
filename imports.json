@@ -1,0 +1,2114 @@
+[
+  {
+    "file": "apps\\api\\src\\app.routes.ts",
+    "line": 1,
+    "symbol": "FastifyInstance",
+    "from": "fastify"
+  },
+  {
+    "file": "apps\\api\\src\\app.ts",
+    "line": 1,
+    "symbol": "FastifyInstance",
+    "from": "fastify"
+  },
+  {
+    "file": "apps\\api\\src\\app.ts",
+    "line": 5,
+    "symbol": "getContainer",
+    "from": "./container/index.js"
+  },
+  {
+    "file": "apps\\api\\src\\app.ts",
+    "line": 6,
+    "symbol": "appRoutes",
+    "from": "./app.routes.js"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.test.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.test.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.test.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.test.ts",
+    "line": 2,
+    "symbol": "getContainer",
+    "from": "./index.js"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.test.ts",
+    "line": 3,
+    "symbol": "asValue",
+    "from": "awilix"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.ts",
+    "line": 1,
+    "symbol": "diContainer",
+    "from": "@fastify/awilix"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.ts",
+    "line": 2,
+    "symbol": "asClass",
+    "from": "awilix"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.ts",
+    "line": 2,
+    "symbol": "InjectionMode",
+    "from": "awilix"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.ts",
+    "line": 3,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.ts",
+    "line": 3,
+    "symbol": "PrismaDatabaseProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "apps\\api\\src\\container\\index.ts",
+    "line": 4,
+    "symbol": "ConfigProvider",
+    "from": "@carbroz/config"
+  },
+  {
+    "file": "apps\\api\\src\\server.ts",
+    "line": 1,
+    "symbol": "buildApp",
+    "from": "./app.js"
+  },
+  {
+    "file": "apps\\api\\src\\server.ts",
+    "line": 2,
+    "symbol": "getContainer",
+    "from": "./container/index.js"
+  },
+  {
+    "file": "apps\\api\\src\\server.ts",
+    "line": 3,
+    "symbol": "AppConfig",
+    "from": "@carbroz/config"
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\entities\\Service.ts",
+    "line": 1,
+    "symbol": "ServiceAddon",
+    "from": "./ServiceAddon.js"
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\repositories\\CatalogRepository.ts",
+    "line": 1,
+    "symbol": "ServiceCategory",
+    "from": "../entities/ServiceCategory.js"
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\repositories\\CatalogRepository.ts",
+    "line": 2,
+    "symbol": "Service",
+    "from": "../entities/Service.js"
+  },
+  {
+    "file": "domains\\catalog\\src\\domain\\repositories\\CatalogRepository.ts",
+    "line": 3,
+    "symbol": "ServiceAddon",
+    "from": "../entities/ServiceAddon.js"
+  },
+  {
+    "file": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 2,
+    "symbol": "ICatalogRepository",
+    "from": "../../../domain/repositories/CatalogRepository.js"
+  },
+  {
+    "file": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 3,
+    "symbol": "ServiceCategory",
+    "from": "../../../domain/entities/ServiceCategory.js"
+  },
+  {
+    "file": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 4,
+    "symbol": "Service",
+    "from": "../../../domain/entities/Service.js"
+  },
+  {
+    "file": "domains\\catalog\\src\\infrastructure\\persistence\\prisma\\PrismaCatalogRepository.ts",
+    "line": 5,
+    "symbol": "ServiceAddon",
+    "from": "../../../domain/entities/ServiceAddon.js"
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\entities\\UserSession.ts",
+    "line": 1,
+    "symbol": "User",
+    "from": "./User.js"
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\AdminRoleRepository.ts",
+    "line": 1,
+    "symbol": "AdminUserRole",
+    "from": "../entities/AdminUserRole.js"
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\PermissionRepository.ts",
+    "line": 1,
+    "symbol": "Permission",
+    "from": "../entities/Permission.js"
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\RoleRepository.ts",
+    "line": 1,
+    "symbol": "Role",
+    "from": "../entities/Role.js"
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\UserRepository.ts",
+    "line": 1,
+    "symbol": "User",
+    "from": "../entities/User.js"
+  },
+  {
+    "file": "domains\\identity\\src\\domain\\repositories\\UserSessionRepository.ts",
+    "line": 1,
+    "symbol": "UserSession",
+    "from": "../entities/UserSession.js"
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaAdminRoleRepository.ts",
+    "line": 2,
+    "symbol": "AdminUserRole",
+    "from": "../../../domain/entities/AdminUserRole.js"
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaPermissionRepository.ts",
+    "line": 2,
+    "symbol": "Permission",
+    "from": "../../../domain/entities/Permission.js"
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaRoleRepository.ts",
+    "line": 2,
+    "symbol": "Role",
+    "from": "../../../domain/entities/Role.js"
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserRepository.ts",
+    "line": 2,
+    "symbol": "User",
+    "from": "../../../domain/entities/User.js"
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\identity\\src\\infrastructure\\persistence\\prisma\\PrismaUserSessionRepository.ts",
+    "line": 2,
+    "symbol": "UserSession",
+    "from": "../../../domain/entities/UserSession.js"
+  },
+  {
+    "file": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 1,
+    "symbol": "IScreen",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 1,
+    "symbol": "UITheme",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 1,
+    "symbol": "BaseTemplate",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 1,
+    "symbol": "UI",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 1,
+    "symbol": "BaseScreenBuilder",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\identity\\src\\presentation\\sdui\\AuthLoginBuilder.ts",
+    "line": 1,
+    "symbol": "BuildContext",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 1,
+    "symbol": "BookingStatus",
+    "from": "../enums/BookingStatus.js"
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 2,
+    "symbol": "BookingStatusHistoryItem",
+    "from": "./BookingStatusHistoryItem.js"
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\entities\\Booking.ts",
+    "line": 3,
+    "symbol": "BookingSnapshots",
+    "from": "../value-objects/BookingSnapshots.js"
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\entities\\BookingStatusHistoryItem.ts",
+    "line": 1,
+    "symbol": "BookingStatus",
+    "from": "../enums/BookingStatus.js"
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\repositories\\BookingRepository.ts",
+    "line": 1,
+    "symbol": "Booking",
+    "from": "../entities/Booking.js"
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\domain\\repositories\\BookingRepository.ts",
+    "line": 2,
+    "symbol": "BookingStatus",
+    "from": "../enums/BookingStatus.js"
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 2,
+    "symbol": "Booking",
+    "from": "../../../domain/entities/Booking.js"
+  },
+  {
+    "file": "domains\\operations\\booking\\src\\infrastructure\\persistence\\prisma\\PrismaBookingRepository.ts",
+    "line": 3,
+    "symbol": "BookingStatus",
+    "from": "../../../domain/enums/BookingStatus.js"
+  },
+  {
+    "file": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "domains\\operations\\booking\\tests\\Booking.spec.ts",
+    "line": 2,
+    "symbol": "Booking",
+    "from": "../src/public/index.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\ListNotificationsQueryHandler.ts",
+    "line": 1,
+    "symbol": "NotificationLog",
+    "from": "../../domain/entities/NotificationLog.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\ListNotificationsQueryHandler.ts",
+    "line": 2,
+    "symbol": "PrismaNotificationLogRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaNotificationLogRepository.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\MarkNotificationReadCommandHandler.ts",
+    "line": 1,
+    "symbol": "NotificationLog",
+    "from": "../../domain/entities/NotificationLog.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\MarkNotificationReadCommandHandler.ts",
+    "line": 2,
+    "symbol": "PrismaNotificationLogRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaNotificationLogRepository.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\RegisterDeviceTokenCommandHandler.ts",
+    "line": 1,
+    "symbol": "DeviceToken",
+    "from": "../../domain/entities/DeviceToken.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\RegisterDeviceTokenCommandHandler.ts",
+    "line": 2,
+    "symbol": "PrismaDeviceTokenRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaDeviceTokenRepository.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\SendMultiChannelNotificationCommandHandler.ts",
+    "line": 1,
+    "symbol": "NotificationLog",
+    "from": "../../domain/entities/NotificationLog.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\SendMultiChannelNotificationCommandHandler.ts",
+    "line": 2,
+    "symbol": "NotificationChannel",
+    "from": "../../domain/enums/NotificationChannel.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\SendMultiChannelNotificationCommandHandler.ts",
+    "line": 3,
+    "symbol": "PrismaNotificationLogRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaNotificationLogRepository.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\application\\handlers\\UnregisterDeviceTokenCommandHandler.ts",
+    "line": 1,
+    "symbol": "PrismaDeviceTokenRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaDeviceTokenRepository.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\Coupon.ts",
+    "line": 1,
+    "symbol": "DiscountType",
+    "from": "../enums/DiscountType.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\NotificationLog.ts",
+    "line": 1,
+    "symbol": "NotificationChannel",
+    "from": "../enums/NotificationChannel.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\NotificationLog.ts",
+    "line": 2,
+    "symbol": "NotificationStatus",
+    "from": "../enums/NotificationStatus.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\entities\\Review.ts",
+    "line": 1,
+    "symbol": "ReviewStatus",
+    "from": "../enums/ReviewStatus.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\CouponRepository.ts",
+    "line": 1,
+    "symbol": "Coupon",
+    "from": "../entities/Coupon.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\CouponUsageRepository.ts",
+    "line": 1,
+    "symbol": "CouponUsage",
+    "from": "../entities/CouponUsage.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\DeviceTokenRepository.ts",
+    "line": 1,
+    "symbol": "DeviceToken",
+    "from": "../entities/DeviceToken.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\NotificationLogRepository.ts",
+    "line": 1,
+    "symbol": "NotificationLog",
+    "from": "../entities/NotificationLog.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\repositories\\ReviewRepository.ts",
+    "line": 1,
+    "symbol": "Review",
+    "from": "../entities/Review.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\domain\\value-objects\\NotificationPayload.ts",
+    "line": 1,
+    "symbol": "NotificationChannel",
+    "from": "../enums/NotificationChannel.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 2,
+    "symbol": "Coupon",
+    "from": "../../../domain/entities/Coupon.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponRepository.ts",
+    "line": 3,
+    "symbol": "DiscountType",
+    "from": "../../../domain/enums/DiscountType.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaCouponUsageRepository.ts",
+    "line": 2,
+    "symbol": "CouponUsage",
+    "from": "../../../domain/entities/CouponUsage.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaDeviceTokenRepository.ts",
+    "line": 2,
+    "symbol": "DeviceToken",
+    "from": "../../../domain/entities/DeviceToken.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 2,
+    "symbol": "NotificationLog",
+    "from": "../../../domain/entities/NotificationLog.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 3,
+    "symbol": "NotificationChannel",
+    "from": "../../../domain/enums/NotificationChannel.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaNotificationLogRepository.ts",
+    "line": 4,
+    "symbol": "NotificationStatus",
+    "from": "../../../domain/enums/NotificationStatus.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 2,
+    "symbol": "Review",
+    "from": "../../../domain/entities/Review.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 3,
+    "symbol": "ReviewStatus",
+    "from": "../../../domain/enums/ReviewStatus.js"
+  },
+  {
+    "file": "domains\\operations\\engagement\\src\\infrastructure\\persistence\\prisma\\PrismaReviewRepository.ts",
+    "line": 4,
+    "symbol": "PartnerRatingStats",
+    "from": "../../../domain/entities/PartnerRatingStats.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Invoice.ts",
+    "line": 1,
+    "symbol": "InvoiceStatus",
+    "from": "../enums/InvoiceStatus.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\PartnerPayout.ts",
+    "line": 1,
+    "symbol": "PayoutStatus",
+    "from": "../enums/PayoutStatus.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 1,
+    "symbol": "PaymentStatus",
+    "from": "../enums/PaymentStatus.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 2,
+    "symbol": "PaymentMethod",
+    "from": "../enums/PaymentMethod.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 3,
+    "symbol": "AggregateRoot",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\entities\\Payment.ts",
+    "line": 4,
+    "symbol": "Money",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\repositories\\InvoiceRepository.ts",
+    "line": 1,
+    "symbol": "Invoice",
+    "from": "../entities/Invoice.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\repositories\\PartnerPayoutRepository.ts",
+    "line": 1,
+    "symbol": "PartnerPayout",
+    "from": "../entities/PartnerPayout.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\domain\\repositories\\PaymentRepository.ts",
+    "line": 1,
+    "symbol": "Payment",
+    "from": "../entities/Payment.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 2,
+    "symbol": "Invoice",
+    "from": "../../../domain/entities/Invoice.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaInvoiceRepository.ts",
+    "line": 3,
+    "symbol": "InvoiceStatus",
+    "from": "../../../domain/enums/InvoiceStatus.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 2,
+    "symbol": "PartnerPayout",
+    "from": "../../../domain/entities/PartnerPayout.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerPayoutRepository.ts",
+    "line": 3,
+    "symbol": "PayoutStatus",
+    "from": "../../../domain/enums/PayoutStatus.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 2,
+    "symbol": "Payment",
+    "from": "../../../domain/entities/Payment.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 3,
+    "symbol": "PaymentMethod",
+    "from": "../../../domain/enums/PaymentMethod.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 4,
+    "symbol": "PaymentStatus",
+    "from": "../../../domain/enums/PaymentStatus.js"
+  },
+  {
+    "file": "domains\\operations\\financials\\src\\infrastructure\\persistence\\prisma\\PrismaPaymentRepository.ts",
+    "line": 5,
+    "symbol": "PaymentWebhook",
+    "from": "../../../domain/entities/PaymentWebhook.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CancelTrackingSessionCommandHandler.ts",
+    "line": 1,
+    "symbol": "TrackingSession",
+    "from": "../../domain/entities/TrackingSession.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CancelTrackingSessionCommandHandler.ts",
+    "line": 2,
+    "symbol": "PrismaTrackingSessionRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaTrackingSessionRepository.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CompleteTrackingSessionCommandHandler.ts",
+    "line": 1,
+    "symbol": "TrackingSession",
+    "from": "../../domain/entities/TrackingSession.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\CompleteTrackingSessionCommandHandler.ts",
+    "line": 2,
+    "symbol": "PrismaTrackingSessionRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaTrackingSessionRepository.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\GetLiveTrackingTimelineQueryHandler.ts",
+    "line": 1,
+    "symbol": "TrackingSession",
+    "from": "../../domain/entities/TrackingSession.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\GetLiveTrackingTimelineQueryHandler.ts",
+    "line": 2,
+    "symbol": "PrismaTrackingSessionRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaTrackingSessionRepository.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\StartTrackingSessionCommandHandler.ts",
+    "line": 1,
+    "symbol": "TrackingSession",
+    "from": "../../domain/entities/TrackingSession.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\StartTrackingSessionCommandHandler.ts",
+    "line": 2,
+    "symbol": "PrismaTrackingSessionRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaTrackingSessionRepository.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 1,
+    "symbol": "TrackingSession",
+    "from": "../../domain/entities/TrackingSession.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 2,
+    "symbol": "LocationPing",
+    "from": "../../domain/entities/LocationPing.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\SyncOfflineGpsLocationsCommandHandler.ts",
+    "line": 3,
+    "symbol": "PrismaTrackingSessionRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaTrackingSessionRepository.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\UpdateLiveGpsLocationCommandHandler.ts",
+    "line": 1,
+    "symbol": "TrackingSession",
+    "from": "../../domain/entities/TrackingSession.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\UpdateLiveGpsLocationCommandHandler.ts",
+    "line": 2,
+    "symbol": "LocationPing",
+    "from": "../../domain/entities/LocationPing.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\application\\handlers\\UpdateLiveGpsLocationCommandHandler.ts",
+    "line": 3,
+    "symbol": "PrismaTrackingSessionRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaTrackingSessionRepository.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\Dispute.ts",
+    "line": 1,
+    "symbol": "Money",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\Dispute.ts",
+    "line": 3,
+    "symbol": "AggregateRoot",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\Dispute.ts",
+    "line": 4,
+    "symbol": "DisputeStatus",
+    "from": "../enums/DisputeStatus.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\Dispute.ts",
+    "line": 5,
+    "symbol": "DisputeReason",
+    "from": "../enums/DisputeReason.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\TrackingSession.ts",
+    "line": 1,
+    "symbol": "TrackingStatus",
+    "from": "../enums/TrackingStatus.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\entities\\TrackingSession.ts",
+    "line": 2,
+    "symbol": "LocationPing",
+    "from": "./LocationPing.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\repositories\\DisputeRepository.ts",
+    "line": 1,
+    "symbol": "Dispute",
+    "from": "../entities/Dispute.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\repositories\\DisputeRepository.ts",
+    "line": 2,
+    "symbol": "DisputeStatus",
+    "from": "../enums/DisputeStatus.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\domain\\repositories\\TrackingSessionRepository.ts",
+    "line": 1,
+    "symbol": "TrackingSession",
+    "from": "../entities/TrackingSession.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 2,
+    "symbol": "Money",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 3,
+    "symbol": "Dispute",
+    "from": "../../../domain/entities/Dispute.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaDisputeRepository.ts",
+    "line": 4,
+    "symbol": "DisputeStatus",
+    "from": "../../../domain/enums/DisputeStatus.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 2,
+    "symbol": "TrackingSession",
+    "from": "../../../domain/entities/TrackingSession.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\src\\infrastructure\\persistence\\prisma\\PrismaTrackingSessionRepository.ts",
+    "line": 3,
+    "symbol": "TrackingStatus",
+    "from": "../../../domain/enums/TrackingStatus.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "line": 2,
+    "symbol": "StartTrackingSessionCommand",
+    "from": "../src/public/index.js"
+  },
+  {
+    "file": "domains\\operations\\fulfillment\\tests\\TrackingCqrs.spec.ts",
+    "line": 2,
+    "symbol": "StartTrackingSessionCommandHandler",
+    "from": "../src/public/index.js"
+  },
+  {
+    "file": "domains\\operations\\scheduling\\src\\domain\\repositories\\ServiceSlotRepository.ts",
+    "line": 1,
+    "symbol": "ServiceSlot",
+    "from": "../entities/ServiceSlot.js"
+  },
+  {
+    "file": "domains\\pricing\\src\\domain\\repositories\\PricingRepository.ts",
+    "line": 1,
+    "symbol": "PricingTier",
+    "from": "../entities/PricingTier.js"
+  },
+  {
+    "file": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 2,
+    "symbol": "PricingTier",
+    "from": "../../../domain/entities/PricingTier.js"
+  },
+  {
+    "file": "domains\\pricing\\src\\infrastructure\\persistence\\prisma\\PrismaPricingRepository.ts",
+    "line": 2,
+    "symbol": "VehicleTypeMultiplierEntity",
+    "from": "../../../domain/entities/PricingTier.js"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\entities\\Vehicle.ts",
+    "line": 1,
+    "symbol": "VehicleStatus",
+    "from": "../enums/VehicleStatus.js"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\repositories\\AddressRepository.ts",
+    "line": 1,
+    "symbol": "Address",
+    "from": "../entities/Address.js"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\repositories\\CustomerProfileRepository.ts",
+    "line": 1,
+    "symbol": "CustomerProfile",
+    "from": "../entities/CustomerProfile.js"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\domain\\repositories\\VehicleRepository.ts",
+    "line": 1,
+    "symbol": "Vehicle",
+    "from": "../entities/Vehicle.js"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaAddressRepository.ts",
+    "line": 2,
+    "symbol": "Address",
+    "from": "../../../domain/entities/Address.js"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaCustomerProfileRepository.ts",
+    "line": 2,
+    "symbol": "CustomerProfile",
+    "from": "../../../domain/entities/CustomerProfile.js"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\infrastructure\\persistence\\prisma\\PrismaVehicleRepository.ts",
+    "line": 2,
+    "symbol": "Vehicle",
+    "from": "../../../domain/entities/Vehicle.js"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 1,
+    "symbol": "IScreen",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 1,
+    "symbol": "UITheme",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 1,
+    "symbol": "BaseTemplate",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 1,
+    "symbol": "UI",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 1,
+    "symbol": "BaseScreenBuilder",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 1,
+    "symbol": "GenericComponent",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\principals\\customer\\src\\presentation\\sdui\\CustomerDashboardBuilder.ts",
+    "line": 1,
+    "symbol": "BuildContext",
+    "from": "@carbroz/sdui-engine"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 1,
+    "symbol": "KycDocument",
+    "from": "../../domain/entities/KycDocument.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 2,
+    "symbol": "KycDocumentStatus",
+    "from": "../../domain/enums/KycDocumentStatus.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 3,
+    "symbol": "KycDocumentType",
+    "from": "../../domain/enums/KycDocumentType.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 4,
+    "symbol": "PrismaKycDocumentRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaKycDocumentRepository.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\UploadPartnerKycDocumentCommandHandler.ts",
+    "line": 6,
+    "symbol": "IStorageProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\VerifyPartnerKycDocumentCommandHandler.ts",
+    "line": 1,
+    "symbol": "KycDocument",
+    "from": "../../domain/entities/KycDocument.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\VerifyPartnerKycDocumentCommandHandler.ts",
+    "line": 2,
+    "symbol": "KycDocumentStatus",
+    "from": "../../domain/enums/KycDocumentStatus.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\application\\handlers\\VerifyPartnerKycDocumentCommandHandler.ts",
+    "line": 3,
+    "symbol": "PrismaKycDocumentRepository",
+    "from": "../../infrastructure/persistence/prisma/PrismaKycDocumentRepository.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\KycDocument.ts",
+    "line": 1,
+    "symbol": "KycDocumentType",
+    "from": "../enums/KycDocumentType.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\KycDocument.ts",
+    "line": 2,
+    "symbol": "KycDocumentStatus",
+    "from": "../enums/KycDocumentStatus.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\Partner.ts",
+    "line": 1,
+    "symbol": "PartnerType",
+    "from": "../enums/PartnerType.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\Partner.ts",
+    "line": 2,
+    "symbol": "PartnerStatus",
+    "from": "../enums/PartnerStatus.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\PartnerMember.ts",
+    "line": 1,
+    "symbol": "PartnerMemberRole",
+    "from": "../enums/PartnerMemberRole.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\entities\\PartnerMember.ts",
+    "line": 2,
+    "symbol": "PartnerMemberStatus",
+    "from": "../enums/PartnerMemberStatus.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\KycDocumentRepository.ts",
+    "line": 1,
+    "symbol": "KycDocument",
+    "from": "../entities/KycDocument.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\PartnerMemberRepository.ts",
+    "line": 1,
+    "symbol": "PartnerMember",
+    "from": "../entities/PartnerMember.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\PartnerProfileRepository.ts",
+    "line": 1,
+    "symbol": "PartnerProfile",
+    "from": "../entities/PartnerProfile.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\domain\\repositories\\PartnerRepository.ts",
+    "line": 1,
+    "symbol": "Partner",
+    "from": "../entities/Partner.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 2,
+    "symbol": "KycDocument",
+    "from": "../../../domain/entities/KycDocument.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 3,
+    "symbol": "KycDocumentStatus",
+    "from": "../../../domain/enums/KycDocumentStatus.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaKycDocumentRepository.ts",
+    "line": 4,
+    "symbol": "KycDocumentType",
+    "from": "../../../domain/enums/KycDocumentType.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 2,
+    "symbol": "PartnerMember",
+    "from": "../../../domain/entities/PartnerMember.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 3,
+    "symbol": "PartnerMemberRole",
+    "from": "../../../domain/enums/PartnerMemberRole.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerMemberRepository.ts",
+    "line": 4,
+    "symbol": "PartnerMemberStatus",
+    "from": "../../../domain/enums/PartnerMemberStatus.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerProfileRepository.ts",
+    "line": 2,
+    "symbol": "PartnerProfile",
+    "from": "../../../domain/entities/PartnerProfile.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 1,
+    "symbol": "PrismaProvider",
+    "from": "@carbroz/platform-database"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 2,
+    "symbol": "Partner",
+    "from": "../../../domain/entities/Partner.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 3,
+    "symbol": "PartnerStatus",
+    "from": "../../../domain/enums/PartnerStatus.js"
+  },
+  {
+    "file": "domains\\principals\\partner\\src\\infrastructure\\persistence\\prisma\\PrismaPartnerRepository.ts",
+    "line": 4,
+    "symbol": "PartnerType",
+    "from": "../../../domain/enums/PartnerType.js"
+  },
+  {
+    "file": "generated\\prisma\\client.ts",
+    "line": 15,
+    "symbol": "fileURLToPath",
+    "from": "node:url"
+  },
+  {
+    "file": "generated\\prisma\\internal\\prismaNamespace.ts",
+    "line": 20,
+    "symbol": "PrismaClient",
+    "from": "./class.js"
+  },
+  {
+    "file": "packages\\config\\src\\AppConfig.ts",
+    "line": 1,
+    "symbol": "z",
+    "from": "zod"
+  },
+  {
+    "file": "packages\\config\\src\\DatabaseConfig.ts",
+    "line": 1,
+    "symbol": "z",
+    "from": "zod"
+  },
+  {
+    "file": "packages\\config\\src\\index.ts",
+    "line": 4,
+    "symbol": "appSchema",
+    "from": "./AppConfig.js"
+  },
+  {
+    "file": "packages\\config\\src\\index.ts",
+    "line": 5,
+    "symbol": "databaseSchema",
+    "from": "./DatabaseConfig.js"
+  },
+  {
+    "file": "packages\\config\\src\\index.ts",
+    "line": 6,
+    "symbol": "jwtSchema",
+    "from": "./JwtConfig.js"
+  },
+  {
+    "file": "packages\\config\\src\\index.ts",
+    "line": 7,
+    "symbol": "redisSchema",
+    "from": "./RedisConfig.js"
+  },
+  {
+    "file": "packages\\config\\src\\index.ts",
+    "line": 8,
+    "symbol": "loggingSchema",
+    "from": "./LoggingConfig.js"
+  },
+  {
+    "file": "packages\\config\\src\\index.ts",
+    "line": 9,
+    "symbol": "securitySchema",
+    "from": "./SecurityConfig.js"
+  },
+  {
+    "file": "packages\\config\\src\\index.ts",
+    "line": 10,
+    "symbol": "providersSchema",
+    "from": "./ProvidersConfig.js"
+  },
+  {
+    "file": "packages\\config\\src\\JwtConfig.ts",
+    "line": 1,
+    "symbol": "z",
+    "from": "zod"
+  },
+  {
+    "file": "packages\\config\\src\\LoggingConfig.ts",
+    "line": 1,
+    "symbol": "z",
+    "from": "zod"
+  },
+  {
+    "file": "packages\\config\\src\\providers\\ConfigProvider.ts",
+    "line": 1,
+    "symbol": "IConfigProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "packages\\config\\src\\ProvidersConfig.ts",
+    "line": 1,
+    "symbol": "z",
+    "from": "zod"
+  },
+  {
+    "file": "packages\\config\\src\\RedisConfig.ts",
+    "line": 1,
+    "symbol": "z",
+    "from": "zod"
+  },
+  {
+    "file": "packages\\config\\src\\SecurityConfig.ts",
+    "line": 1,
+    "symbol": "z",
+    "from": "zod"
+  },
+  {
+    "file": "packages\\config\\tests\\config.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\config.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\config.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\config.spec.ts",
+    "line": 1,
+    "symbol": "vi",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\config.spec.ts",
+    "line": 1,
+    "symbol": "beforeEach",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\config.spec.ts",
+    "line": 1,
+    "symbol": "afterEach",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\config.spec.ts",
+    "line": 2,
+    "symbol": "appSchema",
+    "from": "../src/AppConfig.js"
+  },
+  {
+    "file": "packages\\config\\tests\\config.spec.ts",
+    "line": 3,
+    "symbol": "databaseSchema",
+    "from": "../src/DatabaseConfig.js"
+  },
+  {
+    "file": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 1,
+    "symbol": "vi",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 1,
+    "symbol": "beforeEach",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 2,
+    "symbol": "ConfigProvider",
+    "from": "../src/providers/ConfigProvider.js"
+  },
+  {
+    "file": "packages\\config\\tests\\ConfigProvider.spec.ts",
+    "line": 3,
+    "symbol": "IConfigRepository",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\builder\\ScreenBuilder.ts",
+    "line": 1,
+    "symbol": "IScreen",
+    "from": "../schema/screen/Screen.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\builder\\ScreenBuilder.ts",
+    "line": 2,
+    "symbol": "IScreenBuilder",
+    "from": "./ScreenBuilderContract.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\builder\\ScreenBuilder.ts",
+    "line": 2,
+    "symbol": "BuildContext",
+    "from": "./ScreenBuilderContract.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\builder\\ScreenBuilderContract.ts",
+    "line": 1,
+    "symbol": "IScreen",
+    "from": "../schema/screen/Screen.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "line": 1,
+    "symbol": "IScreenBuilder",
+    "from": "../builder/ScreenBuilderContract.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "line": 2,
+    "symbol": "IScreen",
+    "from": "../schema/screen/Screen.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "line": 3,
+    "symbol": "ScreenBuilder",
+    "from": "../builder/ScreenBuilder.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\factory\\ScreenFactory.ts",
+    "line": 4,
+    "symbol": "ScreenRegistry",
+    "from": "../registry/ScreenRegistry.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\generator\\SduiGenerator.ts",
+    "line": 1,
+    "symbol": "IScreen",
+    "from": "../schema/screen/Screen.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\index.ts",
+    "line": 4,
+    "symbol": "Component",
+    "from": "./schema/component/Component.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\index.ts",
+    "line": 5,
+    "symbol": "SubComponent",
+    "from": "./schema/subcomponent/SubComponent.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\index.ts",
+    "line": 6,
+    "symbol": "Child",
+    "from": "./schema/child/Child.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\index.ts",
+    "line": 7,
+    "symbol": "ChildrenData",
+    "from": "./schema/child-data/ChildrenData.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\index.ts",
+    "line": 8,
+    "symbol": "Template",
+    "from": "./schema/template/Template.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\public\\index.ts",
+    "line": 1,
+    "symbol": "Component",
+    "from": "../schema/component/Component.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\public\\index.ts",
+    "line": 2,
+    "symbol": "SubComponent",
+    "from": "../schema/subcomponent/SubComponent.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\public\\index.ts",
+    "line": 3,
+    "symbol": "Template",
+    "from": "../schema/template/Template.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\public\\index.ts",
+    "line": 4,
+    "symbol": "ScreenBuilder",
+    "from": "../builder/ScreenBuilder.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\public\\index.ts",
+    "line": 5,
+    "symbol": "SduiGenerator",
+    "from": "../generator/SduiGenerator.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\registry\\ScreenRegistry.ts",
+    "line": 1,
+    "symbol": "IScreenBuilder",
+    "from": "../builder/ScreenBuilderContract.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child\\Child.ts",
+    "line": 1,
+    "symbol": "ChildProperties",
+    "from": "./ChildProperties.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child\\Child.ts",
+    "line": 2,
+    "symbol": "IChildrenData",
+    "from": "../child-data/ChildrenData.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child\\Child.ts",
+    "line": 2,
+    "symbol": "ChildrenData",
+    "from": "../child-data/ChildrenData.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child-data\\ChildrenData.ts",
+    "line": 1,
+    "symbol": "ChildrenDataProperties",
+    "from": "./ChildrenDataProperties.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\child-data\\ChildrenData.ts",
+    "line": 1,
+    "symbol": "UIAction",
+    "from": "./ChildrenDataProperties.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 1,
+    "symbol": "ComponentProperties",
+    "from": "./ComponentProperties.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 2,
+    "symbol": "UIAction",
+    "from": "../child-data/ChildrenDataProperties.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 3,
+    "symbol": "ISubcomponent",
+    "from": "../subcomponent/SubComponent.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 3,
+    "symbol": "SubComponent",
+    "from": "../subcomponent/SubComponent.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 4,
+    "symbol": "IChild",
+    "from": "../child/Child.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 4,
+    "symbol": "Child",
+    "from": "../child/Child.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 5,
+    "symbol": "IChildrenData",
+    "from": "../child-data/ChildrenData.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\component\\Component.ts",
+    "line": 5,
+    "symbol": "ChildrenData",
+    "from": "../child-data/ChildrenData.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\Screen.ts",
+    "line": 1,
+    "symbol": "UITheme",
+    "from": "./ScreenProperties.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\Screen.ts",
+    "line": 1,
+    "symbol": "ScreenProperties",
+    "from": "./ScreenProperties.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\Screen.ts",
+    "line": 2,
+    "symbol": "ITemplate",
+    "from": "../template/Template.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\Screen.ts",
+    "line": 3,
+    "symbol": "IComponent",
+    "from": "../component/Component.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\Screen.ts",
+    "line": 4,
+    "symbol": "ISubcomponent",
+    "from": "../subcomponent/SubComponent.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\Screen.ts",
+    "line": 5,
+    "symbol": "IChild",
+    "from": "../child/Child.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\Screen.ts",
+    "line": 6,
+    "symbol": "IChildrenData",
+    "from": "../child-data/ChildrenData.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\screen\\ScreenProperties.ts",
+    "line": 1,
+    "symbol": "ThemeGradient",
+    "from": "../template/TemplateProperties.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponent.ts",
+    "line": 1,
+    "symbol": "SubComponentProperties",
+    "from": "./SubComponentProperties.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponent.ts",
+    "line": 2,
+    "symbol": "IChild",
+    "from": "../child/Child.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\subcomponent\\SubComponent.ts",
+    "line": 2,
+    "symbol": "Child",
+    "from": "../child/Child.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\template\\Template.ts",
+    "line": 1,
+    "symbol": "TemplateProperties",
+    "from": "./TemplateProperties.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\template\\Template.ts",
+    "line": 2,
+    "symbol": "IComponent",
+    "from": "../component/Component.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\schema\\template\\Template.ts",
+    "line": 2,
+    "symbol": "Component",
+    "from": "../component/Component.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\src\\validator\\SduiValidator.ts",
+    "line": 1,
+    "symbol": "z",
+    "from": "zod"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 2,
+    "symbol": "ScreenFactory",
+    "from": "../src/index.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 2,
+    "symbol": "BaseScreenBuilder",
+    "from": "../src/index.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 2,
+    "symbol": "IScreen",
+    "from": "../src/index.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\ScreenFactory.spec.ts",
+    "line": 2,
+    "symbol": "BuildContext",
+    "from": "../src/index.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 2,
+    "symbol": "SduiGenerator",
+    "from": "../src/index.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 2,
+    "symbol": "SduiValidator",
+    "from": "../src/index.js"
+  },
+  {
+    "file": "packages\\sdui-engine\\tests\\SduiGenerator.spec.ts",
+    "line": 2,
+    "symbol": "IScreen",
+    "from": "../src/index.js"
+  },
+  {
+    "file": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 1,
+    "symbol": "beforeEach",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\cache\\tests\\InMemoryCacheProvider.spec.ts",
+    "line": 2,
+    "symbol": "InMemoryCacheProvider",
+    "from": "../src/providers/InMemoryCacheProvider.js"
+  },
+  {
+    "file": "platform\\database\\prisma\\seed.ts",
+    "line": 1,
+    "symbol": "PrismaClient",
+    "from": "@prisma/client"
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaDatabaseProvider.ts",
+    "line": 1,
+    "symbol": "IDatabaseProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaDatabaseProvider.ts",
+    "line": 2,
+    "symbol": "PrismaProvider",
+    "from": "./PrismaProvider.js"
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaProvider.ts",
+    "line": 1,
+    "symbol": "PrismaClient",
+    "from": "@prisma/client"
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaTransactionProvider.ts",
+    "line": 1,
+    "symbol": "ITransactionProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\database\\src\\providers\\PrismaTransactionProvider.ts",
+    "line": 2,
+    "symbol": "PrismaProvider",
+    "from": "./PrismaProvider.js"
+  },
+  {
+    "file": "platform\\event-bus\\src\\providers\\InMemoryEventBus.ts",
+    "line": 1,
+    "symbol": "DomainEvent",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 1,
+    "symbol": "beforeEach",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\event-bus\\tests\\InMemoryEventBus.spec.ts",
+    "line": 2,
+    "symbol": "InMemoryEventBus",
+    "from": "../src/providers/InMemoryEventBus.js"
+  },
+  {
+    "file": "platform\\feature-flags\\src\\providers\\FeatureFlagProvider.ts",
+    "line": 1,
+    "symbol": "IFeatureFlagProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\feature-flags\\src\\providers\\FeatureFlagProvider.ts",
+    "line": 1,
+    "symbol": "IFeatureFlagRepository",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 1,
+    "symbol": "vi",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 1,
+    "symbol": "beforeEach",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 2,
+    "symbol": "FeatureFlagProvider",
+    "from": "../src/providers/FeatureFlagProvider.js"
+  },
+  {
+    "file": "platform\\feature-flags\\tests\\FeatureFlagProvider.spec.ts",
+    "line": 3,
+    "symbol": "IFeatureFlagRepository",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 1,
+    "symbol": "IEmailProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 1,
+    "symbol": "INotificationProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 1,
+    "symbol": "IPushProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 1,
+    "symbol": "ISmsProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 1,
+    "symbol": "NotificationDispatchResult",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\notification\\src\\providers\\MultiChannelNotificationProvider.ts",
+    "line": 1,
+    "symbol": "NotificationPayload",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 1,
+    "symbol": "vi",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\notification\\tests\\MultiChannelNotificationProvider.spec.ts",
+    "line": 2,
+    "symbol": "MultiChannelNotificationProvider",
+    "from": "../src/providers/MultiChannelNotificationProvider.js"
+  },
+  {
+    "file": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 1,
+    "symbol": "beforeEach",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\queue\\tests\\InMemoryQueueProvider.spec.ts",
+    "line": 2,
+    "symbol": "InMemoryQueueProvider",
+    "from": "../src/providers/InMemoryQueueProvider.js"
+  },
+  {
+    "file": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 1,
+    "symbol": "IStorageProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 1,
+    "symbol": "ILoggerProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\storage\\src\\providers\\MinIOStorageProvider.ts",
+    "line": 1,
+    "symbol": "IConfigProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\storage\\src\\providers\\SupabaseStorageProvider.ts",
+    "line": 1,
+    "symbol": "IStorageProvider",
+    "from": "@carbroz/foundation-kernel"
+  },
+  {
+    "file": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 1,
+    "symbol": "describe",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 1,
+    "symbol": "it",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 1,
+    "symbol": "expect",
+    "from": "vitest"
+  },
+  {
+    "file": "platform\\storage\\tests\\storage-provider.spec.ts",
+    "line": 2,
+    "symbol": "SupabaseStorageProvider",
+    "from": "../src/providers/SupabaseStorageProvider.js"
+  },
+  {
+    "file": "prisma.config.ts",
+    "line": 4,
+    "symbol": "defineConfig",
+    "from": "prisma/config"
+  },
+  {
+    "file": "vitest.config.ts",
+    "line": 1,
+    "symbol": "defineConfig",
+    "from": "vitest/config"
+  },
+  {
+    "file": "vitest.workspace.ts",
+    "line": 1,
+    "symbol": "defineConfig",
+    "from": "vitest/config"
+  }
+]
