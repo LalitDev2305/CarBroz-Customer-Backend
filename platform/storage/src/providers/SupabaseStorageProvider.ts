@@ -1,4 +1,16 @@
-import { IStorageProvider, PresignedUrlOptions, FileValidationOptions } from '../index.js';
+import { IStorageProvider } from '@carbroz/common';
+
+export interface PresignedUrlOptions {
+  bucket: string;
+  objectName: string;
+  expiresInSeconds?: number;
+  contentType?: string;
+}
+
+export interface FileValidationOptions {
+  maxSizeBytes?: number;
+  allowedMimeTypes?: string[];
+}
 
 export class SupabaseStorageProvider implements IStorageProvider {
   private readonly baseUrl: string;

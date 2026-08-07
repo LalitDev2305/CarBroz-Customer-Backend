@@ -7,6 +7,10 @@
   "scripts": {
     "build": "tsc"
   },
+  "dependencies": {
+    "@carbroz/common": "workspace:*",
+    "minio": "^8.0.7"
+  },
   "devDependencies": {
     "@types/node": "^26.1.0"
   }

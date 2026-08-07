@@ -3,6 +3,7 @@ packages:
   - "packages/*"
   - "shared/*"
   - "platform/*"
+  - "foundation/*"
   - "domains/*"
 allowBuilds:
   '@prisma/client': true
@@ -11,3 +12,5 @@ allowBuilds:
   esbuild: true
   msgpackr-extract: true
   prisma: true
+overrides:
+  database: link:../../platform/database

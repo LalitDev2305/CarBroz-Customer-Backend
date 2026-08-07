@@ -1,4 +1,4 @@
-import { logger } from '@carbroz/logger';
+import { logger } from '@carbroz/platform-observability';
 export class LoggerProvider {
     info(message, context) {
         logger.info(context || {}, message);

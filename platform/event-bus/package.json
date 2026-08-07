@@ -8,6 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@carbroz/common": "workspace:*",
     "@carbroz/shared-kernel": "workspace:*"
   },
   "devDependencies": {

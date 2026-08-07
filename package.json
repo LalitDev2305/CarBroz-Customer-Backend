@@ -34,6 +34,7 @@
     "vitest": "^4.1.9"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.3"
+    "@prisma/client": "^6.19.3",
+    "database": "link:../../platform/database"
   }
 }

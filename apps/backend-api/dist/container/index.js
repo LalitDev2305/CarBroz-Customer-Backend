@@ -1,8 +1,8 @@
 import { asClass, asFunction } from 'awilix';
 import { diContainer } from '@fastify/awilix';
-import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory, PrismaConfigRepository, PrismaFeatureFlagRepository, PrismaUserRepository, PrismaUserSessionRepository, PrismaRoleRepository, PrismaPermissionRepository, PrismaAdminRoleRepository } from '@carbroz/database';
+import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory, PrismaConfigRepository, PrismaFeatureFlagRepository, PrismaUserRepository, PrismaUserSessionRepository, PrismaRoleRepository, PrismaPermissionRepository, PrismaAdminRoleRepository } from '@carbroz/platform-database';
 import { ConfigProvider } from '@carbroz/config';
-import { FeatureFlagProvider } from '@carbroz/feature-flags';
+import { FeatureFlagProvider } from '@carbroz/platform-feature-flags';
 import { AuthorizationProvider } from '../providers/AuthorizationProvider.js';
 import { GuestLoginUseCase } from '../modules/auth/use-cases/GuestLoginUseCase.js';
 import { SendOtpUseCase } from '../modules/auth/use-cases/SendOtpUseCase.js';
@@ -24,7 +24,7 @@ import { registerSduiRegistryModule } from '@carbroz/domain-sdui-registry';
 import { registerAuditModule } from '@carbroz/domain-audit';
 import { registerConfigModule } from '@carbroz/domain-config';
 // Phase 8
-import { PrismaPartnerRepository, PrismaPartnerMemberRepository } from '@carbroz/database';
+import { PrismaPartnerRepository, PrismaPartnerMemberRepository } from '@carbroz/platform-database';
 import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js';
 import { RegisterOrganizationPartnerUseCase } from '../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js';
 import { GetPartnerProfileUseCase } from '../modules/partner/use-cases/GetPartnerProfileUseCase.js';
@@ -37,8 +37,8 @@ import { GeocodeAddressUseCase } from '../modules/maps/use-cases/GeocodeAddressU
 import { ReverseGeocodeUseCase } from '../modules/maps/use-cases/ReverseGeocodeUseCase.js';
 import { CalculateDistanceUseCase } from '../modules/maps/use-cases/CalculateDistanceUseCase.js';
 // Phase 10
-import { PrismaPartnerProfileRepository, PrismaKycDocumentRepository } from '@carbroz/database';
-import { MinIOStorageProvider } from '../providers/storage/MinIOStorageProvider.js';
+import { PrismaPartnerProfileRepository, PrismaKycDocumentRepository } from '@carbroz/platform-database';
+import { MinIOStorageProvider } from '@carbroz/platform-storage';
 import { UploadKycDocumentUseCase } from '../modules/partner/use-cases/UploadKycDocumentUseCase.js';
 import { GetPartnerKycStatusUseCase } from '../modules/partner/use-cases/GetPartnerKycStatusUseCase.js';
 import { AdminReviewKycDocumentUseCase } from '../modules/admin/use-cases/AdminReviewKycDocumentUseCase.js';
@@ -46,19 +46,19 @@ import { KycController } from '../modules/partner/api/kyc.controller.js';
 import { AdminKycController } from '../modules/admin/api/admin-kyc.controller.js';
 import { LoggerProvider } from '../providers/LoggerProvider.js';
 // Phase 11
-import { PrismaCustomerProfileRepository, PrismaAddressRepository } from '@carbroz/database';
+import { PrismaCustomerProfileRepository, PrismaAddressRepository } from '@carbroz/platform-database';
 import { GetCustomerProfileUseCase } from '../modules/customer/use-cases/GetCustomerProfileUseCase.js';
 import { UpdateCustomerProfileUseCase } from '../modules/customer/use-cases/UpdateCustomerProfileUseCase.js';
 import { ManageAddressUseCase } from '../modules/customer/use-cases/ManageAddressUseCase.js';
 import { ExtractCustomerDataUseCase } from '../modules/customer/use-cases/ExtractCustomerDataUseCase.js';
 // Phase 12
-import { PrismaCatalogRepository, PrismaPricingRepository } from '@carbroz/database';
+import { PrismaCatalogRepository, PrismaPricingRepository } from '@carbroz/platform-database';
 import { GetCatalogUseCase } from '../modules/catalog/use-cases/GetCatalogUseCase.js';
 import { CalculateServicePriceUseCase } from '../modules/catalog/use-cases/CalculateServicePriceUseCase.js';
 import { ManageCatalogUseCase } from '../modules/catalog/use-cases/ManageCatalogUseCase.js';
 import { ManagePricingTierUseCase } from '../modules/catalog/use-cases/ManagePricingTierUseCase.js';
 // Phase 13 & SDUI Bounded Context
-import { PrismaSduiRegistryRepository } from '@carbroz/database';
+import { PrismaSduiRegistryRepository } from '@carbroz/platform-database';
 import { ScreenFactory } from '@carbroz/ui-sdk';
 import { AuthLoginBuilder } from '../modules/auth/ui/AuthLoginBuilder.js';
 import { AuthOtpBuilder } from '../modules/auth/ui/AuthOtpBuilder.js';
@@ -79,7 +79,7 @@ import { GetSduiVersionHistoryUseCase } from '../modules/sdui/use-cases/GetSduiV
 import { GetSduiSpecificVersionUseCase } from '../modules/sdui/use-cases/GetSduiSpecificVersionUseCase.js';
 import { CompareSduiVersionsUseCase } from '../modules/sdui/use-cases/CompareSduiVersionsUseCase.js';
 // Phase 16 Vehicle & Booking Engine
-import { PrismaVehicleRepository, PrismaBookingRepository } from '@carbroz/database';
+import { PrismaVehicleRepository, PrismaBookingRepository } from '@carbroz/platform-database';
 import { CreateVehicleUseCase } from '../modules/vehicle/use-cases/CreateVehicleUseCase.js';
 import { ListCustomerVehiclesUseCase } from '../modules/vehicle/use-cases/ListCustomerVehiclesUseCase.js';
 import { SetDefaultVehicleUseCase } from '../modules/vehicle/use-cases/SetDefaultVehicleUseCase.js';
@@ -93,7 +93,7 @@ import { CancelBookingUseCase } from '../modules/booking/use-cases/CancelBooking
 import { ExpirePendingBookingsUseCase } from '../modules/booking/use-cases/ExpirePendingBookingsUseCase.js';
 import { BookingController } from '../modules/booking/api/booking.controller.js';
 // Phase 17 Payment, Invoice & Payout Engine
-import { PrismaPaymentRepository, PrismaInvoiceRepository, PrismaPartnerPayoutRepository, } from '@carbroz/database';
+import { PrismaPaymentRepository, PrismaInvoiceRepository, PrismaPartnerPayoutRepository, } from '@carbroz/platform-database';
 import { RazorpayPaymentGatewayProvider } from '../providers/payment/RazorpayPaymentGatewayProvider.js';
 import { CreatePaymentOrderUseCase } from '../modules/payment/use-cases/CreatePaymentOrderUseCase.js';
 import { GetPaymentUseCase } from '../modules/payment/use-cases/GetPaymentUseCase.js';
@@ -106,13 +106,13 @@ import { ProcessPayoutBatchUseCase } from '../modules/payout/use-cases/ProcessPa
 import { MarkPayoutPaidUseCase } from '../modules/payout/use-cases/MarkPayoutPaidUseCase.js';
 import { PaymentController } from '../modules/payment/api/payment.controller.js';
 import { PayoutController } from '../modules/payout/api/payout.controller.js';
-import { PrismaTrackingSessionRepository } from '@carbroz/database';
-import { PrismaNotificationLogRepository } from '@carbroz/database';
-import { PrismaDeviceTokenRepository } from '@carbroz/database';
+import { PrismaTrackingSessionRepository } from '@carbroz/platform-database';
+import { PrismaNotificationLogRepository } from '@carbroz/platform-database';
+import { PrismaDeviceTokenRepository } from '@carbroz/platform-database';
 import { FirebasePushProvider } from '../providers/notification/FirebasePushProvider.js';
 import { Msg91SmsProvider } from '../providers/notification/Msg91SmsProvider.js';
 import { ResendEmailProvider } from '../providers/notification/ResendEmailProvider.js';
-import { MultiChannelNotificationProvider } from '../providers/notification/MultiChannelNotificationProvider.js';
+import { MultiChannelNotificationProvider } from '@carbroz/platform-notification';
 import { NotificationService } from '@carbroz/common';
 import { StartTrackingSessionUseCase } from '../modules/tracking/use-cases/StartTrackingSessionUseCase.js';
 import { UpdateLocationPingUseCase } from '../modules/tracking/use-cases/UpdateLocationPingUseCase.js';
@@ -123,7 +123,7 @@ import { DeactivateDeviceTokenUseCase } from '../modules/notification/use-cases/
 import { SendNotificationUseCase } from '../modules/notification/use-cases/SendNotificationUseCase.js';
 import { ListNotificationHistoryUseCase } from '../modules/notification/use-cases/ListNotificationHistoryUseCase.js';
 // Phase 19 Customer Reviews, Partner Ratings & Promo Coupon Engine
-import { PrismaReviewRepository, PrismaCouponRepository, PrismaCouponUsageRepository, } from '@carbroz/database';
+import { PrismaReviewRepository, PrismaCouponRepository, PrismaCouponUsageRepository, } from '@carbroz/platform-database';
 import { PartnerRatingCalculator, CouponDiscountCalculator } from '@carbroz/common';
 import { SubmitReviewUseCase } from '../modules/review/use-cases/SubmitReviewUseCase.js';
 import { ModerateReviewUseCase } from '../modules/review/use-cases/ModerateReviewUseCase.js';
@@ -135,17 +135,17 @@ import { ValidateCouponUseCase } from '../modules/coupon/use-cases/ValidateCoupo
 import { ApplyCouponUseCase } from '../modules/coupon/use-cases/ApplyCouponUseCase.js';
 import { ListCouponsUseCase } from '../modules/coupon/use-cases/ListCouponsUseCase.js';
 // Phase 20 Production Hardening, Audit Logging & Error Codes
-import { PrismaAuditLogRepository } from '@carbroz/database';
+import { PrismaAuditLogRepository } from '@carbroz/platform-database';
 import { AuditLogService } from '@carbroz/common';
 // Phase 21 Booking Dispute Settlement & SLA Refund Engine
-import { PrismaDisputeRepository } from '@carbroz/database';
+import { PrismaDisputeRepository } from '@carbroz/platform-database';
 import { DisputeSettlementCalculator } from '@carbroz/common';
 import { RaiseDisputeUseCase } from '../modules/dispute/use-cases/RaiseDisputeUseCase.js';
 import { ResolveDisputeUseCase } from '../modules/dispute/use-cases/ResolveDisputeUseCase.js';
 import { GetDisputeUseCase } from '../modules/dispute/use-cases/GetDisputeUseCase.js';
 import { ListDisputesUseCase } from '../modules/dispute/use-cases/ListDisputesUseCase.js';
 // Phase 22 Multi-Tenant Corporate Accounts, Fleet Management & B2B Billing Platform
-import { PrismaCorporateAccountRepository, PrismaCorporateMemberRepository, PrismaCorporateFleetVehicleRepository, PrismaCorporateCreditLedgerRepository, PrismaCorporateInvoiceRepository, } from '@carbroz/database';
+import { PrismaCorporateAccountRepository, PrismaCorporateMemberRepository, PrismaCorporateFleetVehicleRepository, PrismaCorporateCreditLedgerRepository, PrismaCorporateInvoiceRepository, } from '@carbroz/platform-database';
 import { RegisterCorporateAccountUseCase } from '../modules/corporate/use-cases/RegisterCorporateAccountUseCase.js';
 import { ApproveCorporateAccountUseCase } from '../modules/corporate/use-cases/ApproveCorporateAccountUseCase.js';
 import { AdjustCreditLimitUseCase } from '../modules/corporate/use-cases/AdjustCreditLimitUseCase.js';

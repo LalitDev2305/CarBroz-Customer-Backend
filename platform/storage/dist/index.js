@@ -1,3 +1,2 @@
-/// <reference types="node" />
-export * from './providers/SupabaseStorageProvider.js';
+export * from './public/index.js';
 //# sourceMappingURL=index.js.map

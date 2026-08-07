@@ -1,7 +1,2 @@
-import type { IDomainEvent } from '@carbroz/shared-kernel';
-export interface IEventBus {
-    publish(event: IDomainEvent): Promise<void>;
-    publishAll(events: IDomainEvent[]): Promise<void>;
-    subscribe(eventName: string, handler: (event: IDomainEvent) => Promise<void>): void;
-}
+export * from './public/index.js';
 //# sourceMappingURL=index.d.ts.map

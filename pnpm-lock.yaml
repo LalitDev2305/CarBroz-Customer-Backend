@@ -203,6 +203,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  database: link:../../platform/database
+
 importers:
 
   .:
@@ -210,6 +213,9 @@ importers:
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)
+      database:
+        specifier: link:../../platform/database
+        version: link:../../platform/database
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -256,9 +262,6 @@ importers:
       '@carbroz/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@carbroz/database':
-        specifier: workspace:*
-        version: link:../../packages/database
       '@carbroz/domain-address':
         specifier: workspace:*
         version: link:../../domains/address
@@ -319,12 +322,30 @@ importers:
       '@carbroz/domain-tracking':
         specifier: workspace:*
         version: link:../../domains/tracking
+      '@carbroz/platform-cache':
+        specifier: workspace:*
+        version: link:../../platform/cache
+      '@carbroz/platform-database':
+        specifier: workspace:*
+        version: link:../../platform/database
+      '@carbroz/platform-event-bus':
+        specifier: workspace:*
+        version: link:../../platform/event-bus
       '@carbroz/platform-feature-flags':
         specifier: workspace:*
         version: link:../../platform/feature-flags
+      '@carbroz/platform-notification':
+        specifier: workspace:*
+        version: link:../../platform/notification
       '@carbroz/platform-observability':
         specifier: workspace:*
         version: link:../../platform/observability
+      '@carbroz/platform-queue':
+        specifier: workspace:*
+        version: link:../../platform/queue
+      '@carbroz/platform-storage':
+        specifier: workspace:*
+        version: link:../../platform/storage
       '@carbroz/ui-sdk':
         specifier: workspace:*
         version: link:../../packages/ui-sdk
@@ -797,6 +818,12 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
 
+  foundation/kernel:
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
   packages/common:
     devDependencies:
       '@types/node':
@@ -815,14 +842,33 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
 
-  packages/database:
+  packages/ui-sdk:
+    dependencies:
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  platform/cache:
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
+  platform/database:
     dependencies:
       '@carbroz/common':
         specifier: workspace:*
-        version: link:../common
+        version: link:../../packages/common
       '@carbroz/config':
         specifier: workspace:*
-        version: link:../config
+        version: link:../../packages/config
       '@carbroz/domain-address':
         specifier: workspace:*
         version: link:../../domains/address
@@ -890,45 +936,11 @@ importers:
         specifier: ^4.19.2
         version: 4.23.0
 
-  packages/ui-sdk:
-    dependencies:
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-
-  platform/cache:
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
-  platform/database:
+  platform/event-bus:
     dependencies:
       '@carbroz/common':
         specifier: workspace:*
         version: link:../../packages/common
-      '@carbroz/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)
-      prisma:
-        specifier: ^6.19.3
-        version: 6.19.3(typescript@6.0.3)
-      tsx:
-        specifier: ^4.19.2
-        version: 4.23.0
-
-  platform/event-bus:
-    dependencies:
       '@carbroz/shared-kernel':
         specifier: workspace:*
         version: link:../../shared/kernel
@@ -942,6 +954,16 @@ importers:
       '@carbroz/common':
         specifier: workspace:*
         version: link:../../packages/common
+
+  platform/notification:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
 
   platform/observability:
     dependencies:
@@ -960,12 +982,23 @@ importers:
         version: 6.0.3
 
   platform/queue:
+    dependencies:
+      bullmq:
+        specifier: ^5.79.2
+        version: 5.79.2
     devDependencies:
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.0
 
   platform/storage:
+    dependencies:
+      '@carbroz/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      minio:
+        specifier: ^8.0.7
+        version: 8.0.7
     devDependencies:
       '@types/node':
         specifier: ^26.1.0

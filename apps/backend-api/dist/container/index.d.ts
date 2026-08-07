@@ -1,7 +1,7 @@
 import { AwilixContainer } from 'awilix';
-import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory } from '@carbroz/database';
+import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider, RepositoryFactory } from '@carbroz/platform-database';
 import { ConfigProvider } from '@carbroz/config';
-import { FeatureFlagProvider } from '@carbroz/feature-flags';
+import { FeatureFlagProvider } from '@carbroz/platform-feature-flags';
 import { AuthorizationProvider } from '../providers/AuthorizationProvider.js';
 import { GuestLoginUseCase } from '../modules/auth/use-cases/GuestLoginUseCase.js';
 import { SendOtpUseCase } from '../modules/auth/use-cases/SendOtpUseCase.js';
