@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ScreenSchema } from '@carbroz/sdui-engine';
+import { screenSchema } from '@carbroz/sdui-engine';
 
 describe('SDUI V3 canonical terminology', () => {
   it('accepts the canonical Template -> Component -> Section -> Group -> Element hierarchy', () => {
@@ -34,6 +34,6 @@ describe('SDUI V3 canonical terminology', () => {
       },
     };
 
-    expect(ScreenSchema.safeParse(screen).success).toBe(true);
+    expect(screenSchema.safeParse(screen).success).toBe(true);
   });
 });
