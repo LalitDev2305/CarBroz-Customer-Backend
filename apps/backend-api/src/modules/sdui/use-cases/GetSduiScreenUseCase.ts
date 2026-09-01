@@ -1,6 +1,6 @@
 import { IUseCase, IRequestContext, NotFoundError } from '@carbroz/common';
-import type { ISduiRegistryRepository } from '@carbroz/domain-sdui-registry';
-import { parseSduiScreen, type SduiScreen } from '@carbroz/sdui-engine';
+import type { ISduiRegistryRepository } from '@carbroz/sdui-registry';
+import { parseSduiScreen, type SduiScreen } from '@carbroz/ui-sdk';
 import type { GetSduiScreenDto } from '../dtos/sdui-registry.dto.js';
 
 export interface GetSduiScreenInput {
