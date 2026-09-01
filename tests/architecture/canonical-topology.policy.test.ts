@@ -9,6 +9,14 @@ function read(path: string): string {
 }
 
 describe('canonical repository topology migration', () => {
+  it('places the executable API at the canonical path and identity', () => {
+    expect(existsSync(resolve(root, 'apps/api/package.json'))).toBe(true);
+    expect(existsSync(resolve(root, 'apps/backend-api'))).toBe(false);
+
+    const api = JSON.parse(read('apps/api/package.json')) as { name?: string };
+    expect(api.name).toBe('@carbroz/api');
+  });
+
   it('places the complete SDUI subsystem under the canonical sdui root', () => {
     expect(existsSync(resolve(root, 'sdui/ui-sdk/package.json'))).toBe(true);
     expect(existsSync(resolve(root, 'sdui/registry/package.json'))).toBe(true);
@@ -27,6 +35,10 @@ describe('canonical repository topology migration', () => {
     expect(registry.name).toBe('@carbroz/sdui-registry');
     expect(registry.dependencies?.['@carbroz/ui-sdk']).toBe('workspace:*');
     expect(registry.dependencies?.['@carbroz/sdui-engine']).toBeUndefined();
+  });
+
+  it('does not retain a competing prompt-based architecture authority', () => {
+    expect(existsSync(resolve(root, 'prompts'))).toBe(false);
   });
 
   it('registers sdui as an explicit workspace category during migration', () => {
