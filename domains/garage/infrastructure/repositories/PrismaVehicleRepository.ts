@@ -1,10 +1,15 @@
-import { PrismaClient } from '@prisma/client';
-import { IVehicleRepository, Vehicle } from '@carbroz/common';
+import { Vehicle } from '../../domain/Vehicle.js';
+import type { VehicleStatus } from '../../domain/VehicleStatus.js';
+import type { IVehicleRepository } from '../../domain/repositories/IVehicleRepository.js';
+import type {
+  VehiclePersistenceClient,
+  VehiclePersistenceRecord,
+} from '../persistence/VehiclePersistenceClient.js';
 
 export class PrismaVehicleRepository implements IVehicleRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: VehiclePersistenceClient) {}
 
-  private mapToDomain(record: any): Vehicle {
+  private mapToDomain(record: VehiclePersistenceRecord): Vehicle {
     return new Vehicle({
       id: record.id,
       publicId: record.publicId,
@@ -18,7 +23,7 @@ export class PrismaVehicleRepository implements IVehicleRepository {
       color: record.color,
       nickname: record.nickname,
       isDefault: record.isDefault,
-      status: record.status as any,
+      status: record.status as VehicleStatus,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
       deletedAt: record.deletedAt,
@@ -26,7 +31,7 @@ export class PrismaVehicleRepository implements IVehicleRepository {
   }
 
   async create(vehicle: Vehicle): Promise<Vehicle> {
-    const record = await (this.prisma as any).vehicle.create({
+    const record = await this.prisma.vehicle.create({
       data: {
         customerId: vehicle.customerId,
         make: vehicle.make,
@@ -45,17 +50,17 @@ export class PrismaVehicleRepository implements IVehicleRepository {
   }
 
   async findById(id: number): Promise<Vehicle | null> {
-    const record = await (this.prisma as any).vehicle.findUnique({ where: { id } });
+    const record = await this.prisma.vehicle.findUnique({ where: { id } });
     return record ? this.mapToDomain(record) : null;
   }
 
   async findByPublicId(publicId: string): Promise<Vehicle | null> {
-    const record = await (this.prisma as any).vehicle.findUnique({ where: { publicId } });
+    const record = await this.prisma.vehicle.findUnique({ where: { publicId } });
     return record ? this.mapToDomain(record) : null;
   }
 
   async findByCustomerAndRegistration(customerId: number, registrationNumber: string): Promise<Vehicle | null> {
-    const record = await (this.prisma as any).vehicle.findFirst({
+    const record = await this.prisma.vehicle.findFirst({
       where: {
         customerId,
         registrationNumber: registrationNumber.trim().toUpperCase(),
@@ -66,15 +71,15 @@ export class PrismaVehicleRepository implements IVehicleRepository {
   }
 
   async listByCustomerId(customerId: number): Promise<Vehicle[]> {
-    const records = await (this.prisma as any).vehicle.findMany({
+    const records = await this.prisma.vehicle.findMany({
       where: { customerId, deletedAt: null },
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
-    return records.map((r: any) => this.mapToDomain(r));
+    return records.map((record) => this.mapToDomain(record));
   }
 
   async update(vehicle: Vehicle): Promise<Vehicle> {
-    const record = await (this.prisma as any).vehicle.update({
+    const record = await this.prisma.vehicle.update({
       where: { id: vehicle.id },
       data: {
         make: vehicle.make,
@@ -94,7 +99,7 @@ export class PrismaVehicleRepository implements IVehicleRepository {
   }
 
   async unsetCustomerDefaultVehicles(customerId: number, excludeVehicleId?: number): Promise<void> {
-    await (this.prisma as any).vehicle.updateMany({
+    await this.prisma.vehicle.updateMany({
       where: {
         customerId,
         id: excludeVehicleId ? { not: excludeVehicleId } : undefined,
@@ -104,7 +109,7 @@ export class PrismaVehicleRepository implements IVehicleRepository {
   }
 
   async softDelete(id: number): Promise<void> {
-    await (this.prisma as any).vehicle.update({
+    await this.prisma.vehicle.update({
       where: { id },
       data: {
         status: 'ARCHIVED',
