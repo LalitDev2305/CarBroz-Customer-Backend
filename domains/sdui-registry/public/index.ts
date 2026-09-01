@@ -6,6 +6,7 @@ export * from '../domain/SduiGroup.js';
 export * from '../domain/SduiElement.js';
 export * from '../domain/SduiNodeLevel.js';
 export * from '../domain/SduiNodeStatus.js';
+export * from '../domain/repositories/ISduiRegistryRepository.js';
 export * from '../infrastructure/repositories/PrismaSduiRegistryRepository.js';
 export * from '../sdui-registry.module.js';
 export * from '../module.manifest.js';
