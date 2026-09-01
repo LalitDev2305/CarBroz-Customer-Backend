@@ -6,7 +6,7 @@ import {
   type SduiScreen,
   type SduiTargetApp,
   type SduiTemplate,
-} from '@carbroz/sdui-engine';
+} from '@carbroz/ui-sdk';
 import { SduiComponentEntity } from '../../domain/SduiComponent.js';
 import { SduiElementEntity } from '../../domain/SduiElement.js';
 import { SduiGroupEntity } from '../../domain/SduiGroup.js';
