@@ -3,7 +3,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import fastifyRateLimit from '@fastify/rate-limit';
 import { getFastifyLoggerConfig } from '@carbroz/platform-observability';
-import { AppConfig, SecurityConfig, LoggingConfig } from '@carbroz/config';
+import { SecurityConfig, LoggingConfig } from '@carbroz/config';
 import { globalErrorHandler } from './middlewares/error-handler.js';
 import diPlugin from './plugins/di.plugin.js';
 import requestContextPlugin from './plugins/request-context.js';
@@ -13,9 +13,9 @@ import authorizationPlugin from './plugins/authorization.plugin.js';
 import authRoutes from './modules/auth/api/auth.routes.js';
 import healthRoutes from './modules/health/api/health.routes.js';
 import { configRoutes } from './modules/config/api/config.routes.js';
+import { appBootstrapRoutes } from './modules/app-bootstrap/api/app-bootstrap.routes.js';
 import { ResponseHelper } from '@carbroz/common';
 import uiRoutes from './ui/ui.routes.js';
-import appRoutes from './app.routes.js';
 import { partnerRoutes } from './modules/partner/api/partner.routes.js';
 import { adminPartnerRoutes } from './modules/admin/api/admin-partner.routes.js';
 import { mapsRoutes } from './modules/maps/api/maps.routes.js';
@@ -111,18 +111,18 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   });
 
   // Global JWT Decode Hook (Soft Check)
-  app.addHook('onRequest', async (request, reply) => {
+  app.addHook('onRequest', async (request) => {
     if (request.headers.authorization) {
       try {
         await request.jwtVerify();
-      } catch (err) {
-        // Soft fail: Invalid tokens will just not set request.user
+      } catch {
+        // Soft fail: invalid/expired tokens produce an anonymous bootstrap context.
       }
     }
   });
 
   // Global Request Logger Hook
-  app.addHook('preHandler', async (request, reply) => {
+  app.addHook('preHandler', async (request) => {
     request.log.info({ req: { method: request.method, url: request.url } }, `🚀 API CALL: ${request.method} ${request.url}`);
     if (request.body) {
       request.log.debug({ body: request.body }, '📦 Payload');
@@ -144,7 +144,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   await app.register(authRoutes, { prefix: '/v1/auth' });
   app.register(configRoutes, { prefix: '/v1/config' });
   app.register(uiRoutes, { prefix: '/v1/ui' });
-  await app.register(appRoutes, { prefix: '/api/v1/app' });
+  await app.register(appBootstrapRoutes, { prefix: '/api/v1/app' });
   await app.register(partnerRoutes, { prefix: '/api/v1/partners' });
   await app.register(adminPartnerRoutes, { prefix: '/api/v1/admin/partners' });
   await app.register(mapsRoutes, { prefix: '/api/v1/maps' });
