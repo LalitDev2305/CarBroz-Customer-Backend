@@ -1,8 +1,6 @@
+import { Booking, type BookingSnapshots, type IBookingRepository } from '@carbroz/domain-booking';
 import {
-  Booking,
-  BookingSnapshots,
   IAddressRepository,
-  IBookingRepository,
   ICatalogRepository,
   ICustomerProfileRepository,
   IPricingRepository,
@@ -65,7 +63,6 @@ export class CreateBookingUseCase {
       throw new Error('Selected service slot is no longer available');
     }
 
-    // Pricing Calculation
     let basePricePaise = service.basePrice;
     const defaultTier = await this.pricingRepository.findDefaultTierByServiceId(input.serviceId);
     if (defaultTier) {
@@ -93,7 +90,7 @@ export class CreateBookingUseCase {
     }
 
     const subtotalPaise = Math.round(basePricePaise * multiplierValue) + addonsTotalPaise;
-    const taxesPaise = Math.round(subtotalPaise * 0.18); // 18% GST standard
+    const taxesPaise = Math.round(subtotalPaise * 0.18);
     const totalPricePaise = subtotalPaise + taxesPaise;
 
     const snapshots: BookingSnapshots = {
@@ -132,7 +129,7 @@ export class CreateBookingUseCase {
       },
     };
 
-    const expiryAt = new Date(now.getTime() + 15 * 60 * 1000); // 15-minute slot hold
+    const expiryAt = new Date(now.getTime() + 15 * 60 * 1000);
 
     const booking = new Booking({
       customerId: input.customerId,
