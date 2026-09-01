@@ -1,44 +1,43 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { DomainEvent } from '@carbroz/foundation-kernel';
 import { InMemoryEventBus } from '../src/providers/InMemoryEventBus.js';
-interface IDomainEvent {
-  eventId: string;
-  eventName: string;
-  occurredOn: Date;
-}
 
-class TestDomainEvent implements IDomainEvent {
-  eventId = 'evt-1';
-  eventName = 'TestDomainEvent';
-  occurredOn = new Date();
+function event(eventName: string): DomainEvent {
+  return { eventName, occurredOn: new Date('2026-01-01T00:00:00.000Z') };
 }
 
 describe('InMemoryEventBus', () => {
-  let eventBus: InMemoryEventBus;
+  it('publishes an event to every subscriber registered for its name', async () => {
+    const bus = new InMemoryEventBus();
+    const first = vi.fn(async () => undefined);
+    const second = vi.fn(async () => undefined);
+    const payload = event('BookingCreated');
 
-  beforeEach(() => {
-    eventBus = new InMemoryEventBus();
+    bus.subscribe('BookingCreated', first);
+    bus.subscribe('BookingCreated', second);
+    await bus.publish(payload);
+
+    expect(first).toHaveBeenCalledWith(payload);
+    expect(second).toHaveBeenCalledWith(payload);
   });
 
-  it('should publish and receive domain events', async () => {
-    let received = false;
-
-    eventBus.subscribe('TestDomainEvent', async (evt) => {
-      received = true;
-      expect(evt.eventId).toBe('evt-1');
-    });
-
-    await eventBus.publish(new TestDomainEvent());
-    expect(received).toBe(true);
+  it('does nothing when an event has no subscribers', async () => {
+    const bus = new InMemoryEventBus();
+    await expect(bus.publish(event('UnknownEvent'))).resolves.toBeUndefined();
   });
 
-  it('should publish multiple events sequentially', async () => {
-    let count = 0;
+  it('publishes event batches in order', async () => {
+    const bus = new InMemoryEventBus();
+    const received: string[] = [];
 
-    eventBus.subscribe('TestDomainEvent', async () => {
-      count++;
+    bus.subscribe('First', async (payload) => {
+      received.push(payload.eventName);
+    });
+    bus.subscribe('Second', async (payload) => {
+      received.push(payload.eventName);
     });
 
-    await eventBus.publishAll([new TestDomainEvent(), new TestDomainEvent()]);
-    expect(count).toBe(2);
+    await bus.publishAll([event('First'), event('Second')]);
+    expect(received).toEqual(['First', 'Second']);
   });
 });
