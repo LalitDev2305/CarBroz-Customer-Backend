@@ -8,10 +8,6 @@ function read(path: string): string {
   return readFileSync(resolve(root, path), 'utf8');
 }
 
-function packageName(path: string): string {
-  return JSON.parse(read(path)) as { name: string } as unknown as string;
-}
-
 describe('canonical repository topology migration', () => {
   it('places the complete SDUI subsystem under the canonical sdui root', () => {
     expect(existsSync(resolve(root, 'sdui/ui-sdk/package.json'))).toBe(true);
@@ -22,7 +18,10 @@ describe('canonical repository topology migration', () => {
 
   it('uses the frozen SDUI package identities', () => {
     const uiSdk = JSON.parse(read('sdui/ui-sdk/package.json')) as { name: string };
-    const registry = JSON.parse(read('sdui/registry/package.json')) as { name: string; dependencies?: Record<string, string> };
+    const registry = JSON.parse(read('sdui/registry/package.json')) as {
+      name: string;
+      dependencies?: Record<string, string>;
+    };
 
     expect(uiSdk.name).toBe('@carbroz/ui-sdk');
     expect(registry.name).toBe('@carbroz/sdui-registry');
