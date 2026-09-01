@@ -1,4 +1,4 @@
-import { IBookingRepository } from '@carbroz/common';
+import { type IBookingRepository } from '@carbroz/domain-booking';
 
 export class ExpirePendingBookingsUseCase {
   constructor(private readonly bookingRepository: IBookingRepository) {}
