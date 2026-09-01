@@ -1,39 +1,91 @@
-import { 
-  ISduiRegistryRepository, 
-  SduiScreenEntity, 
-  SduiTemplateEntity, 
-  SduiComponentEntity,
-  SduiSubcomponentEntity,
-  SduiChildEntity,
-  SduiChildrenDataEntity,
+import { Prisma, PrismaClient } from '@prisma/client';
+import { BadRequestError, ConflictError, NotFoundError } from '@carbroz/common';
+import {
+  parseSduiScreen,
+  targetAppSchema,
+  templateSchema,
+  type SduiScreen,
+  type SduiTargetApp,
+  type SduiTemplate,
+} from '@carbroz/sdui-engine';
+import { SduiComponentEntity } from '../../domain/SduiComponent.js';
+import { SduiElementEntity } from '../../domain/SduiElement.js';
+import { SduiGroupEntity } from '../../domain/SduiGroup.js';
+import { SduiScreenEntity, type SduiScreenStatus } from '../../domain/SduiScreen.js';
+import { SduiSectionEntity } from '../../domain/SduiSection.js';
+import { SduiTemplateEntity } from '../../domain/SduiTemplate.js';
+import type {
   CreateDraftInput,
+  ISduiRegistryRepository,
+  RegistryNodeInput,
   UpdateDraftInput,
-  SduiScreenStatus,
-  ConflictError,
-  NotFoundError,
-  BadRequestError
-} from '@carbroz/common';
-import { PrismaClient } from '@prisma/client';
+} from '../../domain/repositories/ISduiRegistryRepository.js';
+import type { SduiNodeLevel } from '../../domain/SduiNodeLevel.js';
+
+interface ScreenRecord {
+  id: number;
+  publicId: string;
+  screenId: string;
+  targetApp: string;
+  versionNumber: number;
+  status: string;
+  layoutJson: Prisma.JsonValue;
+  lockVersion: number;
+  publishedAt: Date | null;
+  publishedBy: string | null;
+  createdFromVersion: number | null;
+  changeDescription: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface TemplateRecord {
+  id: number;
+  publicId: string;
+  templateId: string;
+  templateType: string;
+  defaultLayoutJson: Prisma.JsonValue;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface RegistryRecord {
+  id: number;
+  publicId: string;
+  name: string;
+  nodeLevel: string;
+  componentType: string;
+  schemaJson: Prisma.JsonValue;
+  supportedProperties: Prisma.JsonValue | null;
+  supportedActions: Prisma.JsonValue | null;
+  version: number;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+function parseScreenStatus(status: string): SduiScreenStatus {
+  if (status === 'DRAFT' || status === 'PUBLISHED' || status === 'ARCHIVED') return status;
+  throw new Error(`Unsupported SDUI screen status '${status}'`);
+}
+
+function asInputJson(value: unknown): Prisma.InputJsonValue {
+  return value as Prisma.InputJsonValue;
+}
 
 export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
-  private unitOfWorkPrisma: any = null;
-
   constructor(private readonly prismaClient: PrismaClient) {}
 
-  private get client(): any {
-    return this.unitOfWorkPrisma || this.prismaClient;
-  }
-
-  private mapToEntity(record: any): SduiScreenEntity {
+  private mapScreen(record: ScreenRecord): SduiScreenEntity {
     return new SduiScreenEntity({
       id: record.id,
       publicId: record.publicId,
       screenId: record.screenId,
-      targetApp: record.targetApp,
-      versionNumber: record.versionNumber ?? record.version ?? 1,
-      status: (record.status as SduiScreenStatus) ?? (record.isPublished ? 'PUBLISHED' : 'DRAFT'),
-      layoutJson: record.layoutJson,
-      lockVersion: record.lockVersion ?? 1,
+      targetApp: targetAppSchema.parse(record.targetApp),
+      versionNumber: record.versionNumber,
+      status: parseScreenStatus(record.status),
+      layoutJson: parseSduiScreen(record.layoutJson),
+      lockVersion: record.lockVersion,
       publishedAt: record.publishedAt,
       publishedBy: record.publishedBy,
       createdFromVersion: record.createdFromVersion,
@@ -43,176 +95,178 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     });
   }
 
-  public async findPublishedScreen(screenId: string, targetApp: string = 'CUSTOMER'): Promise<SduiScreenEntity | null> {
-    const screen = await this.client.sduiScreen.findFirst({
-      where: {
-        screenId,
-        targetApp,
-        status: 'PUBLISHED',
-      },
-      orderBy: { versionNumber: 'desc' }
+  private mapTemplate(record: TemplateRecord): SduiTemplateEntity {
+    return new SduiTemplateEntity({
+      id: record.id,
+      publicId: record.publicId,
+      templateId: record.templateId,
+      templateType: record.templateType,
+      defaultLayoutJson: templateSchema.parse(record.defaultLayoutJson),
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    });
+  }
+
+  public async findPublishedScreen(
+    screenId: string,
+    targetApp: SduiTargetApp = 'CUSTOMER',
+  ): Promise<SduiScreenEntity | null> {
+    const record = await this.prismaClient.sduiScreen.findFirst({
+      where: { screenId, targetApp, status: 'PUBLISHED' },
+      orderBy: { versionNumber: 'desc' },
     });
 
-    if (!screen) return null;
-    return this.mapToEntity(screen);
+    return record ? this.mapScreen(record as ScreenRecord) : null;
   }
 
   public async upsertScreen(
     screenId: string,
-    targetApp: string,
-    layoutJson: any,
-    isPublished: boolean = true
+    targetApp: SduiTargetApp,
+    layoutJson: SduiScreen,
+    isPublished = true,
   ): Promise<SduiScreenEntity> {
+    const document = parseSduiScreen(layoutJson);
+
     if (isPublished) {
-      return await this.createDraftAndPublish(screenId, targetApp, layoutJson);
-    } else {
-      const draft = await this.findDraft(screenId, targetApp);
-      if (draft) {
-        return await this.updateDraft({
-          screenId,
-          targetApp,
-          layoutJson,
-          lockVersion: draft.lockVersion
-        });
-      } else {
-        return await this.createDraft({
-          screenId,
-          targetApp,
-          layoutJson
-        });
-      }
+      return this.createDraftAndPublish(screenId, targetApp, document);
     }
+
+    const draft = await this.findDraft(screenId, targetApp);
+    if (draft) {
+      return this.updateDraft({
+        screenId,
+        targetApp,
+        layoutJson: document,
+        lockVersion: draft.lockVersion,
+      });
+    }
+
+    return this.createDraft({ screenId, targetApp, layoutJson: document });
   }
 
-  private async createDraftAndPublish(screenId: string, targetApp: string, layoutJson: any): Promise<SduiScreenEntity> {
-    return await this.client.$transaction(async (tx: any) => {
+  private async createDraftAndPublish(
+    screenId: string,
+    targetApp: SduiTargetApp,
+    layoutJson: SduiScreen,
+  ): Promise<SduiScreenEntity> {
+    return this.prismaClient.$transaction(async (tx) => {
       const latest = await tx.sduiScreen.findFirst({
         where: { screenId, targetApp },
-        orderBy: { versionNumber: 'desc' }
+        orderBy: { versionNumber: 'desc' },
       });
-
-      const newVersionNumber = latest ? latest.versionNumber + 1 : 1;
+      const versionNumber = latest ? latest.versionNumber + 1 : 1;
 
       await tx.sduiScreen.updateMany({
         where: { screenId, targetApp, status: 'PUBLISHED' },
-        data: { status: 'ARCHIVED' }
+        data: { status: 'ARCHIVED' },
       });
 
       const created = await tx.sduiScreen.create({
         data: {
           screenId,
           targetApp,
-          versionNumber: newVersionNumber,
+          versionNumber,
           status: 'PUBLISHED',
-          layoutJson,
+          layoutJson: asInputJson(layoutJson),
           lockVersion: 1,
           publishedAt: new Date(),
           publishedBy: 'system',
-          createdFromVersion: latest ? latest.versionNumber : null,
-          changeDescription: 'Published via upsert'
-        }
+          createdFromVersion: latest?.versionNumber ?? null,
+          changeDescription: 'Published via upsert',
+        },
       });
 
-      return this.mapToEntity(created);
+      return this.mapScreen(created as ScreenRecord);
     });
   }
 
   public async createDraft(input: CreateDraftInput): Promise<SduiScreenEntity> {
-    const targetApp = input.targetApp || 'CUSTOMER';
+    const targetApp = input.targetApp ?? 'CUSTOMER';
+    const layoutJson = parseSduiScreen(input.layoutJson);
 
-    return await this.client.$transaction(async (tx: any) => {
+    return this.prismaClient.$transaction(async (tx) => {
       const existingDraft = await tx.sduiScreen.findFirst({
-        where: { screenId: input.screenId, targetApp, status: 'DRAFT' }
+        where: { screenId: input.screenId, targetApp, status: 'DRAFT' },
       });
 
       if (existingDraft) {
-        if (input.overwriteExistingDraft) {
-          const updated = await tx.sduiScreen.update({
-            where: { id: existingDraft.id },
-            data: {
-              layoutJson: input.layoutJson,
-              lockVersion: existingDraft.lockVersion + 1,
-              changeDescription: input.changeDescription || existingDraft.changeDescription
-            }
-          });
-          return this.mapToEntity(updated);
+        if (!input.overwriteExistingDraft) {
+          throw new ConflictError(`Active draft already exists for screen '${input.screenId}'`);
         }
-        throw new ConflictError(`Active draft already exists for screen '${input.screenId}'`);
+
+        const updated = await tx.sduiScreen.update({
+          where: { id: existingDraft.id },
+          data: {
+            layoutJson: asInputJson(layoutJson),
+            lockVersion: existingDraft.lockVersion + 1,
+            changeDescription: input.changeDescription ?? existingDraft.changeDescription,
+          },
+        });
+        return this.mapScreen(updated as ScreenRecord);
       }
 
       const latest = await tx.sduiScreen.findFirst({
         where: { screenId: input.screenId, targetApp },
-        orderBy: { versionNumber: 'desc' }
+        orderBy: { versionNumber: 'desc' },
       });
-
-      const newVersionNumber = latest ? latest.versionNumber + 1 : 1;
 
       const draft = await tx.sduiScreen.create({
         data: {
           screenId: input.screenId,
           targetApp,
-          versionNumber: newVersionNumber,
+          versionNumber: latest ? latest.versionNumber + 1 : 1,
           status: 'DRAFT',
-          layoutJson: input.layoutJson,
+          layoutJson: asInputJson(layoutJson),
           lockVersion: 1,
-          createdFromVersion: input.createdFromVersion || (latest ? latest.versionNumber : null),
-          changeDescription: input.changeDescription || 'Created draft'
-        }
+          createdFromVersion: input.createdFromVersion ?? latest?.versionNumber ?? null,
+          changeDescription: input.changeDescription ?? 'Created draft',
+        },
       });
 
-      return this.mapToEntity(draft);
+      return this.mapScreen(draft as ScreenRecord);
     });
   }
 
   public async updateDraft(input: UpdateDraftInput): Promise<SduiScreenEntity> {
-    const targetApp = input.targetApp || 'CUSTOMER';
-
-    const draft = await this.client.sduiScreen.findFirst({
-      where: { screenId: input.screenId, targetApp, status: 'DRAFT' }
+    const targetApp = input.targetApp ?? 'CUSTOMER';
+    const layoutJson = parseSduiScreen(input.layoutJson);
+    const draft = await this.prismaClient.sduiScreen.findFirst({
+      where: { screenId: input.screenId, targetApp, status: 'DRAFT' },
     });
 
-    if (!draft) {
-      throw new NotFoundError(`No active draft found for screen '${input.screenId}'`);
-    }
-
+    if (!draft) throw new NotFoundError(`No active draft found for screen '${input.screenId}'`);
     if (draft.lockVersion !== input.lockVersion) {
       throw new ConflictError(`Lock version mismatch: expected ${input.lockVersion}, current is ${draft.lockVersion}`);
     }
 
-    const updated = await this.client.sduiScreen.update({
+    const updated = await this.prismaClient.sduiScreen.update({
       where: { id: draft.id },
       data: {
-        layoutJson: input.layoutJson,
+        layoutJson: asInputJson(layoutJson),
         lockVersion: draft.lockVersion + 1,
-        changeDescription: input.changeDescription || draft.changeDescription
-      }
+        changeDescription: input.changeDescription ?? draft.changeDescription,
+      },
     });
 
-    return this.mapToEntity(updated);
+    return this.mapScreen(updated as ScreenRecord);
   }
 
   public async publishVersion(
     screenId: string,
-    targetApp: string = 'CUSTOMER',
+    targetApp: SduiTargetApp,
     versionNumber: number,
-    publishedBy: string = 'admin'
+    publishedBy: string,
   ): Promise<SduiScreenEntity> {
-    return await this.client.$transaction(async (tx: any) => {
-      const targetVersion = await tx.sduiScreen.findFirst({
-        where: { screenId, targetApp, versionNumber }
-      });
-
+    return this.prismaClient.$transaction(async (tx) => {
+      const targetVersion = await tx.sduiScreen.findFirst({ where: { screenId, targetApp, versionNumber } });
       if (!targetVersion) {
         throw new NotFoundError(`Screen version ${versionNumber} not found for screen '${screenId}'`);
       }
-
-      if (targetVersion.status === 'PUBLISHED') {
-        return this.mapToEntity(targetVersion);
-      }
+      if (targetVersion.status === 'PUBLISHED') return this.mapScreen(targetVersion as ScreenRecord);
 
       await tx.sduiScreen.updateMany({
         where: { screenId, targetApp, status: 'PUBLISHED' },
-        data: { status: 'ARCHIVED' }
+        data: { status: 'ARCHIVED' },
       });
 
       const published = await tx.sduiScreen.update({
@@ -221,230 +275,164 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
           status: 'PUBLISHED',
           publishedAt: new Date(),
           publishedBy,
-          lockVersion: targetVersion.lockVersion + 1
-        }
+          lockVersion: targetVersion.lockVersion + 1,
+        },
       });
 
-      return this.mapToEntity(published);
+      return this.mapScreen(published as ScreenRecord);
     });
   }
 
   public async archiveVersion(
     screenId: string,
-    targetApp: string = 'CUSTOMER',
-    versionNumber: number
+    targetApp: SduiTargetApp,
+    versionNumber: number,
   ): Promise<SduiScreenEntity> {
-    const targetVersion = await this.client.sduiScreen.findFirst({
-      where: { screenId, targetApp, versionNumber }
-    });
-
+    const targetVersion = await this.prismaClient.sduiScreen.findFirst({ where: { screenId, targetApp, versionNumber } });
     if (!targetVersion) {
       throw new NotFoundError(`Screen version ${versionNumber} not found for screen '${screenId}'`);
     }
-
     if (targetVersion.status === 'PUBLISHED') {
-      throw new BadRequestError(`Cannot archive the currently PUBLISHED version. Publish another version first.`);
+      throw new BadRequestError('Cannot archive the currently PUBLISHED version. Publish another version first.');
     }
 
-    const archived = await this.client.sduiScreen.update({
+    const archived = await this.prismaClient.sduiScreen.update({
       where: { id: targetVersion.id },
-      data: {
-        status: 'ARCHIVED',
-        lockVersion: targetVersion.lockVersion + 1
-      }
+      data: { status: 'ARCHIVED', lockVersion: targetVersion.lockVersion + 1 },
     });
-
-    return this.mapToEntity(archived);
+    return this.mapScreen(archived as ScreenRecord);
   }
 
   public async rollbackVersion(
     screenId: string,
-    targetApp: string = 'CUSTOMER',
+    targetApp: SduiTargetApp,
     targetVersionNumber: number,
-    publishedBy: string = 'admin'
+    publishedBy: string,
   ): Promise<SduiScreenEntity> {
-    return await this.client.$transaction(async (tx: any) => {
+    return this.prismaClient.$transaction(async (tx) => {
       const targetVersion = await tx.sduiScreen.findFirst({
-        where: { screenId, targetApp, versionNumber: targetVersionNumber }
+        where: { screenId, targetApp, versionNumber: targetVersionNumber },
       });
-
       if (!targetVersion) {
         throw new NotFoundError(`Target rollback version ${targetVersionNumber} not found for screen '${screenId}'`);
       }
 
+      const canonicalLayout = parseSduiScreen(targetVersion.layoutJson);
       const latest = await tx.sduiScreen.findFirst({
         where: { screenId, targetApp },
-        orderBy: { versionNumber: 'desc' }
+        orderBy: { versionNumber: 'desc' },
       });
-
-      const newVersionNumber = latest ? latest.versionNumber + 1 : 1;
 
       await tx.sduiScreen.updateMany({
         where: { screenId, targetApp, status: 'PUBLISHED' },
-        data: { status: 'ARCHIVED' }
+        data: { status: 'ARCHIVED' },
       });
 
       const created = await tx.sduiScreen.create({
         data: {
           screenId,
           targetApp,
-          versionNumber: newVersionNumber,
+          versionNumber: latest ? latest.versionNumber + 1 : 1,
           status: 'PUBLISHED',
-          layoutJson: targetVersion.layoutJson,
+          layoutJson: asInputJson(canonicalLayout),
           lockVersion: 1,
           publishedAt: new Date(),
           publishedBy,
           createdFromVersion: targetVersionNumber,
-          changeDescription: `Rollback to version ${targetVersionNumber}`
-        }
+          changeDescription: `Rollback to version ${targetVersionNumber}`,
+        },
       });
 
-      return this.mapToEntity(created);
+      return this.mapScreen(created as ScreenRecord);
     });
   }
 
-  public async getVersionHistory(screenId: string, targetApp: string = 'CUSTOMER'): Promise<SduiScreenEntity[]> {
-    const records = await this.client.sduiScreen.findMany({
+  public async getVersionHistory(
+    screenId: string,
+    targetApp: SduiTargetApp = 'CUSTOMER',
+  ): Promise<SduiScreenEntity[]> {
+    const records = await this.prismaClient.sduiScreen.findMany({
       where: { screenId, targetApp },
-      orderBy: { versionNumber: 'desc' }
+      orderBy: { versionNumber: 'desc' },
     });
-
-    return records.map((r: any) => this.mapToEntity(r));
+    return records.map((record) => this.mapScreen(record as ScreenRecord));
   }
 
   public async getSpecificVersion(
     screenId: string,
-    targetApp: string = 'CUSTOMER',
-    versionNumber: number
+    targetApp: SduiTargetApp,
+    versionNumber: number,
   ): Promise<SduiScreenEntity | null> {
-    const record = await this.client.sduiScreen.findFirst({
-      where: { screenId, targetApp, versionNumber }
-    });
-
-    if (!record) return null;
-    return this.mapToEntity(record);
+    const record = await this.prismaClient.sduiScreen.findFirst({ where: { screenId, targetApp, versionNumber } });
+    return record ? this.mapScreen(record as ScreenRecord) : null;
   }
 
-  public async findDraft(screenId: string, targetApp: string = 'CUSTOMER'): Promise<SduiScreenEntity | null> {
-    const record = await this.client.sduiScreen.findFirst({
-      where: { screenId, targetApp, status: 'DRAFT' }
+  public async findDraft(
+    screenId: string,
+    targetApp: SduiTargetApp = 'CUSTOMER',
+  ): Promise<SduiScreenEntity | null> {
+    const record = await this.prismaClient.sduiScreen.findFirst({
+      where: { screenId, targetApp, status: 'DRAFT' },
     });
-
-    if (!record) return null;
-    return this.mapToEntity(record);
+    return record ? this.mapScreen(record as ScreenRecord) : null;
   }
 
   public async getTemplate(templateId: string): Promise<SduiTemplateEntity | null> {
-    const template = await this.client.sduiTemplate.findUnique({
-      where: { templateId },
-    });
-
-    if (!template) return null;
-
-    return new SduiTemplateEntity({
-      id: template.id,
-      publicId: template.publicId,
-      templateId: template.templateId,
-      templateType: template.templateType,
-      defaultLayoutJson: template.defaultLayoutJson,
-      createdAt: template.createdAt,
-      updatedAt: template.updatedAt,
-    });
+    const record = await this.prismaClient.sduiTemplate.findUnique({ where: { templateId } });
+    return record ? this.mapTemplate(record as TemplateRecord) : null;
   }
 
   public async upsertTemplate(
     templateId: string,
     templateType: string,
-    defaultLayoutJson: any
+    defaultLayoutJson: SduiTemplate,
   ): Promise<SduiTemplateEntity> {
-    const record = await this.client.sduiTemplate.upsert({
+    const template = templateSchema.parse(defaultLayoutJson);
+    const record = await this.prismaClient.sduiTemplate.upsert({
       where: { templateId },
-      update: {
-        templateType,
-        defaultLayoutJson,
-      },
-      create: {
-        templateId,
-        templateType,
-        defaultLayoutJson,
-      },
+      update: { templateType, defaultLayoutJson: asInputJson(template) },
+      create: { templateId, templateType, defaultLayoutJson: asInputJson(template) },
     });
-
-    return new SduiTemplateEntity({
-      id: record.id,
-      publicId: record.publicId,
-      templateId: record.templateId,
-      templateType: record.templateType,
-      defaultLayoutJson: record.defaultLayoutJson,
-      createdAt: record.createdAt,
-      updatedAt: record.updatedAt,
-    });
+    return this.mapTemplate(record as TemplateRecord);
   }
 
-  // Shared Private Helper Operations
-  private async upsertNodeRecord(
-    name: string,
-    componentType: string,
-    schemaJson: any,
-    nodeLevel: string,
-    supportedProperties?: any,
-    supportedActions?: any
-  ): Promise<any> {
-    return await this.client.sduiComponentRegistry.upsert({
-      where: { name },
+  private async upsertNodeRecord(input: RegistryNodeInput, nodeLevel: SduiNodeLevel): Promise<RegistryRecord> {
+    const record = await this.prismaClient.sduiComponentRegistry.upsert({
+      where: { name: input.name },
       update: {
         nodeLevel,
-        componentType,
-        schemaJson,
-        supportedProperties,
-        supportedActions,
+        componentType: input.componentType,
+        schemaJson: asInputJson(input.schemaJson),
+        supportedProperties: input.supportedProperties === undefined ? undefined : asInputJson(input.supportedProperties),
+        supportedActions: input.supportedActions === undefined ? undefined : asInputJson(input.supportedActions),
       },
       create: {
-        name,
+        name: input.name,
         nodeLevel,
-        componentType,
-        schemaJson,
-        supportedProperties,
-        supportedActions,
+        componentType: input.componentType,
+        schemaJson: asInputJson(input.schemaJson),
+        supportedProperties: input.supportedProperties === undefined ? undefined : asInputJson(input.supportedProperties),
+        supportedActions: input.supportedActions === undefined ? undefined : asInputJson(input.supportedActions),
       },
     });
+    return record as RegistryRecord;
   }
 
-  private async findNodeRecord(name: string, nodeLevel: string): Promise<any | null> {
-    return await this.client.sduiComponentRegistry.findFirst({
-      where: { name, nodeLevel },
-    });
+  private async findNodeRecord(name: string, nodeLevel: SduiNodeLevel): Promise<RegistryRecord | null> {
+    const record = await this.prismaClient.sduiComponentRegistry.findFirst({ where: { name, nodeLevel } });
+    return record ? (record as RegistryRecord) : null;
   }
 
-  private async listNodeRecords(nodeLevel: string): Promise<any[]> {
-    return await this.client.sduiComponentRegistry.findMany({
+  private async listNodeRecords(nodeLevel: SduiNodeLevel): Promise<RegistryRecord[]> {
+    const records = await this.prismaClient.sduiComponentRegistry.findMany({
       where: { nodeLevel },
       orderBy: { id: 'asc' },
     });
+    return records as RegistryRecord[];
   }
 
-  // Component Node Operations
-  public async createComponent(
-    name: string,
-    componentType: string,
-    schemaJson: any,
-    nodeLevel: string = 'COMPONENT',
-    supportedProperties?: any,
-    supportedActions?: any
-  ): Promise<SduiComponentEntity> {
-    const record = await this.upsertNodeRecord(name, componentType, schemaJson, nodeLevel, supportedProperties, supportedActions);
-    return new SduiComponentEntity(record);
-  }
-
-  public async registerComponent(
-    name: string,
-    componentType: string,
-    schemaJson: any,
-    nodeLevel: string = 'COMPONENT',
-    supportedProperties?: any,
-    supportedActions?: any
-  ): Promise<SduiComponentEntity> {
-    return this.createComponent(name, componentType, schemaJson, nodeLevel, supportedProperties, supportedActions);
+  public async createComponent(input: RegistryNodeInput): Promise<SduiComponentEntity> {
+    return new SduiComponentEntity(await this.upsertNodeRecord(input, 'COMPONENT'));
   }
 
   public async getComponent(name: string): Promise<SduiComponentEntity | null> {
@@ -453,73 +441,45 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
   }
 
   public async listComponents(): Promise<SduiComponentEntity[]> {
-    const records = await this.listNodeRecords('COMPONENT');
-    return records.map(r => new SduiComponentEntity(r));
+    return (await this.listNodeRecords('COMPONENT')).map((record) => new SduiComponentEntity(record));
   }
 
-  // Subcomponent Node Operations
-  public async createSubcomponent(
-    name: string,
-    componentType: string,
-    schemaJson: any,
-    supportedProperties?: any,
-    supportedActions?: any
-  ): Promise<SduiSubcomponentEntity> {
-    const record = await this.upsertNodeRecord(name, componentType, schemaJson, 'SUBCOMPONENT', supportedProperties, supportedActions);
-    return new SduiSubcomponentEntity(record);
+  public async createSection(input: RegistryNodeInput): Promise<SduiSectionEntity> {
+    return new SduiSectionEntity(await this.upsertNodeRecord(input, 'SECTION'));
   }
 
-  public async getSubcomponent(name: string): Promise<SduiSubcomponentEntity | null> {
-    const record = await this.findNodeRecord(name, 'SUBCOMPONENT');
-    return record ? new SduiSubcomponentEntity(record) : null;
+  public async getSection(name: string): Promise<SduiSectionEntity | null> {
+    const record = await this.findNodeRecord(name, 'SECTION');
+    return record ? new SduiSectionEntity(record) : null;
   }
 
-  public async listSubcomponents(): Promise<SduiSubcomponentEntity[]> {
-    const records = await this.listNodeRecords('SUBCOMPONENT');
-    return records.map(r => new SduiSubcomponentEntity(r));
+  public async listSections(): Promise<SduiSectionEntity[]> {
+    return (await this.listNodeRecords('SECTION')).map((record) => new SduiSectionEntity(record));
   }
 
-  // Child Node Operations
-  public async createChild(
-    name: string,
-    componentType: string,
-    schemaJson: any,
-    supportedProperties?: any,
-    supportedActions?: any
-  ): Promise<SduiChildEntity> {
-    const record = await this.upsertNodeRecord(name, componentType, schemaJson, 'CHILD', supportedProperties, supportedActions);
-    return new SduiChildEntity(record);
+  public async createGroup(input: RegistryNodeInput): Promise<SduiGroupEntity> {
+    return new SduiGroupEntity(await this.upsertNodeRecord(input, 'GROUP'));
   }
 
-  public async getChild(name: string): Promise<SduiChildEntity | null> {
-    const record = await this.findNodeRecord(name, 'CHILD');
-    return record ? new SduiChildEntity(record) : null;
+  public async getGroup(name: string): Promise<SduiGroupEntity | null> {
+    const record = await this.findNodeRecord(name, 'GROUP');
+    return record ? new SduiGroupEntity(record) : null;
   }
 
-  public async listChildren(): Promise<SduiChildEntity[]> {
-    const records = await this.listNodeRecords('CHILD');
-    return records.map(r => new SduiChildEntity(r));
+  public async listGroups(): Promise<SduiGroupEntity[]> {
+    return (await this.listNodeRecords('GROUP')).map((record) => new SduiGroupEntity(record));
   }
 
-  // ChildrenData Node Operations
-  public async createChildrenData(
-    name: string,
-    componentType: string,
-    schemaJson: any,
-    supportedProperties?: any,
-    supportedActions?: any
-  ): Promise<SduiChildrenDataEntity> {
-    const record = await this.upsertNodeRecord(name, componentType, schemaJson, 'CHILDREN_DATA', supportedProperties, supportedActions);
-    return new SduiChildrenDataEntity(record);
+  public async createElement(input: RegistryNodeInput): Promise<SduiElementEntity> {
+    return new SduiElementEntity(await this.upsertNodeRecord(input, 'ELEMENT'));
   }
 
-  public async getChildrenData(name: string): Promise<SduiChildrenDataEntity | null> {
-    const record = await this.findNodeRecord(name, 'CHILDREN_DATA');
-    return record ? new SduiChildrenDataEntity(record) : null;
+  public async getElement(name: string): Promise<SduiElementEntity | null> {
+    const record = await this.findNodeRecord(name, 'ELEMENT');
+    return record ? new SduiElementEntity(record) : null;
   }
 
-  public async listChildrenData(): Promise<SduiChildrenDataEntity[]> {
-    const records = await this.listNodeRecords('CHILDREN_DATA');
-    return records.map(r => new SduiChildrenDataEntity(r));
+  public async listElements(): Promise<SduiElementEntity[]> {
+    return (await this.listNodeRecords('ELEMENT')).map((record) => new SduiElementEntity(record));
   }
 }
