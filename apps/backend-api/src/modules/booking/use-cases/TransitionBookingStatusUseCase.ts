@@ -1,4 +1,4 @@
-import { Booking, BookingStatus, IBookingRepository } from '@carbroz/common';
+import { Booking, type BookingStatus, type IBookingRepository } from '@carbroz/domain-booking';
 import { CreatePayoutEligibilityUseCase } from '../../payout/use-cases/CreatePayoutEligibilityUseCase.js';
 
 export interface TransitionBookingStatusInput {
