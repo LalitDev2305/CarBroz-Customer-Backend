@@ -67,7 +67,6 @@ export * from './domain/Address.js';
 export * from './domain/repositories/ICustomerProfileRepository.js';
 export * from './domain/repositories/IAddressRepository.js';
 
-// Phase 12 Catalog & Pricing
 export * from './domain/ServiceCategory.js';
 export * from './domain/Service.js';
 export * from './domain/ServiceAddon.js';
@@ -75,18 +74,6 @@ export * from './domain/PricingTier.js';
 export * from './domain/repositories/ICatalogRepository.js';
 export * from './domain/repositories/IPricingRepository.js';
 
-// Phase 13 SDUI Registry & Bounded Context
-export * from './domain/sdui/SduiScreen.js';
-export * from './domain/sdui/SduiTemplate.js';
-export * from './domain/sdui/SduiNodeLevel.js';
-export * from './domain/sdui/SduiNodeStatus.js';
-export * from './domain/sdui/SduiComponent.js';
-export * from './domain/sdui/SduiSubcomponent.js';
-export * from './domain/sdui/SduiChild.js';
-export * from './domain/sdui/SduiChildrenData.js';
-export * from './domain/sdui/repositories/ISduiRegistryRepository.js';
-
-// Phase 16 Vehicle & Booking Engine
 export * from './domain/vehicle/VehicleStatus.js';
 export * from './domain/vehicle/Vehicle.js';
 export * from './domain/vehicle/repositories/IVehicleRepository.js';
@@ -96,7 +83,6 @@ export * from './domain/booking/BookingSnapshots.js';
 export * from './domain/booking/Booking.js';
 export * from './domain/booking/repositories/IBookingRepository.js';
 
-// Phase 17 Payment, Invoicing & Payout Engine
 export * from './domain/value-objects/Money.js';
 export * from './domain/config/FinancialConfiguration.js';
 export * from './domain/services/TaxCalculator.js';
@@ -113,7 +99,6 @@ export * from './domain/payout/PartnerPayout.js';
 export * from './domain/payout/repositories/IPartnerPayoutRepository.js';
 export * from './providers/IPaymentGatewayProvider.js';
 
-// Phase 18 Real-Time Tracking & Multi-Channel Notification Engine
 export * from './domain/location/TrackingStatus.js';
 export * from './domain/location/LocationPing.js';
 export * from './domain/location/TrackingSession.js';
@@ -131,7 +116,6 @@ export * from './providers/ISmsProvider.js';
 export * from './providers/IEmailProvider.js';
 export * from './providers/INotificationProvider.js';
 
-// Phase 19 Customer Reviews, Partner Ratings & Promo Coupons Engine
 export * from './domain/review/ReviewStatus.js';
 export * from './domain/review/Review.js';
 export * from './domain/review/repositories/IReviewRepository.js';
@@ -144,7 +128,6 @@ export * from './domain/coupon/repositories/ICouponUsageRepository.js';
 export * from './domain/coupon/services/CouponDiscountCalculator.js';
 export * from './domain/events/ReviewEvents.js';
 
-// Phase 20 Production Hardening, Audit Logging & Error Codes
 export * from './domain/audit/AuditActor.js';
 export * from './domain/audit/AuditAction.js';
 export * from './domain/audit/AuditLog.js';
@@ -152,14 +135,12 @@ export * from './domain/audit/repositories/IAuditLogRepository.js';
 export * from './domain/audit/services/AuditLogService.js';
 export * from './errors/ErrorCode.js';
 
-// Phase 21 Booking Dispute Settlement & SLA Refund Engine
 export * from './domain/dispute/DisputeStatus.js';
 export * from './domain/dispute/DisputeReason.js';
 export * from './domain/dispute/Dispute.js';
 export * from './domain/dispute/repositories/IDisputeRepository.js';
 export * from './domain/dispute/services/DisputeSettlementCalculator.js';
 
-// Phase 22 Multi-Tenant Corporate Accounts, Fleet Management & B2B Billing Platform
 export * from './domain/corporate/CorporateAccount.js';
 export * from './domain/corporate/CorporateMember.js';
 export * from './domain/corporate/CorporateFleetVehicle.js';
