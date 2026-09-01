@@ -4,7 +4,6 @@ import { CreateSduiComponentUseCase } from '../../sdui/use-cases/CreateSduiCompo
 import { CreateSduiSectionUseCase } from '../../sdui/use-cases/CreateSduiSectionUseCase.js';
 import { CreateSduiGroupUseCase } from '../../sdui/use-cases/CreateSduiGroupUseCase.js';
 import { CreateSduiElementUseCase } from '../../sdui/use-cases/CreateSduiElementUseCase.js';
-import { UpdateSduiScreenLayoutUseCase } from '../../sdui/use-cases/UpdateSduiScreenLayoutUseCase.js';
 import { CreateSduiDraftUseCase } from '../../sdui/use-cases/CreateSduiDraftUseCase.js';
 import { UpdateSduiDraftUseCase } from '../../sdui/use-cases/UpdateSduiDraftUseCase.js';
 import { PublishSduiVersionUseCase } from '../../sdui/use-cases/PublishSduiVersionUseCase.js';
@@ -24,24 +23,22 @@ import {
   publishSduiVersionSchema,
   rollbackSduiVersionSchema,
   updateSduiDraftSchema,
-  updateSduiScreenSchema,
 } from '../../sdui/dtos/sdui-registry.dto.js';
 
 export class AdminSduiController {
   constructor(
     private readonly createSduiComponentUseCase: CreateSduiComponentUseCase,
-    private readonly updateSduiScreenLayoutUseCase: UpdateSduiScreenLayoutUseCase,
-    private readonly createSduiDraftUseCase?: CreateSduiDraftUseCase,
-    private readonly updateSduiDraftUseCase?: UpdateSduiDraftUseCase,
-    private readonly publishSduiVersionUseCase?: PublishSduiVersionUseCase,
-    private readonly archiveSduiVersionUseCase?: ArchiveSduiVersionUseCase,
-    private readonly rollbackSduiVersionUseCase?: RollbackSduiVersionUseCase,
-    private readonly getSduiVersionHistoryUseCase?: GetSduiVersionHistoryUseCase,
-    private readonly getSduiSpecificVersionUseCase?: GetSduiSpecificVersionUseCase,
-    private readonly compareSduiVersionsUseCase?: CompareSduiVersionsUseCase,
-    private readonly createSduiSectionUseCase?: CreateSduiSectionUseCase,
-    private readonly createSduiGroupUseCase?: CreateSduiGroupUseCase,
-    private readonly createSduiElementUseCase?: CreateSduiElementUseCase,
+    private readonly createSduiDraftUseCase: CreateSduiDraftUseCase,
+    private readonly updateSduiDraftUseCase: UpdateSduiDraftUseCase,
+    private readonly publishSduiVersionUseCase: PublishSduiVersionUseCase,
+    private readonly archiveSduiVersionUseCase: ArchiveSduiVersionUseCase,
+    private readonly rollbackSduiVersionUseCase: RollbackSduiVersionUseCase,
+    private readonly getSduiVersionHistoryUseCase: GetSduiVersionHistoryUseCase,
+    private readonly getSduiSpecificVersionUseCase: GetSduiSpecificVersionUseCase,
+    private readonly compareSduiVersionsUseCase: CompareSduiVersionsUseCase,
+    private readonly createSduiSectionUseCase: CreateSduiSectionUseCase,
+    private readonly createSduiGroupUseCase: CreateSduiGroupUseCase,
+    private readonly createSduiElementUseCase: CreateSduiElementUseCase,
   ) {}
 
   public registerComponent = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -55,7 +52,7 @@ export class AdminSduiController {
 
   public registerSection = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = createSduiSectionSchema.parse(request.body);
-    const result = await this.createSduiSectionUseCase!.execute({
+    const result = await this.createSduiSectionUseCase.execute({
       context: (request as any).requestContext,
       data: dto,
     });
@@ -64,7 +61,7 @@ export class AdminSduiController {
 
   public registerGroup = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = createSduiGroupSchema.parse(request.body);
-    const result = await this.createSduiGroupUseCase!.execute({
+    const result = await this.createSduiGroupUseCase.execute({
       context: (request as any).requestContext,
       data: dto,
     });
@@ -73,25 +70,16 @@ export class AdminSduiController {
 
   public registerElement = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = createSduiElementSchema.parse(request.body);
-    const result = await this.createSduiElementUseCase!.execute({
+    const result = await this.createSduiElementUseCase.execute({
       context: (request as any).requestContext,
       data: dto,
     });
     return reply.status(201).send(ResponseHelper.success(result, 'Element created successfully'));
   };
 
-  public updateScreenLayout = async (request: FastifyRequest, reply: FastifyReply) => {
-    const dto = updateSduiScreenSchema.parse(request.body);
-    const result = await this.updateSduiScreenLayoutUseCase.execute({
-      context: (request as any).requestContext,
-      data: dto,
-    });
-    return reply.send(ResponseHelper.success(result, 'Screen layout published successfully'));
-  };
-
   public createDraft = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = createSduiDraftSchema.parse(request.body);
-    const result = await this.createSduiDraftUseCase!.execute({
+    const result = await this.createSduiDraftUseCase.execute({
       context: (request as any).requestContext,
       data: dto,
     });
@@ -100,7 +88,7 @@ export class AdminSduiController {
 
   public updateDraft = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = updateSduiDraftSchema.parse(request.body);
-    const result = await this.updateSduiDraftUseCase!.execute({
+    const result = await this.updateSduiDraftUseCase.execute({
       context: (request as any).requestContext,
       data: dto,
     });
@@ -109,7 +97,7 @@ export class AdminSduiController {
 
   public publishVersion = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = publishSduiVersionSchema.parse(request.body);
-    const result = await this.publishSduiVersionUseCase!.execute({
+    const result = await this.publishSduiVersionUseCase.execute({
       context: (request as any).requestContext,
       data: dto,
     });
@@ -118,7 +106,7 @@ export class AdminSduiController {
 
   public archiveVersion = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = archiveSduiVersionSchema.parse(request.body);
-    const result = await this.archiveSduiVersionUseCase!.execute({
+    const result = await this.archiveSduiVersionUseCase.execute({
       context: (request as any).requestContext,
       data: dto,
     });
@@ -127,7 +115,7 @@ export class AdminSduiController {
 
   public rollbackVersion = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = rollbackSduiVersionSchema.parse(request.body);
-    const result = await this.rollbackSduiVersionUseCase!.execute({
+    const result = await this.rollbackSduiVersionUseCase.execute({
       context: (request as any).requestContext,
       data: dto,
     });
@@ -137,14 +125,14 @@ export class AdminSduiController {
   public getVersionHistory = async (request: FastifyRequest, reply: FastifyReply) => {
     const { screenId } = request.params as { screenId: string };
     const { targetApp } = request.query as { targetApp?: string };
-    const result = await this.getSduiVersionHistoryUseCase!.execute({ screenId, targetApp });
+    const result = await this.getSduiVersionHistoryUseCase.execute({ screenId, targetApp });
     return reply.send(ResponseHelper.success(result, 'SDUI screen version history retrieved successfully'));
   };
 
   public getSpecificVersion = async (request: FastifyRequest, reply: FastifyReply) => {
     const { screenId, versionNumber } = request.params as { screenId: string; versionNumber: string };
     const { targetApp } = request.query as { targetApp?: string };
-    const result = await this.getSduiSpecificVersionUseCase!.execute({
+    const result = await this.getSduiSpecificVersionUseCase.execute({
       screenId,
       targetApp,
       versionNumber: parseInt(versionNumber, 10),
@@ -165,7 +153,7 @@ export class AdminSduiController {
       sourceVersion: parseInt(sourceVersion, 10),
       targetVersion: parseInt(targetVersion, 10),
     });
-    const result = await this.compareSduiVersionsUseCase!.execute(dto);
+    const result = await this.compareSduiVersionsUseCase.execute(dto);
     return reply.send(ResponseHelper.success(result, 'SDUI screen versions compared successfully'));
   };
 }
