@@ -2,195 +2,77 @@
 
 **Status:** Normative architecture source of truth  
 **Applies to:** Customer, Partner, Admin, API, domains, platform, SDUI, data, security, tests, tooling  
-**Branch introduced on:** `architecture/backend-v3-clean`
+**Branch:** `architecture/backend-v3-clean`
 
 ---
 
-## 1. Purpose and authority
+## 1. Authority
 
-This document is the single normative architecture constitution for the CarBroz backend. Production code, tests, package structure, dependency direction, API behavior, persistence, SDUI contracts, security, observability, and build tooling MUST conform to it.
+This is the single normative architecture document for CarBroz Backend V3. Implementation and tests are the evidence of compliance. Names such as factory, builder, clean architecture, repository, provider, or unit of work are not evidence by themselves.
 
-A class, package, folder, interface, provider, repository, factory, builder, transaction abstraction, or design-pattern name is never accepted as evidence that the promised guarantee exists. Guarantees MUST be established by implementation and tests.
-
-No competing architecture document may define different rules. Historical design documents are migration input only and MUST be deleted after V3 migration completes. The root README may contain setup/run instructions and a link to this constitution, but it MUST NOT redefine architecture.
-
----
+No competing architecture document may redefine these rules. Historical phase/audit/design documents are migration input only and must not survive as parallel architecture authorities.
 
 ## 2. Architectural style
 
-CarBroz Backend V3 is a **modular monolith** using:
+CarBroz is a modular monolith using DDD bounded contexts, Clean/Hexagonal Architecture, Dependency Inversion, Ports and Adapters, explicit application use cases, event-driven readiness, PostgreSQL, Prisma as infrastructure, Fastify as transport, Zod at runtime boundaries, and a pnpm workspace.
 
-- Domain-Driven Design bounded contexts.
-- Clean/Hexagonal Architecture.
-- Dependency Inversion.
-- Ports and Adapters.
-- Explicit application use cases.
-- Event-driven readiness through domain events and a transactional outbox.
-- PostgreSQL as the primary transactional database.
-- Prisma as infrastructure only.
-- Fastify as HTTP transport only.
-- Zod for runtime validation at system boundaries.
-- pnpm workspace monorepo.
+Microservices are not the current deployment model, but boundaries must remain independently testable and extractable.
 
-Microservices are NOT the current deployment model. Boundaries MUST nevertheless remain independently testable and extractable.
-
----
-
-## 3. Canonical repository topology
+## 3. Canonical topology
 
 ```text
-carbroz-backend/
-├── apps/
-│   └── api/
-│       ├── src/
-│       │   ├── bootstrap/
-│       │   ├── composition/
-│       │   ├── http/
-│       │   │   ├── plugins/
-│       │   │   ├── middleware/
-│       │   │   ├── guards/
-│       │   │   ├── errors/
-│       │   │   └── routes/
-│       │   └── server.ts
-│       └── tests/
-├── foundation/
-│   └── kernel/
-├── domains/
-│   ├── identity/
-│   ├── customer/
-│   ├── partner/
-│   ├── catalog/
-│   ├── booking/
-│   ├── operations/
-│   ├── financials/
-│   ├── communications/
-│   ├── engagement/
-│   ├── configuration/
-│   ├── sdui/
-│   └── audit/
-├── packages/
-│   └── sdui-engine/
-├── platform/
-│   ├── database/
-│   ├── cache/
-│   ├── messaging/
-│   ├── storage/
-│   ├── observability/
-│   └── integrations/
-├── tests/
-│   ├── architecture/
-│   ├── contracts/
-│   ├── integration/
-│   └── e2e/
-├── prisma/
-│   ├── schema.prisma
-│   ├── migrations/
-│   └── seed/
-└── docs/
-    └── MASTER-BACKEND-CONSTITUTION.md
+apps/api                 transport + composition root only
+foundation/kernel        one universal kernel
+domains/*                bounded contexts
+packages/sdui-engine     one canonical SDUI structural/composition engine
+platform/*               technical capabilities/integrations
+tests/*                  architecture/contracts/integration/e2e
+prisma/*                 schema/migrations/seed
+docs/MASTER-BACKEND-CONSTITUTION.md
 ```
 
-Top-level `shared/`, generic business `common/`, duplicate SDK folders, duplicate kernels, and duplicate business module trees are forbidden in the final V3 repository.
-
----
+Final V3 forbids top-level shared business architecture, a generic business `common` God-package, duplicate kernels, duplicate UI SDKs, duplicate business repositories, tracked normal build output, and duplicate package responsibilities.
 
 ## 4. Foundation kernel
 
-Exactly one kernel exists: `foundation/kernel` published as `@carbroz/foundation-kernel`.
+Exactly one kernel exists: `foundation/kernel` / `@carbroz/foundation-kernel`.
 
-It MAY contain truly universal primitives such as:
+It may own only universal primitives such as Entity/AggregateRoot/ValueObject, DomainEvent, Result/error primitives, Money, Clock/ID ports, pagination, actor identity and truly universal transaction contracts.
 
-- Entity/AggregateRoot/ValueObject abstractions.
-- DomainEvent.
-- Result/error primitives.
-- UseCase contract.
-- Clock and ID generator ports.
-- Actor identity abstraction.
-- Pagination primitives.
-- Transaction context contract when universally required.
+It must not own User, Customer, Partner, Booking, Payment, Coupon, Review, Address, KYC, SDUI screen models, or other CarBroz business concepts. `shared/kernel` must disappear after migration.
 
-It MUST NOT contain CarBroz business entities such as User, Customer, Partner, Booking, Payment, Coupon, Review, Address, KYC, or SDUI screen models.
+## 5. Bounded-context ownership
 
-`shared/kernel` and business-heavy `packages/common` MUST be deleted after migration.
+- **Identity:** User, Session, authentication, OTP, token/session policy, roles, permissions.
+- **Customer:** CustomerProfile, preferences, addresses, customer garage/vehicles.
+- **Partner:** Partner/Profile, organization/member concepts, KYC, capabilities, declared availability/leave.
+- **Catalog:** ServiceCategory, Service, Addon, pricing configuration, multipliers, tax classification metadata.
+- **Booking:** Booking aggregate, lifecycle/state machine, snapshots, cancellation and booking invariants. Not capacity/dispatch.
+- **Operations:** slots, capacity, availability, assignment, dispatch, radius/travel feasibility, workload, tracking, ETA and service execution.
+- **Financials:** payment, invoice, refund, payout, commission, taxes, ledger, settlement and payment webhooks.
+- **Communications:** notification concepts, templates/preferences, delivery policy; vendor adapters remain platform integrations.
+- **Engagement:** reviews, ratings, coupons, promotions/offers.
+- **Configuration:** persisted runtime/business configuration, feature rollout, maintenance/version/bootstrap policy; not secrets/env configuration.
+- **SDUI:** screen metadata, drafts, publish/version/rollback lifecycle and persistence. It consumes but never redefines `sdui-engine`.
+- **Audit:** immutable business/security audit records and actor/action semantics.
 
----
+## 6. Domain structure
 
-## 5. Bounded contexts and ownership
-
-### 5.1 Identity
-Owns User, Session, authentication, OTP challenge lifecycle, access-token policy, refresh-token lifecycle, roles, permissions, authorization policy, and device sessions.
-
-### 5.2 Customer
-Owns CustomerProfile, preferences, addresses, customer-owned vehicles/garage, and customer profile state.
-
-### 5.3 Partner
-Owns Partner, PartnerProfile, individual/organization partner concepts, PartnerMember, partner roles, KYC, verification, capabilities, declared availability, and leave rules.
-
-### 5.4 Catalog
-Owns ServiceCategory, Service, ServiceAddon, catalog pricing configuration, vehicle/service multipliers, tax classification metadata, and service configuration.
-
-### 5.5 Booking
-Owns Booking aggregate, booking lifecycle/state machine, immutable snapshots, cancellation rules, and booking invariants. Booking does NOT own capacity or dispatch.
-
-### 5.6 Operations
-Owns slot inventory, availability, capacity, partner assignment, dispatch, radius matching, travel feasibility, partner workload, tracking sessions, location updates, ETA policy, and service execution workflow.
-
-### 5.7 Financials
-Owns payment, invoice, refund, payout, commission, taxes, ledger, payment webhooks, and settlement. Internal submodules may separate these concerns while remaining one cohesive bounded context.
-
-### 5.8 Communications
-Owns notification domain concepts: DeviceToken, Notification, NotificationTemplate, NotificationPreference, DeliveryLog, and channel policy. Vendor SDK implementations remain platform integrations.
-
-### 5.9 Engagement
-Owns reviews, ratings, coupons, promotions, offers, and engagement policy.
-
-### 5.10 Configuration
-Owns persisted business/runtime application configuration such as maintenance mode, supported app versions, forced update policy, remote operational flags, feature rollout, bootstrap decisions, and startup routing configuration. Environment/secret configuration is NOT owned here.
-
-### 5.11 SDUI
-Owns SDUI screen metadata, drafts, publishing, immutable versions, rollback, target application, version history, and persistence lifecycle. It MUST consume the canonical `sdui-engine` contract and MUST NOT redefine it.
-
-### 5.12 Audit
-Owns immutable security/business audit records and audit actor/action semantics.
-
----
-
-## 6. Standard internal domain structure
-
-A domain uses only the directories that have real responsibilities; empty ceremonial folders are forbidden.
+Domains use only folders with real responsibilities. Typical structure:
 
 ```text
-domains/<domain>/
-├── src/
-│   ├── domain/
-│   │   ├── entities/
-│   │   ├── value-objects/
-│   │   ├── events/
-│   │   ├── services/
-│   │   └── repositories/
-│   ├── application/
-│   │   ├── commands/
-│   │   ├── queries/
-│   │   ├── use-cases/
-│   │   ├── dto/
-│   │   └── ports/
-│   ├── infrastructure/
-│   │   ├── persistence/prisma/
-│   │   ├── mappers/
-│   │   └── adapters/
-│   ├── presentation/http/
-│   ├── composition/
-│   └── public/
-└── tests/
+domains/<domain>/src/
+├── domain/{entities,value-objects,events,services,repositories}
+├── application/{commands,queries,use-cases,dto,ports}
+├── infrastructure/{persistence,mappers,adapters}
+├── presentation/
+├── composition/
+└── public/
 ```
 
-Domain entities and repository ports are owned by their bounded context, never by a global common package.
-
----
+Domain entities and repository ports belong to their bounded context, never a global common package.
 
 ## 7. Dependency law
-
-Canonical inward dependency direction:
 
 ```text
 foundation
@@ -204,536 +86,279 @@ infrastructure adapters
 presentation / composition / transport
 ```
 
-Domain code MUST NOT import Fastify, Prisma, Redis, Awilix, MinIO, Firebase, Razorpay, MSG91, Resend, Google Maps SDKs, filesystem APIs, `process.env`, or concrete platform infrastructure.
+Domain code must not import Fastify, Prisma, Redis, Awilix, vendor SDKs, filesystem APIs, `process.env`, or concrete platform infrastructure. Application code depends on domain + ports, not concrete infrastructure. Infrastructure implements ports. API composes and transports; it does not own business entities/use cases/repositories/SDUI contracts.
 
-Application code may depend on its domain and declared ports but MUST NOT depend on concrete infrastructure implementations.
-
-Infrastructure implements domain/application ports.
-
-The API app composes modules and transports requests. It MUST NOT own CarBroz business use cases, entities, state machines, repositories, or SDUI contract definitions.
-
-Architecture tests MUST enforce forbidden imports and dependency cycles.
-
----
+Architecture tests must enforce dependency direction and cycles.
 
 ## 8. API application
 
-The final application is `apps/api` published as `@carbroz/api`.
+Final application is `apps/api` / `@carbroz/api`. It owns Fastify/server lifecycle, request context, middleware/plugins/guards, error-to-HTTP mapping, route composition, bootstrap/composition, readiness and shutdown only.
 
-It owns only:
+Public product APIs use `/api/v1/...`. Every route declares explicit access policy. Security cannot rely only on a soft global JWT decode hook.
 
-- Fastify creation and server lifecycle.
-- Request context and correlation.
-- HTTP middleware/plugins/guards.
-- Error-to-HTTP mapping.
-- Route composition.
-- Dependency composition/bootstrap.
-- Graceful shutdown/readiness.
+## 9. Authentication/session security
 
-All public versioned product APIs use `/api/v1/...`. Operational endpoints such as `/health` and `/ready` may remain unversioned.
+Production OTP requires cryptographically secure generation, hash-at-rest, expiry, attempt limit, resend cooldown, one-time consumption, challenge+phone binding, rate limiting and provider abstraction. Production bootstrap rejects mock/development OTP modes.
 
-Route definitions MUST explicitly declare access policy: PUBLIC, AUTHENTICATED, CUSTOMER, PARTNER/PARTNER_MEMBER, ADMIN, or explicit permission. Security MUST NOT rely solely on a global soft JWT decode hook.
+Refresh tokens require cryptographic strength, rotation, expiry, revocation, session/device binding and reuse detection. Token policy is centralized. OTPs, access/refresh tokens, authorization headers and secrets are never logged.
 
----
+## 10. Authorization/resource ownership
 
-## 9. Authentication and session security
+Transport authorization and resource ownership are separate checks. User-owned resources must validate actor ownership or explicit permission. External APIs prefer public UUID-like identifiers over internal autoincrement IDs.
 
-Production OTP behavior MUST include:
+## 11. Persistence/repositories
 
-- Cryptographically secure generation.
-- Hash-at-rest storage.
-- Expiry.
-- Attempt limits.
-- Resend cooldown.
-- One-time consumption.
-- Challenge + phone binding.
-- Rate limiting.
-- Provider abstraction.
+`platform/database` owns Prisma client lifecycle, connection health, transaction infrastructure and database-level utilities only.
 
-A development OTP adapter may exist, but production bootstrap MUST reject development/mock OTP configuration.
+Business Prisma repositories belong in their owning domain infrastructure. Platform/database must not export every business repository or depend on every domain. Domain/application contracts never expose Prisma types.
 
-Refresh tokens MUST be cryptographically random or use an equivalently strong design, stored hashed where opaque tokens are used, rotated, expiring, revocable, session/device bound, and protected by token-family reuse detection.
+## 12. Transactions
 
-Controllers MUST NOT define token lifetimes. One token service owns issuer, audience, lifetime, signing, rotation, and verification policy.
+A transaction is real only when all repository operations inside the callback use the same underlying database transaction. Critical flows require real PostgreSQL rollback tests. Passing a transaction client that repositories ignore is forbidden.
 
-OTP values, access tokens, refresh tokens, authorization headers, and secrets MUST NEVER be logged.
+## 13. Events/outbox
 
----
+Cross-domain side effects should use versioned domain events and a transactional outbox rather than deep repository coupling. Domain change + outbox insertion must commit atomically when required. Delivery is retryable/idempotent.
 
-## 10. Authorization and resource ownership
+## 14. Money/financial invariants
 
-Transport authorization and domain ownership checks are separate requirements.
+Money is integer minor units + currency; INR uses paise. Floating-point monetary storage/arithmetic is forbidden. Pricing produces immutable/versioned quotation snapshots. Tax rules do not live as hardcoded Booking logic. Ledger/payout/refund/settlement invariants require tests.
 
-Use cases that mutate/read user-owned resources MUST validate actor ownership or explicit permission. Resource APIs SHOULD make unsafe ID-only access difficult, e.g. customer-address lookup SHOULD include customer ownership in the query contract.
+## 15. Booking/operations invariants
 
-External APIs use public UUID-like identifiers rather than internal database autoincrement IDs wherever practical.
-
----
-
-## 11. Persistence and repositories
-
-`platform/database` owns only Prisma client lifecycle, connection health, transaction infrastructure, and database-level utilities.
-
-Concrete repositories such as PrismaBookingRepository, PrismaCustomerRepository, PrismaPaymentRepository, etc. belong in the infrastructure layer of their owning domain.
-
-`platform/database` MUST NOT become a registry of every business repository and MUST NOT depend on every bounded context.
-
-Domain/application code MUST NOT expose Prisma types.
-
----
-
-## 12. Transactions and Unit of Work
-
-A transaction abstraction is considered valid only when all repository operations inside the callback participate in the SAME underlying database transaction.
-
-Passing a transaction client that repositories ignore is forbidden.
-
-Critical flows MUST have real PostgreSQL integration tests proving rollback. At minimum:
-
-1. operation A succeeds;
-2. operation B fails;
-3. transaction fails;
-4. operation A is verified absent afterward.
-
-Payment + Booking + Invoice + Webhook status and aggregate change + Outbox record must be atomic where the use case requires it.
-
----
-
-## 13. Events and transactional outbox
-
-Cross-domain side effects SHOULD use domain events and an outbox rather than deep synchronous repository coupling.
-
-Critical domain change and outbox insertion MUST commit atomically. Message publication occurs after commit and must be retryable/idempotent.
-
-Event contracts are versioned. Consumers MUST tolerate retry and duplicate delivery.
-
----
-
-## 14. Money and financial invariants
-
-Money is represented as integer minor units plus currency. For INR the minor unit is paise.
-
-Ambiguous comments/fields using `cents`, raw `price`, or mixed rupee/paise semantics are forbidden in new code.
-
-Floating-point arithmetic MUST NOT be used for monetary storage or ledger invariants.
-
-Pricing produces a versioned immutable quotation/snapshot containing base amount, addons, adjustments, discount, tax, subtotal, total, currency, and calculation version.
-
-Tax rates MUST NOT be hardcoded inside Booking use cases.
-
-Ledger accounting, payout, refund, and settlement invariants are covered by Financials tests.
-
----
-
-## 15. Booking and operations invariants
-
-Booking owns state, not capacity.
-
-Operations owns availability, slot capacity, partner capability/availability, leave, radius/travel feasibility, assignment, dispatch, tracking, and execution workflow.
-
-Slot reservation MUST be concurrency-safe. A read-then-create conflict check without a database concurrency guarantee is forbidden.
-
-Booking state transitions MUST be explicit and encapsulated. Direct public mutation of aggregate state that bypasses invariants is forbidden.
-
-Business time decisions use a Clock abstraction rather than uncontrolled `new Date()`/`Date.now()` calls in domain policy.
-
----
+Booking owns booking state; Operations owns capacity/availability/dispatch/tracking/execution. Slot reservation must be concurrency-safe. Booking transitions are explicit and encapsulated. Business-time policy uses a Clock abstraction.
 
 ## 16. Error architecture
 
-Expected business failures MUST NOT become accidental HTTP 500 responses.
+Expected business failures use typed error categories and must not accidentally become HTTP 500. HTTP mapping occurs at transport. Clients receive stable safe codes/details; internal stack/infrastructure details are never exposed.
 
-The system uses typed error categories such as DomainError, ValidationError, AuthenticationError, AuthorizationError, NotFoundError, ConflictError, StateTransitionError, RateLimitError, ProviderError, and InfrastructureError.
+## 17. Configuration
 
-HTTP mapping occurs at the transport boundary. Error responses expose stable machine-readable codes and safe validation details where needed by SDUI forms.
+Secrets/environment configuration and persisted business configuration are separate. Reusable configuration packages do not call `process.exit()` during import. Only `.env.example` is the general committed template. Production rejects known unsafe/default credentials and development-only provider modes.
 
-Internal stack traces and infrastructure details are not sent to clients.
+## 18. Observability/PII
 
----
-
-## 17. Environment configuration vs business configuration
-
-Environment/secret configuration includes DATABASE_URL, REDIS_URL, JWT secrets, vendor credentials, host/port, and logging level.
-
-Business configuration includes maintenance mode, version support, forced update, feature rollout, remote policy, and bootstrap routing.
-
-Reusable configuration packages MUST NOT call `process.exit()` during import. Configuration parsing returns/throws a typed validation error; application bootstrap decides whether startup terminates.
-
-Only `.env.example` is the general committed developer template. Real local/production secret files are ignored. Production startup MUST reject known sample secrets, default provider credentials, unsafe development OTP modes, and other explicitly forbidden insecure defaults.
+Logs default to metadata, not payload dumps. OTP/token/auth headers, sensitive contact/address/coordinates/KYC/payment/vendor secrets are omitted or redacted. Meaningful provider failures cannot disappear in silent catches.
 
 ---
 
-## 18. Observability and PII
+# SDUI CONSTITUTION
 
-Logs default to metadata, not payload dumps.
+## 19. One canonical SDUI engine
 
-Safe structured fields include trace/request IDs, route, status, latency, actor type, safe public resource identifiers, stable error code, and provider metrics.
-
-Sensitive values MUST be redacted or omitted, including OTP, access/refresh tokens, authorization headers, phone/email where not explicitly safe, addresses, precise coordinates, KYC data, payment secrets, and vendor credentials.
-
-Provider fallback may be resilient but failures MUST remain observable. Silent `catch {}` for meaningful operational failures is forbidden.
-
----
-
-## 19. Canonical SDUI engine
-
-Exactly one structural SDUI contract package exists: `packages/sdui-engine` published as `@carbroz/sdui-engine`.
-
-No API DTO, domain package, shared package, or second SDK may independently redefine the SDUI hierarchy.
-
-The engine owns:
+Exactly one structural/composition package exists: `packages/sdui-engine` / `@carbroz/sdui-engine`. The deleted UI SDKs are not restored. Their valid composition capability is migrated into this canonical engine.
 
 ```text
-src/
-├── contract/
-│   ├── screen.schema.ts
-│   ├── template.schema.ts
-│   ├── component.schema.ts
-│   ├── section.schema.ts
-│   ├── group.schema.ts
-│   ├── element.schema.ts
-│   ├── action.schema.ts
-│   ├── theme.schema.ts
-│   └── properties.schema.ts
-├── builder/
-├── factory/
-├── validator/
-├── serializer/
-├── versioning/
-└── public/
+packages/sdui-engine/src/
+├── contract/            canonical Zod runtime structure
+├── catalog/             reusable registered definitions
+│   ├── template/
+│   ├── component/
+│   ├── section/
+│   ├── group/
+│   └── element/
+├── factory/             validated instance creation
+├── builder/             hierarchy-safe composition
+├── validator/           canonical validation
+├── serializer/          validated serialization/deserialization
+├── versioning/          schema-version policy
+└── public/              supported public API only
 ```
 
-Zod runtime schemas are the canonical runtime contract. TypeScript types SHOULD be inferred from canonical schemas where practical. `any`, `.passthrough()` everywhere, and duplicate handwritten structural models are forbidden in the core hierarchy.
-
----
+No API DTO/domain/shared/second SDK may independently redefine the hierarchy.
 
 ## 20. Canonical SDUI hierarchy
 
-The SDUI structure is intentionally optional only at Section and Group levels.
+Template and Component are mandatory; Element is the terminal structural leaf. Section and Group are optional.
+
+Every Component independently selects exactly one legal branch:
 
 ```text
-Template
-└── Component[]        REQUIRED, non-empty
+Template → Component → Element
+Template → Component → Section → Element
+Template → Component → Section → Group → Element
 ```
 
-Every individual Component independently selects exactly ONE content form:
-
-```text
-Component → Element[]
-```
-
-or:
-
-```text
-Component → Section[] → Element[]
-```
-
-or:
-
-```text
-Component → Section[] → Group[] → Element[]
-```
-
-Therefore a single Template may legally contain mixed component shapes:
-
-```text
-Template
-├── Component A
-│   └── Element[]
-├── Component B
-│   └── Section[]
-│       └── Element[]
-└── Component C
-    └── Section[]
-        └── Group[]
-            └── Element[]
-```
+One Template may mix these shapes across different Components.
 
 Rules:
 
-- Template is required.
-- At least one Component is required.
-- Every Component MUST resolve transitively to at least one Element.
-- Section is optional.
-- Group is optional.
-- Element is the structural leaf.
-- A Component MUST NOT contain both `elements` and `sections`.
-- A Section MUST NOT contain both `elements` and `groups`.
-- A Component MUST NOT contain Group directly.
-- Template MUST NOT contain Section or Element directly.
-- Group MUST NOT contain Section or Component.
-- Element MUST NOT contain Component, Section, Group, or nested Element hierarchy.
-- Skipped levels are omitted; empty arrays/null placeholders are not used to express skipping.
-- Non-empty arrays are enforced for structural branches.
-- Multiple Components, Sections, Groups, and Elements are supported.
+- Template contains a non-empty `components` array.
+- Every Component resolves transitively to at least one Element.
+- Component chooses `elements` OR `sections`, never both.
+- Section chooses `elements` OR `groups`, never both.
+- Component cannot contain Group directly.
+- Template cannot contain Section/Group/Element directly.
+- Group contains Elements only.
+- Element cannot own structural descendants.
+- Skipped levels are omitted, not represented by null/empty placeholders.
+- Selected structural arrays are non-empty.
+- Multiple Components/Sections/Groups/Elements are supported.
+- Legacy `Subcomponent`, `Child`, `ChildrenData`, `subComponents`, `children`, `childrenData` are forbidden aliases and must not return.
 
-Legacy terms `Subcomponent`, `Child`, `ChildrenData`, `subComponents`, `children`, and `childrenData` are removed in V3 and are not canonical aliases.
+## 21. SDUI definition vs instance vs runtime data
 
----
+Reuse is a first-class invariant at **every level**: Template, Component, Section, Group and Element.
 
-## 21. SDUI element responsibility
+The engine distinguishes:
 
-Element is the atomic leaf and may contain id, type, typed properties, actions, analytics, accessibility, validation, binding, visibility, and metadata according to versioned contracts.
+1. **Definition/type** — immutable reusable structure/semantics registered in the catalog, e.g. `form_template`, `profile_header`, `primary_button`.
+2. **Instance/id** — one concrete use of a definition in one composed screen, e.g. `login_continue_button`.
+3. **Runtime data/overrides** — permitted values for that instance, e.g. text, image, action, enabled state, labels, layout/property overrides.
 
-Elements may not recursively own structural hierarchy.
+`type` identifies reusable behavior/structure. `id` identifies the concrete instance. They are never treated as the same concept.
 
-Unknown element/property expansion must be version-aware and validator-controlled rather than accepted through unrestricted `any`.
+A definition may be reused on Login, Dashboard, Booking or another screen with different IDs and data without duplicating its implementation.
 
----
-
-## 22. SDUI persistence/versioning
-
-Published SDUI is an immutable versioned document stored in PostgreSQL JSONB after canonical validation.
-
-A published version records at least screenId, targetApp, schemaVersion, version, templateId, templateType, documentJson, checksum, status, creation metadata, and publish metadata.
-
-Production flow:
+Example:
 
 ```text
-Builder/Admin Editor
+primary_button definition
+├── login_continue_button    data.text = "Continue"
+└── dashboard_book_button    data.text = "Book Now"
+```
+
+Reuse is by configuration. A new definition is created only when structure or semantics genuinely differ. Arbitrary mutation that makes a registered definition meaningless is forbidden.
+
+## 22. SDUI catalog/registry
+
+The catalog is the extension point for reusable UI vocabulary.
+
+To introduce a new UI type:
+
+```text
+create definition → register canonical type → compose/use through factory/builder
+```
+
+Examples:
+
+```text
+catalog/template/FormTemplate
+catalog/template/DashboardTemplate
+catalog/component/ProfileHeaderComponent
+catalog/section/FormSection
+catalog/group/InputGroup
+catalog/element/PrimaryButtonElement
+```
+
+Registries exist independently for Template, Component, Section, Group and Element. Duplicate type registration must fail. Unknown type resolution must fail. Runtime filesystem scanning/dynamic discovery is forbidden; registration is deterministic and explicit.
+
+Screen/business modules must not duplicate registry mechanics.
+
+## 23. Factory responsibility
+
+Factories create one validated instance from a registered reusable definition plus instance input/runtime data. Factories do not own screen-specific business decisions.
+
+Canonical responsibilities include TemplateFactory, ComponentFactory, SectionFactory, GroupFactory and ElementFactory.
+
+Factories validate output against canonical schemas before returning it. Raw/unregistered creation, when intentionally exposed for infrastructure/testing/composition primitives, must still pass canonical schema validation.
+
+## 24. Builder responsibility
+
+Builders compose legal trees and enforce hierarchy invariants while building, not only after serialization.
+
+Canonical builders include ScreenBuilder, TemplateBuilder, ComponentBuilder, SectionBuilder and GroupBuilder.
+
+Builders expose canonical vocabulary only: `addComponent`, `addSection`, `addGroup`, `addElement`. Legacy `addSubcomponent`, `addChild`, `addChildData` are forbidden.
+
+A ComponentBuilder that has selected direct Elements must reject Sections, and vice versa. A SectionBuilder that has selected direct Elements must reject Groups, and vice versa. Empty selected branches fail canonical validation.
+
+## 25. Screen-specific composition ownership
+
+Reusable structural definitions belong to `sdui-engine`. Business/screen-specific composition belongs to the appropriate bounded context/application presentation layer, for example an Identity Login composer or Customer Dashboard composer.
+
+A screen composer selects registered definitions and supplies business/runtime data; it must not redefine how `primary_button`, `profile_header`, `form_template`, etc. structurally work.
+
+Example conceptual flow:
+
+```text
+LoginScreenComposer
+  → form_template
+  → auth_header component
+  → form component
+  → input section/group
+  → phone_input + primary_button elements
+```
+
+Dashboard may reuse the same header/button/group definitions with different instance IDs and runtime data.
+
+## 26. SDUI element responsibility
+
+Element is the atomic leaf and may contain id, type, typed properties, actions, analytics, accessibility, validation, binding, visibility and metadata according to versioned contracts. Unknown expansion is validator/version controlled; unrestricted `any` is forbidden in the core hierarchy.
+
+## 27. SDUI persistence/versioning
+
+Published SDUI is an immutable versioned document stored in PostgreSQL JSONB after canonical validation. Published metadata includes screenId, targetApp, schemaVersion, version, templateId, templateType, documentJson/checksum/status and creation/publish metadata.
+
+```text
+Composer/Admin Editor
+→ canonical builder/factory
 → canonical validator
 → Draft
 → Publish
-→ Immutable Screen Version
+→ Immutable Version
 → PostgreSQL JSONB
 → validated read
 → Client
 ```
 
-A corrupted published document MUST NOT silently degrade into a static builder result. Corruption is a distinct observable contract failure. Explicit fallback policy, if any, must be configured and tested.
+Corrupted published documents are observable contract failures, not silently replaced with static fallback. `targetApp` is finite: CUSTOMER, PARTNER, ADMIN. Schema-version support is explicit and tested.
 
-Runtime filesystem scanning/dynamic discovery of screen builders is forbidden. Builder registration is deterministic and explicit.
+## 28. SDUI test matrix
 
-`targetApp` uses a canonical finite type/value object (initially CUSTOMER, PARTNER, ADMIN), not arbitrary strings.
-
----
-
-## 23. Platform integrations
-
-External vendors are adapters behind ports, grouped by capability under `platform/integrations` as appropriate: maps, payment, SMS, email, push, storage, etc.
-
-Domains depend on ports; they never instantiate or import Google Maps, Razorpay, MSG91, Firebase, Resend, MinIO, or similar concrete adapters.
-
-Provider selection is configuration-driven and testable. Provider failures use typed provider errors and observability.
+Tests must cover all three legal branches, mixed components in one template, multiples at every level, zero/empty structural branches, illegal mixed branches, illegal skipped relationships, structural descendants under Element, duplicate IDs, invalid targetApp/schema version, malformed actions/properties, unknown/duplicate registry definitions, factory validation, builder invariants, serialization round-trip, and reuse of one definition with different IDs/runtime data.
 
 ---
 
-## 24. API response and validation contracts
+## 29. Platform integrations
 
-Public response contracts are typed and MUST NOT default generics to `any`.
+External vendors are adapters behind ports. Domains never instantiate/import concrete Maps, payment, SMS, email, push or storage vendor SDKs. Provider selection is configuration-driven, typed and observable.
 
-Boundary payloads are validated. After validation, code works with typed values rather than propagating untrusted `any`.
+## 30. API/validation contracts
 
-Validation errors may expose safe machine-readable field codes required by client/SDUI form rendering.
+Public response contracts are typed and do not default to `any`. Boundary payloads are validated before use. Safe machine-readable validation codes may be exposed for SDUI forms.
 
----
+## 31. Generated artifacts/source control
 
-## 25. Generated artifacts and source control
+Normal generated output is not source and final V3 must not track `**/dist/**`, `**/*.tsbuildinfo`, normal emitted JS/declarations/maps, or coverage output. A clean build must not leave unintended tracked changes.
 
-Generated compilation output is not source code.
+## 32. Package naming/uniqueness
 
-The final repository MUST NOT track:
+Every responsibility has one owner. Duplicate package responsibilities/names are forbidden. Historical phase numbers belong to Git history, not final production organization.
 
-- `**/dist/**`
-- `**/*.tsbuildinfo`
-- generated JavaScript emitted from TypeScript source
-- generated declarations/source maps produced by normal builds
+## 33. Testing policy
 
-Git ignore rules are recursive. A clean build may generate artifacts locally/CI but `git status` must remain clean except for intentionally generated versioned assets explicitly documented here.
+All executable CarBroz production TypeScript targets final merge coverage of 100% statements, branches, functions and lines. Generated/type-only/barrel files are validated by build/architecture checks rather than fake coverage. Exclusions cannot be added merely to reach a number.
 
----
+Required layers include unit, domain invariant, state-machine, use-case, repository contract, real Prisma/PostgreSQL integration, rollback/concurrency, HTTP/auth/authz, provider adapter, SDUI schema/catalog/factory/builder/serialization/versioning, configuration, error, architecture, security and critical E2E tests.
 
-## 26. Package naming and uniqueness
+## 34. Architecture enforcement
 
-Every architectural responsibility has exactly one package/source of truth. Duplicate package responsibilities and duplicate package names are forbidden.
+Automated checks must fail on forbidden domain technology imports, app-owned business logic, platform-owned business repositories, multiple SDUI authorities, reintroduced common/shared God architecture, tracked generated output, duplicate responsibilities, dependency cycles, legacy SDUI terms, or architecture policy scanning generated `dist` as if it were source.
 
-Canonical naming uses examples such as:
+Architecture scans must target actual source and intentionally exclude generated output.
 
-- `@carbroz/foundation-kernel`
-- `@carbroz/sdui-engine`
-- `@carbroz/platform-database`
-- `@carbroz/platform-cache`
-- `@carbroz/platform-messaging`
-- `@carbroz/platform-observability`
-- `@carbroz/domain-identity`
-- `@carbroz/domain-customer`
-- `@carbroz/domain-partner`
-- `@carbroz/domain-catalog`
-- `@carbroz/domain-booking`
-- `@carbroz/domain-operations`
-- `@carbroz/domain-financials`
+## 35. Migration rules
 
-Historical phase numbers belong to Git history, not production package organization or source comments.
+Every legacy file receives KEEP, REFACTOR, REWRITE or DELETE based on evidence. Defective behavior is never preserved solely for compatibility.
 
----
+Known outcomes:
 
-## 27. Testing policy
+- business-heavy `packages/common` → migrate ownership then DELETE;
+- `shared/kernel` → consolidate useful universal primitives then DELETE;
+- duplicate UI SDKs → remain DELETED; valid builder/factory/catalog capability lives in `sdui-engine`;
+- Subcomponent/Child/ChildrenData → DELETE, never alias;
+- app-owned business use cases → MOVE/REFACTOR to domain;
+- central platform business repositories → MOVE to domain infrastructure;
+- tracked dist → DELETE;
+- competing architecture docs → DELETE.
 
-All executable production TypeScript owned by CarBroz must reach final merge thresholds of:
+Temporary coexistence is allowed only when necessary to keep migration controlled and must be removed before freeze. Compatibility shims that preserve wrong ownership are forbidden.
 
-```text
-Statements: 100%
-Branches:   100%
-Functions:  100%
-Lines:      100%
-```
+## 36. Final freeze criteria
 
-Type-only declarations, generated Prisma/client code, generated artifacts, and pure barrel exports are not executable coverage goals; they are validated by compilation and architecture checks.
+V3 is not merge-ready until there is exactly one constitution, one kernel, one SDUI authority, no common/shared business God package, no platform-owned business repositories, no app-owned business use cases, no tracked normal build output, no legacy SDUI hierarchy, secure auth/session design, real transaction propagation, no forbidden dependency cycles/imports, stable error mapping, all required test layers green, executable production coverage 100/100/100/100, fresh install/build/test green, and clean Git status after validation.
 
-Coverage exclusions MUST NOT be added merely to achieve a number. Any legitimate exclusion requires an explicit constitution amendment/rationale.
+## 37. Amendment rule
 
-Required test layers include:
-
-- Unit tests.
-- Domain invariant/value-object tests.
-- State-machine tests.
-- Use-case tests.
-- Repository contract tests.
-- Real Prisma/PostgreSQL integration tests.
-- Transaction rollback tests.
-- Concurrency tests.
-- HTTP route tests.
-- Authentication and authorization tests.
-- Provider adapter tests.
-- SDUI schema/builder/serialization/versioning tests.
-- Configuration tests.
-- Error contract tests.
-- Architecture dependency tests.
-- Security regression tests.
-- End-to-end critical-flow tests.
-
----
-
-## 28. Mandatory SDUI test matrix
-
-Valid structural cases MUST include:
-
-- Template → Component → Element.
-- Template → Component → Section → Element.
-- Template → Component → Section → Group → Element.
-- One template containing all three component shapes simultaneously.
-- Multiple Components.
-- Multiple Sections.
-- Multiple Groups.
-- Multiple Elements.
-
-Invalid tests MUST include zero Components, no terminal Element path, empty selected structural arrays, Component with both elements+sections, Section with both elements+groups, Component→Group, Template→Element, Template→Section, Group→Section, structural children under Element, invalid targetApp, unsupported schema version, malformed actions/properties, and duplicate IDs where the contract requires uniqueness.
-
----
-
-## 29. Mandatory security and business test matrices
-
-Authentication tests cover OTP generation/hash/expiry/attempts/resend/reuse/wrong binding, production mock-provider rejection, access token signature/issuer/audience/expiry, refresh rotation/reuse/revocation/expiry/device binding, logout, and logout-all.
-
-Booking/Operations tests cover ownership, future-time validation, inactive catalog entries, capacity, parallel reservation race, slot expiration, partner capability/availability/leave/radius/workload, assignment, service lifecycle, cancellation, and invalid state transitions.
-
-Financial tests cover money arithmetic/rounding, quotations, tax/discount rules, payment creation/capture/failure, webhook signature/replay/idempotency, transaction rollback, invoice/refund/commission/payout, and ledger balancing.
-
----
-
-## 30. Architecture tests
-
-Automated architecture checks MUST fail if:
-
-- domain code imports Fastify/Prisma/platform implementations;
-- API owns business use cases/entities/repositories;
-- platform/database imports every business domain or exports business repositories;
-- multiple SDUI contract packages exist;
-- generic `common`/`shared` business architecture is reintroduced;
-- generated dist artifacts are tracked;
-- duplicate package names/responsibilities exist;
-- forbidden cross-domain imports or cycles exist;
-- legacy SDUI structural terms are reintroduced after migration freeze.
-
----
-
-## 31. Toolchain and CI gates
-
-Local and CI tool versions must match the repository-declared package manager/runtime policy. CI uses a frozen lockfile.
-
-Final merge validation includes, as applicable:
-
-```text
-pnpm install --frozen-lockfile
-Prisma validate/generate
-typecheck
-lint
-format check
-build
-unit tests
-integration tests
-architecture tests
-contract tests
-e2e tests
-100% coverage
-dependency-cycle check
-unused/dead-code check
-duplicate package-name check
-tracked-generated-file check
-```
-
-A project that only compiles is not considered validated.
-
----
-
-## 32. Migration rules
-
-Every legacy file receives one explicit decision: KEEP AS-IS, REFACTOR, REWRITE, or DELETE.
-
-Defective behavior is not preserved merely because it already exists.
-
-Known V3 migration outcomes include:
-
-- fixed/mock production OTP logic → REWRITE;
-- predictable refresh-token generation → REWRITE;
-- ineffective transaction propagation → REWRITE;
-- business-heavy `packages/common` → DELETE after migration;
-- `shared/kernel` → DELETE after migration;
-- duplicate UI SDKs → DELETE/REPLACE with `sdui-engine`;
-- old Subcomponent/Child/ChildrenData hierarchy → DELETE;
-- app-owned business use cases → MOVE/REFACTOR into owning domains;
-- central platform business repositories → MOVE into owning domain infrastructure;
-- tracked dist output → DELETE;
-- stale competing architecture docs → DELETE after constitution migration.
-
-During migration, old code may temporarily coexist only when required to keep the branch buildable. Temporary duplication MUST be removed before freeze.
-
----
-
-## 33. Final merge freeze criteria
-
-Backend V3 is not merge-ready until all are true:
-
-- exactly one architecture constitution;
-- no duplicate architecture packages or SDUI authorities;
-- no global business God package;
-- no business repositories owned by generic database platform;
-- no business use cases owned by API app;
-- no tracked normal build output;
-- no legacy SDUI hierarchy in canonical runtime contracts;
-- no hardcoded production OTP;
-- no predictable refresh-token design;
-- real transaction propagation proven by rollback tests;
-- no forbidden technology imports from domain;
-- no unresolved dependency cycles;
-- no unjustified `any` in core contracts;
-- expected business failures map to stable non-500 behavior;
-- security, transaction, SDUI, integration, architecture, and E2E suites pass;
-- executable production coverage is 100/100/100/100;
-- fresh install/build/test succeeds;
-- clean Git tree after validation.
-
----
-
-## 34. Amendment rule
-
-This constitution is intentionally strict. Implementation MUST NOT silently deviate from it.
-
-If implementation evidence proves a rule is incorrect or incomplete, the change sequence is:
-
-1. document the evidence;
-2. amend this constitution intentionally;
-3. add/update enforcement tests;
-4. then change production code.
-
-Architecture drift by convenience is forbidden.
+Implementation must not silently deviate from this constitution. When evidence proves a rule incomplete or wrong: document evidence, amend this constitution intentionally, add/update enforcement tests, then change production code. Architecture drift by convenience is forbidden.
