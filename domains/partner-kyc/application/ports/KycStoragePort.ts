@@ -1,6 +1,6 @@
 export interface KycFileValidationOptions {
   maxSizeBytes: number;
-  allowedMimeTypes: readonly string[];
+  allowedMimeTypes: string[];
 }
 
 export interface KycPresignedDownloadOptions {
