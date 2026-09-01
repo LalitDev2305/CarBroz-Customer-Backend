@@ -21,11 +21,15 @@ function gitGrep(pattern: string): string[] {
   return (result.stdout ?? '')
     .split(/\r?\n/)
     .filter(Boolean)
-    .filter((line) => !line.includes('/infrastructure/') && !line.includes('/composition/') && !line.includes('.module.ts'));
+    .filter((line) => !line.includes('/dist/'))
+    .filter((line) => !line.includes('/tests/'))
+    .filter((line) => !line.includes('/infrastructure/'))
+    .filter((line) => !line.includes('/composition/'))
+    .filter((line) => !line.includes('.module.ts'));
 }
 
 describe('domain dependency policy', () => {
-  it('keeps domain/application source independent from concrete infrastructure', () => {
+  it('keeps production domain/application source independent from concrete infrastructure', () => {
     const violations = FORBIDDEN_DOMAIN_IMPORTS.flatMap((dependency) => gitGrep(dependency));
     expect(violations, `Forbidden domain-layer dependencies:\n${violations.join('\n')}`).toEqual([]);
   });
