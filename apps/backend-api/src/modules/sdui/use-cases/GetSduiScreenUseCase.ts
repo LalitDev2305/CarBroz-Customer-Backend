@@ -1,37 +1,26 @@
-import { ISduiRegistryRepository, IUseCase, IRequestContext, NotFoundError } from '@carbroz/common';
-import { ScreenFactory } from '@carbroz/ui-sdk';
-import { GetSduiScreenDto, sduiJsonContractSchema, SduiJsonContract } from '../dtos/sdui-registry.dto.js';
+import { IUseCase, IRequestContext, NotFoundError } from '@carbroz/common';
+import type { ISduiRegistryRepository } from '@carbroz/domain-sdui-registry';
+import { parseSduiScreen, type SduiScreen } from '@carbroz/sdui-engine';
+import type { GetSduiScreenDto } from '../dtos/sdui-registry.dto.js';
 
 export interface GetSduiScreenInput {
   context?: IRequestContext;
   data: GetSduiScreenDto;
 }
 
-export class GetSduiScreenUseCase implements IUseCase<GetSduiScreenInput, SduiJsonContract> {
-  constructor(
-    private readonly sduiRegistryRepository: ISduiRegistryRepository,
-    private readonly screenFactory: ScreenFactory
-  ) {}
+export class GetSduiScreenUseCase implements IUseCase<GetSduiScreenInput, SduiScreen> {
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
 
-  public async execute(input: GetSduiScreenInput): Promise<SduiJsonContract> {
-    const { screenId, targetApp = 'CUSTOMER' } = input.data;
+  public async execute(input: GetSduiScreenInput): Promise<SduiScreen> {
+    const { screenId, targetApp } = input.data;
+    const screen = await this.sduiRegistryRepository.findPublishedScreen(screenId, targetApp);
 
-    // 1. Try DB lookup
-    const dbScreen = await this.sduiRegistryRepository.findPublishedScreen(screenId, targetApp);
-    if (dbScreen) {
-      const validated = sduiJsonContractSchema.safeParse(dbScreen.layoutJson);
-      if (validated.success) {
-        return validated.data as SduiJsonContract;
-      }
+    if (!screen) {
+      throw new NotFoundError(`Published screen '${screenId}' for target '${targetApp}' was not found.`);
     }
 
-    // 2. Fallback to ScreenFactory from @carbroz/ui-sdk
-    try {
-      const staticScreen = await this.screenFactory.buildScreen(screenId, input.context);
-      const validatedStatic = sduiJsonContractSchema.parse(staticScreen);
-      return validatedStatic as SduiJsonContract;
-    } catch (err: any) {
-      throw new NotFoundError(`Screen layout for screenId '${screenId}' (targetApp: ${targetApp}) not found.`);
-    }
+    // Persistence is never trusted blindly. Published documents must satisfy
+    // the exact canonical V3 contract before they leave the backend.
+    return parseSduiScreen(screen.layoutJson);
   }
 }
