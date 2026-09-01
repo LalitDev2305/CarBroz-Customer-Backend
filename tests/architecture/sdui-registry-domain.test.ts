@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SduiComponentEntity, SduiElementEntity, SduiGroupEntity, SduiSectionEntity } from '@carbroz/domain-sdui-registry';
+import { SduiComponentEntity, SduiElementEntity, SduiGroupEntity, SduiSectionEntity } from '@carbroz/sdui-registry';
 
 const base = {
   id: 1,
