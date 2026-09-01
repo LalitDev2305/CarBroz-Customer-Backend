@@ -12,5 +12,3 @@ allowBuilds:
   esbuild: true
   msgpackr-extract: true
   prisma: true
-overrides:
-  database: link:../../platform/database
