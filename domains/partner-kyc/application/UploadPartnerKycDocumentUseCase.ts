@@ -15,7 +15,7 @@ export interface UploadKycInput {
 
 const KYC_BUCKET = 'partner-kyc-docs';
 const KYC_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
-const KYC_ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf'] as const;
+const KYC_ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 const KYC_PRESIGNED_URL_TTL_SECONDS = 3600;
 
 function sanitizeFileName(fileName: string): string {
@@ -47,7 +47,7 @@ export class UploadPartnerKycDocumentUseCase {
       partnerId: input.partnerId,
       type: input.type,
       fileUrl,
-      status: 'PENDING' as KycDocumentStatus,
+      status: KycDocumentStatus.PENDING,
       rejectionReason: null,
       uploadedById: input.uploadedById,
       verifiedById: null,
