@@ -24,13 +24,6 @@ export const getSduiScreenSchema = z.object({
   targetApp: targetAppSchema.default('CUSTOMER'),
 }).strict();
 
-export const updateSduiScreenSchema = z.object({
-  screenId: z.string().trim().min(1),
-  targetApp: targetAppSchema.default('CUSTOMER'),
-  isPublished: z.boolean().default(true),
-  layoutJson: screenSchema,
-}).strict();
-
 export const createSduiDraftSchema = z.object({
   screenId: z.string().trim().min(1),
   targetApp: targetAppSchema.default('CUSTOMER'),
@@ -72,7 +65,6 @@ export const compareSduiVersionsSchema = z.object({
 export type GetSduiScreenDto = z.infer<typeof getSduiScreenSchema>;
 export type SduiJsonContractDto = z.infer<typeof screenSchema>;
 export type SduiJsonContract = SduiJsonContractDto;
-export type UpdateSduiScreenDto = z.infer<typeof updateSduiScreenSchema>;
 export type CreateSduiDraftDto = z.infer<typeof createSduiDraftSchema>;
 export type UpdateSduiDraftDto = z.infer<typeof updateSduiDraftSchema>;
 export type PublishSduiVersionDto = z.infer<typeof publishSduiVersionSchema>;
