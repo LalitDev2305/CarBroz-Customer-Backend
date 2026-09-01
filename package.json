@@ -3,20 +3,19 @@
   "version": "1.0.0",
   "description": "CarBroz Backend Platform Workspace",
   "private": true,
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": "11.9.0"
+  },
   "scripts": {
     "dev": "pnpm --filter backend-api dev",
     "start": "pnpm --filter backend-api start",
     "build": "pnpm -r build",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "vitest"
-  },
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.9.0",
-      "onFail": "download"
-    }
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "type": "module",
   "devDependencies": {
