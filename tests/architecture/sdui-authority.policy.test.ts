@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 
 const LEGACY_SDUI_PATHS = [
@@ -17,12 +17,22 @@ const LEGACY_SDUI_TERMS = [
   'childrenData',
 ];
 
+function git(args: string[]): string {
+  const result = spawnSync('git', args, {
+    encoding: 'utf8',
+    cwd: process.cwd(),
+  });
+
+  if (result.status !== 0 && result.status !== 1) {
+    throw new Error(result.stderr || `git ${args.join(' ')} failed with status ${result.status}`);
+  }
+
+  return result.stdout ?? '';
+}
+
 describe('SDUI authority policy', () => {
   it('has no legacy SDUI package authority', () => {
-    const trackedFiles = execFileSync('git', ['ls-files'], {
-      encoding: 'utf8',
-      cwd: process.cwd(),
-    })
+    const trackedFiles = git(['ls-files'])
       .split(/\r?\n/)
       .filter(Boolean);
 
@@ -31,10 +41,7 @@ describe('SDUI authority policy', () => {
   });
 
   it('has no legacy hierarchy terminology in production TypeScript', () => {
-    const output = execFileSync('git', ['grep', '-n', '-E', LEGACY_SDUI_TERMS.join('|'), '--', '*.ts'], {
-      encoding: 'utf8',
-      cwd: process.cwd(),
-    });
+    const output = git(['grep', '-n', '-E', LEGACY_SDUI_TERMS.join('|'), '--', '*.ts']);
 
     const matches = output
       .split(/\r?\n/)
