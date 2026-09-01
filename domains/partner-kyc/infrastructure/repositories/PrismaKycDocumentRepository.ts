@@ -1,16 +1,19 @@
-import { KycDocument, IKycDocumentRepository, KycDocumentStatus, KycDocumentType } from '@carbroz/common';
-import { PrismaClient } from '@prisma/client';
+import type { KycDocument } from '../../domain/KycDocument.js';
+import type { KycDocumentStatus } from '../../domain/KycDocumentStatus.js';
+import type { KycDocumentType } from '../../domain/KycDocumentType.js';
+import type {
+  IKycDocumentRepository,
+  NewKycDocument,
+} from '../../domain/repositories/IKycDocumentRepository.js';
+import type {
+  KycPersistenceClient,
+  KycPersistenceRecord,
+} from '../persistence/KycPersistenceClient.js';
 
 export class PrismaKycDocumentRepository implements IKycDocumentRepository {
-  private unitOfWorkPrisma: any = null;
+  constructor(private readonly client: KycPersistenceClient) {}
 
-  constructor(private readonly prismaClient: PrismaClient) {}
-
-  private get client() {
-    return this.unitOfWorkPrisma || this.prismaClient;
-  }
-
-  private mapToDomain(entity: any): KycDocument {
+  private mapToDomain(entity: KycPersistenceRecord): KycDocument {
     return {
       id: entity.id,
       publicId: entity.publicId,
@@ -33,15 +36,15 @@ export class PrismaKycDocumentRepository implements IKycDocumentRepository {
 
   async findByPartnerId(partnerId: number): Promise<KycDocument[]> {
     const entities = await this.client.kycDocument.findMany({ where: { partnerId } });
-    return entities.map(e => this.mapToDomain(e));
+    return entities.map((entity) => this.mapToDomain(entity));
   }
 
   async findByPartnerIdAndStatus(partnerId: number, status: KycDocumentStatus): Promise<KycDocument[]> {
     const entities = await this.client.kycDocument.findMany({ where: { partnerId, status } });
-    return entities.map(e => this.mapToDomain(e));
+    return entities.map((entity) => this.mapToDomain(entity));
   }
 
-  async create(document: Omit<KycDocument, 'id' | 'publicId' | 'createdAt' | 'updatedAt'>): Promise<KycDocument> {
+  async create(document: NewKycDocument): Promise<KycDocument> {
     const entity = await this.client.kycDocument.create({
       data: {
         partnerId: document.partnerId,
@@ -71,14 +74,15 @@ export class PrismaKycDocumentRepository implements IKycDocumentRepository {
     return this.mapToDomain(entity);
   }
 
-  async updateStatus(id: number, status: KycDocumentStatus, verifiedById: number, rejectionReason?: string | null): Promise<KycDocument> {
+  async updateStatus(
+    id: number,
+    status: KycDocumentStatus,
+    verifiedById: number,
+    rejectionReason?: string | null,
+  ): Promise<KycDocument> {
     const entity = await this.client.kycDocument.update({
       where: { id },
-      data: {
-        status,
-        verifiedById,
-        rejectionReason,
-      },
+      data: { status, verifiedById, rejectionReason },
     });
     return this.mapToDomain(entity);
   }
@@ -87,18 +91,20 @@ export class PrismaKycDocumentRepository implements IKycDocumentRepository {
     try {
       await this.client.kycDocument.delete({ where: { id } });
       return true;
-    } catch (e: any) {
-      if (e.code === 'P2025') return false;
-      throw e;
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
+        return false;
+      }
+      throw error;
     }
   }
 
   async findAll(): Promise<KycDocument[]> {
     const entities = await this.client.kycDocument.findMany();
-    return entities.map(e => this.mapToDomain(e));
+    return entities.map((entity) => this.mapToDomain(entity));
   }
 
-  async save(entity: KycDocument): Promise<KycDocument> {
-    return this.update(entity.id, entity);
+  async save(document: KycDocument): Promise<KycDocument> {
+    return this.update(document.id, document);
   }
 }
