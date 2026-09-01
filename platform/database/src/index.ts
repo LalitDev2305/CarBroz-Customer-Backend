@@ -19,7 +19,6 @@ export * from './repositories/PrismaAddressRepository.js';
 export * from './repositories/PrismaCatalogRepository.js';
 export * from './repositories/PrismaPricingRepository.js';
 export * from './repositories/PrismaVehicleRepository.js';
-export * from './repositories/PrismaBookingRepository.js';
 export * from './repositories/PrismaPaymentRepository.js';
 export * from './repositories/PrismaInvoiceRepository.js';
 export * from './repositories/PrismaPartnerPayoutRepository.js';
