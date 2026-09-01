@@ -1,34 +1,31 @@
-import { PrismaClient } from '@prisma/client';
 import { Booking } from '../../domain/Booking.js';
 import type { BookingStatus } from '../../domain/BookingStatus.js';
 import type { IBookingRepository } from '../../domain/repositories/IBookingRepository.js';
+import type {
+  BookingPersistenceClient,
+  BookingPersistenceRecord,
+} from '../persistence/BookingPersistenceClient.js';
 
 export class PrismaBookingRepository implements IBookingRepository {
-  private unitOfWorkPrisma: any = null;
+  constructor(private readonly prisma: BookingPersistenceClient) {}
 
-  constructor(private readonly prismaClient: PrismaClient) {}
-
-  private get prisma() {
-    return this.unitOfWorkPrisma || this.prismaClient;
-  }
-
-  private mapToDomain(record: any): Booking {
+  private mapToDomain(record: BookingPersistenceRecord): Booking {
     return new Booking({
       id: record.id,
       publicId: record.publicId,
       customerId: record.customerId,
-      partnerId: record.partnerId,
+      partnerId: record.partnerId ?? undefined,
       vehicleId: record.vehicleId,
       addressId: record.addressId,
       serviceId: record.serviceId,
       status: record.status as BookingStatus,
       slotStartTime: record.slotStartTime,
       slotEndTime: record.slotEndTime,
-      expiryAt: record.expiryAt,
+      expiryAt: record.expiryAt ?? undefined,
       totalPricePaise: record.totalPricePaise,
-      cancellationReason: record.cancellationReason,
-      snapshots: record.snapshotsJson,
-      statusHistory: record.statusHistoryJson,
+      cancellationReason: record.cancellationReason ?? undefined,
+      snapshots: record.snapshotsJson as Booking['snapshots'],
+      statusHistory: record.statusHistoryJson as Booking['statusHistory'],
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     });
@@ -67,10 +64,7 @@ export class PrismaBookingRepository implements IBookingRepository {
 
   async listByCustomerId(customerId: number, status?: BookingStatus): Promise<Booking[]> {
     const records = await this.prisma.booking.findMany({
-      where: {
-        customerId,
-        status: status || undefined,
-      },
+      where: { customerId, status: status || undefined },
       orderBy: { createdAt: 'desc' },
     });
     return records.map((record) => this.mapToDomain(record));
@@ -78,10 +72,7 @@ export class PrismaBookingRepository implements IBookingRepository {
 
   async listByPartnerId(partnerId: number, status?: BookingStatus): Promise<Booking[]> {
     const records = await this.prisma.booking.findMany({
-      where: {
-        partnerId,
-        status: status || undefined,
-      },
+      where: { partnerId, status: status || undefined },
       orderBy: { slotStartTime: 'asc' },
     });
     return records.map((record) => this.mapToDomain(record));
@@ -136,10 +127,7 @@ export class PrismaBookingRepository implements IBookingRepository {
 
   async findExpiredPendingBookings(now: Date): Promise<Booking[]> {
     const records = await this.prisma.booking.findMany({
-      where: {
-        status: 'CREATED',
-        expiryAt: { lt: now },
-      },
+      where: { status: 'CREATED', expiryAt: { lt: now } },
     });
     return records.map((record) => this.mapToDomain(record));
   }
