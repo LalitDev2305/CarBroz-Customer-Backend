@@ -1,4 +1,4 @@
-import { Booking, IBookingRepository } from '@carbroz/common';
+import { Booking, type IBookingRepository } from '@carbroz/domain-booking';
 
 export interface CancelBookingInput {
   bookingPublicId: string;
