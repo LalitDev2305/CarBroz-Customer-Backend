@@ -1,4 +1,4 @@
-import type { SduiScreen, SduiTargetApp } from '@carbroz/sdui-engine';
+import type { SduiScreen, SduiTargetApp } from '@carbroz/ui-sdk';
 import type { SduiComponentEntity } from '../SduiComponent.js';
 import type { SduiElementEntity } from '../SduiElement.js';
 import type { SduiGroupEntity } from '../SduiGroup.js';
