@@ -1,35 +1,40 @@
-name: CarBroz Backend CI/CD Pipeline
+name: CarBroz Backend CI
 
 on:
   push:
-    branches: [ main, feature/* ]
+    branches:
+      - main
+      - architecture-v2
+      - architecture/backend-v3-clean
+      - 'feature/**'
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - architecture-v2
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Codebase
+      - name: Checkout codebase
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate repository pnpm version
+        run: corepack prepare pnpm@11.9.0 --activate
 
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm dependencies
         uses: actions/cache@v4
@@ -39,20 +44,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Prisma Validate
+      - name: Prisma validate
         run: pnpm prisma validate
 
-      - name: Prisma Generate
+      - name: Prisma generate
         run: pnpm prisma generate
 
-      - name: Build Monorepo Packages
+      - name: Build monorepo packages
         run: pnpm build
 
       - name: Run ESLint
         run: pnpm exec eslint --quiet .
 
-      - name: Run Vitest Suite
+      - name: Run Vitest suite
         run: pnpm test
