@@ -9,22 +9,24 @@ function read(path: string): string {
 }
 
 describe('vehicle persistence boundary', () => {
-  it('keeps the Vehicle repository implementation inside the customer garage boundary', () => {
-    expect(existsSync(resolve(root, 'domains/garage/infrastructure/repositories/PrismaVehicleRepository.ts'))).toBe(true);
+  it('keeps Vehicle persistence inside the canonical Customer garage subfeature', () => {
+    expect(existsSync(resolve(root, 'domains/customer/garage/infrastructure/repositories/PrismaVehicleRepository.ts'))).toBe(true);
+    expect(existsSync(resolve(root, 'domains/garage'))).toBe(false);
     expect(existsSync(resolve(root, 'platform/database/src/repositories/PrismaVehicleRepository.ts'))).toBe(false);
   });
 
-  it('does not export or depend on Vehicle persistence from platform/database', () => {
+  it('does not export or own Vehicle persistence from platform/database', () => {
     const databaseIndex = read('platform/database/src/index.ts');
     const databasePackage = read('platform/database/package.json');
 
     expect(databaseIndex).not.toContain('PrismaVehicleRepository');
     expect(databasePackage).not.toContain('@carbroz/domain-garage');
+    expect(databasePackage).not.toContain('@carbroz/domain-customer');
   });
 
-  it('lets the garage module own vehicle repository and application registrations', () => {
-    const garageModule = read('domains/garage/garage.module.ts');
-    const apiContainer = read('apps/backend-api/src/container/index.ts');
+  it('lets the Customer-owned garage module register vehicle repository and application services', () => {
+    const garageModule = read('domains/customer/garage/garage.module.ts');
+    const apiContainer = read('apps/api/src/container/index.ts');
 
     expect(garageModule).toContain('vehicleRepository');
     expect(garageModule).toContain('createVehicleUseCase');
@@ -32,10 +34,10 @@ describe('vehicle persistence boundary', () => {
     expect(apiContainer).not.toContain('asClass(PrismaVehicleRepository)');
   });
 
-  it('keeps vehicle application use cases out of the API transport app', () => {
-    expect(existsSync(resolve(root, 'apps/backend-api/src/modules/vehicle/use-cases/CreateVehicleUseCase.ts'))).toBe(false);
-    expect(existsSync(resolve(root, 'apps/backend-api/src/modules/vehicle/use-cases/ListCustomerVehiclesUseCase.ts'))).toBe(false);
-    expect(existsSync(resolve(root, 'apps/backend-api/src/modules/vehicle/use-cases/SetDefaultVehicleUseCase.ts'))).toBe(false);
-    expect(existsSync(resolve(root, 'apps/backend-api/src/modules/vehicle/use-cases/ArchiveVehicleUseCase.ts'))).toBe(false);
+  it('keeps vehicle business use cases out of the API transport app', () => {
+    expect(existsSync(resolve(root, 'apps/api/src/modules/vehicle/use-cases/CreateVehicleUseCase.ts'))).toBe(false);
+    expect(existsSync(resolve(root, 'apps/api/src/modules/vehicle/use-cases/ListCustomerVehiclesUseCase.ts'))).toBe(false);
+    expect(existsSync(resolve(root, 'apps/api/src/modules/vehicle/use-cases/SetDefaultVehicleUseCase.ts'))).toBe(false);
+    expect(existsSync(resolve(root, 'apps/api/src/modules/vehicle/use-cases/ArchiveVehicleUseCase.ts'))).toBe(false);
   });
 });

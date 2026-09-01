@@ -20,9 +20,9 @@ const EXPECTED_CHILDREN: Record<string, readonly string[]> = {
     'catalog',
     'config',
     'coupon',
+    'customer',
     'customer-profile',
     'dispute',
-    'garage',
     'identity',
     'invoice',
     'notification',
@@ -67,7 +67,6 @@ const TRANSITIONAL_DOMAIN_NAMES = new Set([
   'coupon',
   'customer-profile',
   'dispute',
-  'garage',
   'invoice',
   'notification',
   'partner-kyc',
@@ -175,11 +174,13 @@ describe('workspace taxonomy policy', () => {
     expect(duplicates, `Duplicate workspace package identities: ${JSON.stringify(duplicates)}`).toEqual([]);
   });
 
-  it('keeps the canonical API and SDUI package identities fixed', () => {
+  it('keeps canonical package locations fixed while migration progresses', () => {
     expect(readJson('apps/api/package.json').name).toBe('@carbroz/api');
     expect(readJson('sdui/ui-sdk/package.json').name).toBe('@carbroz/ui-sdk');
     expect(readJson('sdui/registry/package.json').name).toBe('@carbroz/sdui-registry');
     expect(readJson('foundation/kernel/package.json').name).toBe('@carbroz/foundation-kernel');
+    expect(existsSync(resolve(root, 'domains/customer/package.json'))).toBe(true);
+    expect(existsSync(resolve(root, 'domains/garage'))).toBe(false);
   });
 
   it('keeps the migration workspace globs explicit and closed', () => {
