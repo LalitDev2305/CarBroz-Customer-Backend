@@ -1,1 +1,0 @@
-{"version":3,"file":"GenericComponent.js","sourceRoot":"","sources":["../../../src/ui/components/GenericComponent.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,oBAAoB,CAAC;AAEnD,MAAM,OAAO,gBAAiB,SAAQ,aAAa;IACjD,YAAY,EAAU,EAAE,IAAY;QAClC,KAAK,CAAC,EAAE,EAAE,IAAI,CAAC,CAAC;IAClB,CAAC;CACF"}
