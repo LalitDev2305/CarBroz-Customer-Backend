@@ -9,6 +9,5 @@ export * from '../infrastructure/repositories/PrismaUserSessionRepository.js';
 export * from '../infrastructure/repositories/PrismaRoleRepository.js';
 export * from '../infrastructure/repositories/PrismaPermissionRepository.js';
 export * from '../infrastructure/repositories/PrismaAdminRoleRepository.js';
-export * from '../ui/AuthLoginBuilder.js';
 export * from '../identity.module.js';
 export * from '../module.manifest.js';
