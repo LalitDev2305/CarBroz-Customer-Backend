@@ -1,6 +1,6 @@
 import { KycDocument } from '../domain/KycDocument.js';
 import { KycDocumentStatus } from '../domain/KycDocumentStatus.js';
-import { PrismaKycDocumentRepository } from '../infrastructure/repositories/PrismaKycDocumentRepository.js';
+import type { IKycDocumentRepository } from '../domain/repositories/IKycDocumentRepository.js';
 
 export interface VerifyKycInput {
   documentId: number;
@@ -10,7 +10,7 @@ export interface VerifyKycInput {
 }
 
 export class VerifyPartnerKycDocumentUseCase {
-  constructor(private readonly kycRepository: PrismaKycDocumentRepository) {}
+  constructor(private readonly kycRepository: IKycDocumentRepository) {}
 
   public async execute(input: VerifyKycInput): Promise<KycDocument> {
     const document = await this.kycRepository.findById(input.documentId);
@@ -26,7 +26,7 @@ export class VerifyPartnerKycDocumentUseCase {
       input.documentId,
       newStatus,
       input.adminUserId,
-      input.approved ? null : input.rejectionReason || 'Document verification failed'
+      input.approved ? null : input.rejectionReason || 'Document verification failed',
     );
   }
 }
