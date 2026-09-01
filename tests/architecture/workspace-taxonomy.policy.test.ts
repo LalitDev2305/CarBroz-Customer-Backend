@@ -14,14 +14,12 @@ const EXPECTED_CHILDREN: Record<string, readonly string[]> = {
   packages: ['common', 'config'],
   shared: ['kernel'],
   domains: [
-    'address',
     'audit',
     'booking',
     'catalog',
     'config',
     'coupon',
     'customer',
-    'customer-profile',
     'dispute',
     'identity',
     'invoice',
@@ -62,10 +60,8 @@ const FINAL_DOMAIN_NAMES = new Set([
 ]);
 
 const TRANSITIONAL_DOMAIN_NAMES = new Set([
-  'address',
   'config',
   'coupon',
-  'customer-profile',
   'dispute',
   'invoice',
   'notification',
@@ -142,6 +138,13 @@ describe('workspace taxonomy policy', () => {
     expect(violations, `Unclassified domain packages: ${violations.join(', ')}`).toEqual([]);
   });
 
+  it('keeps Customer fragments physically consolidated under domains/customer', () => {
+    expect(childDirectories('domains/customer')).toEqual(['address', 'garage', 'profile', 'public']);
+    expect(existsSync(resolve(root, 'domains/address'))).toBe(false);
+    expect(existsSync(resolve(root, 'domains/customer-profile'))).toBe(false);
+    expect(existsSync(resolve(root, 'domains/garage'))).toBe(false);
+  });
+
   it('allows only canonical or constitution-listed transitional platform capabilities', () => {
     const violations = childDirectories('platform').filter(
       (name) => !FINAL_PLATFORM_NAMES.has(name) && !TRANSITIONAL_PLATFORM_NAMES.has(name),
@@ -180,7 +183,6 @@ describe('workspace taxonomy policy', () => {
     expect(readJson('sdui/registry/package.json').name).toBe('@carbroz/sdui-registry');
     expect(readJson('foundation/kernel/package.json').name).toBe('@carbroz/foundation-kernel');
     expect(existsSync(resolve(root, 'domains/customer/package.json'))).toBe(true);
-    expect(existsSync(resolve(root, 'domains/garage'))).toBe(false);
   });
 
   it('keeps the migration workspace globs explicit and closed', () => {

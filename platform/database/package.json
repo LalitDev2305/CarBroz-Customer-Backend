@@ -10,12 +10,10 @@
   "dependencies": {
     "@carbroz/common": "workspace:*",
     "@carbroz/config": "workspace:*",
-    "@carbroz/domain-address": "workspace:*",
     "@carbroz/domain-audit": "workspace:*",
     "@carbroz/domain-catalog": "workspace:*",
     "@carbroz/domain-config": "workspace:*",
     "@carbroz/domain-coupon": "workspace:*",
-    "@carbroz/domain-customer-profile": "workspace:*",
     "@carbroz/domain-dispute": "workspace:*",
     "@carbroz/domain-invoice": "workspace:*",
     "@carbroz/domain-notification": "workspace:*",
