@@ -1,5 +1,6 @@
-import { ISduiRegistryRepository, IUseCase, IRequestContext, ForbiddenError, SduiComponentEntity } from '@carbroz/common';
-import { CreateSduiComponentDto } from '../dtos/sdui-registry.dto.js';
+import { ForbiddenError, IRequestContext, IUseCase } from '@carbroz/common';
+import type { ISduiRegistryRepository, SduiComponentEntity } from '@carbroz/domain-sdui-registry';
+import type { CreateSduiComponentDto } from '../dtos/sdui-registry.dto.js';
 
 export interface CreateSduiComponentInput {
   context: IRequestContext;
@@ -14,17 +15,6 @@ export class CreateSduiComponentUseCase implements IUseCase<CreateSduiComponentI
       throw new ForbiddenError('Only administrators can create SDUI components');
     }
 
-    const { name, componentType, schemaJson, supportedProperties, supportedActions } = input.data;
-    return await this.sduiRegistryRepository.createComponent(
-      name,
-      componentType,
-      schemaJson,
-      'COMPONENT',
-      supportedProperties,
-      supportedActions
-    );
+    return this.sduiRegistryRepository.createComponent(input.data);
   }
 }
-
-export const RegisterSduiComponentUseCase = CreateSduiComponentUseCase;
-export type RegisterSduiComponentInput = CreateSduiComponentInput;
