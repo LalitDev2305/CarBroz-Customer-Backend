@@ -10,7 +10,7 @@ import {
   sectionRegistry,
   templateRegistry,
   type InstanceInput,
-} from '../catalog/registries.js';
+} from '../registry/registries.js';
 
 export class ElementFactory {
   static create(type: string, input: InstanceInput): SduiElement {
