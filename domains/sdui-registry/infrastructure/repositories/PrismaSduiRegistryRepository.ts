@@ -1,4 +1,4 @@
-import { BadRequestError, ConflictError, NotFoundError } from '@carbroz/common';
+import { KernelError, KernelErrorCode } from '@carbroz/foundation-kernel';
 import {
   parseSduiScreen,
   targetAppSchema,
@@ -27,9 +27,21 @@ import type {
   TemplatePersistenceRecord,
 } from '../persistence/SduiPersistenceClient.js';
 
+function invalidInput(message: string): KernelError {
+  return new KernelError(KernelErrorCode.INVALID_INPUT, message, 400);
+}
+
+function notFound(message: string): KernelError {
+  return new KernelError(KernelErrorCode.NOT_FOUND, message, 404);
+}
+
+function conflict(message: string): KernelError {
+  return new KernelError(KernelErrorCode.CONFLICT, message, 409);
+}
+
 function parseScreenStatus(status: string): SduiScreenStatus {
   if (status === 'DRAFT' || status === 'PUBLISHED' || status === 'ARCHIVED') return status;
-  throw new Error(`Unsupported SDUI screen status '${status}'`);
+  throw invalidInput(`Unsupported SDUI screen status '${status}'`);
 }
 
 export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
@@ -144,7 +156,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
 
       if (existingDraft) {
         if (!input.overwriteExistingDraft) {
-          throw new ConflictError(`Active draft already exists for screen '${input.screenId}'`);
+          throw conflict(`Active draft already exists for screen '${input.screenId}'`);
         }
         const updated = await tx.sduiScreen.update({
           where: { id: existingDraft.id },
@@ -185,9 +197,9 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
       where: { screenId: input.screenId, targetApp, status: 'DRAFT' },
     });
 
-    if (!draft) throw new NotFoundError(`No active draft found for screen '${input.screenId}'`);
+    if (!draft) throw notFound(`No active draft found for screen '${input.screenId}'`);
     if (draft.lockVersion !== input.lockVersion) {
-      throw new ConflictError(`Lock version mismatch: expected ${input.lockVersion}, current is ${draft.lockVersion}`);
+      throw conflict(`Lock version mismatch: expected ${input.lockVersion}, current is ${draft.lockVersion}`);
     }
 
     const updated = await this.prismaClient.sduiScreen.update({
@@ -210,7 +222,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     return this.prismaClient.$transaction(async (tx) => {
       const targetVersion = await tx.sduiScreen.findFirst({ where: { screenId, targetApp, versionNumber } });
       if (!targetVersion) {
-        throw new NotFoundError(`Screen version ${versionNumber} not found for screen '${screenId}'`);
+        throw notFound(`Screen version ${versionNumber} not found for screen '${screenId}'`);
       }
       if (targetVersion.status === 'PUBLISHED') return this.mapScreen(targetVersion);
 
@@ -239,10 +251,10 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
   ): Promise<SduiScreenEntity> {
     const targetVersion = await this.prismaClient.sduiScreen.findFirst({ where: { screenId, targetApp, versionNumber } });
     if (!targetVersion) {
-      throw new NotFoundError(`Screen version ${versionNumber} not found for screen '${screenId}'`);
+      throw notFound(`Screen version ${versionNumber} not found for screen '${screenId}'`);
     }
     if (targetVersion.status === 'PUBLISHED') {
-      throw new BadRequestError('Cannot archive the currently PUBLISHED version. Publish another version first.');
+      throw invalidInput('Cannot archive the currently PUBLISHED version. Publish another version first.');
     }
 
     const archived = await this.prismaClient.sduiScreen.update({
@@ -263,7 +275,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
         where: { screenId, targetApp, versionNumber: targetVersionNumber },
       });
       if (!targetVersion) {
-        throw new NotFoundError(`Target rollback version ${targetVersionNumber} not found for screen '${screenId}'`);
+        throw notFound(`Target rollback version ${targetVersionNumber} not found for screen '${screenId}'`);
       }
 
       const canonicalLayout = parseSduiScreen(targetVersion.layoutJson);
