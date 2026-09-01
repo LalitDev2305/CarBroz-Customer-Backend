@@ -5,7 +5,6 @@ import { AdminSduiController } from './admin-sdui.controller.js';
 function getController(): AdminSduiController {
   return new AdminSduiController(
     diContainer.resolve('createSduiComponentUseCase'),
-    diContainer.resolve('updateSduiScreenLayoutUseCase'),
     diContainer.resolve('createSduiDraftUseCase'),
     diContainer.resolve('updateSduiDraftUseCase'),
     diContainer.resolve('publishSduiVersionUseCase'),
@@ -28,7 +27,6 @@ export async function adminSduiRoutes(fastify: FastifyInstance) {
   fastify.post('/groups', async (request, reply) => getController().registerGroup(request, reply));
   fastify.post('/elements', async (request, reply) => getController().registerElement(request, reply));
 
-  fastify.post('/screens', async (request, reply) => getController().updateScreenLayout(request, reply));
   fastify.post('/screens/draft', async (request, reply) => getController().createDraft(request, reply));
   fastify.put('/screens/draft', async (request, reply) => getController().updateDraft(request, reply));
   fastify.post('/screens/publish', async (request, reply) => getController().publishVersion(request, reply));
