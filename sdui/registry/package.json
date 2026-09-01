@@ -1,5 +1,5 @@
 {
-  "name": "@carbroz/domain-sdui-registry",
+  "name": "@carbroz/sdui-registry",
   "version": "3.0.0",
   "type": "module",
   "main": "dist/public/index.js",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@carbroz/foundation-kernel": "workspace:*",
-    "@carbroz/sdui-engine": "workspace:*",
+    "@carbroz/ui-sdk": "workspace:*",
     "awilix": "^12.0.0"
   },
   "devDependencies": {
