@@ -31,7 +31,7 @@ import { registerNotificationModule } from '@carbroz/domain-notification';
 import { registerReviewModule } from '@carbroz/domain-review';
 import { registerCouponModule } from '@carbroz/domain-coupon';
 import { registerDisputeModule } from '@carbroz/domain-dispute';
-import { PrismaSduiRegistryRepository, registerSduiRegistryModule } from '@carbroz/domain-sdui-registry';
+import { registerSduiRegistryModule } from '@carbroz/domain-sdui-registry';
 import { registerAuditModule } from '@carbroz/domain-audit';
 import { registerConfigModule } from '@carbroz/domain-config';
 
@@ -74,7 +74,6 @@ import { CreateSduiComponentUseCase } from '../modules/sdui/use-cases/CreateSdui
 import { CreateSduiSectionUseCase } from '../modules/sdui/use-cases/CreateSduiSectionUseCase.js';
 import { CreateSduiGroupUseCase } from '../modules/sdui/use-cases/CreateSduiGroupUseCase.js';
 import { CreateSduiElementUseCase } from '../modules/sdui/use-cases/CreateSduiElementUseCase.js';
-import { UpdateSduiScreenLayoutUseCase } from '../modules/sdui/use-cases/UpdateSduiScreenLayoutUseCase.js';
 import { CreateSduiDraftUseCase } from '../modules/sdui/use-cases/CreateSduiDraftUseCase.js';
 import { UpdateSduiDraftUseCase } from '../modules/sdui/use-cases/UpdateSduiDraftUseCase.js';
 import { PublishSduiVersionUseCase } from '../modules/sdui/use-cases/PublishSduiVersionUseCase.js';
@@ -243,7 +242,6 @@ export interface Cradle {
   createSduiSectionUseCase: CreateSduiSectionUseCase;
   createSduiGroupUseCase: CreateSduiGroupUseCase;
   createSduiElementUseCase: CreateSduiElementUseCase;
-  updateSduiScreenLayoutUseCase: UpdateSduiScreenLayoutUseCase;
   createSduiDraftUseCase: CreateSduiDraftUseCase;
   updateSduiDraftUseCase: UpdateSduiDraftUseCase;
   publishSduiVersionUseCase: PublishSduiVersionUseCase;
@@ -403,13 +401,11 @@ export function getContainer(): AwilixContainer<Cradle> {
       manageCatalogUseCase: asClass(ManageCatalogUseCase).classic().scoped(),
       managePricingTierUseCase: asClass(ManagePricingTierUseCase).classic().scoped(),
 
-      sduiRegistryRepository: asClass(PrismaSduiRegistryRepository).classic().singleton(),
       getSduiScreenUseCase: asClass(GetSduiScreenUseCase).classic().scoped(),
       createSduiComponentUseCase: asClass(CreateSduiComponentUseCase).classic().scoped(),
       createSduiSectionUseCase: asClass(CreateSduiSectionUseCase).classic().scoped(),
       createSduiGroupUseCase: asClass(CreateSduiGroupUseCase).classic().scoped(),
       createSduiElementUseCase: asClass(CreateSduiElementUseCase).classic().scoped(),
-      updateSduiScreenLayoutUseCase: asClass(UpdateSduiScreenLayoutUseCase).classic().scoped(),
       createSduiDraftUseCase: asClass(CreateSduiDraftUseCase).classic().scoped(),
       updateSduiDraftUseCase: asClass(UpdateSduiDraftUseCase).classic().scoped(),
       publishSduiVersionUseCase: asClass(PublishSduiVersionUseCase).classic().scoped(),
@@ -517,7 +513,6 @@ export function getContainer(): AwilixContainer<Cradle> {
     registerSduiRegistryModule(diContainer);
     registerAuditModule(diContainer);
     registerConfigModule(diContainer);
-
     isRegistered = true;
   }
 
