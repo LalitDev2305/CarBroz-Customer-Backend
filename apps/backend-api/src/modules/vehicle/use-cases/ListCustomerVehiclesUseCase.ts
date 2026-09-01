@@ -1,9 +1,9 @@
-import { IVehicleRepository, Vehicle } from '@carbroz/common';
+import { IVehicleRepository, Vehicle } from '@carbroz/domain-garage';
 
 export class ListCustomerVehiclesUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
 
   async execute(customerId: number): Promise<Vehicle[]> {
-    return await this.vehicleRepository.listByCustomerId(customerId);
+    return this.vehicleRepository.listByCustomerId(customerId);
   }
 }
