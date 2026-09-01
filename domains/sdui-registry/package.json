@@ -1,6 +1,6 @@
 {
   "name": "@carbroz/domain-sdui-registry",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "type": "module",
   "main": "dist/public/index.js",
   "types": "dist/public/index.d.ts",
@@ -9,12 +9,12 @@
   },
   "dependencies": {
     "@carbroz/common": "workspace:*",
-    "@carbroz/shared-kernel": "workspace:*",
-    "@carbroz/shared-ui-sdk": "workspace:*",
+    "@carbroz/foundation-kernel": "workspace:*",
+    "@carbroz/sdui-engine": "workspace:*",
     "@prisma/client": "^6.19.3",
     "awilix": "^12.0.0"
   },
   "devDependencies": {
-    "@types/node": "^26.1.0"
+    "@types/node": "^22.20.1"
   }
 }
