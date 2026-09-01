@@ -1,4 +1,5 @@
-import { Booking, IBookingRepository, IPartnerRepository } from '@carbroz/common';
+import { Booking, type IBookingRepository } from '@carbroz/domain-booking';
+import { type IPartnerRepository } from '@carbroz/common';
 
 export class AssignPartnerToBookingUseCase {
   constructor(
