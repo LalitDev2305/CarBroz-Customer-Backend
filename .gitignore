@@ -1,11 +1,17 @@
-node_modules
-# Keep environment variables out of version control
-.env
-.env.local
+node_modules/
 
-/generated
-/dist
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Generated build output
+**/dist/
+**/*.tsbuildinfo
+**/generated/
+coverage/
+
+# Runtime / local artifacts
 *.log
 *.tmp
-coverage
-
+.DS_Store
