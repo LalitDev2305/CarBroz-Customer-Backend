@@ -7,7 +7,6 @@ export interface AggregateRoot<TId = string> extends Entity<TId> {
 }
 
 export interface DomainEvent {
-  eventId: string;
   eventName: string;
   occurredOn: Date;
 }
