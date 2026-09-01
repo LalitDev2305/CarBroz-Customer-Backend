@@ -2,6 +2,8 @@ import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 
 const LEGACY_SDUI_PATHS = [
+  'packages/sdui-engine/',
+  'domains/sdui-registry/',
   'packages/ui-sdk/',
   'shared/ui-sdk/',
   'packages/common/src/domain/sdui/',
