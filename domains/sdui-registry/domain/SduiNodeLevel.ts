@@ -1,1 +1,1 @@
-export type SduiNodeLevel = 'COMPONENT' | 'SUBCOMPONENT' | 'CHILD' | 'CHILDREN_DATA';
+export type SduiNodeLevel = 'COMPONENT' | 'SECTION' | 'GROUP' | 'ELEMENT';
