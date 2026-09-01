@@ -1,9 +1,11 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ResponseHelper } from '@carbroz/common';
-import { CreateVehicleUseCase } from '../use-cases/CreateVehicleUseCase.js';
-import { ListCustomerVehiclesUseCase } from '../use-cases/ListCustomerVehiclesUseCase.js';
-import { SetDefaultVehicleUseCase } from '../use-cases/SetDefaultVehicleUseCase.js';
-import { ArchiveVehicleUseCase } from '../use-cases/ArchiveVehicleUseCase.js';
+import {
+  ArchiveVehicleUseCase,
+  CreateVehicleUseCase,
+  ListCustomerVehiclesUseCase,
+  SetDefaultVehicleUseCase,
+} from '@carbroz/domain-garage';
 import { createVehicleSchema } from '../dtos/vehicle.dto.js';
 
 export class VehicleController {
