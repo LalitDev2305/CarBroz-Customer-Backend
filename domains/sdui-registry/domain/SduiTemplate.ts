@@ -1,9 +1,11 @@
+import type { SduiTemplate } from '@carbroz/sdui-engine';
+
 export interface SduiTemplateProps {
   id: number;
   publicId: string;
   templateId: string;
   templateType: string;
-  defaultLayoutJson: any;
+  defaultLayoutJson: SduiTemplate;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -13,7 +15,7 @@ export class SduiTemplateEntity {
   public readonly publicId: string;
   public readonly templateId: string;
   public readonly templateType: string;
-  public readonly defaultLayoutJson: any;
+  public readonly defaultLayoutJson: SduiTemplate;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
 
