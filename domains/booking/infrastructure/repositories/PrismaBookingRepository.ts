@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { Booking, BookingStatus, IBookingRepository } from '@carbroz/common';
+import { Booking } from '../../domain/Booking.js';
+import type { BookingStatus } from '../../domain/BookingStatus.js';
+import type { IBookingRepository } from '../../domain/repositories/IBookingRepository.js';
 
 export class PrismaBookingRepository implements IBookingRepository {
   private unitOfWorkPrisma: any = null;
@@ -25,8 +27,8 @@ export class PrismaBookingRepository implements IBookingRepository {
       expiryAt: record.expiryAt,
       totalPricePaise: record.totalPricePaise,
       cancellationReason: record.cancellationReason,
-      snapshots: record.snapshotsJson as any,
-      statusHistory: record.statusHistoryJson as any,
+      snapshots: record.snapshotsJson,
+      statusHistory: record.statusHistoryJson,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     });
@@ -46,8 +48,8 @@ export class PrismaBookingRepository implements IBookingRepository {
         expiryAt: booking.expiryAt,
         totalPricePaise: booking.totalPricePaise,
         cancellationReason: booking.cancellationReason,
-        snapshotsJson: booking.snapshots as any,
-        statusHistoryJson: booking.statusHistory as any,
+        snapshotsJson: booking.snapshots,
+        statusHistoryJson: booking.statusHistory,
       },
     });
     return this.mapToDomain(record);
@@ -67,60 +69,60 @@ export class PrismaBookingRepository implements IBookingRepository {
     const records = await this.prisma.booking.findMany({
       where: {
         customerId,
-        status: status ? status : undefined,
+        status: status || undefined,
       },
       orderBy: { createdAt: 'desc' },
     });
-    return records.map((r) => this.mapToDomain(r));
+    return records.map((record) => this.mapToDomain(record));
   }
 
   async listByPartnerId(partnerId: number, status?: BookingStatus): Promise<Booking[]> {
     const records = await this.prisma.booking.findMany({
       where: {
         partnerId,
-        status: status ? status : undefined,
+        status: status || undefined,
       },
       orderBy: { slotStartTime: 'asc' },
     });
-    return records.map((r) => this.mapToDomain(r));
+    return records.map((record) => this.mapToDomain(record));
   }
 
   async listAll(status?: BookingStatus, limit = 50, offset = 0): Promise<Booking[]> {
     const records = await this.prisma.booking.findMany({
-      where: { status: status ? status : undefined },
+      where: { status: status || undefined },
       take: limit,
       skip: offset,
       orderBy: { createdAt: 'desc' },
     });
-    return records.map((r) => this.mapToDomain(r));
+    return records.map((record) => this.mapToDomain(record));
   }
 
-  async findConflictingPartnerBooking(partnerId: number, startTime: Date, endTime: Date, excludeBookingId?: number): Promise<Booking | null> {
+  async findConflictingPartnerBooking(
+    partnerId: number,
+    startTime: Date,
+    endTime: Date,
+    excludeBookingId?: number,
+  ): Promise<Booking | null> {
     const record = await this.prisma.booking.findFirst({
       where: {
         partnerId,
         id: excludeBookingId ? { not: excludeBookingId } : undefined,
         status: { in: ['ASSIGNED', 'IN_PROGRESS'] },
         OR: [
-          {
-            slotStartTime: { lte: startTime },
-            slotEndTime: { gt: startTime },
-          },
-          {
-            slotStartTime: { lt: endTime },
-            slotEndTime: { gte: endTime },
-          },
-          {
-            slotStartTime: { gte: startTime },
-            slotEndTime: { lte: endTime },
-          },
+          { slotStartTime: { lte: startTime }, slotEndTime: { gt: startTime } },
+          { slotStartTime: { lt: endTime }, slotEndTime: { gte: endTime } },
+          { slotStartTime: { gte: startTime }, slotEndTime: { lte: endTime } },
         ],
       },
     });
     return record ? this.mapToDomain(record) : null;
   }
 
-  async findConflictingSlotBooking(serviceId: number, startTime: Date, endTime: Date): Promise<Booking | null> {
+  async findConflictingSlotBooking(
+    serviceId: number,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<Booking | null> {
     const record = await this.prisma.booking.findFirst({
       where: {
         serviceId,
@@ -139,7 +141,7 @@ export class PrismaBookingRepository implements IBookingRepository {
         expiryAt: { lt: now },
       },
     });
-    return records.map((r) => this.mapToDomain(r));
+    return records.map((record) => this.mapToDomain(record));
   }
 
   async update(booking: Booking): Promise<Booking> {
@@ -150,8 +152,8 @@ export class PrismaBookingRepository implements IBookingRepository {
         status: booking.status,
         expiryAt: booking.expiryAt,
         cancellationReason: booking.cancellationReason,
-        snapshotsJson: booking.snapshots as any,
-        statusHistoryJson: booking.statusHistory as any,
+        snapshotsJson: booking.snapshots,
+        statusHistoryJson: booking.statusHistory,
       },
     });
     return this.mapToDomain(record);
