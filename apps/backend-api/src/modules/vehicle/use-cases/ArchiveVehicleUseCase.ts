@@ -1,4 +1,4 @@
-import { IVehicleRepository } from '@carbroz/common';
+import { IVehicleRepository } from '@carbroz/domain-garage';
 
 export class ArchiveVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
