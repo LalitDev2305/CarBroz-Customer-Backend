@@ -1,4 +1,3 @@
-import { Prisma, PrismaClient } from '@prisma/client';
 import { BadRequestError, ConflictError, NotFoundError } from '@carbroz/common';
 import {
   parseSduiScreen,
@@ -21,62 +20,22 @@ import type {
   UpdateDraftInput,
 } from '../../domain/repositories/ISduiRegistryRepository.js';
 import type { SduiNodeLevel } from '../../domain/SduiNodeLevel.js';
-
-interface ScreenRecord {
-  id: number;
-  publicId: string;
-  screenId: string;
-  targetApp: string;
-  versionNumber: number;
-  status: string;
-  layoutJson: Prisma.JsonValue;
-  lockVersion: number;
-  publishedAt: Date | null;
-  publishedBy: string | null;
-  createdFromVersion: number | null;
-  changeDescription: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface TemplateRecord {
-  id: number;
-  publicId: string;
-  templateId: string;
-  templateType: string;
-  defaultLayoutJson: Prisma.JsonValue;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface RegistryRecord {
-  id: number;
-  publicId: string;
-  name: string;
-  nodeLevel: string;
-  componentType: string;
-  schemaJson: Prisma.JsonValue;
-  supportedProperties: Prisma.JsonValue | null;
-  supportedActions: Prisma.JsonValue | null;
-  version: number;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type {
+  RegistryPersistenceRecord,
+  ScreenPersistenceRecord,
+  SduiPersistenceClient,
+  TemplatePersistenceRecord,
+} from '../persistence/SduiPersistenceClient.js';
 
 function parseScreenStatus(status: string): SduiScreenStatus {
   if (status === 'DRAFT' || status === 'PUBLISHED' || status === 'ARCHIVED') return status;
   throw new Error(`Unsupported SDUI screen status '${status}'`);
 }
 
-function asInputJson(value: unknown): Prisma.InputJsonValue {
-  return value as Prisma.InputJsonValue;
-}
-
 export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
-  constructor(private readonly prismaClient: PrismaClient) {}
+  constructor(private readonly prismaClient: SduiPersistenceClient) {}
 
-  private mapScreen(record: ScreenRecord): SduiScreenEntity {
+  private mapScreen(record: ScreenPersistenceRecord): SduiScreenEntity {
     return new SduiScreenEntity({
       id: record.id,
       publicId: record.publicId,
@@ -95,7 +54,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     });
   }
 
-  private mapTemplate(record: TemplateRecord): SduiTemplateEntity {
+  private mapTemplate(record: TemplatePersistenceRecord): SduiTemplateEntity {
     return new SduiTemplateEntity({
       id: record.id,
       publicId: record.publicId,
@@ -115,8 +74,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
       where: { screenId, targetApp, status: 'PUBLISHED' },
       orderBy: { versionNumber: 'desc' },
     });
-
-    return record ? this.mapScreen(record as ScreenRecord) : null;
+    return record ? this.mapScreen(record) : null;
   }
 
   public async upsertScreen(
@@ -126,10 +84,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     isPublished = true,
   ): Promise<SduiScreenEntity> {
     const document = parseSduiScreen(layoutJson);
-
-    if (isPublished) {
-      return this.createDraftAndPublish(screenId, targetApp, document);
-    }
+    if (isPublished) return this.createDraftAndPublish(screenId, targetApp, document);
 
     const draft = await this.findDraft(screenId, targetApp);
     if (draft) {
@@ -140,7 +95,6 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
         lockVersion: draft.lockVersion,
       });
     }
-
     return this.createDraft({ screenId, targetApp, layoutJson: document });
   }
 
@@ -167,7 +121,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
           targetApp,
           versionNumber,
           status: 'PUBLISHED',
-          layoutJson: asInputJson(layoutJson),
+          layoutJson,
           lockVersion: 1,
           publishedAt: new Date(),
           publishedBy: 'system',
@@ -175,8 +129,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
           changeDescription: 'Published via upsert',
         },
       });
-
-      return this.mapScreen(created as ScreenRecord);
+      return this.mapScreen(created);
     });
   }
 
@@ -193,16 +146,15 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
         if (!input.overwriteExistingDraft) {
           throw new ConflictError(`Active draft already exists for screen '${input.screenId}'`);
         }
-
         const updated = await tx.sduiScreen.update({
           where: { id: existingDraft.id },
           data: {
-            layoutJson: asInputJson(layoutJson),
+            layoutJson,
             lockVersion: existingDraft.lockVersion + 1,
             changeDescription: input.changeDescription ?? existingDraft.changeDescription,
           },
         });
-        return this.mapScreen(updated as ScreenRecord);
+        return this.mapScreen(updated);
       }
 
       const latest = await tx.sduiScreen.findFirst({
@@ -216,14 +168,13 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
           targetApp,
           versionNumber: latest ? latest.versionNumber + 1 : 1,
           status: 'DRAFT',
-          layoutJson: asInputJson(layoutJson),
+          layoutJson,
           lockVersion: 1,
           createdFromVersion: input.createdFromVersion ?? latest?.versionNumber ?? null,
           changeDescription: input.changeDescription ?? 'Created draft',
         },
       });
-
-      return this.mapScreen(draft as ScreenRecord);
+      return this.mapScreen(draft);
     });
   }
 
@@ -242,13 +193,12 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     const updated = await this.prismaClient.sduiScreen.update({
       where: { id: draft.id },
       data: {
-        layoutJson: asInputJson(layoutJson),
+        layoutJson,
         lockVersion: draft.lockVersion + 1,
         changeDescription: input.changeDescription ?? draft.changeDescription,
       },
     });
-
-    return this.mapScreen(updated as ScreenRecord);
+    return this.mapScreen(updated);
   }
 
   public async publishVersion(
@@ -262,7 +212,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
       if (!targetVersion) {
         throw new NotFoundError(`Screen version ${versionNumber} not found for screen '${screenId}'`);
       }
-      if (targetVersion.status === 'PUBLISHED') return this.mapScreen(targetVersion as ScreenRecord);
+      if (targetVersion.status === 'PUBLISHED') return this.mapScreen(targetVersion);
 
       await tx.sduiScreen.updateMany({
         where: { screenId, targetApp, status: 'PUBLISHED' },
@@ -278,8 +228,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
           lockVersion: targetVersion.lockVersion + 1,
         },
       });
-
-      return this.mapScreen(published as ScreenRecord);
+      return this.mapScreen(published);
     });
   }
 
@@ -300,7 +249,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
       where: { id: targetVersion.id },
       data: { status: 'ARCHIVED', lockVersion: targetVersion.lockVersion + 1 },
     });
-    return this.mapScreen(archived as ScreenRecord);
+    return this.mapScreen(archived);
   }
 
   public async rollbackVersion(
@@ -334,7 +283,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
           targetApp,
           versionNumber: latest ? latest.versionNumber + 1 : 1,
           status: 'PUBLISHED',
-          layoutJson: asInputJson(canonicalLayout),
+          layoutJson: canonicalLayout,
           lockVersion: 1,
           publishedAt: new Date(),
           publishedBy,
@@ -342,8 +291,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
           changeDescription: `Rollback to version ${targetVersionNumber}`,
         },
       });
-
-      return this.mapScreen(created as ScreenRecord);
+      return this.mapScreen(created);
     });
   }
 
@@ -355,7 +303,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
       where: { screenId, targetApp },
       orderBy: { versionNumber: 'desc' },
     });
-    return records.map((record) => this.mapScreen(record as ScreenRecord));
+    return records.map((record) => this.mapScreen(record));
   }
 
   public async getSpecificVersion(
@@ -364,7 +312,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     versionNumber: number,
   ): Promise<SduiScreenEntity | null> {
     const record = await this.prismaClient.sduiScreen.findFirst({ where: { screenId, targetApp, versionNumber } });
-    return record ? this.mapScreen(record as ScreenRecord) : null;
+    return record ? this.mapScreen(record) : null;
   }
 
   public async findDraft(
@@ -374,12 +322,12 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     const record = await this.prismaClient.sduiScreen.findFirst({
       where: { screenId, targetApp, status: 'DRAFT' },
     });
-    return record ? this.mapScreen(record as ScreenRecord) : null;
+    return record ? this.mapScreen(record) : null;
   }
 
   public async getTemplate(templateId: string): Promise<SduiTemplateEntity | null> {
     const record = await this.prismaClient.sduiTemplate.findUnique({ where: { templateId } });
-    return record ? this.mapTemplate(record as TemplateRecord) : null;
+    return record ? this.mapTemplate(record) : null;
   }
 
   public async upsertTemplate(
@@ -390,45 +338,42 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     const template = templateSchema.parse(defaultLayoutJson);
     const record = await this.prismaClient.sduiTemplate.upsert({
       where: { templateId },
-      update: { templateType, defaultLayoutJson: asInputJson(template) },
-      create: { templateId, templateType, defaultLayoutJson: asInputJson(template) },
+      update: { templateType, defaultLayoutJson: template },
+      create: { templateId, templateType, defaultLayoutJson: template },
     });
-    return this.mapTemplate(record as TemplateRecord);
+    return this.mapTemplate(record);
   }
 
-  private async upsertNodeRecord(input: RegistryNodeInput, nodeLevel: SduiNodeLevel): Promise<RegistryRecord> {
-    const record = await this.prismaClient.sduiComponentRegistry.upsert({
+  private async upsertNodeRecord(input: RegistryNodeInput, nodeLevel: SduiNodeLevel): Promise<RegistryPersistenceRecord> {
+    return this.prismaClient.sduiComponentRegistry.upsert({
       where: { name: input.name },
       update: {
         nodeLevel,
         componentType: input.componentType,
-        schemaJson: asInputJson(input.schemaJson),
-        supportedProperties: input.supportedProperties === undefined ? undefined : asInputJson(input.supportedProperties),
-        supportedActions: input.supportedActions === undefined ? undefined : asInputJson(input.supportedActions),
+        schemaJson: input.schemaJson,
+        supportedProperties: input.supportedProperties,
+        supportedActions: input.supportedActions,
       },
       create: {
         name: input.name,
         nodeLevel,
         componentType: input.componentType,
-        schemaJson: asInputJson(input.schemaJson),
-        supportedProperties: input.supportedProperties === undefined ? undefined : asInputJson(input.supportedProperties),
-        supportedActions: input.supportedActions === undefined ? undefined : asInputJson(input.supportedActions),
+        schemaJson: input.schemaJson,
+        supportedProperties: input.supportedProperties,
+        supportedActions: input.supportedActions,
       },
     });
-    return record as RegistryRecord;
   }
 
-  private async findNodeRecord(name: string, nodeLevel: SduiNodeLevel): Promise<RegistryRecord | null> {
-    const record = await this.prismaClient.sduiComponentRegistry.findFirst({ where: { name, nodeLevel } });
-    return record ? (record as RegistryRecord) : null;
+  private async findNodeRecord(name: string, nodeLevel: SduiNodeLevel): Promise<RegistryPersistenceRecord | null> {
+    return this.prismaClient.sduiComponentRegistry.findFirst({ where: { name, nodeLevel } });
   }
 
-  private async listNodeRecords(nodeLevel: SduiNodeLevel): Promise<RegistryRecord[]> {
-    const records = await this.prismaClient.sduiComponentRegistry.findMany({
+  private async listNodeRecords(nodeLevel: SduiNodeLevel): Promise<RegistryPersistenceRecord[]> {
+    return this.prismaClient.sduiComponentRegistry.findMany({
       where: { nodeLevel },
       orderBy: { id: 'asc' },
     });
-    return records as RegistryRecord[];
   }
 
   public async createComponent(input: RegistryNodeInput): Promise<SduiComponentEntity> {
