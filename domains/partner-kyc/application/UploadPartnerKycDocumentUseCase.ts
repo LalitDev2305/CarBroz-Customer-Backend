@@ -1,8 +1,8 @@
 import { KycDocument } from '../domain/KycDocument.js';
 import { KycDocumentStatus } from '../domain/KycDocumentStatus.js';
 import { KycDocumentType } from '../domain/KycDocumentType.js';
-import { PrismaKycDocumentRepository } from '../infrastructure/repositories/PrismaKycDocumentRepository.js';
-import { IStorageProvider } from '@carbroz/platform-storage';
+import type { IKycDocumentRepository } from '../domain/repositories/IKycDocumentRepository.js';
+import type { KycStoragePort } from './ports/KycStoragePort.js';
 
 export interface UploadKycInput {
   partnerId: number;
@@ -13,32 +13,36 @@ export interface UploadKycInput {
   mimeType: string;
 }
 
+const KYC_BUCKET = 'partner-kyc-docs';
+const KYC_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+const KYC_ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf'] as const;
+const KYC_PRESIGNED_URL_TTL_SECONDS = 3600;
+
+function sanitizeFileName(fileName: string): string {
+  return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+}
+
 export class UploadPartnerKycDocumentUseCase {
   constructor(
-    private readonly kycRepository: PrismaKycDocumentRepository,
-    private readonly storageProvider: IStorageProvider
+    private readonly kycRepository: IKycDocumentRepository,
+    private readonly storageProvider: KycStoragePort,
+    private readonly now: () => number = Date.now,
   ) {}
 
   public async execute(input: UploadKycInput): Promise<{ document: KycDocument; presignedUrl: string }> {
-    // 1. Validate File Size & Type
     await this.storageProvider.validateFile(input.fileBuffer, input.mimeType, {
-      maxSizeBytes: 10 * 1024 * 1024, // 10MB limit
-      allowedMimeTypes: ['image/jpeg', 'image/png', 'application/pdf'],
+      maxSizeBytes: KYC_MAX_FILE_SIZE_BYTES,
+      allowedMimeTypes: KYC_ALLOWED_MIME_TYPES,
     });
 
-    const objectName = `kyc/${input.partnerId}/${input.type}_${Date.now()}_${input.fileName}`;
-
-    // 2. Upload file to Supabase / S3 bucket
-    const fileUrl = await this.storageProvider.uploadFile('partner-kyc-docs', objectName, input.fileBuffer, input.mimeType);
-
-    // 3. Generate presigned download URL for secure inspection
+    const objectName = `kyc/${input.partnerId}/${input.type}_${this.now()}_${sanitizeFileName(input.fileName)}`;
+    const fileUrl = await this.storageProvider.uploadFile(KYC_BUCKET, objectName, input.fileBuffer, input.mimeType);
     const presignedUrl = await this.storageProvider.getPresignedDownloadUrl({
-      bucket: 'partner-kyc-docs',
+      bucket: KYC_BUCKET,
       objectName,
-      expiresInSeconds: 3600, // 1 hr expiry
+      expiresInSeconds: KYC_PRESIGNED_URL_TTL_SECONDS,
     });
 
-    // 4. Save metadata to repository in PENDING state
     const document = await this.kycRepository.create({
       partnerId: input.partnerId,
       type: input.type,
