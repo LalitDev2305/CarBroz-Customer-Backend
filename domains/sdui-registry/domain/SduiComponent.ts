@@ -5,9 +5,9 @@ export interface SduiComponentProps {
   publicId: string;
   name: string;
   componentType: string;
-  schemaJson: any;
-  supportedProperties?: any;
-  supportedActions?: any;
+  schemaJson: unknown;
+  supportedProperties?: unknown;
+  supportedActions?: unknown;
   version?: number;
   status?: SduiNodeStatus | string;
   createdAt: Date;
@@ -20,9 +20,9 @@ export class SduiComponentEntity {
   public readonly name: string;
   public readonly nodeLevel = 'COMPONENT' as const;
   public readonly componentType: string;
-  public readonly schemaJson: any;
-  public readonly supportedProperties: any;
-  public readonly supportedActions: any;
+  public readonly schemaJson: unknown;
+  public readonly supportedProperties: unknown;
+  public readonly supportedActions: unknown;
   public readonly version: number;
   public readonly status: SduiNodeStatus | string;
   public readonly createdAt: Date;
@@ -36,8 +36,8 @@ export class SduiComponentEntity {
     this.schemaJson = props.schemaJson;
     this.supportedProperties = props.supportedProperties;
     this.supportedActions = props.supportedActions;
-    this.version = props.version || 1;
-    this.status = props.status || 'ACTIVE';
+    this.version = props.version ?? 1;
+    this.status = props.status ?? 'ACTIVE';
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
