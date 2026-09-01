@@ -11,7 +11,6 @@
     "@carbroz/common": "workspace:*",
     "@carbroz/foundation-kernel": "workspace:*",
     "@carbroz/sdui-engine": "workspace:*",
-    "@prisma/client": "^6.19.3",
     "awilix": "^12.0.0"
   },
   "devDependencies": {
