@@ -1,4 +1,4 @@
-import { IVehicleRepository, Vehicle } from '@carbroz/common';
+import { IVehicleRepository, Vehicle } from '@carbroz/domain-garage';
 
 export interface CreateVehicleInput {
   customerId: number;
@@ -39,6 +39,6 @@ export class CreateVehicleUseCase {
       isDefault: input.isDefault ?? false,
     });
 
-    return await this.vehicleRepository.create(vehicle);
+    return this.vehicleRepository.create(vehicle);
   }
 }
