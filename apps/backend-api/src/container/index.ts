@@ -4,7 +4,6 @@ import {
   PrismaProvider,
   PrismaDatabaseProvider,
   PrismaTransactionProvider,
-  RepositoryFactory,
   PrismaConfigRepository,
   PrismaFeatureFlagRepository,
   PrismaUserRepository,
@@ -23,6 +22,13 @@ import { RefreshTokenUseCase } from '../modules/auth/use-cases/RefreshTokenUseCa
 import { LogoutUseCase } from '../modules/auth/use-cases/LogoutUseCase.js';
 
 import { registerBookingModule } from '@carbroz/domain-booking';
+import {
+  ArchiveVehicleUseCase,
+  CreateVehicleUseCase,
+  ListCustomerVehiclesUseCase,
+  SetDefaultVehicleUseCase,
+  registerGarageModule,
+} from '@carbroz/domain-garage';
 import { registerTrackingModule } from '@carbroz/domain-tracking';
 import { registerPaymentModule } from '@carbroz/domain-payment';
 import { registerInvoiceModule } from '@carbroz/domain-invoice';
@@ -83,11 +89,6 @@ import { GetSduiVersionHistoryUseCase } from '../modules/sdui/use-cases/GetSduiV
 import { GetSduiSpecificVersionUseCase } from '../modules/sdui/use-cases/GetSduiSpecificVersionUseCase.js';
 import { CompareSduiVersionsUseCase } from '../modules/sdui/use-cases/CompareSduiVersionsUseCase.js';
 
-import { PrismaVehicleRepository } from '@carbroz/platform-database';
-import { CreateVehicleUseCase } from '../modules/vehicle/use-cases/CreateVehicleUseCase.js';
-import { ListCustomerVehiclesUseCase } from '../modules/vehicle/use-cases/ListCustomerVehiclesUseCase.js';
-import { SetDefaultVehicleUseCase } from '../modules/vehicle/use-cases/SetDefaultVehicleUseCase.js';
-import { ArchiveVehicleUseCase } from '../modules/vehicle/use-cases/ArchiveVehicleUseCase.js';
 import { VehicleController } from '../modules/vehicle/api/vehicle.controller.js';
 import { CreateBookingUseCase } from '../modules/booking/use-cases/CreateBookingUseCase.js';
 import { ConfirmBookingUseCase } from '../modules/booking/use-cases/ConfirmBookingUseCase.js';
@@ -181,7 +182,6 @@ export interface Cradle {
   prismaProvider: PrismaProvider;
   databaseProvider: PrismaDatabaseProvider;
   transactionProvider: PrismaTransactionProvider;
-  repositoryFactory: RepositoryFactory;
   configRepository: import('@carbroz/common').IConfigRepository;
   featureFlagRepository: import('@carbroz/common').IFeatureFlagRepository;
   configProvider: ConfigProvider;
@@ -251,7 +251,7 @@ export interface Cradle {
   getSduiSpecificVersionUseCase: GetSduiSpecificVersionUseCase;
   compareSduiVersionsUseCase: CompareSduiVersionsUseCase;
 
-  vehicleRepository: import('@carbroz/common').IVehicleRepository;
+  vehicleRepository: import('@carbroz/domain-garage').IVehicleRepository;
   bookingRepository: import('@carbroz/domain-booking').IBookingRepository;
   createVehicleUseCase: CreateVehicleUseCase;
   listCustomerVehiclesUseCase: ListCustomerVehiclesUseCase;
@@ -351,7 +351,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       prismaProvider: asClass(PrismaProvider).classic().singleton(),
       databaseProvider: asClass(PrismaDatabaseProvider).classic().singleton(),
       transactionProvider: asClass(PrismaTransactionProvider).classic().singleton(),
-      repositoryFactory: asClass(RepositoryFactory).classic().singleton(),
       configRepository: asClass(PrismaConfigRepository).classic().singleton(),
       featureFlagRepository: asClass(PrismaFeatureFlagRepository).classic().singleton(),
       configProvider: asClass(ConfigProvider).classic().singleton(),
@@ -415,11 +414,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       getSduiSpecificVersionUseCase: asClass(GetSduiSpecificVersionUseCase).classic().scoped(),
       compareSduiVersionsUseCase: asClass(CompareSduiVersionsUseCase).classic().scoped(),
 
-      vehicleRepository: asClass(PrismaVehicleRepository).classic().singleton(),
-      createVehicleUseCase: asClass(CreateVehicleUseCase).classic().scoped(),
-      listCustomerVehiclesUseCase: asClass(ListCustomerVehiclesUseCase).classic().scoped(),
-      setDefaultVehicleUseCase: asClass(SetDefaultVehicleUseCase).classic().scoped(),
-      archiveVehicleUseCase: asClass(ArchiveVehicleUseCase).classic().scoped(),
       vehicleController: asClass(VehicleController).classic().scoped(),
       createBookingUseCase: asClass(CreateBookingUseCase).classic().scoped(),
       confirmBookingUseCase: asClass(ConfirmBookingUseCase).classic().scoped(),
@@ -500,6 +494,7 @@ export function getContainer(): AwilixContainer<Cradle> {
       adminCorporateController: asClass(AdminCorporateController).classic().scoped(),
     });
 
+    registerGarageModule(diContainer);
     registerBookingModule(diContainer);
     registerTrackingModule(diContainer);
     registerPaymentModule(diContainer);
