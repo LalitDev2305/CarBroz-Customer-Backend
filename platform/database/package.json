@@ -17,7 +17,6 @@
     "@carbroz/domain-coupon": "workspace:*",
     "@carbroz/domain-customer-profile": "workspace:*",
     "@carbroz/domain-dispute": "workspace:*",
-    "@carbroz/domain-garage": "workspace:*",
     "@carbroz/domain-invoice": "workspace:*",
     "@carbroz/domain-notification": "workspace:*",
     "@carbroz/domain-partner-kyc": "workspace:*",
