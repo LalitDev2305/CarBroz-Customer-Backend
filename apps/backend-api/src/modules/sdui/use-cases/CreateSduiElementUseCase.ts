@@ -1,5 +1,5 @@
 import { ForbiddenError, IRequestContext, IUseCase } from '@carbroz/common';
-import type { ISduiRegistryRepository, SduiElementEntity } from '@carbroz/domain-sdui-registry';
+import type { ISduiRegistryRepository, SduiElementEntity } from '@carbroz/sdui-registry';
 import type { CreateSduiElementDto } from '../dtos/sdui-registry.dto.js';
 
 export interface CreateSduiElementInput {
