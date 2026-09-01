@@ -1,0 +1,27 @@
+{
+  "name": "@carbroz/sdui-engine",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/public/index.js",
+  "types": "dist/public/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/public/index.d.ts",
+      "import": "./dist/public/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
