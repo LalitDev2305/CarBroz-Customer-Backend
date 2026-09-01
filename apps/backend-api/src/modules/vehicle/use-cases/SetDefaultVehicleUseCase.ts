@@ -1,4 +1,4 @@
-import { IVehicleRepository, Vehicle } from '@carbroz/common';
+import { IVehicleRepository, Vehicle } from '@carbroz/domain-garage';
 
 export class SetDefaultVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
@@ -11,6 +11,6 @@ export class SetDefaultVehicleUseCase {
 
     await this.vehicleRepository.unsetCustomerDefaultVehicles(customerId, vehicle.id);
     vehicle.setDefault(true);
-    return await this.vehicleRepository.update(vehicle);
+    return this.vehicleRepository.update(vehicle);
   }
 }
