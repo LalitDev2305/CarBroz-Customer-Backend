@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { screenSchema } from '@carbroz/sdui-engine';
+import { screenSchema } from '@carbroz/ui-sdk';
 
 describe('SDUI V3 canonical terminology', () => {
   it('accepts the canonical Template -> Component -> Section -> Group -> Element hierarchy', () => {
