@@ -83,7 +83,7 @@ import { GetSduiVersionHistoryUseCase } from '../modules/sdui/use-cases/GetSduiV
 import { GetSduiSpecificVersionUseCase } from '../modules/sdui/use-cases/GetSduiSpecificVersionUseCase.js';
 import { CompareSduiVersionsUseCase } from '../modules/sdui/use-cases/CompareSduiVersionsUseCase.js';
 
-import { PrismaVehicleRepository, PrismaBookingRepository } from '@carbroz/platform-database';
+import { PrismaVehicleRepository } from '@carbroz/platform-database';
 import { CreateVehicleUseCase } from '../modules/vehicle/use-cases/CreateVehicleUseCase.js';
 import { ListCustomerVehiclesUseCase } from '../modules/vehicle/use-cases/ListCustomerVehiclesUseCase.js';
 import { SetDefaultVehicleUseCase } from '../modules/vehicle/use-cases/SetDefaultVehicleUseCase.js';
@@ -252,7 +252,7 @@ export interface Cradle {
   compareSduiVersionsUseCase: CompareSduiVersionsUseCase;
 
   vehicleRepository: import('@carbroz/common').IVehicleRepository;
-  bookingRepository: import('@carbroz/common').IBookingRepository;
+  bookingRepository: import('@carbroz/domain-booking').IBookingRepository;
   createVehicleUseCase: CreateVehicleUseCase;
   listCustomerVehiclesUseCase: ListCustomerVehiclesUseCase;
   setDefaultVehicleUseCase: SetDefaultVehicleUseCase;
@@ -416,7 +416,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       compareSduiVersionsUseCase: asClass(CompareSduiVersionsUseCase).classic().scoped(),
 
       vehicleRepository: asClass(PrismaVehicleRepository).classic().singleton(),
-      bookingRepository: asClass(PrismaBookingRepository).classic().singleton(),
       createVehicleUseCase: asClass(CreateVehicleUseCase).classic().scoped(),
       listCustomerVehiclesUseCase: asClass(ListCustomerVehiclesUseCase).classic().scoped(),
       setDefaultVehicleUseCase: asClass(SetDefaultVehicleUseCase).classic().scoped(),
