@@ -27,7 +27,6 @@
     "@carbroz/domain-payout": "workspace:*",
     "@carbroz/domain-pricing": "workspace:*",
     "@carbroz/domain-review": "workspace:*",
-    "@carbroz/domain-sdui-registry": "workspace:*",
     "@carbroz/domain-tracking": "workspace:*",
     "@prisma/client": "^6.19.3",
     "prisma": "^6.19.3",
