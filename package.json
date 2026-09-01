@@ -19,6 +19,8 @@
   },
   "type": "module",
   "devDependencies": {
+    "@carbroz/domain-sdui-registry": "workspace:*",
+    "@carbroz/sdui-engine": "workspace:*",
     "@eslint/js": "^10.0.1",
     "@types/node": "^22.20.1",
     "@vitest/coverage-v8": "4.1.9",
