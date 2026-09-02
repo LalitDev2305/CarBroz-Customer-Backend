@@ -1,33 +1,40 @@
-import { PrismaClient } from '@prisma/client';
-import { IAddressRepository, Address } from '@carbroz/common';
+import { Address } from '../../domain/Address.js';
+import type { IAddressRepository } from '../../domain/repositories/IAddressRepository.js';
+import type {
+  AddressPersistenceClient,
+  AddressPersistenceRecord,
+  AddressTransactionClient,
+} from '../persistence/AddressPersistenceClient.js';
 
 export class PrismaAddressRepository implements IAddressRepository {
-  constructor(private readonly prisma: PrismaClient) {}
-
+  constructor(
+    private readonly prisma: AddressPersistenceClient,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
 
   async findById(id: number): Promise<Address | null> {
     const model = await this.prisma.address.findUnique({ where: { id, deletedAt: null } });
-    return model ? new Address(model) : null;
+    return model ? this.toDomain(model) : null;
   }
 
   async findByUserId(userId: number): Promise<Address[]> {
     const models = await this.prisma.address.findMany({
       where: { userId, deletedAt: null },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
-    return models.map(m => new Address(m));
+    return models.map((model) => this.toDomain(model));
   }
 
   async findDefaultByUserId(userId: number): Promise<Address | null> {
     const model = await this.prisma.address.findFirst({
-      where: { userId, isDefault: true, deletedAt: null }
+      where: { userId, isDefault: true, deletedAt: null },
     });
-    return model ? new Address(model) : null;
+    return model ? this.toDomain(model) : null;
   }
 
   async findAll(): Promise<Address[]> {
     const models = await this.prisma.address.findMany({ where: { deletedAt: null } });
-    return models.map(m => new Address(m));
+    return models.map((model) => this.toDomain(model));
   }
 
   async save(entity: Address): Promise<Address> {
@@ -45,27 +52,19 @@ export class PrismaAddressRepository implements IAddressRepository {
       isDefault: entity.isDefault,
     };
 
-    // Use transaction if setting as default to unset others
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: AddressTransactionClient) => {
       if (entity.isDefault) {
         await tx.address.updateMany({
           where: { userId: entity.userId, deletedAt: null },
-          data: { isDefault: false }
+          data: { isDefault: false },
         });
       }
 
-      if (entity.id) {
-        const updated = await tx.address.update({
-          where: { id: entity.id },
-          data,
-        });
-        return new Address(updated);
-      } else {
-        const created = await tx.address.create({
-          data,
-        });
-        return new Address(created);
-      }
+      const model = entity.id
+        ? await tx.address.update({ where: { id: entity.id }, data })
+        : await tx.address.create({ data });
+
+      return this.toDomain(model);
     });
   }
 
@@ -73,11 +72,18 @@ export class PrismaAddressRepository implements IAddressRepository {
     try {
       await this.prisma.address.update({
         where: { id },
-        data: { deletedAt: new Date() },
+        data: { deletedAt: this.now() },
       });
       return true;
     } catch {
       return false;
     }
+  }
+
+  private toDomain(model: AddressPersistenceRecord): Address {
+    return new Address({
+      ...model,
+      publicId: model.publicId ?? undefined,
+    });
   }
 }
