@@ -1,3 +1,7 @@
+export * from '../profile/domain/CustomerProfile.js';
+export * from '../profile/domain/repositories/ICustomerProfileRepository.js';
+export * from '../address/domain/Address.js';
+export * from '../address/domain/repositories/IAddressRepository.js';
 export * from '../garage/domain/Vehicle.js';
 export * from '../garage/domain/VehicleStatus.js';
 export * from '../garage/domain/repositories/IVehicleRepository.js';
@@ -5,5 +9,4 @@ export * from '../garage/application/use-cases/CreateVehicleUseCase.js';
 export * from '../garage/application/use-cases/ListCustomerVehiclesUseCase.js';
 export * from '../garage/application/use-cases/SetDefaultVehicleUseCase.js';
 export * from '../garage/application/use-cases/ArchiveVehicleUseCase.js';
-export * from '../garage/garage.module.js';
 export * from '../customer.module.js';
