@@ -5,7 +5,7 @@ import {
   CreateVehicleUseCase,
   ListCustomerVehiclesUseCase,
   SetDefaultVehicleUseCase,
-} from '@carbroz/domain-garage';
+} from '@carbroz/domain-customer';
 import { createVehicleSchema } from '../dtos/vehicle.dto.js';
 
 export class VehicleController {
