@@ -1,5 +1,5 @@
 {
-  "name": "@carbroz/domain-garage",
+  "name": "@carbroz/domain-customer",
   "version": "1.0.0",
   "type": "module",
   "main": "dist/public/index.js",
@@ -8,8 +8,6 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@carbroz/common": "workspace:*",
-    "@prisma/client": "^6.19.3",
     "awilix": "^12.0.0"
   },
   "devDependencies": {
