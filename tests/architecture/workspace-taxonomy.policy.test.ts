@@ -6,6 +6,7 @@ const root = process.cwd();
 
 const CANONICAL_ROOTS = ['apps', 'domains', 'sdui', 'platform', 'foundation', 'prisma', 'tests', 'docs'] as const;
 const TRANSITIONAL_ROOTS = ['packages', 'shared'] as const;
+const GENERATED_DIRECTORIES = new Set(['node_modules', 'dist', 'coverage', '.turbo']);
 
 const EXPECTED_CHILDREN: Record<string, readonly string[]> = {
   apps: ['api'],
@@ -95,7 +96,7 @@ function childDirectories(path: string): string[] {
   if (!existsSync(absolute)) return [];
 
   return readdirSync(absolute, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
+    .filter((entry) => entry.isDirectory() && !GENERATED_DIRECTORIES.has(entry.name))
     .map((entry) => entry.name)
     .sort();
 }
@@ -182,7 +183,8 @@ describe('workspace taxonomy policy', () => {
     expect(readJson('sdui/ui-sdk/package.json').name).toBe('@carbroz/ui-sdk');
     expect(readJson('sdui/registry/package.json').name).toBe('@carbroz/sdui-registry');
     expect(readJson('foundation/kernel/package.json').name).toBe('@carbroz/foundation-kernel');
-    expect(existsSync(resolve(root, 'domains/customer/package.json'))).toBe(true);
+    expect(readJson('domains/customer/package.json').name).toBe('@carbroz/domain-customer');
+    expect(existsSync(resolve(root, 'domains/garage'))).toBe(false);
   });
 
   it('keeps the migration workspace globs explicit and closed', () => {
