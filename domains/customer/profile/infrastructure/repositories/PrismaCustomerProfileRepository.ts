@@ -1,22 +1,29 @@
-import { PrismaClient } from '@prisma/client';
-import { ICustomerProfileRepository, CustomerProfile } from '@carbroz/common';
+import { CustomerProfile } from '../../domain/CustomerProfile.js';
+import type { ICustomerProfileRepository } from '../../domain/repositories/ICustomerProfileRepository.js';
+import type {
+  CustomerProfilePersistenceClient,
+  CustomerProfilePersistenceRecord,
+} from '../persistence/CustomerProfilePersistenceClient.js';
 
 export class PrismaCustomerProfileRepository implements ICustomerProfileRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: CustomerProfilePersistenceClient,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
 
   async findById(id: number): Promise<CustomerProfile | null> {
-    const model = await (this.prisma as any).customerProfile.findUnique({ where: { id, deletedAt: null } });
-    return model ? new CustomerProfile(model) : null;
+    const model = await this.prisma.customerProfile.findUnique({ where: { id, deletedAt: null } });
+    return model ? this.toDomain(model) : null;
   }
 
   async findByUserId(userId: number): Promise<CustomerProfile | null> {
-    const model = await (this.prisma as any).customerProfile.findUnique({ where: { userId, deletedAt: null } });
-    return model ? new CustomerProfile(model) : null;
+    const model = await this.prisma.customerProfile.findUnique({ where: { userId, deletedAt: null } });
+    return model ? this.toDomain(model) : null;
   }
 
   async findAll(): Promise<CustomerProfile[]> {
-    const models = await (this.prisma as any).customerProfile.findMany({ where: { deletedAt: null } });
-    return models.map((m: any) => new CustomerProfile(m));
+    const models = await this.prisma.customerProfile.findMany({ where: { deletedAt: null } });
+    return models.map((model) => this.toDomain(model));
   }
 
   async save(entity: CustomerProfile): Promise<CustomerProfile> {
@@ -29,29 +36,29 @@ export class PrismaCustomerProfileRepository implements ICustomerProfileReposito
       marketingOptIn: entity.marketingOptIn,
     };
 
-    if (entity.id) {
-      const updated = await (this.prisma as any).customerProfile.update({
-        where: { id: entity.id },
-        data,
-      });
-      return new CustomerProfile(updated);
-    } else {
-      const created = await (this.prisma as any).customerProfile.create({
-        data,
-      });
-      return new CustomerProfile(created);
-    }
+    const model = entity.id
+      ? await this.prisma.customerProfile.update({ where: { id: entity.id }, data })
+      : await this.prisma.customerProfile.create({ data });
+
+    return this.toDomain(model);
   }
 
   async delete(id: number): Promise<boolean> {
     try {
-      await (this.prisma as any).customerProfile.update({
+      await this.prisma.customerProfile.update({
         where: { id },
-        data: { deletedAt: new Date() },
+        data: { deletedAt: this.now() },
       });
       return true;
     } catch {
       return false;
     }
+  }
+
+  private toDomain(model: CustomerProfilePersistenceRecord): CustomerProfile {
+    return new CustomerProfile({
+      ...model,
+      publicId: model.publicId ?? undefined,
+    });
   }
 }
