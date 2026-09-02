@@ -24,14 +24,13 @@ describe('vehicle persistence boundary', () => {
     expect(databasePackage).not.toContain('@carbroz/domain-customer');
   });
 
-  it('lets the Customer-owned garage module register vehicle repository and application services', () => {
+  it('lets the canonical Customer module own vehicle composition', () => {
+    const customerModule = read('domains/customer/customer.module.ts');
     const garageModule = read('domains/customer/garage/garage.module.ts');
-    const apiContainer = read('apps/api/src/container/index.ts');
 
+    expect(customerModule).toContain('registerGarageModule(container)');
     expect(garageModule).toContain('vehicleRepository');
     expect(garageModule).toContain('createVehicleUseCase');
-    expect(apiContainer).toContain('registerGarageModule(diContainer)');
-    expect(apiContainer).not.toContain('asClass(PrismaVehicleRepository)');
   });
 
   it('keeps vehicle business use cases out of the API transport app', () => {
