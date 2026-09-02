@@ -48,12 +48,16 @@ describe('canonical repository topology migration', () => {
 
   it('keeps the final taxonomy frozen in the Master Constitution', () => {
     const constitution = read('docs/MASTER-BACKEND-CONSTITUTION.md');
-    expect(constitution).toContain('apps/api/');
-    expect(constitution).toContain('sdui/ui-sdk/');
-    expect(constitution).toContain('sdui/registry/');
-    expect(constitution).toContain('domains/customer/');
-    expect(constitution).toContain('domains/partner/');
-    expect(constitution).toContain('domains/financials/');
-    expect(constitution).toContain('platform/integrations/');
+
+    expect(constitution).toContain('├── apps/');
+    expect(constitution).toContain('│   └── api/');
+    expect(constitution).toContain('├── domains/');
+    expect(constitution).toContain('│   ├── customer/');
+    expect(constitution).toContain('│   ├── partner/');
+    expect(constitution).toContain('│   ├── financials/');
+    expect(constitution).toContain('├── sdui/');
+    expect(constitution).toContain('│   ├── ui-sdk/');
+    expect(constitution).toContain('│   └── registry/');
+    expect(constitution).toContain('│   └── integrations/');
   });
 });
