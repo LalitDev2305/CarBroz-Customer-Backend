@@ -12,8 +12,6 @@ export * from './repositories/PrismaFeatureFlagRepository.js';
 export * from './repositories/PrismaPartnerRepository.js';
 export * from './repositories/PrismaPartnerMemberRepository.js';
 export * from './repositories/PrismaPartnerProfileRepository.js';
-export * from './repositories/PrismaCustomerProfileRepository.js';
-export * from './repositories/PrismaAddressRepository.js';
 export * from './repositories/PrismaCatalogRepository.js';
 export * from './repositories/PrismaPricingRepository.js';
 export * from './repositories/PrismaPaymentRepository.js';
