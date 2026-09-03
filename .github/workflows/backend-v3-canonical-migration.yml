@@ -27,6 +27,8 @@ jobs:
         run: node tools/run-backend-v3-migration.mjs
       - name: Finalize canonical platform workspaces
         run: node tools/finalize-backend-v3-platform.mjs
+      - name: Finalize single bounded-context ownership
+        run: node tools/finalize-backend-v3-single-ownership.mjs
       - name: Finalize package import boundaries
         run: node tools/finalize-backend-v3-import-boundaries.mjs
       - name: Finalize strict TypeScript semantics
@@ -49,6 +51,7 @@ jobs:
         run: |
           node tools/run-backend-v3-migration.mjs
           node tools/finalize-backend-v3-platform.mjs
+          node tools/finalize-backend-v3-single-ownership.mjs
           node tools/finalize-backend-v3-import-boundaries.mjs
           node tools/finalize-backend-v3-strictness.mjs
           node tools/verify-backend-v3-canonical-structure.mjs
