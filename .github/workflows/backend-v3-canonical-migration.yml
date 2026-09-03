@@ -1,0 +1,50 @@
+name: Backend V3 Canonical Migration
+
+on:
+  push:
+    branches:
+      - feature/backend-v3-canonical-migration
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-validate-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: corepack prepare pnpm@11.9.0 --activate
+      - name: Generate canonical architecture
+        run: node tools/backend-v3-migrate.mjs
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Prisma validate
+        run: pnpm prisma validate
+      - name: Prisma generate
+        run: pnpm prisma generate
+      - name: Build
+        run: pnpm build
+      - name: Lint
+        run: pnpm exec eslint --quiet .
+      - name: Test
+        run: pnpm test
+      - name: Verify final topology
+        run: node tools/backend-v3-migrate.mjs
+      - name: Commit validated migration
+        shell: bash
+        run: |
+          git config user.name "CarBroz Architecture Bot"
+          git config user.email "architecture@carbroz.local"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No migration changes remain."
+          else
+            git commit -m "refactor(architecture): migrate backend to canonical v3 topology"
+            git push origin HEAD:feature/backend-v3-canonical-migration
+          fi
