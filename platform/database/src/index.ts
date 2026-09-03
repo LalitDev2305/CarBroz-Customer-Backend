@@ -7,6 +7,3 @@ export * from './repositories/PrismaUserSessionRepository.js';
 export * from './repositories/PrismaRoleRepository.js';
 export * from './repositories/PrismaPermissionRepository.js';
 export * from './repositories/PrismaAdminRoleRepository.js';
-export * from './repositories/PrismaPartnerRepository.js';
-export * from './repositories/PrismaPartnerMemberRepository.js';
-export * from './repositories/PrismaPartnerProfileRepository.js';
