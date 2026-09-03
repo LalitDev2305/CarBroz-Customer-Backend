@@ -1,8 +1,10 @@
-import { ISduiRegistryRepository, IUseCase, NotFoundError, SduiScreenEntity } from '@carbroz/common';
+import { IUseCase, NotFoundError } from '@carbroz/common';
+import type { ISduiRegistryRepository, SduiScreenEntity } from '@carbroz/sdui-registry';
+import type { SduiTargetApp } from '@carbroz/ui-sdk';
 
 export interface GetSduiSpecificVersionInput {
   screenId: string;
-  targetApp?: string;
+  targetApp?: SduiTargetApp;
   versionNumber: number;
 }
 
