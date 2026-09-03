@@ -3,6 +3,11 @@ import path from 'node:path';
 
 const root = process.cwd();
 const p = (...parts) => path.join(root, ...parts);
+const write = (relative, content) => {
+  const file = p(relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, content);
+};
 const patch = (relative, transform) => {
   const file = p(relative);
   if (!fs.existsSync(file)) return;
@@ -11,32 +16,122 @@ const patch = (relative, transform) => {
   if (after !== before) fs.writeFileSync(file, after);
 };
 
-const authInputs = new Map([
-  ['GuestLoginUseCase.ts', `interface Input {\n  deviceId: string;\n  deviceModel?: string;\n  osVersion?: string;\n  fcmToken?: string;\n}\n`],
-  ['LogoutUseCase.ts', `interface Input {\n  deviceId?: string;\n  sessionId?: number;\n  userId?: number;\n  logoutAll?: boolean;\n}\n`],
-  ['RefreshTokenUseCase.ts', `interface Input {\n  refreshToken: string;\n  deviceId: string;\n}\n`],
-  ['SendOtpUseCase.ts', `interface Input {\n  phoneNumber: string;\n  deviceId: string;\n}\n`],
-  ['VerifyOtpUseCase.ts', `interface Input {\n  phoneNumber: string;\n  otp: string;\n  deviceId: string;\n  deviceModel?: string;\n  osVersion?: string;\n  fcmToken?: string;\n}\n`],
-]);
+// Identity application owns its input contracts. API/Zod schemas remain transport-only.
+write('domains/identity/application/GuestLoginUseCase.ts', `import { IUseCase, IUserRepository, IUserSessionRepository } from '@carbroz/common';
 
-for (const [name, declaration] of authInputs) {
-  patch(`domains/identity/application/${name}`, (text) => {
-    text = text.replace(/^import \{ z \} from 'zod';\n/m, '');
-    text = text.replace(/^import .*auth\.dto\.js.*\n/m, '');
-    text = text.replace(/^type Input = .*;\n/m, declaration);
-    return text;
-  });
+interface Input {
+  deviceId: string;
+  deviceModel?: string;
+  osVersion?: string;
+  fcmToken?: string;
 }
 
-for (const relative of [
-  'domains/identity/application/GuestLoginUseCase.ts',
-  'domains/identity/application/VerifyOtpUseCase.ts',
-]) {
-  patch(relative, (text) =>
-    text
-      .replace(/\s*deviceModel,\n\s*osVersion,\n\s*fcmToken,\n/g,
-        `\n      ...(deviceModel !== undefined ? { deviceModel } : {}),\n      ...(osVersion !== undefined ? { osVersion } : {}),\n      ...(fcmToken !== undefined ? { fcmToken } : {}),\n`)
-  );
+export class GuestLoginUseCase implements IUseCase<Input, any> {
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly userSessionRepository: IUserSessionRepository
+  ) {}
+
+  async execute(input: Input): Promise<any> {
+    const { deviceId, deviceModel, osVersion, fcmToken } = input;
+    const guestUser = await this.userRepository.upsert(\`guest_\${Date.now()}\`, {
+      isGuest: true,
+      role: 'GUEST',
+    });
+
+    const newSession = await this.userSessionRepository.upsert(guestUser.id, deviceId, {
+      ...(deviceModel !== undefined ? { deviceModel } : {}),
+      ...(osVersion !== undefined ? { osVersion } : {}),
+      ...(fcmToken !== undefined ? { fcmToken } : {}),
+    });
+
+    return { user: guestUser, session: newSession };
+  }
+}
+`);
+
+write('domains/identity/application/LogoutUseCase.ts', `import { IUseCase, IUserSessionRepository } from '@carbroz/common';
+
+interface Input {
+  deviceId?: string;
+  sessionId?: number;
+  userId?: number;
+  logoutAll?: boolean;
+}
+
+export class LogoutUseCase implements IUseCase<Input, void> {
+  constructor(private readonly userSessionRepository: IUserSessionRepository) {}
+
+  async execute(input: Input): Promise<void> {
+    const { sessionId, userId, logoutAll } = input;
+    if (logoutAll && userId) {
+      await this.userSessionRepository.revokeAllForUser(userId);
+    } else if (sessionId) {
+      await this.userSessionRepository.save({
+        id: sessionId,
+        isRevoked: true,
+        refreshToken: null,
+      } as any);
+    }
+  }
+}
+`);
+
+write('domains/identity/application/VerifyOtpUseCase.ts', `import { IUseCase, IUserRepository, IUserSessionRepository, ValidationError } from '@carbroz/common';
+
+interface Input {
+  phoneNumber: string;
+  otp: string;
+  deviceId: string;
+  deviceModel?: string;
+  osVersion?: string;
+  fcmToken?: string;
+}
+
+export class VerifyOtpUseCase implements IUseCase<Input, any> {
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly userSessionRepository: IUserSessionRepository
+  ) {}
+
+  async execute(input: Input): Promise<any> {
+    const { phoneNumber, otp, deviceId, deviceModel, osVersion, fcmToken } = input;
+    if (otp !== '123456' && otp !== '111111') {
+      throw new ValidationError('Invalid OTP');
+    }
+
+    const user = await this.userRepository.upsert(phoneNumber, {
+      role: 'USER',
+      isGuest: false,
+    });
+    const refreshToken = \`rt_\${Buffer.from(user.id + Date.now().toString()).toString('base64')}\`;
+    const session = await this.userSessionRepository.upsert(user.id, deviceId, {
+      ...(deviceModel !== undefined ? { deviceModel } : {}),
+      ...(osVersion !== undefined ? { osVersion } : {}),
+      ...(fcmToken !== undefined ? { fcmToken } : {}),
+      refreshToken,
+    });
+
+    return {
+      user,
+      session,
+      nextScreen: { template: 'dashboard_template', api: 'home' },
+    };
+  }
+}
+`);
+
+const authInputs = new Map([
+  ['RefreshTokenUseCase.ts', `interface Input {\n  refreshToken: string;\n  deviceId: string;\n}\n`],
+  ['SendOtpUseCase.ts', `interface Input {\n  phoneNumber: string;\n  deviceId: string;\n}\n`],
+]);
+for (const [name, declaration] of authInputs) {
+  patch(`domains/identity/application/${name}`, (text) => {
+    text = text.replace(/^import \{ z \} from 'zod';\r?\n/m, '');
+    text = text.replace(/^import .*auth\.dto\.js.*\r?\n/m, '');
+    text = text.replace(/^type Input = .*;\r?\n/m, declaration);
+    return text;
+  });
 }
 
 // Prisma nullable fields may be null, but exactOptionalPropertyTypes forbids
