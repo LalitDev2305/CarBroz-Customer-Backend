@@ -43,6 +43,8 @@ jobs:
         run: node tools/finalize-backend-v3-partner.mjs
       - name: Finalize Configuration bounded context
         run: node tools/finalize-backend-v3-configuration.mjs
+      - name: Finalize integration contracts
+        run: node tools/finalize-backend-v3-integrations.mjs
       - name: Finalize package import boundaries
         run: node tools/finalize-backend-v3-import-boundaries.mjs
       - name: Finalize workspace dependency graph
@@ -77,6 +79,7 @@ jobs:
           node tools/finalize-backend-v3-domain-dependencies.mjs
           node tools/finalize-backend-v3-partner.mjs
           node tools/finalize-backend-v3-configuration.mjs
+          node tools/finalize-backend-v3-integrations.mjs
           node tools/finalize-backend-v3-import-boundaries.mjs
           node tools/finalize-backend-v3-workspace-graph.mjs
           node tools/finalize-backend-v3-strictness.mjs
