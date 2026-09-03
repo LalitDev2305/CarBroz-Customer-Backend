@@ -1,5 +1,5 @@
 import { UserSession, IUserSessionRepository } from '@carbroz/common';
-import { PrismaProvider } from '../providers/PrismaProvider.js';
+import { PrismaProvider } from '@carbroz/platform-database';
 
 export class PrismaUserSessionRepository implements IUserSessionRepository {
   private readonly prisma;
@@ -80,18 +80,18 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
       },
       include: { user: true }
     });
-    
+
     if (!session || session.deletedAt) return null;
     return this.mapToDomain(session);
   }
 
   async findByRefreshToken(refreshToken: string, deviceId: string): Promise<UserSession | null> {
     const session = await this.prisma.userSession.findFirst({
-      where: { 
-        refreshToken, 
+      where: {
+        refreshToken,
         deviceId,
-        isRevoked: false, 
-        deletedAt: null 
+        isRevoked: false,
+        deletedAt: null
       },
       include: { user: true }
     });
