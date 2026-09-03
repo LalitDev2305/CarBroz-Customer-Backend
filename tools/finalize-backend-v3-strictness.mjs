@@ -32,13 +32,6 @@ for (const file of walk(p('domains')).filter((x) => x.endsWith('.ts') && !x.incl
 
   if (file.includes(`${path.sep}infrastructure${path.sep}repositories${path.sep}Prisma`)) {
     text = text.replace(/\.map\(\(([A-Za-z_$][\w$]*)\)\s*=>/g, '.map(($1: any) =>');
-
-    // Hydration objects must omit optional publicId when storage has no value.
-    // Handle both direct values and the legacy `?? undefined` form.
-    text = text.replace(
-      /publicId:\s*([A-Za-z_$][\w$]*)\.publicId(?:\s*\?\?\s*undefined)?\s*,/g,
-      '...($1.publicId !== undefined && $1.publicId !== null ? { publicId: $1.publicId } : {}),',
-    );
   }
 
   fs.writeFileSync(file, text);
