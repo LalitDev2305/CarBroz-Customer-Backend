@@ -1,9 +1,12 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { CreateVehicleUseCase } from '../src/modules/vehicle/use-cases/CreateVehicleUseCase.js';
-import { ListCustomerVehiclesUseCase } from '../src/modules/vehicle/use-cases/ListCustomerVehiclesUseCase.js';
-import { SetDefaultVehicleUseCase } from '../src/modules/vehicle/use-cases/SetDefaultVehicleUseCase.js';
-import { ArchiveVehicleUseCase } from '../src/modules/vehicle/use-cases/ArchiveVehicleUseCase.js';
-import { IVehicleRepository, Vehicle } from '@carbroz/common';
+import {
+  ArchiveVehicleUseCase,
+  CreateVehicleUseCase,
+  IVehicleRepository,
+  ListCustomerVehiclesUseCase,
+  SetDefaultVehicleUseCase,
+  Vehicle,
+} from '@carbroz/domain-customer';
 
 class MemoryVehicleRepository implements IVehicleRepository {
   public items: Vehicle[] = [];
@@ -112,7 +115,7 @@ describe('Vehicle Use Cases', () => {
         year: 2023,
         registrationNumber: 'KA05MN1234',
         fuelType: 'DIESEL',
-      })
+      }),
     ).rejects.toThrow();
   });
 
