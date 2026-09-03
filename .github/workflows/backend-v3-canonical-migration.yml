@@ -28,6 +28,7 @@ jobs:
           let s = fs.readFileSync(file, 'utf8');
           s = s.replace("['domains/partner/', 'domains/catalog-pricing/', 'domains/financials/', 'domains/operations/', 'domains/communications/', 'domains/engagement/', 'domains/configuration/', 'domains/enterprise/', 'apps/api', 'GLOBAL', 'PARTNER', 'CUSTOMER']", "['partner/', 'catalog-pricing/', 'financials/', 'operations/', 'communications/', 'engagement/', 'configuration/', 'enterprise/', 'apps/', 'GLOBAL', 'PARTNER', 'CUSTOMER']");
           s = s.replace("if (!owner || !newAbs.endsWith('.ts')) continue;", "if (!owner || !newAbs.endsWith('.ts') || !fs.existsSync(newAbs)) continue;");
+          s = s.replace("/import\\s+(type\\s+)?\\{([\\s\\S]*?)\\}\\s+from\\s+['\"]@carbroz\\/common['\"];?/g", "/import\\s+(type\\s+)?\\{([^}]*)\\}\\s+from\\s+['\"]@carbroz\\/common['\"];?/g");
           fs.writeFileSync(file, s);
           NODE
       - name: Generate canonical architecture
