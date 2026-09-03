@@ -6,9 +6,3 @@ export const raiseDisputeSchema = z.object({
   description: z.string().optional(),
   requestedRefundPaise: z.number().int().nonnegative(),
 });
-
-export const resolveDisputeSchema = z.object({
-  action: z.enum(['REFUND', 'REJECT']),
-  approvedRefundPaise: z.number().int().nonnegative().optional(),
-  resolutionNotes: z.string().min(5),
-});
