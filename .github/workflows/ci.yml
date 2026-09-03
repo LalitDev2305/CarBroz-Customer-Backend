@@ -7,6 +7,7 @@ on:
       - architecture-v2
       - architecture/backend-v3-clean
       - 'feature/**'
+      - '!feature/backend-v3-stage-a-cleanup'
   pull_request:
     branches:
       - main
