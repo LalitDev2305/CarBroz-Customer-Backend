@@ -1,16 +1,31 @@
-import { asClass, type AwilixContainer } from 'awilix';
+import { asFunction, type AwilixContainer } from 'awilix';
+import type { PrismaProvider } from '@carbroz/platform-database';
 import { PrismaUserRepository } from './infrastructure/repositories/PrismaUserRepository.js';
 import { PrismaUserSessionRepository } from './infrastructure/repositories/PrismaUserSessionRepository.js';
 import { PrismaRoleRepository } from './infrastructure/repositories/PrismaRoleRepository.js';
 import { PrismaPermissionRepository } from './infrastructure/repositories/PrismaPermissionRepository.js';
 import { PrismaAdminRoleRepository } from './infrastructure/repositories/PrismaAdminRoleRepository.js';
 
+interface IdentityCradle {
+  prismaProvider: PrismaProvider;
+}
+
 export function registerIdentityModule(container: AwilixContainer): void {
   container.register({
-    userRepository: asClass(PrismaUserRepository).singleton(),
-    userSessionRepository: asClass(PrismaUserSessionRepository).singleton(),
-    roleRepository: asClass(PrismaRoleRepository).singleton(),
-    permissionRepository: asClass(PrismaPermissionRepository).singleton(),
-    adminRoleRepository: asClass(PrismaAdminRoleRepository).singleton(),
+    userRepository: asFunction(
+      (cradle: IdentityCradle) => new PrismaUserRepository(cradle.prismaProvider),
+    ).singleton(),
+    userSessionRepository: asFunction(
+      (cradle: IdentityCradle) => new PrismaUserSessionRepository(cradle.prismaProvider),
+    ).singleton(),
+    roleRepository: asFunction(
+      (cradle: IdentityCradle) => new PrismaRoleRepository(cradle.prismaProvider),
+    ).singleton(),
+    permissionRepository: asFunction(
+      (cradle: IdentityCradle) => new PrismaPermissionRepository(cradle.prismaProvider),
+    ).singleton(),
+    adminRoleRepository: asFunction(
+      (cradle: IdentityCradle) => new PrismaAdminRoleRepository(cradle.prismaProvider),
+    ).singleton(),
   });
 }
