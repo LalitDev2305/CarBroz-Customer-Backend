@@ -1,5 +1,5 @@
 {
-  "name": "@carbroz/domain-partner-profile",
+  "name": "@carbroz/domain-partner",
   "version": "1.0.0",
   "type": "module",
   "main": "dist/public/index.js",
@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@carbroz/common": "workspace:*",
-    "@carbroz/shared-kernel": "workspace:*",
     "@prisma/client": "^6.19.3",
     "awilix": "^12.0.0"
   },
