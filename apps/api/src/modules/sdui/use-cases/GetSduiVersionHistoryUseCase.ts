@@ -1,8 +1,10 @@
-import { ISduiRegistryRepository, IUseCase, SduiScreenEntity } from '@carbroz/common';
+import { IUseCase } from '@carbroz/common';
+import type { ISduiRegistryRepository, SduiScreenEntity } from '@carbroz/sdui-registry';
+import type { SduiTargetApp } from '@carbroz/ui-sdk';
 
 export interface GetSduiVersionHistoryInput {
   screenId: string;
-  targetApp?: string;
+  targetApp?: SduiTargetApp;
 }
 
 export class GetSduiVersionHistoryUseCase implements IUseCase<GetSduiVersionHistoryInput, SduiScreenEntity[]> {
