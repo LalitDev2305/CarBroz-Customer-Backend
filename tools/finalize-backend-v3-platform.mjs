@@ -117,6 +117,10 @@ for (const file of walk(root).filter((x) => x.endsWith('package.json'))) {
   if (changed) fs.writeFileSync(file, JSON.stringify(manifest, null, 2) + '\n');
 }
 
+// The canonical migration rewrites pnpm-workspace.yaml. Restore pnpm 11 build-script
+// approvals here so required native/Prisma packages can install non-interactively in CI.
+write('pnpm-workspace.yaml', `packages:\n  - 'apps/*'\n  - 'domains/*'\n  - 'sdui/*'\n  - 'platform/*'\n  - 'foundation/*'\nallowBuilds:\n  '@prisma/client': true\n  '@prisma/engines': true\n  bcrypt: true\n  esbuild: true\n  msgpackr-extract: true\n  prisma: true\n`);
+
 for (const legacy of packageAliases.keys()) {
   for (const file of walk(root).filter((x) => /\.(?:ts|mts|cts|json)$/.test(x))) {
     if (fs.readFileSync(file, 'utf8').includes(legacy)) throw new Error(`Legacy platform package identity remains: ${legacy} in ${path.relative(root, file)}`);
