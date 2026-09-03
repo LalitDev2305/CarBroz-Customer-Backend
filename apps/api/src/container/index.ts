@@ -37,6 +37,19 @@ import { registerDisputeModule } from '@carbroz/domain-dispute';
 import { registerSduiRegistryModule } from '@carbroz/sdui-registry';
 import { registerAuditModule } from '@carbroz/domain-audit';
 import { FeatureFlagProvider, registerConfigModule } from '@carbroz/domain-configuration';
+import {
+  RegisterCorporateAccountUseCase,
+  ApproveCorporateAccountUseCase,
+  AdjustCreditLimitUseCase,
+  AddCorporateMemberUseCase,
+  RemoveCorporateMemberUseCase,
+  EnrollFleetVehicleUseCase,
+  RemoveFleetVehicleUseCase,
+  ValidateCorporateBookingUseCase,
+  GenerateCorporateInvoiceUseCase,
+  ReconcileCorporatePaymentUseCase,
+  registerEnterpriseModule,
+} from '@carbroz/domain-enterprise';
 
 import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js';
 import { RegisterOrganizationPartnerUseCase } from '../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js';
@@ -104,11 +117,6 @@ import {
   PrismaCouponUsageRepository,
   PrismaAuditLogRepository,
   PrismaDisputeRepository,
-  PrismaCorporateAccountRepository,
-  PrismaCorporateMemberRepository,
-  PrismaCorporateFleetVehicleRepository,
-  PrismaCorporateCreditLedgerRepository,
-  PrismaCorporateInvoiceRepository,
 } from '@carbroz/platform-database';
 import { RazorpayPaymentGatewayProvider } from '../providers/payment/RazorpayPaymentGatewayProvider.js';
 import { CreatePaymentOrderUseCase } from '../modules/payment/use-cases/CreatePaymentOrderUseCase.js';
@@ -148,16 +156,6 @@ import { RaiseDisputeUseCase } from '../modules/dispute/use-cases/RaiseDisputeUs
 import { ResolveDisputeUseCase } from '../modules/dispute/use-cases/ResolveDisputeUseCase.js';
 import { GetDisputeUseCase } from '../modules/dispute/use-cases/GetDisputeUseCase.js';
 import { ListDisputesUseCase } from '../modules/dispute/use-cases/ListDisputesUseCase.js';
-import { RegisterCorporateAccountUseCase } from '../modules/corporate/use-cases/RegisterCorporateAccountUseCase.js';
-import { ApproveCorporateAccountUseCase } from '../modules/corporate/use-cases/ApproveCorporateAccountUseCase.js';
-import { AdjustCreditLimitUseCase } from '../modules/corporate/use-cases/AdjustCreditLimitUseCase.js';
-import { AddCorporateMemberUseCase } from '../modules/corporate/use-cases/AddCorporateMemberUseCase.js';
-import { RemoveCorporateMemberUseCase } from '../modules/corporate/use-cases/RemoveCorporateMemberUseCase.js';
-import { EnrollFleetVehicleUseCase } from '../modules/corporate/use-cases/EnrollFleetVehicleUseCase.js';
-import { RemoveFleetVehicleUseCase } from '../modules/corporate/use-cases/RemoveFleetVehicleUseCase.js';
-import { ValidateCorporateBookingUseCase } from '../modules/corporate/use-cases/ValidateCorporateBookingUseCase.js';
-import { GenerateCorporateInvoiceUseCase } from '../modules/corporate/use-cases/GenerateCorporateInvoiceUseCase.js';
-import { ReconcileCorporatePaymentUseCase } from '../modules/corporate/use-cases/ReconcileCorporatePaymentUseCase.js';
 import { CorporateController } from '../modules/corporate/controllers/CorporateController.js';
 import { AdminCorporateController } from '../modules/corporate/controllers/AdminCorporateController.js';
 
@@ -436,21 +434,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       resolveDisputeUseCase: asClass(ResolveDisputeUseCase).classic().scoped(),
       getDisputeUseCase: asClass(GetDisputeUseCase).classic().scoped(),
       listDisputesUseCase: asClass(ListDisputesUseCase).classic().scoped(),
-      corporateAccountRepo: asClass(PrismaCorporateAccountRepository).classic().singleton(),
-      corporateMemberRepo: asClass(PrismaCorporateMemberRepository).classic().singleton(),
-      fleetVehicleRepo: asClass(PrismaCorporateFleetVehicleRepository).classic().singleton(),
-      creditLedgerRepo: asClass(PrismaCorporateCreditLedgerRepository).classic().singleton(),
-      corporateInvoiceRepo: asClass(PrismaCorporateInvoiceRepository).classic().singleton(),
-      registerAccountUseCase: asClass(RegisterCorporateAccountUseCase).classic().scoped(),
-      approveAccountUseCase: asClass(ApproveCorporateAccountUseCase).classic().scoped(),
-      adjustCreditLimitUseCase: asClass(AdjustCreditLimitUseCase).classic().scoped(),
-      addMemberUseCase: asClass(AddCorporateMemberUseCase).classic().scoped(),
-      removeMemberUseCase: asClass(RemoveCorporateMemberUseCase).classic().scoped(),
-      enrollFleetVehicleUseCase: asClass(EnrollFleetVehicleUseCase).classic().scoped(),
-      removeFleetVehicleUseCase: asClass(RemoveFleetVehicleUseCase).classic().scoped(),
-      validateCorporateBookingUseCase: asClass(ValidateCorporateBookingUseCase).classic().scoped(),
-      generateCorporateInvoiceUseCase: asClass(GenerateCorporateInvoiceUseCase).classic().scoped(),
-      reconcilePaymentUseCase: asClass(ReconcileCorporatePaymentUseCase).classic().scoped(),
       corporateController: asClass(CorporateController).classic().scoped(),
       adminCorporateController: asClass(AdminCorporateController).classic().scoped(),
     });
@@ -469,6 +452,7 @@ export function getContainer(): AwilixContainer<Cradle> {
     registerSduiRegistryModule(diContainer);
     registerAuditModule(diContainer);
     registerConfigModule(diContainer);
+    registerEnterpriseModule(diContainer);
     isRegistered = true;
   }
 
