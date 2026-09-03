@@ -1,4 +1,4 @@
-import { Money } from '@carbroz/shared-kernel';
+import { Money } from '@carbroz/foundation-kernel';
 import { DisputeStatus } from './DisputeStatus.js';
 import { DisputeReason } from './DisputeReason.js';
 
