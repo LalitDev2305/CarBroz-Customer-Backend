@@ -9,9 +9,9 @@ function read(path: string): string {
 }
 
 describe('partner KYC persistence boundary', () => {
-  it('keeps the KYC repository implementation inside the Partner KYC bounded context', () => {
+  it('keeps the KYC repository implementation inside the Partner bounded context', () => {
     expect(
-      existsSync(resolve(root, 'domains/partner-kyc/infrastructure/repositories/PrismaKycDocumentRepository.ts')),
+      existsSync(resolve(root, 'domains/partner/kyc/infrastructure/repositories/PrismaKycDocumentRepository.ts')),
     ).toBe(true);
     expect(existsSync(resolve(root, 'platform/database/src/repositories/PrismaKycDocumentRepository.ts'))).toBe(false);
   });
@@ -25,7 +25,7 @@ describe('partner KYC persistence boundary', () => {
   });
 
   it('lets the Partner KYC module own DI registration for kycDocumentRepository', () => {
-    const kycModule = read('domains/partner-kyc/partner-kyc.module.ts');
+    const kycModule = read('domains/partner/kyc/partner-kyc.module.ts');
 
     expect(kycModule).toContain('kycDocumentRepository');
     expect(kycModule).toContain('PrismaKycDocumentRepository');
