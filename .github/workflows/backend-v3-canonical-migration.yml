@@ -37,8 +37,12 @@ jobs:
         run: node tools/finalize-backend-v3-canonical-internals.mjs
       - name: Finalize SDUI contracts
         run: node tools/finalize-backend-v3-sdui.mjs
+      - name: Finalize domain dependency boundaries
+        run: node tools/finalize-backend-v3-domain-dependencies.mjs
       - name: Finalize package import boundaries
         run: node tools/finalize-backend-v3-import-boundaries.mjs
+      - name: Finalize workspace dependency graph
+        run: node tools/finalize-backend-v3-workspace-graph.mjs
       - name: Finalize strict TypeScript semantics
         run: node tools/finalize-backend-v3-strictness.mjs
       - name: Finalize customer hydration
@@ -66,7 +70,9 @@ jobs:
           node tools/finalize-backend-v3-symbol-ownership.mjs
           node tools/finalize-backend-v3-canonical-internals.mjs
           node tools/finalize-backend-v3-sdui.mjs
+          node tools/finalize-backend-v3-domain-dependencies.mjs
           node tools/finalize-backend-v3-import-boundaries.mjs
+          node tools/finalize-backend-v3-workspace-graph.mjs
           node tools/finalize-backend-v3-strictness.mjs
           node tools/finalize-backend-v3-customer-hydration.mjs
           node tools/verify-backend-v3-canonical-structure.mjs
