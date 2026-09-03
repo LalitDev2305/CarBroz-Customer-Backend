@@ -10,21 +10,25 @@ function patch(relative, transform) {
   fs.writeFileSync(file, transform(fs.readFileSync(file, 'utf8')));
 }
 
-// Foundation owns universal application errors; expose them through its public
-// boundary so domains/SDUI never deep-import Foundation internals.
 patch('foundation/kernel/src/public/index.ts', (text) => {
   if (!text.includes("../errors/exceptions.js")) text += "\nexport * from '../errors/exceptions.js';\n";
   return text;
 });
 
-// The frozen SDUI scopes are GLOBAL, PARTNER and CUSTOMER. Admin manages the
-// registry but is not itself an SDUI-rendered target application.
 patch('sdui/ui-sdk/src/contract/common.schema.ts', (text) =>
   text.replace("z.enum(['CUSTOMER', 'PARTNER', 'ADMIN'])", "z.enum(['GLOBAL', 'CUSTOMER', 'PARTNER'])")
 );
 
-// Use the canonical target-app type instead of unbounded strings at Registry
-// application boundaries.
+// Registry DTOs own Zod request/schema contracts after API business logic is
+// removed, so Registry must declare the dependency itself rather than relying on
+// the UI SDK's transitive dependency.
+patch('sdui/registry/package.json', (text) => {
+  const pkg = JSON.parse(text);
+  pkg.dependencies ??= {};
+  pkg.dependencies.zod = '^4.4.3';
+  return `${JSON.stringify(pkg, null, 2)}\n`;
+});
+
 for (const relative of [
   'sdui/registry/application/GetSduiSpecificVersionUseCase.ts',
   'sdui/registry/application/GetSduiVersionHistoryUseCase.ts',
