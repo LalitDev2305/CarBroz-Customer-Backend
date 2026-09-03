@@ -1,0 +1,92 @@
+name: Backend V3 Stage A Exactness Audit
+
+on:
+  push:
+    branches:
+      - feature/backend-v3-stage-a-cleanup
+
+jobs:
+  exactness-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact source architecture only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,re,sys
+          failures=[]
+          def fail(x): failures.append(x)
+
+          # Exact workspace discovery roots.
+          ws=Path('pnpm-workspace.yaml').read_text()
+          expected=["- 'apps/*'","- 'domains/*'","- 'sdui/*'","- 'platform/*'","- 'foundation/*'"]
+          for line in expected:
+              if line not in ws: fail('MISSING WORKSPACE GLOB: '+line)
+          for forbidden in ("packages/*","shared/*","libs/*"):
+              if forbidden in ws: fail('FORBIDDEN WORKSPACE GLOB: '+forbidden)
+
+          expected_packages={
+            'apps/api':'@carbroz/api',
+            'foundation/kernel':'@carbroz/foundation-kernel',
+            'sdui/ui-sdk':'@carbroz/ui-sdk',
+            'sdui/registry':'@carbroz/sdui-registry',
+            'platform/cache':'@carbroz/platform-cache',
+            'platform/database':'@carbroz/platform-database',
+            'platform/integrations':'@carbroz/platform-integrations',
+            'platform/messaging':'@carbroz/platform-messaging',
+            'platform/observability':'@carbroz/platform-observability',
+            'platform/storage':'@carbroz/platform-storage',
+          }
+          domains=['identity','partner','customer','catalog-pricing','booking','operations','financials','communications','engagement','configuration','dispute','enterprise','audit']
+          expected_packages.update({f'domains/{d}':f'@carbroz/domain-{d}' for d in domains})
+          names={}
+          for folder,expected_name in expected_packages.items():
+              package=Path(folder)/'package.json'
+              if not package.exists():
+                  fail('MISSING PACKAGE.JSON: '+folder); continue
+              actual=json.loads(package.read_text()).get('name')
+              if actual!=expected_name: fail(f'PACKAGE IDENTITY {folder}: expected {expected_name}, got {actual}')
+              if actual in names: fail(f'DUPLICATE PACKAGE NAME {actual}: {names[actual]} <> {folder}')
+              names[actual]=folder
+
+          # Exact top-level subroots.
+          exact_children={
+            'foundation':{'kernel'},
+            'sdui':{'ui-sdk','registry'},
+            'platform':{'cache','database','integrations','messaging','observability','storage'},
+            'apps':{'api'},
+            'tests':{'architecture','contracts','integration','e2e'},
+          }
+          for folder,expected in exact_children.items():
+              actual={p.name for p in Path(folder).iterdir() if p.is_dir()}
+              if actual!=expected: fail(f'EXACT CHILDREN {folder}: expected {sorted(expected)}, got {sorted(actual)}')
+
+          # Every domain must expose one public boundary; consumers should use workspace packages.
+          for d in domains:
+              pub=Path('domains')/d/'public/index.ts'
+              if not pub.exists(): fail('MISSING DOMAIN PUBLIC BOUNDARY: '+str(pub))
+          for p in ('foundation/kernel/src/public/index.ts','sdui/ui-sdk/src/public/index.ts','sdui/registry/public/index.ts'):
+              if not Path(p).exists(): fail('MISSING CANONICAL PUBLIC BOUNDARY: '+p)
+
+          # Product-surface route files must define paths relative to their mounted prefix.
+          surfaces=Path('apps/api/src/surfaces')
+          for f in surfaces.rglob('*.ts'):
+              text=f.read_text(errors='ignore')
+              if re.search(r"fastify\.(?:get|post|put|patch|delete)\(\s*['\"]/api/v1/",text):
+                  fail('ABSOLUTE API PATH INSIDE SURFACE: '+str(f))
+
+          # No product surface may contain a generic app/bootstrap/config/screen implementation.
+          for f in surfaces.rglob('*.ts'):
+              low=str(f).lower()
+              if '/surfaces/' in low and re.search(r'/(app|bootstrap)(?:\.|/)',low):
+                  fail('GENERIC APP/BOOTSTRAP SOURCE UNDER PRODUCT SURFACE: '+str(f))
+
+          print('=== FINAL STAGE A EXACTNESS AUDIT ===')
+          if failures:
+              for x in failures: print('FAIL:',x)
+              print('TOTAL FAILURES:',len(failures))
+              sys.exit(1)
+          print('PASS: workspace identities, exact roots, public boundaries and surface route ownership match the canonical Backend V3 structure.')
+          PY
