@@ -46,18 +46,58 @@ describe('canonical repository topology migration', () => {
     expect(workspace).toContain('"sdui/*"');
   });
 
-  it('keeps the final taxonomy frozen in the Master Constitution', () => {
+  it('freezes the canonical business topology in the Master Constitution', () => {
     const constitution = read('docs/MASTER-BACKEND-CONSTITUTION.md');
 
     expect(constitution).toContain('├── apps/');
     expect(constitution).toContain('│   └── api/');
     expect(constitution).toContain('├── domains/');
-    expect(constitution).toContain('│   ├── customer/');
+    expect(constitution).toContain('│   ├── identity/');
     expect(constitution).toContain('│   ├── partner/');
+    expect(constitution).toContain('│   ├── customer/');
+    expect(constitution).toContain('│   ├── catalog-pricing/');
+    expect(constitution).toContain('│   ├── booking/');
+    expect(constitution).toContain('│   ├── operations/');
     expect(constitution).toContain('│   ├── financials/');
+    expect(constitution).toContain('│   ├── communications/');
+    expect(constitution).toContain('│   ├── engagement/');
+    expect(constitution).toContain('│   ├── configuration/');
+    expect(constitution).toContain('│   ├── dispute/');
+    expect(constitution).toContain('│   ├── enterprise/');
+    expect(constitution).toContain('│   └── audit/');
     expect(constitution).toContain('├── sdui/');
     expect(constitution).toContain('│   ├── ui-sdk/');
     expect(constitution).toContain('│   └── registry/');
     expect(constitution).toContain('│   └── integrations/');
+  });
+
+  it('freezes Partner, Customer and Admin as isolated API surfaces', () => {
+    const constitution = read('docs/MASTER-BACKEND-CONSTITUTION.md');
+
+    expect(constitution).toContain('├── surfaces/');
+    expect(constitution).toContain('│   ├── partner/');
+    expect(constitution).toContain('│   ├── customer/');
+    expect(constitution).toContain('│   └── admin/');
+    expect(constitution).toContain('/api/v1/partner/*');
+    expect(constitution).toContain('/api/v1/customer/*');
+    expect(constitution).toContain('/api/v1/admin/*');
+  });
+
+  it('forbids screen-name-driven backend architecture and freezes runtime SDUI scopes', () => {
+    const constitution = read('docs/MASTER-BACKEND-CONSTITUTION.md');
+
+    expect(constitution).toContain('No screen-name-driven backend architecture');
+    expect(constitution).toContain('GLOBAL');
+    expect(constitution).toContain('PARTNER');
+    expect(constitution).toContain('CUSTOMER');
+    expect(constitution).toContain('Published SDUI definitions/documents are immutable');
+  });
+
+  it('requires every future architecture-sensitive session to read the constitution first', () => {
+    const constitution = read('docs/MASTER-BACKEND-CONSTITUTION.md');
+
+    expect(constitution).toContain('Mandatory pre-change gate');
+    expect(constitution).toContain('Before ANY architecture-sensitive refactor or feature implementation');
+    expect(constitution).toContain('Architecture MUST NOT silently drift');
   });
 });
