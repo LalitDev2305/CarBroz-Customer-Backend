@@ -1,19 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   RegisterCorporateAccountUseCase,
-} from '../src/modules/corporate/use-cases/RegisterCorporateAccountUseCase.js';
-import {
   ApproveCorporateAccountUseCase,
-} from '../src/modules/corporate/use-cases/ApproveCorporateAccountUseCase.js';
-import {
   ValidateCorporateBookingUseCase,
-} from '../src/modules/corporate/use-cases/ValidateCorporateBookingUseCase.js';
-import {
   GenerateCorporateInvoiceUseCase,
-} from '../src/modules/corporate/use-cases/GenerateCorporateInvoiceUseCase.js';
-import {
   ReconcileCorporatePaymentUseCase,
-} from '../src/modules/corporate/use-cases/ReconcileCorporatePaymentUseCase.js';
+} from '@carbroz/domain-enterprise';
 import {
   CorporateAccount,
   CorporateMember,
@@ -289,7 +281,6 @@ describe('Phase 22 — Corporate Accounts, Fleet Management & B2B Billing Use Ca
     expect(invoice.status).toBe('ISSUED');
     expect(invoice.lines).toHaveLength(1);
 
-    // Reconcile Payment
     mockCorporateInvoiceRepo.findByPublicId.mockResolvedValue(invoice);
     mockCorporateInvoiceRepo.update.mockImplementation(async (inv: any) => inv);
     mockAccountRepo.updateUtilisedCredit.mockResolvedValue(activeAccount);
