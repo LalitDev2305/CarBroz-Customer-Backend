@@ -18,6 +18,16 @@
     "test:coverage": "vitest run --coverage"
   },
   "type": "module",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "bcrypt",
+      "esbuild",
+      "msgpackr-extract",
+      "prisma"
+    ]
+  },
   "devDependencies": {
     "@carbroz/sdui-registry": "workspace:*",
     "@carbroz/ui-sdk": "workspace:*",
