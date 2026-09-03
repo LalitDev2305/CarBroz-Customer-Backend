@@ -1,9 +1,11 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { RegisterCorporateAccountUseCase } from '../use-cases/RegisterCorporateAccountUseCase.js';
-import { AddCorporateMemberUseCase } from '../use-cases/AddCorporateMemberUseCase.js';
-import { RemoveCorporateMemberUseCase } from '../use-cases/RemoveCorporateMemberUseCase.js';
-import { EnrollFleetVehicleUseCase } from '../use-cases/EnrollFleetVehicleUseCase.js';
-import { RemoveFleetVehicleUseCase } from '../use-cases/RemoveFleetVehicleUseCase.js';
+import {
+  AddCorporateMemberUseCase,
+  EnrollFleetVehicleUseCase,
+  RegisterCorporateAccountUseCase,
+  RemoveCorporateMemberUseCase,
+  RemoveFleetVehicleUseCase,
+} from '@carbroz/domain-enterprise';
 
 export class CorporateController {
   async registerAccount(request: FastifyRequest, reply: FastifyReply) {
