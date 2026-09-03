@@ -1,4 +1,4 @@
-import { IDatabaseProvider } from '@carbroz/common';
+import { type IDatabaseProvider } from '../public/IDatabaseProvider.js';
 import { PrismaProvider } from './PrismaProvider.js';
 
 export class PrismaDatabaseProvider implements IDatabaseProvider {

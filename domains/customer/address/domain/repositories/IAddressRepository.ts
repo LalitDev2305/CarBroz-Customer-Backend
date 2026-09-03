@@ -1,4 +1,4 @@
-import type { Address } from '../Address.js';
+import { type Address } from '../Address.js';
 
 export interface IAddressRepository {
   findById(id: number): Promise<Address | null>;

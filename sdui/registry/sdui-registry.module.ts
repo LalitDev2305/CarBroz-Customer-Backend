@@ -1,5 +1,5 @@
 import { asFunction, type AwilixContainer } from 'awilix';
-import type { SduiPersistenceClient } from './infrastructure/persistence/SduiPersistenceClient.js';
+import { type SduiPersistenceClient } from './infrastructure/persistence/SduiPersistenceClient.js';
 import { PrismaSduiRegistryRepository } from './infrastructure/repositories/PrismaSduiRegistryRepository.js';
 
 interface PrismaProviderPort {

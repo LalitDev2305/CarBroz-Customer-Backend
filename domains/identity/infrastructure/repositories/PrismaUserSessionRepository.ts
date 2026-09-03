@@ -1,5 +1,6 @@
-import { UserSession, IUserSessionRepository } from '@carbroz/common';
-import { PrismaProvider } from '../providers/PrismaProvider.js';
+import { type UserSession } from '../../domain/UserSession.js';
+import { type IUserSessionRepository } from '../../domain/repositories/IUserSessionRepository.js';
+import { PrismaProvider } from '@carbroz/platform-database';
 
 export class PrismaUserSessionRepository implements IUserSessionRepository {
   private readonly prisma;
@@ -28,10 +29,10 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
       data: {
         userId: data.userId!,
         deviceId: data.deviceId!,
-        deviceModel: data.deviceModel,
-        osVersion: data.osVersion,
-        fcmToken: data.fcmToken,
-        refreshToken: data.refreshToken,
+        deviceModel: data.deviceModel ?? null,
+        osVersion: data.osVersion ?? null,
+        fcmToken: data.fcmToken ?? null,
+        refreshToken: data.refreshToken ?? null,
       },
       include: { user: true }
     });
@@ -42,12 +43,12 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
     const session = await this.prisma.userSession.update({
       where: { id },
       data: {
-        deviceModel: data.deviceModel,
-        osVersion: data.osVersion,
-        fcmToken: data.fcmToken,
-        refreshToken: data.refreshToken,
-        isRevoked: data.isRevoked,
-        lastActiveAt: data.lastActiveAt,
+        ...(data.deviceModel !== undefined ? { deviceModel: data.deviceModel } : {}),
+        ...(data.osVersion !== undefined ? { osVersion: data.osVersion } : {}),
+        ...(data.fcmToken !== undefined ? { fcmToken: data.fcmToken } : {}),
+        ...(data.refreshToken !== undefined ? { refreshToken: data.refreshToken } : {}),
+        ...(data.isRevoked !== undefined ? { isRevoked: data.isRevoked } : {}),
+        ...(data.lastActiveAt !== undefined ? { lastActiveAt: data.lastActiveAt } : {}),
       },
       include: { user: true }
     });
@@ -104,20 +105,20 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
         userId_deviceId: { userId, deviceId }
       },
       update: {
-        deviceModel: data.deviceModel,
-        osVersion: data.osVersion,
-        fcmToken: data.fcmToken,
-        refreshToken: data.refreshToken,
+        ...(data.deviceModel !== undefined ? { deviceModel: data.deviceModel } : {}),
+        ...(data.osVersion !== undefined ? { osVersion: data.osVersion } : {}),
+        ...(data.fcmToken !== undefined ? { fcmToken: data.fcmToken } : {}),
+        ...(data.refreshToken !== undefined ? { refreshToken: data.refreshToken } : {}),
         lastActiveAt: new Date(),
         isRevoked: false
       },
       create: {
         userId,
         deviceId,
-        deviceModel: data.deviceModel,
-        osVersion: data.osVersion,
-        fcmToken: data.fcmToken,
-        refreshToken: data.refreshToken,
+        deviceModel: data.deviceModel ?? null,
+        osVersion: data.osVersion ?? null,
+        fcmToken: data.fcmToken ?? null,
+        refreshToken: data.refreshToken ?? null,
       },
       include: { user: true }
     });

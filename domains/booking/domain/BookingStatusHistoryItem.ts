@@ -1,4 +1,4 @@
-import { BookingStatus } from './BookingStatus.js';
+import { type BookingStatus } from './BookingStatus.js';
 
 export interface BookingStatusHistoryItem {
   fromStatus: BookingStatus | null;

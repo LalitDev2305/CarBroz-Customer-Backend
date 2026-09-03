@@ -1,0 +1,17 @@
+{
+  "name": "@carbroz/domain-communications",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/public/index.js",
+  "types": "dist/public/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "awilix": "^12.0.0",
+    "@prisma/client": "^6.19.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0"
+  }
+}

@@ -1,6 +1,6 @@
 import { Money } from '@carbroz/shared-kernel';
-import { DisputeStatus } from './DisputeStatus.js';
-import { DisputeReason } from './DisputeReason.js';
+import { type DisputeStatus } from './DisputeStatus.js';
+import { type DisputeReason } from './DisputeReason.js';
 
 export interface DisputeProps {
   id?: number;
@@ -40,8 +40,8 @@ export class Dispute {
     if (!props.raisedByActorId) throw new Error('Dispute requires raisedByActorId');
     if (!props.disputeReason) throw new Error('Dispute requires a disputeReason');
 
-    this.id = props.id;
-    this.publicId = props.publicId;
+    if (props.id !== undefined) this.id = props.id;
+    if (props.publicId !== undefined) this.publicId = props.publicId;
     this.bookingId = props.bookingId;
     this.raisedByActorId = props.raisedByActorId;
     this.raisedByActorType = props.raisedByActorType;
@@ -52,8 +52,8 @@ export class Dispute {
     this.status = props.status ?? 'OPEN';
     this.resolutionNotes = props.resolutionNotes ?? null;
     this.resolvedAt = props.resolvedAt ?? null;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+    if (props.createdAt !== undefined) this.createdAt = props.createdAt;
+    if (props.updatedAt !== undefined) this.updatedAt = props.updatedAt;
   }
 
   public resolveRefund(approvedRefundAmount: Money, notes: string): void {

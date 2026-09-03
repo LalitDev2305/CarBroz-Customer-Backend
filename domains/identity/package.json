@@ -8,10 +8,10 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@carbroz/common": "workspace:*",
-    "@carbroz/shared-kernel": "workspace:*",
+    "awilix": "^12.0.0",
     "@prisma/client": "^6.19.3",
-    "awilix": "^12.0.0"
+    "@carbroz/foundation-kernel": "workspace:*",
+    "@carbroz/platform-database": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.1.0"

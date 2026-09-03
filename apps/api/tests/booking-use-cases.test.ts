@@ -4,19 +4,11 @@ import { ConfirmBookingUseCase } from '../src/modules/booking/use-cases/ConfirmB
 import { AssignPartnerToBookingUseCase } from '../src/modules/booking/use-cases/AssignPartnerToBookingUseCase.js';
 import { CancelBookingUseCase } from '../src/modules/booking/use-cases/CancelBookingUseCase.js';
 import { ExpirePendingBookingsUseCase } from '../src/modules/booking/use-cases/ExpirePendingBookingsUseCase.js';
-import {
-  Booking,
-  Vehicle,
-  type BookingStatus,
-  type IAddressRepository,
-  type IBookingRepository,
-  type ICatalogRepository,
-  type ICustomerProfileRepository,
-  type IPartnerRepository,
-  type IPricingRepository,
-  type ITransactionProvider,
-  type IVehicleRepository,
-} from '@carbroz/common';
+import { Booking, type BookingStatus, type IBookingRepository } from '@carbroz/domain-booking';
+import { Vehicle, type IAddressRepository, type ICustomerProfileRepository, type IVehicleRepository } from '@carbroz/domain-customer';
+import { type ICatalogRepository, type IPricingRepository } from '@carbroz/domain-catalog-pricing';
+import { type IPartnerRepository } from '@carbroz/domain-partner';
+import { type ITransactionProvider } from '@carbroz/foundation-kernel';
 
 class MemoryBookingRepository implements IBookingRepository {
   public items: Booking[] = [];

@@ -3,7 +3,7 @@ import { ArchiveVehicleUseCase } from './application/use-cases/ArchiveVehicleUse
 import { CreateVehicleUseCase } from './application/use-cases/CreateVehicleUseCase.js';
 import { ListCustomerVehiclesUseCase } from './application/use-cases/ListCustomerVehiclesUseCase.js';
 import { SetDefaultVehicleUseCase } from './application/use-cases/SetDefaultVehicleUseCase.js';
-import type { VehiclePersistenceClient } from './infrastructure/persistence/VehiclePersistenceClient.js';
+import { type VehiclePersistenceClient } from './infrastructure/persistence/VehiclePersistenceClient.js';
 import { PrismaVehicleRepository } from './infrastructure/repositories/PrismaVehicleRepository.js';
 
 interface PrismaProviderPort {

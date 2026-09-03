@@ -1,5 +1,5 @@
 import { screenSchema, type SduiScreen, type SduiTheme } from '../contract/screen.schema.js';
-import type { SduiTemplate } from '../contract/template.schema.js';
+import { type SduiTemplate } from '../contract/template.schema.js';
 
 export interface ScreenBuilderInput {
   screenId: string;

@@ -1,9 +1,6 @@
 import { CustomerProfile } from '../../domain/CustomerProfile.js';
-import type { ICustomerProfileRepository } from '../../domain/repositories/ICustomerProfileRepository.js';
-import type {
-  CustomerProfilePersistenceClient,
-  CustomerProfilePersistenceRecord,
-} from '../persistence/CustomerProfilePersistenceClient.js';
+import { type ICustomerProfileRepository } from '../../domain/repositories/ICustomerProfileRepository.js';
+import { type CustomerProfilePersistenceClient, type CustomerProfilePersistenceRecord } from '../persistence/CustomerProfilePersistenceClient.js';
 
 export class PrismaCustomerProfileRepository implements ICustomerProfileRepository {
   constructor(
@@ -23,7 +20,7 @@ export class PrismaCustomerProfileRepository implements ICustomerProfileReposito
 
   async findAll(): Promise<CustomerProfile[]> {
     const models = await this.prisma.customerProfile.findMany({ where: { deletedAt: null } });
-    return models.map((model) => this.toDomain(model));
+    return models.map((model: any) => this.toDomain(model));
   }
 
   async save(entity: CustomerProfile): Promise<CustomerProfile> {
@@ -56,9 +53,10 @@ export class PrismaCustomerProfileRepository implements ICustomerProfileReposito
   }
 
   private toDomain(model: CustomerProfilePersistenceRecord): CustomerProfile {
+    const { publicId, ...rest } = model;
     return new CustomerProfile({
-      ...model,
-      publicId: model.publicId ?? undefined,
+      ...rest,
+      ...(publicId !== undefined && publicId !== null ? { publicId } : {}),
     });
   }
 }

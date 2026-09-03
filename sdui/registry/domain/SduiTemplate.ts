@@ -1,4 +1,4 @@
-import type { SduiTemplate } from '@carbroz/ui-sdk';
+import { type SduiTemplate } from '@carbroz/ui-sdk';
 
 export interface SduiTemplateProps {
   id: number;

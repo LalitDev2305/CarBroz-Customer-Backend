@@ -1,4 +1,4 @@
-import { SduiNodeStatus } from './SduiNodeStatus.js';
+import { type SduiNodeStatus } from './SduiNodeStatus.js';
 
 export interface SduiSectionProps {
   id: number;

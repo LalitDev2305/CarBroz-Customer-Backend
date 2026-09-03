@@ -1,16 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  ComponentBuilder,
-  ComponentFactory,
-  ElementFactory,
-  GroupBuilder,
-  ScreenBuilder,
-  SectionBuilder,
-  TemplateBuilder,
-  componentRegistry,
-  elementRegistry,
-  CURRENT_SDUI_SCHEMA_VERSION,
-} from '../src/public/index.js';
+import { ComponentBuilder, ComponentFactory, ElementFactory, GroupBuilder, ScreenBuilder, SectionBuilder, TemplateBuilder, componentRegistry, elementRegistry, CURRENT_SDUI_SCHEMA_VERSION } from '../src/public/index.js';
 
 const element = (id: string, type = 'text') => ElementFactory.raw({ id, type, properties: {} });
 

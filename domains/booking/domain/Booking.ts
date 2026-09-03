@@ -1,6 +1,6 @@
-import { BookingStatus } from './BookingStatus.js';
-import { BookingStatusHistoryItem } from './BookingStatusHistoryItem.js';
-import { BookingSnapshots } from './BookingSnapshots.js';
+import { type BookingStatus } from './BookingStatus.js';
+import { type BookingStatusHistoryItem } from './BookingStatusHistoryItem.js';
+import { type BookingSnapshots } from './BookingSnapshots.js';
 
 export interface BookingProps {
   id?: number;
@@ -54,8 +54,8 @@ export class Booking {
       throw new Error('Slot end time must be after slot start time');
     }
 
-    this.id = props.id;
-    this.publicId = props.publicId;
+    if (props.id !== undefined) this.id = props.id;
+    if (props.publicId !== undefined) this.publicId = props.publicId;
     this.customerId = props.customerId;
     this.partnerId = props.partnerId ?? null;
     this.vehicleId = props.vehicleId;
@@ -79,8 +79,8 @@ export class Booking {
     ];
     this.corporateAccountId = props.corporateAccountId ?? null;
     this.corporateFleetVehicleId = props.corporateFleetVehicleId ?? null;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+    if (props.createdAt !== undefined) this.createdAt = props.createdAt;
+    if (props.updatedAt !== undefined) this.updatedAt = props.updatedAt;
   }
 
   confirm(actorId: number): void {
@@ -140,7 +140,7 @@ export class Booking {
       toStatus: newStatus,
       timestamp: new Date(),
       actorId,
-      note,
+      ...(note !== undefined ? { note } : {}),
     });
   }
 }

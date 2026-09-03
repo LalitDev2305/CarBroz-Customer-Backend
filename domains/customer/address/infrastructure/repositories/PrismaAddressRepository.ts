@@ -1,10 +1,6 @@
 import { Address } from '../../domain/Address.js';
-import type { IAddressRepository } from '../../domain/repositories/IAddressRepository.js';
-import type {
-  AddressPersistenceClient,
-  AddressPersistenceRecord,
-  AddressTransactionClient,
-} from '../persistence/AddressPersistenceClient.js';
+import { type IAddressRepository } from '../../domain/repositories/IAddressRepository.js';
+import { type AddressPersistenceClient, type AddressPersistenceRecord, type AddressTransactionClient } from '../persistence/AddressPersistenceClient.js';
 
 export class PrismaAddressRepository implements IAddressRepository {
   constructor(
@@ -22,7 +18,7 @@ export class PrismaAddressRepository implements IAddressRepository {
       where: { userId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
-    return models.map((model) => this.toDomain(model));
+    return models.map((model: any) => this.toDomain(model));
   }
 
   async findDefaultByUserId(userId: number): Promise<Address | null> {
@@ -34,7 +30,7 @@ export class PrismaAddressRepository implements IAddressRepository {
 
   async findAll(): Promise<Address[]> {
     const models = await this.prisma.address.findMany({ where: { deletedAt: null } });
-    return models.map((model) => this.toDomain(model));
+    return models.map((model: any) => this.toDomain(model));
   }
 
   async save(entity: Address): Promise<Address> {
@@ -81,9 +77,10 @@ export class PrismaAddressRepository implements IAddressRepository {
   }
 
   private toDomain(model: AddressPersistenceRecord): Address {
+    const { publicId, ...rest } = model;
     return new Address({
-      ...model,
-      publicId: model.publicId ?? undefined,
+      ...rest,
+      ...(publicId !== undefined && publicId !== null ? { publicId } : {}),
     });
   }
 }

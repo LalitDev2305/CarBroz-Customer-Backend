@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { ActorType, AuditLog, IAuditLogRepository } from '@carbroz/common';
+import { type ActorType } from '../../domain/AuditActor.js';
+import { AuditLog } from '../../domain/AuditLog.js';
+import { type IAuditLogRepository } from '../../domain/repositories/IAuditLogRepository.js';
 
 export class PrismaAuditLogRepository implements IAuditLogRepository {
   private unitOfWorkPrisma: any = null;
@@ -61,7 +63,7 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
       skip: offset,
       orderBy: { createdAt: 'desc' },
     });
-    return records.map((r) => this.mapToDomain(r));
+    return records.map((r: any) => this.mapToDomain(r));
   }
 
   async listByActor(actorId: number, limit = 50, offset = 0): Promise<AuditLog[]> {
@@ -71,6 +73,6 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
       skip: offset,
       orderBy: { createdAt: 'desc' },
     });
-    return records.map((r) => this.mapToDomain(r));
+    return records.map((r: any) => this.mapToDomain(r));
   }
 }

@@ -5,19 +5,10 @@ import { ProcessPaymentWebhookUseCase } from '../src/modules/payment/use-cases/P
 import { GenerateInvoiceUseCase } from '../src/modules/invoice/use-cases/GenerateInvoiceUseCase.js';
 import { CreatePayoutEligibilityUseCase } from '../src/modules/payout/use-cases/CreatePayoutEligibilityUseCase.js';
 import { RazorpayPaymentGatewayProvider } from '../src/providers/payment/RazorpayPaymentGatewayProvider.js';
-import {
-  Booking,
-  Invoice,
-  PartnerPayout,
-  Payment,
-  PaymentWebhook,
-} from '@carbroz/common';
-import type {
-  IPaymentRepository,
-  IInvoiceRepository,
-  IPartnerPayoutRepository,
-  ITransactionProvider,
-} from '@carbroz/common';
+import { Booking } from '@carbroz/domain-booking';
+import { Invoice, PartnerPayout, Payment, PaymentWebhook } from '@carbroz/domain-financials';
+import { type IPaymentRepository, type IInvoiceRepository, type IPartnerPayoutRepository } from '@carbroz/domain-financials';
+import { type ITransactionProvider } from '@carbroz/foundation-kernel';
 
 class MemoryPaymentRepository implements IPaymentRepository {
   public payments: Payment[] = [];

@@ -1,5 +1,5 @@
 import { asFunction, type AwilixContainer } from 'awilix';
-import type { AddressPersistenceClient } from './infrastructure/persistence/AddressPersistenceClient.js';
+import { type AddressPersistenceClient } from './infrastructure/persistence/AddressPersistenceClient.js';
 import { PrismaAddressRepository } from './infrastructure/repositories/PrismaAddressRepository.js';
 
 interface PrismaProviderPort {

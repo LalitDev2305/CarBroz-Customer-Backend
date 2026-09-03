@@ -1,4 +1,4 @@
-import { IStorageProvider } from '@carbroz/common';
+import { type IStorageProvider } from '../public/IStorageProvider.js';
 
 export interface PresignedUrlOptions {
   bucket: string;

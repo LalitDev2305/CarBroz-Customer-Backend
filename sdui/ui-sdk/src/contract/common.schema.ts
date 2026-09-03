@@ -13,7 +13,7 @@ export const actionSchema = z.object({
 
 export const actionsSchema = z.record(z.string().min(1), actionSchema);
 
-export const targetAppSchema = z.enum(['CUSTOMER', 'PARTNER', 'ADMIN']);
+export const targetAppSchema = z.enum(['GLOBAL', 'CUSTOMER', 'PARTNER']);
 
 export type SduiAction = z.infer<typeof actionSchema>;
 export type SduiTargetApp = z.infer<typeof targetAppSchema>;

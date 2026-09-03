@@ -1,4 +1,4 @@
-import type { Vehicle } from '../Vehicle.js';
+import { type Vehicle } from '../Vehicle.js';
 
 export interface IVehicleRepository {
   create(vehicle: Vehicle): Promise<Vehicle>;

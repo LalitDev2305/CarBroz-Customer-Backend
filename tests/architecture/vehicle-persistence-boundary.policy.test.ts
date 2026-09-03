@@ -20,7 +20,7 @@ describe('vehicle persistence boundary', () => {
     const databasePackage = read('platform/database/package.json');
 
     expect(databaseIndex).not.toContain('PrismaVehicleRepository');
-    expect(databasePackage).not.toContain('@carbroz/domain-garage');
+    expect(databasePackage).not.toContain('@carbroz/domain-customer');
     expect(databasePackage).not.toContain('@carbroz/domain-customer');
   });
 

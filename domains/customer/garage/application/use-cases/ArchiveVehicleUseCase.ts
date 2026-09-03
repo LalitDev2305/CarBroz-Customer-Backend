@@ -1,4 +1,4 @@
-import type { IVehicleRepository } from '../../domain/repositories/IVehicleRepository.js';
+import { type IVehicleRepository } from '../../domain/repositories/IVehicleRepository.js';
 
 export class ArchiveVehicleUseCase {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}

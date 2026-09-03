@@ -1,18 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import {
-  Booking,
-  LocationPing,
-  NotificationLog,
-  NotificationService,
-  TrackingSession,
-} from '@carbroz/common';
-import type {
-  IBookingRepository,
-  IDeviceTokenRepository,
-  IMapsProvider,
-  INotificationLogRepository,
-  ITrackingSessionRepository,
-} from '@carbroz/common';
+import { Booking } from '@carbroz/domain-booking';
+import { LocationPing, TrackingSession } from '@carbroz/domain-operations';
+import { NotificationLog, NotificationService } from '@carbroz/domain-communications';
+import { type IBookingRepository } from '@carbroz/domain-booking';
+import { type IDeviceTokenRepository, type INotificationLogRepository } from '@carbroz/domain-communications';
+import { type IMapsProvider, type ITrackingSessionRepository } from '@carbroz/domain-operations';
 import { StartTrackingSessionUseCase } from '../src/modules/tracking/use-cases/StartTrackingSessionUseCase.js';
 import { UpdateLocationPingUseCase } from '../src/modules/tracking/use-cases/UpdateLocationPingUseCase.js';
 import { GetCurrentTrackingUseCase } from '../src/modules/tracking/use-cases/GetCurrentTrackingUseCase.js';

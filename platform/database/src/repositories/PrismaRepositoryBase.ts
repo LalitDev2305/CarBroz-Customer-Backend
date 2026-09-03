@@ -1,4 +1,4 @@
-import { IRepository } from '@carbroz/common';
+import { type IRepository } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 
 export interface IPrismaDelegate<TModel, TFindManyArgs, TFindUniqueArgs, TCreateArgs, TUpdateArgs> {

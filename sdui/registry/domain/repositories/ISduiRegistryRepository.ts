@@ -1,10 +1,10 @@
-import type { SduiScreen, SduiTargetApp } from '@carbroz/ui-sdk';
-import type { SduiComponentEntity } from '../SduiComponent.js';
-import type { SduiElementEntity } from '../SduiElement.js';
-import type { SduiGroupEntity } from '../SduiGroup.js';
-import type { SduiScreenEntity } from '../SduiScreen.js';
-import type { SduiSectionEntity } from '../SduiSection.js';
-import type { SduiTemplateEntity } from '../SduiTemplate.js';
+import { type SduiScreen, type SduiTargetApp } from '@carbroz/ui-sdk';
+import { type SduiComponentEntity } from '../SduiComponent.js';
+import { type SduiElementEntity } from '../SduiElement.js';
+import { type SduiGroupEntity } from '../SduiGroup.js';
+import { type SduiScreenEntity } from '../SduiScreen.js';
+import { type SduiSectionEntity } from '../SduiSection.js';
+import { type SduiTemplateEntity } from '../SduiTemplate.js';
 
 export interface CreateDraftInput {
   screenId: string;

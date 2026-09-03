@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { Dispute, DisputeStatus, IDisputeRepository, Money } from '@carbroz/common';
+import { Dispute } from '../../domain/Dispute.js';
+import { type DisputeStatus } from '../../domain/DisputeStatus.js';
+import { type IDisputeRepository } from '../../domain/repositories/IDisputeRepository.js';
+import { Money } from '@carbroz/foundation-kernel';
 
 export class PrismaDisputeRepository implements IDisputeRepository {
   private unitOfWorkPrisma: any = null;
@@ -83,7 +86,7 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       where: { bookingId },
       orderBy: { createdAt: 'desc' },
     });
-    return records.map((r) => this.mapToDomain(r));
+    return records.map((r: any) => this.mapToDomain(r));
   }
 
   async list(status?: DisputeStatus, limit = 50, offset = 0): Promise<Dispute[]> {
@@ -93,6 +96,6 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       skip: offset,
       orderBy: { createdAt: 'desc' },
     });
-    return records.map((r) => this.mapToDomain(r));
+    return records.map((r: any) => this.mapToDomain(r));
   }
 }

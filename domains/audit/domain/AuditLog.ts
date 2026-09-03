@@ -1,5 +1,5 @@
-import { ActorType } from './AuditActor.js';
-import { AuditAction } from './AuditAction.js';
+import { type ActorType } from './AuditActor.js';
+import { type AuditAction } from './AuditAction.js';
 
 export interface AuditLogProps {
   id?: number;
@@ -36,8 +36,8 @@ export class AuditLog {
     if (!props.action) throw new Error('AuditLog requires an action');
     if (!props.resource) throw new Error('AuditLog requires a resource name');
 
-    this.id = props.id;
-    this.publicId = props.publicId;
+    if (props.id !== undefined) this.id = props.id;
+    if (props.publicId !== undefined) this.publicId = props.publicId;
     this.actorId = props.actorId ?? null;
     this.actorType = props.actorType ?? 'SYSTEM';
     this.action = props.action;
@@ -48,6 +48,6 @@ export class AuditLog {
     this.ipAddress = props.ipAddress ?? null;
     this.userAgent = props.userAgent ?? null;
     this.correlationId = props.correlationId ?? null;
-    this.createdAt = props.createdAt;
+    if (props.createdAt !== undefined) this.createdAt = props.createdAt;
   }
 }

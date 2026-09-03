@@ -3,14 +3,7 @@ import { elementSchema, type SduiElement } from '../contract/element.schema.js';
 import { groupSchema, type SduiGroup } from '../contract/group.schema.js';
 import { sectionSchema, type SduiSection } from '../contract/section.schema.js';
 import { templateSchema, type SduiTemplate } from '../contract/template.schema.js';
-import {
-  componentRegistry,
-  elementRegistry,
-  groupRegistry,
-  sectionRegistry,
-  templateRegistry,
-  type InstanceInput,
-} from '../registry/registries.js';
+import { componentRegistry, elementRegistry, groupRegistry, sectionRegistry, templateRegistry, type InstanceInput } from '../registry/registries.js';
 
 export class ElementFactory {
   static create(type: string, input: InstanceInput): SduiElement {

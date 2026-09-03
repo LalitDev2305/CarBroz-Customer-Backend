@@ -1,4 +1,4 @@
-import { VehicleStatus } from './VehicleStatus.js';
+import { type VehicleStatus } from './VehicleStatus.js';
 
 export interface VehicleProps {
   id?: number;
@@ -42,8 +42,8 @@ export class Vehicle {
     if (!props.make || !props.model) throw new Error('Vehicle make and model are required');
     if (!props.registrationNumber) throw new Error('Vehicle registration number is required');
 
-    this.id = props.id;
-    this.publicId = props.publicId;
+    if (props.id !== undefined) this.id = props.id;
+    if (props.publicId !== undefined) this.publicId = props.publicId;
     this.customerId = props.customerId;
     this.make = props.make;
     this.model = props.model;
@@ -55,8 +55,8 @@ export class Vehicle {
     this.nickname = props.nickname ?? null;
     this.isDefault = props.isDefault ?? false;
     this.status = props.status ?? 'ACTIVE';
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
+    if (props.createdAt !== undefined) this.createdAt = props.createdAt;
+    if (props.updatedAt !== undefined) this.updatedAt = props.updatedAt;
     this.deletedAt = props.deletedAt ?? null;
   }
 

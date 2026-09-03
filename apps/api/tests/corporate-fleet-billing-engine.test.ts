@@ -14,14 +14,8 @@ import {
 import {
   ReconcileCorporatePaymentUseCase,
 } from '../src/modules/corporate/use-cases/ReconcileCorporatePaymentUseCase.js';
-import {
-  CorporateAccount,
-  CorporateMember,
-  CorporateFleetVehicle,
-  CorporateCreditLedger,
-  CorporateInvoice,
-  Money,
-} from '@carbroz/common';
+import { CorporateAccount, CorporateMember, CorporateFleetVehicle, CorporateCreditLedger, CorporateInvoice } from '@carbroz/domain-enterprise';
+import { Money } from '@carbroz/foundation-kernel';
 
 describe('Phase 22 — Corporate Accounts, Fleet Management & B2B Billing Use Case Suite', () => {
   let mockAccountRepo: any;

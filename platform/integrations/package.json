@@ -1,0 +1,17 @@
+{
+  "name": "@carbroz/platform-integrations",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@carbroz/domain-configuration": "workspace:*",
+    "@carbroz/domain-communications": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0"
+  }
+}

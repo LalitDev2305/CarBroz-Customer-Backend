@@ -1,4 +1,4 @@
-import type { CustomerProfile } from '../CustomerProfile.js';
+import { type CustomerProfile } from '../CustomerProfile.js';
 
 export interface ICustomerProfileRepository {
   findById(id: number): Promise<CustomerProfile | null>;

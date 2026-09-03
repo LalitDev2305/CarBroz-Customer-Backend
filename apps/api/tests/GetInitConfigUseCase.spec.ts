@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GetInitConfigUseCase } from '../src/modules/config/use-cases/GetInitConfigUseCase.js';
-import { IConfigProvider, IFeatureFlagProvider } from '@carbroz/common';
+import { type IConfigProvider } from '@carbroz/foundation-kernel';
+import { type IFeatureFlagProvider } from '@carbroz/domain-configuration';
 
 describe('GetInitConfigUseCase', () => {
   let configProvider: IConfigProvider;

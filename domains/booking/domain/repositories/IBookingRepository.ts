@@ -1,5 +1,5 @@
-import type { Booking } from '../Booking.js';
-import type { BookingStatus } from '../BookingStatus.js';
+import { type Booking } from '../Booking.js';
+import { type BookingStatus } from '../BookingStatus.js';
 
 export interface IBookingRepository {
   create(booking: Booking): Promise<Booking>;

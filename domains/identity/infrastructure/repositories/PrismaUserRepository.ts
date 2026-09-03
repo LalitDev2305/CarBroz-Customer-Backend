@@ -1,5 +1,6 @@
-import { User, IUserRepository } from '@carbroz/common';
-import { PrismaProvider } from '../providers/PrismaProvider.js';
+import { type User } from '../../domain/User.js';
+import { type IUserRepository } from '../../domain/repositories/IUserRepository.js';
+import { PrismaProvider } from '@carbroz/platform-database';
 
 export class PrismaUserRepository implements IUserRepository {
   private readonly prisma;
@@ -24,8 +25,8 @@ export class PrismaUserRepository implements IUserRepository {
   async create(data: Partial<User>): Promise<User> {
     const user = await this.prisma.user.create({
       data: {
-        email: data.email,
-        phoneNumber: data.phoneNumber,
+        email: data.email ?? null,
+        phoneNumber: data.phoneNumber ?? null,
         isGuest: data.isGuest ?? false,
         role: data.role ?? 'USER',
       }
@@ -37,10 +38,10 @@ export class PrismaUserRepository implements IUserRepository {
     const user = await this.prisma.user.update({
       where: { id },
       data: {
-        email: data.email,
-        phoneNumber: data.phoneNumber,
-        isGuest: data.isGuest,
-        role: data.role,
+        ...(data.email !== undefined ? { email: data.email } : {}),
+        ...(data.phoneNumber !== undefined ? { phoneNumber: data.phoneNumber } : {}),
+        ...(data.isGuest !== undefined ? { isGuest: data.isGuest } : {}),
+        ...(data.role !== undefined ? { role: data.role } : {}),
       }
     });
     return this.mapToDomain(user);
@@ -76,13 +77,13 @@ export class PrismaUserRepository implements IUserRepository {
     const user = await this.prisma.user.upsert({
       where: { phoneNumber },
       update: {
-        email: data.email,
-        isGuest: data.isGuest,
-        role: data.role,
+        ...(data.email !== undefined ? { email: data.email } : {}),
+        ...(data.isGuest !== undefined ? { isGuest: data.isGuest } : {}),
+        ...(data.role !== undefined ? { role: data.role } : {}),
       },
       create: {
         phoneNumber,
-        email: data.email,
+        email: data.email ?? null,
         isGuest: data.isGuest ?? false,
         role: data.role ?? 'USER',
       }

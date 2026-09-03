@@ -3,7 +3,7 @@ import { CreateVehicleUseCase } from '../src/modules/vehicle/use-cases/CreateVeh
 import { ListCustomerVehiclesUseCase } from '../src/modules/vehicle/use-cases/ListCustomerVehiclesUseCase.js';
 import { SetDefaultVehicleUseCase } from '../src/modules/vehicle/use-cases/SetDefaultVehicleUseCase.js';
 import { ArchiveVehicleUseCase } from '../src/modules/vehicle/use-cases/ArchiveVehicleUseCase.js';
-import { IVehicleRepository, Vehicle } from '@carbroz/common';
+import { type IVehicleRepository, Vehicle } from '@carbroz/domain-customer';
 
 class MemoryVehicleRepository implements IVehicleRepository {
   public items: Vehicle[] = [];

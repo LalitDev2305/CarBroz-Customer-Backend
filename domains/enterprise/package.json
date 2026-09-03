@@ -1,0 +1,24 @@
+{
+  "name": "@carbroz/domain-enterprise",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/public/index.js",
+  "types": "dist/public/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "awilix": "^12.0.0",
+    "@prisma/client": "^6.19.3",
+    "@carbroz/domain-identity": "workspace:*",
+    "@carbroz/domain-audit": "workspace:*",
+    "@carbroz/foundation-kernel": "workspace:*",
+    "@carbroz/domain-customer": "workspace:*",
+    "@carbroz/domain-booking": "workspace:*",
+    "@carbroz/domain-financials": "workspace:*",
+    "@carbroz/domain-communications": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0"
+  }
+}

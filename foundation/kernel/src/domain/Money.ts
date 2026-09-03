@@ -24,11 +24,19 @@ export class Money {
     return new Money(amountMinor, currency);
   }
 
+  static fromPaise(amountPaise: number, currency = 'INR'): Money {
+    return new Money(amountPaise, currency);
+  }
+
   static zero(currency = 'INR'): Money {
     return new Money(0, currency);
   }
 
   get amountMinor(): number {
+    return this._amountMinor;
+  }
+
+  get amountPaise(): number {
     return this._amountMinor;
   }
 

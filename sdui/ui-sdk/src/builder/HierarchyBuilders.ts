@@ -1,8 +1,8 @@
-import type { SduiComponent } from '../contract/component.schema.js';
-import type { SduiElement } from '../contract/element.schema.js';
-import type { SduiGroup } from '../contract/group.schema.js';
-import type { SduiSection } from '../contract/section.schema.js';
-import type { SduiTemplate } from '../contract/template.schema.js';
+import { type SduiComponent } from '../contract/component.schema.js';
+import { type SduiElement } from '../contract/element.schema.js';
+import { type SduiGroup } from '../contract/group.schema.js';
+import { type SduiSection } from '../contract/section.schema.js';
+import { type SduiTemplate } from '../contract/template.schema.js';
 import { componentSchema } from '../contract/component.schema.js';
 import { groupSchema } from '../contract/group.schema.js';
 import { sectionSchema } from '../contract/section.schema.js';

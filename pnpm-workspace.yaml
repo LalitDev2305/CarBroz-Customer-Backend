@@ -1,11 +1,9 @@
 packages:
-  - "apps/*"
-  - "domains/*"
-  - "sdui/*"
-  - "platform/*"
-  - "foundation/*"
-  - "packages/*"
-  - "shared/*"
+  - 'apps/*'
+  - 'domains/*'
+  - 'sdui/*'
+  - 'platform/*'
+  - 'foundation/*'
 allowBuilds:
   '@prisma/client': true
   '@prisma/engines': true

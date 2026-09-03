@@ -1,10 +1,7 @@
 import { Vehicle } from '../../domain/Vehicle.js';
-import type { VehicleStatus } from '../../domain/VehicleStatus.js';
-import type { IVehicleRepository } from '../../domain/repositories/IVehicleRepository.js';
-import type {
-  VehiclePersistenceClient,
-  VehiclePersistenceRecord,
-} from '../persistence/VehiclePersistenceClient.js';
+import { type VehicleStatus } from '../../domain/VehicleStatus.js';
+import { type IVehicleRepository } from '../../domain/repositories/IVehicleRepository.js';
+import { type VehiclePersistenceClient, type VehiclePersistenceRecord } from '../persistence/VehiclePersistenceClient.js';
 
 export class PrismaVehicleRepository implements IVehicleRepository {
   constructor(private readonly prisma: VehiclePersistenceClient) {}
@@ -75,7 +72,7 @@ export class PrismaVehicleRepository implements IVehicleRepository {
       where: { customerId, deletedAt: null },
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
-    return records.map((record) => this.mapToDomain(record));
+    return records.map((record: any) => this.mapToDomain(record));
   }
 
   async update(vehicle: Vehicle): Promise<Vehicle> {

@@ -1,5 +1,5 @@
 import { asFunction, type AwilixContainer } from 'awilix';
-import type { CustomerProfilePersistenceClient } from './infrastructure/persistence/CustomerProfilePersistenceClient.js';
+import { type CustomerProfilePersistenceClient } from './infrastructure/persistence/CustomerProfilePersistenceClient.js';
 import { PrismaCustomerProfileRepository } from './infrastructure/repositories/PrismaCustomerProfileRepository.js';
 
 interface PrismaProviderPort {

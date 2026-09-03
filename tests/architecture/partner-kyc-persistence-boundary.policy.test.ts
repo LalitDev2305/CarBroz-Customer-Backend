@@ -21,7 +21,7 @@ describe('partner KYC persistence boundary', () => {
     const databasePackage = read('platform/database/package.json');
 
     expect(databaseIndex).not.toContain('PrismaKycDocumentRepository');
-    expect(databasePackage).not.toContain('@carbroz/domain-partner-kyc');
+    expect(databasePackage).not.toContain('@carbroz/domain-partner');
   });
 
   it('lets the Partner KYC module own DI registration for kycDocumentRepository', () => {

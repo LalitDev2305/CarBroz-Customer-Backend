@@ -857,13 +857,51 @@ Frozen migration order:
 17. Run full build/typecheck/tests and repository scans.
 18. Declare architecture freeze only when Section 54 is satisfied.
 
-Each move preserves behavior through tests and deletes superseded source once consumers are updated. Compatibility clutter is forbidden unless an explicit compatibility requirement exists.
+Each move preserves existing intended behavior while superseded source is deleted once consumers are updated. Compatibility clutter is forbidden unless an explicit compatibility requirement exists.
+
+## 48A. Implementation-first execution law
+
+Backend V3 migration is executed in two strictly separated stages.
+
+### Stage A — Complete implementation and test-source construction
+
+Stage A is owned by ChatGPT/GitHub implementation work. During Stage A the objective is to finish the complete constitution-defined repository, not to use test execution as an incremental implementation driver.
+
+Stage A MUST complete all of the following before the validation campaign begins:
+
+- the physical repository matches the frozen canonical architecture;
+- every package/module/class/interface/use case/repository/adapter/DTO/mapper/provider has exactly one justified canonical owner;
+- all legacy, duplicate, obsolete, compatibility-only, generated and unnecessary source is removed;
+- all imports, public boundaries, workspace identities and dependency directions are canonical;
+- Partner, Customer and Admin access surfaces are structurally isolated;
+- Partner and Customer SDUI remain runtime-driven, scoped and independent;
+- all production implementation required by the architecture migration is present;
+- all required test SOURCE files and test fixtures are created/organized for the later validation campaign;
+- architecture/static repository scanners may be used to inspect topology, duplicates, ownership and forbidden paths, but the executable test suite MUST NOT be used as the implementation agent.
+
+During Stage A, Antigravity MUST NOT implement or modify production code. Antigravity is not an architecture or coding agent for this repository.
+
+### Stage B — Validation campaign
+
+Stage B begins only after Stage A is explicitly declared IMPLEMENTATION COMPLETE.
+
+Antigravity is used only to execute and report test/validation evidence requested by ChatGPT. Production fixes remain owned by ChatGPT/GitHub implementation work.
+
+Validation then covers, in a deliberate complete campaign, install/lockfile integrity, Prisma validation/generation, TypeScript build/typecheck, lint, architecture tests, unit tests, domain invariants, repository contracts, integration tests, rollback/concurrency tests, HTTP/auth/authz tests, provider adapter tests, SDUI tests, security tests, E2E tests, coverage and final clean-tree verification.
+
+A failed validation never authorizes Antigravity to redesign architecture or implement a fix. It reports evidence; ChatGPT compares the evidence against this constitution and changes the canonical source when required.
+
+### No phase drift
+
+Do not alternate between partial implementation and Antigravity-driven test/fix loops. Finish Stage A first, then perform Stage B comprehensively. New chats and long-running sessions MUST preserve this separation.
 
 ---
 
 # PART VIII — TESTING AND ENFORCEMENT
 
 ## 49. Testing policy
+
+Test source construction belongs to Stage A. Test execution belongs to Stage B and begins only after the implementation-complete gate in Section 53A is satisfied. Antigravity is an execution/audit tool only; it MUST NOT author production implementation.
 
 All executable CarBroz production TypeScript targets final merge coverage of 100% statements, branches, functions and lines. Generated/type-only/barrel files are validated by build/architecture checks rather than fake coverage. Exclusions cannot be added merely to reach a number.
 
@@ -918,6 +956,28 @@ Every feature must answer before coding:
 9. Which architecture regression test prevents drift?
 
 No feature bypasses this gate.
+
+## 53A. Implementation-complete gate before validation
+
+Stage A is IMPLEMENTATION COMPLETE only when repository inspection proves all of the following without relying on executable tests:
+
+- the canonical roots and workspace packages match Sections 5 and 7 exactly;
+- no top-level packages/shared/common/libs compatibility architecture survives;
+- exactly one Foundation kernel, one UI SDK and one SDUI Registry exist;
+- every current source file is classified to an explicit owner;
+- no duplicate class, enum, business repository, use case, DTO authority, provider authority or business module tree survives;
+- no API-owned business use case remains;
+- no Platform-owned business repository remains;
+- no tracked generated build output remains;
+- no legacy SDUI hierarchy or hardcoded screen-name architecture remains;
+- Partner, Customer and Admin API surfaces are separate;
+- Partner/Customer business and SDUI-specific code does not depend on the other product's internals;
+- public boundaries/import directions and workspace dependency graph are canonical and acyclic;
+- all intended architecture-migration production code is structurally present;
+- the complete required test-source inventory for Stage B is present and organized;
+- migration-only scaffolding that is not part of the final product architecture is either removed or explicitly justified as permanent tooling.
+
+Only after this gate is explicitly satisfied may Stage B validation begin.
 
 ## 54. Final architecture freeze criteria
 

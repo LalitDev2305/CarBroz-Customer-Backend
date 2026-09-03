@@ -8,8 +8,11 @@
     "build": "tsc"
   },
   "dependencies": {
+    "awilix": "^12.0.0",
     "@prisma/client": "^6.19.3",
-    "awilix": "^12.0.0"
+    "@carbroz/domain-customer": "workspace:*",
+    "@carbroz/domain-catalog-pricing": "workspace:*",
+    "@carbroz/foundation-kernel": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.1.0"

@@ -1,5 +1,5 @@
 import { asFunction, type AwilixContainer } from 'awilix';
-import type { BookingPersistenceClient } from './infrastructure/persistence/BookingPersistenceClient.js';
+import { type BookingPersistenceClient } from './infrastructure/persistence/BookingPersistenceClient.js';
 import { PrismaBookingRepository } from './infrastructure/repositories/PrismaBookingRepository.js';
 
 interface PrismaProviderPort {

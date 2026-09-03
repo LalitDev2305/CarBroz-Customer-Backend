@@ -9,5 +9,8 @@
   },
   "devDependencies": {
     "@types/node": "^26.1.0"
+  },
+  "dependencies": {
+    "@carbroz/foundation-kernel": "workspace:*"
   }
 }

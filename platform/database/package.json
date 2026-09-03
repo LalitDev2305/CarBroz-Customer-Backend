@@ -8,24 +8,10 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@carbroz/common": "workspace:*",
-    "@carbroz/config": "workspace:*",
-    "@carbroz/domain-audit": "workspace:*",
-    "@carbroz/domain-catalog": "workspace:*",
-    "@carbroz/domain-config": "workspace:*",
-    "@carbroz/domain-coupon": "workspace:*",
-    "@carbroz/domain-dispute": "workspace:*",
-    "@carbroz/domain-invoice": "workspace:*",
-    "@carbroz/domain-notification": "workspace:*",
-    "@carbroz/domain-partner-profile": "workspace:*",
-    "@carbroz/domain-payment": "workspace:*",
-    "@carbroz/domain-payout": "workspace:*",
-    "@carbroz/domain-pricing": "workspace:*",
-    "@carbroz/domain-review": "workspace:*",
-    "@carbroz/domain-tracking": "workspace:*",
     "@prisma/client": "^6.19.3",
     "prisma": "^6.19.3",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "@carbroz/foundation-kernel": "workspace:*"
   },
   "prisma": {
     "seed": "npx @dotenvx/dotenvx run -f ../../.env.development -- tsx prisma/seed.ts"

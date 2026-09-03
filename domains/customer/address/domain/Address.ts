@@ -17,8 +17,8 @@ export class Address {
   deletedAt?: Date | null;
 
   constructor(data: Partial<Address>) {
-    this.id = data.id;
-    this.publicId = data.publicId;
+    if (data.id !== undefined) this.id = data.id;
+    if (data.publicId !== undefined) this.publicId = data.publicId;
     this.userId = data.userId!;
     this.label = data.label ?? null;
     this.addressLine1 = data.addressLine1!;
@@ -30,8 +30,8 @@ export class Address {
     this.latitude = data.latitude ?? null;
     this.longitude = data.longitude ?? null;
     this.isDefault = data.isDefault ?? false;
-    this.createdAt = data.createdAt;
-    this.updatedAt = data.updatedAt;
-    this.deletedAt = data.deletedAt;
+    if (data.createdAt !== undefined) this.createdAt = data.createdAt;
+    if (data.updatedAt !== undefined) this.updatedAt = data.updatedAt;
+    if (data.deletedAt !== undefined) this.deletedAt = data.deletedAt;
   }
 }

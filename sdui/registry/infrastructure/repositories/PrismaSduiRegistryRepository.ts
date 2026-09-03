@@ -1,31 +1,14 @@
 import { KernelError, KernelErrorCode } from '@carbroz/foundation-kernel';
-import {
-  parseSduiScreen,
-  targetAppSchema,
-  templateSchema,
-  type SduiScreen,
-  type SduiTargetApp,
-  type SduiTemplate,
-} from '@carbroz/ui-sdk';
+import { parseSduiScreen, targetAppSchema, templateSchema, type SduiScreen, type SduiTargetApp, type SduiTemplate } from '@carbroz/ui-sdk';
 import { SduiComponentEntity } from '../../domain/SduiComponent.js';
 import { SduiElementEntity } from '../../domain/SduiElement.js';
 import { SduiGroupEntity } from '../../domain/SduiGroup.js';
 import { SduiScreenEntity, type SduiScreenStatus } from '../../domain/SduiScreen.js';
 import { SduiSectionEntity } from '../../domain/SduiSection.js';
 import { SduiTemplateEntity } from '../../domain/SduiTemplate.js';
-import type {
-  CreateDraftInput,
-  ISduiRegistryRepository,
-  RegistryNodeInput,
-  UpdateDraftInput,
-} from '../../domain/repositories/ISduiRegistryRepository.js';
-import type { SduiNodeLevel } from '../../domain/SduiNodeLevel.js';
-import type {
-  RegistryPersistenceRecord,
-  ScreenPersistenceRecord,
-  SduiPersistenceClient,
-  TemplatePersistenceRecord,
-} from '../persistence/SduiPersistenceClient.js';
+import { type CreateDraftInput, type ISduiRegistryRepository, type RegistryNodeInput, type UpdateDraftInput } from '../../domain/repositories/ISduiRegistryRepository.js';
+import { type SduiNodeLevel } from '../../domain/SduiNodeLevel.js';
+import { type RegistryPersistenceRecord, type ScreenPersistenceRecord, type SduiPersistenceClient, type TemplatePersistenceRecord } from '../persistence/SduiPersistenceClient.js';
 
 function invalidInput(message: string): KernelError {
   return new KernelError(KernelErrorCode.INVALID_INPUT, message, 400);

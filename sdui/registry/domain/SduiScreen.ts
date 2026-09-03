@@ -1,4 +1,4 @@
-import type { SduiScreen, SduiTargetApp } from '@carbroz/ui-sdk';
+import { type SduiScreen, type SduiTargetApp } from '@carbroz/ui-sdk';
 
 export type SduiScreenStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 

@@ -1,20 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import {
-  Booking,
-  Coupon,
-  CouponDiscountCalculator,
-  CouponUsage,
-  PartnerRatingCalculator,
-  Review,
-} from '@carbroz/common';
-import type {
-  IBookingRepository,
-  ICouponRepository,
-  ICouponUsageRepository,
-  IPartnerRepository,
-  IReviewRepository,
-  Partner,
-} from '@carbroz/common';
+import { Booking } from '@carbroz/domain-booking';
+import { Coupon, CouponDiscountCalculator, CouponUsage, PartnerRatingCalculator, Review } from '@carbroz/domain-engagement';
+import { type IBookingRepository } from '@carbroz/domain-booking';
+import { type ICouponRepository, type ICouponUsageRepository, type IReviewRepository } from '@carbroz/domain-engagement';
+import { type IPartnerRepository, type Partner } from '@carbroz/domain-partner';
 import { SubmitReviewUseCase } from '../src/modules/review/use-cases/SubmitReviewUseCase.js';
 import { ModerateReviewUseCase } from '../src/modules/review/use-cases/ModerateReviewUseCase.js';
 import { GetPartnerReviewsUseCase } from '../src/modules/review/use-cases/GetPartnerReviewsUseCase.js';

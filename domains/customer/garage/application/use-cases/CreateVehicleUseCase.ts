@@ -1,5 +1,5 @@
 import { Vehicle } from '../../domain/Vehicle.js';
-import type { IVehicleRepository } from '../../domain/repositories/IVehicleRepository.js';
+import { type IVehicleRepository } from '../../domain/repositories/IVehicleRepository.js';
 
 export interface CreateVehicleInput {
   customerId: number;
@@ -34,12 +34,12 @@ export class CreateVehicleUseCase {
       customerId: input.customerId,
       make: input.make,
       model: input.model,
-      variant: input.variant,
+      ...(input.variant !== undefined ? { variant: input.variant } : {}),
       year: input.year,
       registrationNumber: input.registrationNumber,
       fuelType: input.fuelType,
-      color: input.color,
-      nickname: input.nickname,
+      ...(input.color !== undefined ? { color: input.color } : {}),
+      ...(input.nickname !== undefined ? { nickname: input.nickname } : {}),
       isDefault: input.isDefault ?? false,
     });
 

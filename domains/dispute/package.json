@@ -8,10 +8,13 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@carbroz/common": "workspace:*",
-    "@carbroz/shared-kernel": "workspace:*",
+    "awilix": "^12.0.0",
     "@prisma/client": "^6.19.3",
-    "awilix": "^12.0.0"
+    "@carbroz/foundation-kernel": "workspace:*",
+    "@carbroz/domain-audit": "workspace:*",
+    "@carbroz/domain-booking": "workspace:*",
+    "@carbroz/domain-communications": "workspace:*",
+    "@carbroz/domain-financials": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.1.0"

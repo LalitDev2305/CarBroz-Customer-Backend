@@ -1,5 +1,5 @@
-import { IAdminRoleRepository } from '@carbroz/common';
-import { AdminUserRole } from '@carbroz/common';
+import { type IAdminRoleRepository } from '../../domain/repositories/IAdminRoleRepository.js';
+import { type AdminUserRole } from '../../domain/AdminUserRole.js';
 import { PrismaClient } from '@prisma/client';
 
 export class PrismaAdminRoleRepository implements IAdminRoleRepository {
@@ -33,7 +33,7 @@ export class PrismaAdminRoleRepository implements IAdminRoleRepository {
       where: { userId },
       select: { roleId: true }
     });
-    return records.map(r => r.roleId);
+    return records.map((r: { roleId: number }) => r.roleId);
   }
 
   private mapToDomain(record: any): AdminUserRole {
