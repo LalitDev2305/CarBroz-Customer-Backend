@@ -46,11 +46,6 @@ export class PrismaPartnerRepository implements IPartnerRepository {
     return model ? this.mapToDomain(model) : null;
   }
 
-  async findByCode(code: string): Promise<Partner | null> {
-    const model = await this.prisma.partner.findFirst({ where: { publicId: code, deletedAt: null } });
-    return model ? this.mapToDomain(model) : null;
-  }
-
   async findAll(): Promise<Partner[]> {
     const models = await this.prisma.partner.findMany({ where: { deletedAt: null } });
     return models.map((model) => this.mapToDomain(model));
