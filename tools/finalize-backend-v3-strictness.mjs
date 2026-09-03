@@ -18,9 +18,6 @@ function walk(dir) {
 for (const file of walk(p('domains')).filter((x) => x.endsWith('.ts') && !x.includes(`${path.sep}dist${path.sep}`))) {
   let text = fs.readFileSync(file, 'utf8');
 
-  // exactOptionalPropertyTypes does not permit assigning an explicit undefined
-  // to a `property?: T`. Preserve optional storage semantics regardless of the
-  // constructor parameter name used by legacy entities (props/data/input/etc.).
   const optionalProperties = new Set();
   for (const match of text.matchAll(/(?:public\s+|private\s+|protected\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\?\s*:\s*[^;]+;/g)) {
     optionalProperties.add(match[1]);
@@ -33,22 +30,20 @@ for (const file of walk(p('domains')).filter((x) => x.endsWith('.ts') && !x.incl
     );
   }
 
-  // Prisma callback row types can be lost while adapters are moved between
-  // packages before the generated client is visible to each workspace. Keep
-  // the adapter boundary explicit rather than disabling noImplicitAny.
   if (file.includes(`${path.sep}infrastructure${path.sep}repositories${path.sep}Prisma`)) {
     text = text.replace(/\.map\(\(([A-Za-z_$][\w$]*)\)\s*=>/g, '.map(($1: any) =>');
 
-    // Hydration objects must not explicitly pass undefined to optional domain
-    // fields under exactOptionalPropertyTypes.
-    text = text.replace(/publicId:\s*([A-Za-z_$][\w$]*)\.publicId\s*,/g, '...($1.publicId !== undefined ? { publicId: $1.publicId } : {}),');
+    // Hydration objects must omit optional publicId when storage has no value.
+    // Handle both direct values and the legacy `?? undefined` form.
+    text = text.replace(
+      /publicId:\s*([A-Za-z_$][\w$]*)\.publicId(?:\s*\?\?\s*undefined)?\s*,/g,
+      '...($1.publicId !== undefined && $1.publicId !== null ? { publicId: $1.publicId } : {}),',
+    );
   }
 
   fs.writeFileSync(file, text);
 }
 
-// Optional vehicle input fields are omitted when absent so the Vehicle domain
-// constructor receives its intended optional contract rather than undefined.
 const createVehicle = p('domains/customer/garage/application/use-cases/CreateVehicleUseCase.ts');
 if (fs.existsSync(createVehicle)) {
   let text = fs.readFileSync(createVehicle, 'utf8');
