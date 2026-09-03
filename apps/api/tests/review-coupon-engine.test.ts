@@ -206,14 +206,15 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     const discountCalculator = new CouponDiscountCalculator(mockCouponUsageRepo);
     const validateUseCase = new ValidateCouponUseCase(mockCouponRepo, discountCalculator);
     const applyUseCase = new ApplyCouponUseCase(mockCouponRepo, mockCouponUsageRepo, mockBookingRepo, discountCalculator);
+    const validityAnchor = new Date();
 
     const coupon = await createUseCase.execute({
       code: 'FESTIVE500',
       discountType: 'FIXED_AMOUNT',
       discountValue: 50000, // ₹500 discount
       minBookingAmountPaise: 80000, // min ₹800
-      validFrom: new Date('2026-08-01T00:00:00Z'),
-      validUntil: new Date('2026-08-31T23:59:59Z'),
+      validFrom: new Date(validityAnchor.getTime() - 24 * 60 * 60 * 1000),
+      validUntil: new Date(validityAnchor.getTime() + 24 * 60 * 60 * 1000),
     });
 
     expect(coupon.code).toBe('FESTIVE500');
