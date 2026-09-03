@@ -48,7 +48,7 @@ export class Dispute {
     this.disputeReason = props.disputeReason;
     this.description = props.description ?? null;
     this.requestedRefundAmount = props.requestedRefundAmount;
-    this.refundedAmount = props.refundedAmount ?? Money.zero();
+    this.refundedAmount = props.refundedAmount ?? Money.zero(props.requestedRefundAmount.currency);
     this.status = props.status ?? 'OPEN';
     this.resolutionNotes = props.resolutionNotes ?? null;
     this.resolvedAt = props.resolvedAt ?? null;
@@ -60,7 +60,7 @@ export class Dispute {
     if (this.status !== 'OPEN' && this.status !== 'UNDER_REVIEW') {
       throw new Error(`Cannot resolve dispute in status ${this.status}`);
     }
-    if (approvedRefundAmount.amountPaise > this.requestedRefundAmount.amountPaise) {
+    if (approvedRefundAmount.greaterThan(this.requestedRefundAmount)) {
       throw new Error('Approved refund cannot exceed requested refund amount');
     }
     this.refundedAmount = approvedRefundAmount;
@@ -73,7 +73,7 @@ export class Dispute {
     if (this.status !== 'OPEN' && this.status !== 'UNDER_REVIEW') {
       throw new Error(`Cannot reject dispute in status ${this.status}`);
     }
-    this.refundedAmount = Money.zero();
+    this.refundedAmount = Money.zero(this.requestedRefundAmount.currency);
     this.status = 'RESOLVED_REJECTED';
     this.resolutionNotes = notes;
     this.resolvedAt = new Date();
