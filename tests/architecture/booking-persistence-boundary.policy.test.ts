@@ -24,7 +24,7 @@ describe('booking persistence boundary', () => {
 
   it('lets the Booking module own DI registration for bookingRepository', () => {
     const bookingModule = read('domains/booking/booking.module.ts');
-    const apiContainer = read('apps/backend-api/src/container/index.ts');
+    const apiContainer = read('apps/api/src/container/index.ts');
 
     expect(bookingModule).toContain('bookingRepository');
     expect(apiContainer).toContain('registerBookingModule(diContainer)');
