@@ -23,9 +23,20 @@ for (const [name, declaration] of authInputs) {
   patch(`domains/identity/application/${name}`, (text) => {
     text = text.replace(/^import \{ z \} from 'zod';\n/m, '');
     text = text.replace(/^import .*auth\.dto\.js.*\n/m, '');
-    text = text.replace(/^type Input = z\.infer<[^;]+>;\n/m, declaration);
+    text = text.replace(/^type Input = .*;\n/m, declaration);
     return text;
   });
+}
+
+for (const relative of [
+  'domains/identity/application/GuestLoginUseCase.ts',
+  'domains/identity/application/VerifyOtpUseCase.ts',
+]) {
+  patch(relative, (text) =>
+    text
+      .replace(/\s*deviceModel,\n\s*osVersion,\n\s*fcmToken,\n/g,
+        `\n      ...(deviceModel !== undefined ? { deviceModel } : {}),\n      ...(osVersion !== undefined ? { osVersion } : {}),\n      ...(fcmToken !== undefined ? { fcmToken } : {}),\n`)
+  );
 }
 
 // Prisma nullable fields may be null, but exactOptionalPropertyTypes forbids
@@ -51,13 +62,11 @@ patch('domains/identity/infrastructure/repositories/PrismaUserSessionRepository.
     text = text.replace(new RegExp(`${name}: data\\.${name},`, 'g'), `${name}: data.${name} ?? null,`);
   }
 
-  // Update operations must distinguish omission from clearing a nullable field.
   text = text.replace(
     /data: \{\n\s*deviceModel: data\.deviceModel \?\? null,\n\s*osVersion: data\.osVersion \?\? null,\n\s*fcmToken: data\.fcmToken \?\? null,\n\s*refreshToken: data\.refreshToken \?\? null,\n\s*isRevoked: data\.isRevoked,\n\s*lastActiveAt: data\.lastActiveAt,\n\s*\}/,
     `data: {\n        ...(data.deviceModel !== undefined ? { deviceModel: data.deviceModel } : {}),\n        ...(data.osVersion !== undefined ? { osVersion: data.osVersion } : {}),\n        ...(data.fcmToken !== undefined ? { fcmToken: data.fcmToken } : {}),\n        ...(data.refreshToken !== undefined ? { refreshToken: data.refreshToken } : {}),\n        ...(data.isRevoked !== undefined ? { isRevoked: data.isRevoked } : {}),\n        ...(data.lastActiveAt !== undefined ? { lastActiveAt: data.lastActiveAt } : {}),\n      }`,
   );
 
-  // Upsert update: preserve unspecified nullable metadata instead of clearing it.
   text = text.replace(
     /update: \{\n\s*deviceModel: data\.deviceModel \?\? null,\n\s*osVersion: data\.osVersion \?\? null,\n\s*fcmToken: data\.fcmToken \?\? null,\n\s*refreshToken: data\.refreshToken \?\? null,\n\s*lastActiveAt: new Date\(\),\n\s*isRevoked: false\n\s*\}/,
     `update: {\n        ...(data.deviceModel !== undefined ? { deviceModel: data.deviceModel } : {}),\n        ...(data.osVersion !== undefined ? { osVersion: data.osVersion } : {}),\n        ...(data.fcmToken !== undefined ? { fcmToken: data.fcmToken } : {}),\n        ...(data.refreshToken !== undefined ? { refreshToken: data.refreshToken } : {}),\n        lastActiveAt: new Date(),\n        isRevoked: false\n      }`,
