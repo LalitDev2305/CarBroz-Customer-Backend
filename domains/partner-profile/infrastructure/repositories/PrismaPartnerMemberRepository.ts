@@ -1,20 +1,31 @@
-import { PartnerMember as PrismaPartnerMember, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { PartnerMember, PartnerMemberRole, PartnerMemberStatus, IPartnerMemberRepository } from '@carbroz/common';
 
+type PartnerMemberRecord = {
+  id: number;
+  publicId: string;
+  userId: number;
+  partnerId: number;
+  role: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export class PrismaPartnerMemberRepository implements IPartnerMemberRepository {
-  private unitOfWorkPrisma: any = null;
+  private unitOfWorkPrisma: PrismaClient | null = null;
 
   constructor(private readonly prismaClient: PrismaClient) {}
 
-  private get prisma() {
-    return this.unitOfWorkPrisma || this.prismaClient;
+  private get prisma(): PrismaClient {
+    return this.unitOfWorkPrisma ?? this.prismaClient;
   }
 
-  public setUnitOfWork(uow: any): void {
+  public setUnitOfWork(uow: PrismaClient): void {
     this.unitOfWorkPrisma = uow;
   }
 
-  protected mapToDomain(entity: PrismaPartnerMember): PartnerMember {
+  protected mapToDomain(entity: PartnerMemberRecord): PartnerMember {
     return {
       id: entity.id,
       publicId: entity.publicId,
@@ -28,70 +39,75 @@ export class PrismaPartnerMemberRepository implements IPartnerMemberRepository {
   }
 
   public async findByPublicId(publicId: string): Promise<PartnerMember | null> {
-    const entity = await this.prisma.partnerMember.findUnique({
-      where: { publicId }
-    });
+    const entity = await this.prisma.partnerMember.findUnique({ where: { publicId } });
     return entity ? this.mapToDomain(entity) : null;
   }
 
   public async findByUserIdAndPartnerId(userId: number, partnerId: number): Promise<PartnerMember | null> {
     const entity = await this.prisma.partnerMember.findUnique({
-      where: {
-        userId_partnerId: {
-          userId,
-          partnerId
-        }
-      }
+      where: { userId_partnerId: { userId, partnerId } }
     });
     return entity ? this.mapToDomain(entity) : null;
   }
 
   public async findByUserId(userId: number): Promise<PartnerMember[]> {
-    const entities = await this.prisma.partnerMember.findMany({
-      where: { userId }
-    });
-    return entities.map((e: PrismaPartnerMember) => this.mapToDomain(e));
+    const entities = await this.prisma.partnerMember.findMany({ where: { userId } });
+    return entities.map((entity) => this.mapToDomain(entity));
   }
 
   public async findByPartnerId(partnerId: number): Promise<PartnerMember[]> {
-    const entities = await this.prisma.partnerMember.findMany({
-      where: { partnerId }
-    });
-    return entities.map((e: PrismaPartnerMember) => this.mapToDomain(e));
+    const entities = await this.prisma.partnerMember.findMany({ where: { partnerId } });
+    return entities.map((entity) => this.mapToDomain(entity));
   }
 
   public async findById(id: number): Promise<PartnerMember | null> {
-    const entity = await this.prisma.partnerMember.findUnique({
-      where: { id }
-    });
+    const entity = await this.prisma.partnerMember.findUnique({ where: { id } });
     return entity ? this.mapToDomain(entity) : null;
   }
 
   public async findAll(): Promise<PartnerMember[]> {
     const entities = await this.prisma.partnerMember.findMany();
-    return entities.map((e: PrismaPartnerMember) => this.mapToDomain(e));
+    return entities.map((entity) => this.mapToDomain(entity));
   }
 
-  public async save(entity: PartnerMember): Promise<PartnerMember> {
-    throw new Error('Method not implemented.');
+  public async save(member: PartnerMember): Promise<PartnerMember> {
+    if (!member.id) return this.create(member);
+
+    const entity = await this.prisma.partnerMember.update({
+      where: { id: member.id },
+      data: {
+        userId: member.userId,
+        partnerId: member.partnerId,
+        role: member.role,
+        status: member.status,
+      }
+    });
+    return this.mapToDomain(entity);
   }
 
   public async create(data: Partial<PartnerMember>): Promise<PartnerMember> {
+    if (data.userId == null || data.partnerId == null || data.role == null) {
+      throw new Error('Partner member userId, partnerId and role are required');
+    }
+
     const entity = await this.prisma.partnerMember.create({
       data: {
-        userId: data.userId!,
-        partnerId: data.partnerId!,
-        role: data.role!,
-        status: data.status!
+        userId: data.userId,
+        partnerId: data.partnerId,
+        role: data.role,
+        status: data.status ?? PartnerMemberStatus.ACTIVE,
+        ...(data.publicId ? { publicId: data.publicId } : {}),
       }
     });
     return this.mapToDomain(entity);
   }
 
   public async delete(id: number): Promise<boolean> {
-    await this.prisma.partnerMember.delete({
-      where: { id }
-    });
-    return true;
+    try {
+      await this.prisma.partnerMember.delete({ where: { id } });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
