@@ -1,8 +1,10 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { ApproveCorporateAccountUseCase } from '../use-cases/ApproveCorporateAccountUseCase.js';
-import { AdjustCreditLimitUseCase } from '../use-cases/AdjustCreditLimitUseCase.js';
-import { GenerateCorporateInvoiceUseCase } from '../use-cases/GenerateCorporateInvoiceUseCase.js';
-import { ReconcileCorporatePaymentUseCase } from '../use-cases/ReconcileCorporatePaymentUseCase.js';
+import {
+  AdjustCreditLimitUseCase,
+  ApproveCorporateAccountUseCase,
+  GenerateCorporateInvoiceUseCase,
+  ReconcileCorporatePaymentUseCase,
+} from '@carbroz/domain-enterprise';
 
 export class AdminCorporateController {
   async listAccounts(request: FastifyRequest, reply: FastifyReply) {
