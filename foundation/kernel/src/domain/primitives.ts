@@ -1,11 +1,3 @@
-export interface Entity<TId = string> {
-  id: TId;
-}
-
-export interface AggregateRoot<TId = string> extends Entity<TId> {
-  version?: number;
-}
-
 export interface DomainEvent {
   eventName: string;
   occurredOn: Date;
