@@ -13,7 +13,6 @@ import {
   PrismaAdminRoleRepository,
 } from '@carbroz/platform-database';
 import { ConfigProvider } from '@carbroz/config';
-import { FeatureFlagProvider } from '@carbroz/platform-feature-flags';
 import { AuthorizationProvider } from '../providers/AuthorizationProvider.js';
 import { GuestLoginUseCase } from '../modules/auth/use-cases/GuestLoginUseCase.js';
 import { SendOtpUseCase } from '../modules/auth/use-cases/SendOtpUseCase.js';
@@ -37,7 +36,7 @@ import { registerReviewModule, registerCouponModule } from '@carbroz/domain-enga
 import { registerDisputeModule } from '@carbroz/domain-dispute';
 import { registerSduiRegistryModule } from '@carbroz/sdui-registry';
 import { registerAuditModule } from '@carbroz/domain-audit';
-import { registerConfigModule } from '@carbroz/domain-configuration';
+import { FeatureFlagProvider, registerConfigModule } from '@carbroz/domain-configuration';
 
 import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js';
 import { RegisterOrganizationPartnerUseCase } from '../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js';
@@ -325,7 +324,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       configRepository: asClass(PrismaConfigRepository).classic().singleton(),
       featureFlagRepository: asClass(PrismaFeatureFlagRepository).classic().singleton(),
       configProvider: asClass(ConfigProvider).classic().singleton(),
-      featureFlagProvider: asClass(FeatureFlagProvider).classic().singleton(),
       userRepository: asClass(PrismaUserRepository).classic().singleton(),
       userSessionRepository: asClass(PrismaUserSessionRepository).classic().singleton(),
       roleRepository: asClass(PrismaRoleRepository).classic().singleton(),
