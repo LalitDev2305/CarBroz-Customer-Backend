@@ -13,6 +13,7 @@ import type {
   INotificationLogRepository,
   ITrackingSessionRepository,
 } from '@carbroz/common';
+import { MultiChannelNotificationProvider } from '@carbroz/platform-integrations';
 import { StartTrackingSessionUseCase } from '../src/modules/tracking/use-cases/StartTrackingSessionUseCase.js';
 import { UpdateLocationPingUseCase } from '../src/modules/tracking/use-cases/UpdateLocationPingUseCase.js';
 import { GetCurrentTrackingUseCase } from '../src/modules/tracking/use-cases/GetCurrentTrackingUseCase.js';
@@ -21,7 +22,6 @@ import { SendNotificationUseCase } from '../src/modules/notification/use-cases/S
 import { FirebasePushProvider } from '../src/providers/notification/FirebasePushProvider.js';
 import { Msg91SmsProvider } from '../src/providers/notification/Msg91SmsProvider.js';
 import { ResendEmailProvider } from '../src/providers/notification/ResendEmailProvider.js';
-import { MultiChannelNotificationProvider } from '../src/providers/notification/MultiChannelNotificationProvider.js';
 
 describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
   const sessions = new Map<number, TrackingSession>();
