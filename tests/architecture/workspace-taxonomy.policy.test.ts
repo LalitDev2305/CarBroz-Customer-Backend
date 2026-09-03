@@ -31,7 +31,6 @@ const EXPECTED_CHILDREN: Record<string, readonly string[]> = {
   platform: [
     'cache',
     'database',
-    'feature-flags',
     'integrations',
     'messaging',
     'observability',
@@ -63,8 +62,6 @@ const FINAL_PLATFORM_NAMES = new Set([
   'observability',
   'integrations',
 ]);
-
-const TRANSITIONAL_PLATFORM_NAMES = new Set(['feature-flags']);
 
 function childDirectories(path: string): string[] {
   const absolute = resolve(root, path);
@@ -122,12 +119,10 @@ describe('workspace taxonomy policy', () => {
     expect(existsSync(resolve(root, 'domains/garage'))).toBe(false);
   });
 
-  it('allows only canonical or explicitly transitional platform capabilities', () => {
-    const violations = childDirectories('platform').filter(
-      (name) => !FINAL_PLATFORM_NAMES.has(name) && !TRANSITIONAL_PLATFORM_NAMES.has(name),
-    );
-
+  it('allows only final platform capabilities', () => {
+    const violations = childDirectories('platform').filter((name) => !FINAL_PLATFORM_NAMES.has(name));
     expect(violations, `Unclassified platform packages: ${violations.join(', ')}`).toEqual([]);
+    expect(existsSync(resolve(root, 'platform/feature-flags'))).toBe(false);
   });
 
   it('keeps the remaining transitional catch-all root closed to new packages', () => {
