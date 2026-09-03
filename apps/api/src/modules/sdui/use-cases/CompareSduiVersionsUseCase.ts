@@ -1,4 +1,5 @@
-import { ISduiRegistryRepository, IUseCase, NotFoundError, SduiScreenEntity } from '@carbroz/common';
+import { IUseCase, NotFoundError } from '@carbroz/common';
+import type { ISduiRegistryRepository, SduiScreenEntity } from '@carbroz/sdui-registry';
 import { CompareSduiVersionsDto } from '../dtos/sdui-registry.dto.js';
 
 export interface CompareSduiVersionsResult {
