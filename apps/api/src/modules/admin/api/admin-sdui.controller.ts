@@ -25,6 +25,17 @@ import {
   updateSduiDraftSchema,
 } from '../../sdui/dtos/sdui-registry.dto.js';
 
+const targetApps = ['CUSTOMER', 'PARTNER', 'ADMIN'] as const;
+type TargetApp = (typeof targetApps)[number];
+
+function parseTargetApp(value: unknown): TargetApp | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string' || !targetApps.includes(value as TargetApp)) {
+    throw new Error(`Invalid targetApp '${String(value)}'`);
+  }
+  return value as TargetApp;
+}
+
 export class AdminSduiController {
   constructor(
     private readonly createSduiComponentUseCase: CreateSduiComponentUseCase,
@@ -124,17 +135,20 @@ export class AdminSduiController {
 
   public getVersionHistory = async (request: FastifyRequest, reply: FastifyReply) => {
     const { screenId } = request.params as { screenId: string };
-    const { targetApp } = request.query as { targetApp?: string };
-    const result = await this.getSduiVersionHistoryUseCase.execute({ screenId, targetApp });
+    const { targetApp } = request.query as { targetApp?: unknown };
+    const result = await this.getSduiVersionHistoryUseCase.execute({
+      screenId,
+      targetApp: parseTargetApp(targetApp),
+    });
     return reply.send(ResponseHelper.success(result, 'SDUI screen version history retrieved successfully'));
   };
 
   public getSpecificVersion = async (request: FastifyRequest, reply: FastifyReply) => {
     const { screenId, versionNumber } = request.params as { screenId: string; versionNumber: string };
-    const { targetApp } = request.query as { targetApp?: string };
+    const { targetApp } = request.query as { targetApp?: unknown };
     const result = await this.getSduiSpecificVersionUseCase.execute({
       screenId,
-      targetApp,
+      targetApp: parseTargetApp(targetApp),
       versionNumber: parseInt(versionNumber, 10),
     });
     return reply.send(ResponseHelper.success(result, 'SDUI specific version retrieved successfully'));
@@ -143,13 +157,13 @@ export class AdminSduiController {
   public compareVersions = async (request: FastifyRequest, reply: FastifyReply) => {
     const { screenId } = request.params as { screenId: string };
     const { targetApp, sourceVersion, targetVersion } = request.query as {
-      targetApp?: string;
+      targetApp?: unknown;
       sourceVersion: string;
       targetVersion: string;
     };
     const dto = compareSduiVersionsSchema.parse({
       screenId,
-      targetApp,
+      targetApp: parseTargetApp(targetApp),
       sourceVersion: parseInt(sourceVersion, 10),
       targetVersion: parseInt(targetVersion, 10),
     });
