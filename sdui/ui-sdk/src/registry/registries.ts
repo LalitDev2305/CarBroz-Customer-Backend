@@ -5,9 +5,26 @@ import type { SduiSection } from '../contract/section.schema.js';
 import type { SduiTemplate } from '../contract/template.schema.js';
 import { DefinitionRegistry } from './DefinitionRegistry.js';
 
+/**
+ * Runtime data accepted by reusable SDUI definitions.
+ * Structural children are optional here because each registry consumes only the
+ * child collection legal for its own level; final legality is enforced by the
+ * canonical Zod schemas in NodeFactories.
+ */
 export interface InstanceInput {
   id: string;
   properties?: Record<string, unknown>;
+  actions?: SduiElement['actions'];
+  analytics?: SduiElement['analytics'];
+  accessibility?: SduiElement['accessibility'];
+  validation?: SduiElement['validation'];
+  binding?: SduiElement['binding'];
+  visibility?: SduiElement['visibility'];
+  metadata?: SduiElement['metadata'];
+  elements?: SduiElement[];
+  groups?: SduiGroup[];
+  sections?: SduiSection[];
+  components?: SduiComponent[];
 }
 
 export const templateRegistry = new DefinitionRegistry<InstanceInput, SduiTemplate>();
