@@ -30,17 +30,14 @@ import {
   registerCustomerModule,
 } from '@carbroz/domain-customer';
 import { registerPartnerModule } from '@carbroz/domain-partner';
-import { registerTrackingModule } from '@carbroz/domain-tracking';
-import { registerPaymentModule } from '@carbroz/domain-payment';
-import { registerInvoiceModule } from '@carbroz/domain-invoice';
-import { registerPayoutModule } from '@carbroz/domain-payout';
-import { registerNotificationModule } from '@carbroz/domain-notification';
-import { registerReviewModule } from '@carbroz/domain-review';
-import { registerCouponModule } from '@carbroz/domain-coupon';
+import { registerTrackingModule } from '@carbroz/domain-operations';
+import { registerPaymentModule, registerInvoiceModule, registerPayoutModule } from '@carbroz/domain-financials';
+import { registerNotificationModule } from '@carbroz/domain-communications';
+import { registerReviewModule, registerCouponModule } from '@carbroz/domain-engagement';
 import { registerDisputeModule } from '@carbroz/domain-dispute';
 import { registerSduiRegistryModule } from '@carbroz/sdui-registry';
 import { registerAuditModule } from '@carbroz/domain-audit';
-import { registerConfigModule } from '@carbroz/domain-config';
+import { registerConfigModule } from '@carbroz/domain-configuration';
 
 import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js';
 import { RegisterOrganizationPartnerUseCase } from '../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js';
@@ -129,7 +126,7 @@ import { PayoutController } from '../modules/payout/api/payout.controller.js';
 import { FirebasePushProvider } from '../providers/notification/FirebasePushProvider.js';
 import { Msg91SmsProvider } from '../providers/notification/Msg91SmsProvider.js';
 import { ResendEmailProvider } from '../providers/notification/ResendEmailProvider.js';
-import { MultiChannelNotificationProvider } from '@carbroz/platform-notification';
+import { MultiChannelNotificationProvider } from '@carbroz/platform-integrations';
 import { NotificationService, PartnerRatingCalculator, CouponDiscountCalculator, AuditLogService, DisputeSettlementCalculator } from '@carbroz/common';
 import { StartTrackingSessionUseCase } from '../modules/tracking/use-cases/StartTrackingSessionUseCase.js';
 import { UpdateLocationPingUseCase } from '../modules/tracking/use-cases/UpdateLocationPingUseCase.js';
