@@ -1,5 +1,22 @@
 import { describe, expect, it } from 'vitest';
-import { ComponentBuilder, ComponentFactory, ElementFactory, GroupBuilder, ScreenBuilder, SectionBuilder, TemplateBuilder, componentRegistry, elementRegistry, CURRENT_SDUI_SCHEMA_VERSION } from '../src/public/index.js';
+import {
+  ComponentBuilder,
+  ComponentFactory,
+  ElementFactory,
+  GroupBuilder,
+  GroupFactory,
+  ScreenBuilder,
+  SectionBuilder,
+  SectionFactory,
+  TemplateBuilder,
+  TemplateFactory,
+  componentRegistry,
+  elementRegistry,
+  groupRegistry,
+  sectionRegistry,
+  templateRegistry,
+  CURRENT_SDUI_SCHEMA_VERSION,
+} from '../src/public/index.js';
 
 const element = (id: string, type = 'text') => ElementFactory.raw({ id, type, properties: {} });
 
@@ -86,5 +103,135 @@ describe('SDUI composition engine', () => {
     expect(login.id).not.toBe(dashboard.id);
     expect(login.properties?.title).toBe('Welcome');
     expect(dashboard.properties?.title).toBe('Hi');
+  });
+
+  /**
+   * Reference demo for adding a new reusable SDUI hierarchy.
+   *
+   * Registration order is leaf -> parent:
+   * Element -> Group -> Section -> Component -> Template.
+   * Each parent creates its children through their registered factory, so the final
+   * screen is composed only from canonical reusable definitions.
+   */
+  it('demonstrates how to register and return Template -> Component -> Section -> Group -> Element', () => {
+    const elementType = 'test_demo_text';
+    const groupType = 'test_demo_group';
+    const sectionType = 'test_demo_section';
+    const componentType = 'test_demo_component';
+    const templateType = 'test_demo_template';
+
+    if (!elementRegistry.has(elementType)) {
+      elementRegistry.register(elementType, ({ id, properties }) => ({
+        id,
+        type: elementType,
+        properties: {
+          text: properties?.text ?? 'Demo element',
+          style: 'body',
+        },
+      }));
+    }
+
+    if (!groupRegistry.has(groupType)) {
+      groupRegistry.register(groupType, ({ id, properties }) => ({
+        id,
+        type: groupType,
+        properties: { axis: 'horizontal', gap: 8 },
+        elements: [
+          ElementFactory.create(elementType, {
+            id: `${id}_element`,
+            properties: { text: properties?.text },
+          }),
+        ],
+      }));
+    }
+
+    if (!sectionRegistry.has(sectionType)) {
+      sectionRegistry.register(sectionType, ({ id, properties }) => ({
+        id,
+        type: sectionType,
+        properties: { padding: 16 },
+        groups: [
+          GroupFactory.create(groupType, {
+            id: `${id}_group`,
+            properties,
+          }),
+        ],
+      }));
+    }
+
+    if (!componentRegistry.has(componentType)) {
+      componentRegistry.register(componentType, ({ id, properties }) => ({
+        id,
+        type: componentType,
+        properties: { width: 'match_parent' },
+        sections: [
+          SectionFactory.create(sectionType, {
+            id: `${id}_section`,
+            properties,
+          }),
+        ],
+      }));
+    }
+
+    if (!templateRegistry.has(templateType)) {
+      templateRegistry.register(templateType, ({ id, properties }) => ({
+        id,
+        type: templateType,
+        properties: { layout: 'column' },
+        components: [
+          ComponentFactory.create(componentType, {
+            id: `${id}_component`,
+            properties,
+          }),
+        ],
+      }));
+    }
+
+    const template = TemplateFactory.create(templateType, {
+      id: 'test_demo_template_instance',
+      properties: { text: 'Hello from registered SDUI' },
+    });
+
+    const screen = new ScreenBuilder({
+      screenId: 'test_demo_screen',
+      schemaVersion: CURRENT_SDUI_SCHEMA_VERSION,
+      targetApp: 'CUSTOMER',
+    }).withTemplate(template).build();
+
+    expect(screen).toEqual({
+      screenId: 'test_demo_screen',
+      schemaVersion: CURRENT_SDUI_SCHEMA_VERSION,
+      targetApp: 'CUSTOMER',
+      templateId: 'test_demo_template_instance',
+      templateType: 'test_demo_template',
+      template: {
+        id: 'test_demo_template_instance',
+        type: 'test_demo_template',
+        properties: { layout: 'column' },
+        components: [{
+          id: 'test_demo_template_instance_component',
+          type: 'test_demo_component',
+          properties: { width: 'match_parent' },
+          sections: [{
+            id: 'test_demo_template_instance_component_section',
+            type: 'test_demo_section',
+            properties: { padding: 16 },
+            groups: [{
+              id: 'test_demo_template_instance_component_section_group',
+              type: 'test_demo_group',
+              properties: { axis: 'horizontal', gap: 8 },
+              elements: [{
+                id: 'test_demo_template_instance_component_section_group_element',
+                type: 'test_demo_text',
+                properties: {
+                  text: 'Hello from registered SDUI',
+                  style: 'body',
+                },
+              }],
+            }],
+          }],
+        }],
+      },
+    });
   });
 });
