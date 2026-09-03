@@ -4,7 +4,7 @@ import path from 'node:path';
 const root = process.cwd();
 const p = (...parts) => path.join(root, ...parts);
 const exists = (x) => fs.existsSync(p(x));
-const rm = (x) => fs.rmSync(p(x), { recursive: true, force: true });
+const rel = (x) => path.relative(root, x).replaceAll('\\', '/');
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -17,97 +17,115 @@ function walk(dir) {
   return out;
 }
 
-function moveInto(sourceRel, targetRel) {
-  const source = p(sourceRel);
-  const target = p(targetRel);
-  if (!fs.existsSync(source)) return;
-  fs.mkdirSync(target, { recursive: true });
-  for (const file of walk(source)) {
-    const sub = path.relative(source, file);
-    const destination = path.join(target, sub);
-    fs.mkdirSync(path.dirname(destination), { recursive: true });
-    if (!fs.existsSync(destination)) fs.renameSync(file, destination);
-    else fs.rmSync(file, { force: true });
+function toJsRelative(fromFile, toFile) {
+  let spec = path.relative(path.dirname(fromFile), toFile).replaceAll('\\', '/');
+  spec = spec.replace(/\.ts$/, '.js');
+  if (!spec.startsWith('.')) spec = `./${spec}`;
+  return spec;
+}
+
+function resolveRelativeTs(fromFile, spec) {
+  if (!spec.startsWith('.')) return null;
+  const raw = path.resolve(path.dirname(fromFile), spec);
+  const candidates = [raw, raw.replace(/\.js$/, '.ts'), `${raw}.ts`, path.join(raw, 'index.ts')];
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? raw.replace(/\.js$/, '.ts');
+}
+
+// Any file we remove/move can already be referenced by migration-rewritten
+// relative imports. Rewire those references to the single canonical owner first.
+function rewriteReferences(oldAbs, newAbs) {
+  for (const file of walk(root).filter((x) => x.endsWith('.ts') || x.endsWith('.mjs'))) {
+    let text = fs.readFileSync(file, 'utf8');
+    let changed = false;
+    text = text.replace(/(['"])(\.[^'"\n]+)\1/g, (all, quote, spec) => {
+      const resolved = resolveRelativeTs(file, spec);
+      if (!resolved || path.resolve(resolved) !== path.resolve(oldAbs)) return all;
+      changed = true;
+      return `${quote}${toJsRelative(file, newAbs)}${quote}`;
+    });
+    if (changed) fs.writeFileSync(file, text);
   }
-  fs.rmSync(source, { recursive: true, force: true });
 }
 
-function removeIfCanonical(duplicateRel, canonicalRel) {
-  if (!exists(duplicateRel)) return;
-  if (!exists(canonicalRel)) throw new Error(`Cannot remove duplicate ${duplicateRel}; canonical owner missing: ${canonicalRel}`);
-  rm(duplicateRel);
+function coalesceFile(duplicateRel, canonicalRel) {
+  const duplicate = p(duplicateRel);
+  const canonical = p(canonicalRel);
+  if (!fs.existsSync(duplicate)) return;
+  fs.mkdirSync(path.dirname(canonical), { recursive: true });
+  if (fs.existsSync(canonical)) {
+    rewriteReferences(duplicate, canonical);
+    fs.rmSync(duplicate, { force: true });
+    return;
+  }
+  rewriteReferences(duplicate, canonical);
+  fs.renameSync(duplicate, canonical);
 }
 
-// Partner: profile/KYC capability-local definitions are canonical. Root copies
-// came from the retired common/platform packages and must not survive.
+function coalesceTree(duplicateRel, canonicalRel) {
+  const duplicate = p(duplicateRel);
+  if (!fs.existsSync(duplicate)) return;
+  for (const file of walk(duplicate)) {
+    const sub = path.relative(duplicate, file).replaceAll('\\', '/');
+    coalesceFile(`${duplicateRel}/${sub}`, `${canonicalRel}/${sub}`);
+  }
+  fs.rmSync(duplicate, { recursive: true, force: true });
+}
+
+// Partner: capability-local profile/KYC trees are canonical.
 for (const name of ['PartnerType.ts', 'PartnerStatus.ts', 'PartnerMemberRole.ts', 'PartnerMemberStatus.ts']) {
-  removeIfCanonical(`domains/partner/domain/${name}`, `domains/partner/profile/domain/${name}`);
+  coalesceFile(`domains/partner/domain/${name}`, `domains/partner/profile/domain/${name}`);
 }
 for (const name of ['KycDocumentStatus.ts', 'KycDocumentType.ts']) {
-  removeIfCanonical(`domains/partner/domain/${name}`, `domains/partner/kyc/domain/${name}`);
+  coalesceFile(`domains/partner/domain/${name}`, `domains/partner/kyc/domain/${name}`);
 }
 for (const name of ['IPartnerRepository.ts', 'IPartnerMemberRepository.ts', 'IPartnerProfileRepository.ts']) {
-  removeIfCanonical(`domains/partner/domain/repositories/${name}`, `domains/partner/profile/domain/repositories/${name}`);
+  coalesceFile(`domains/partner/domain/repositories/${name}`, `domains/partner/profile/domain/repositories/${name}`);
 }
-removeIfCanonical('domains/partner/domain/repositories/IKycDocumentRepository.ts', 'domains/partner/kyc/domain/repositories/IKycDocumentRepository.ts');
+coalesceFile('domains/partner/domain/repositories/IKycDocumentRepository.ts', 'domains/partner/kyc/domain/repositories/IKycDocumentRepository.ts');
 for (const name of ['PrismaPartnerRepository.ts', 'PrismaPartnerMemberRepository.ts', 'PrismaPartnerProfileRepository.ts']) {
-  removeIfCanonical(`domains/partner/infrastructure/repositories/${name}`, `domains/partner/profile/infrastructure/repositories/${name}`);
+  coalesceFile(`domains/partner/infrastructure/repositories/${name}`, `domains/partner/profile/infrastructure/repositories/${name}`);
 }
-if (exists('domains/partner/infrastructure/repositories/PrismaKycDocumentRepository.ts')) {
-  removeIfCanonical('domains/partner/infrastructure/repositories/PrismaKycDocumentRepository.ts', 'domains/partner/kyc/infrastructure/repositories/PrismaKycDocumentRepository.ts');
-}
+coalesceFile('domains/partner/infrastructure/repositories/PrismaKycDocumentRepository.ts', 'domains/partner/kyc/infrastructure/repositories/PrismaKycDocumentRepository.ts');
 
-// Catalog/Pricing: keep the capability-local model and persistence trees.
+// Catalog/Pricing: service catalogue and pricing policy are capability-local.
 for (const name of ['Service.ts', 'ServiceAddon.ts', 'ServiceCategory.ts']) {
-  removeIfCanonical(`domains/catalog-pricing/domain/${name}`, `domains/catalog-pricing/catalog/domain/${name}`);
+  coalesceFile(`domains/catalog-pricing/domain/${name}`, `domains/catalog-pricing/catalog/domain/${name}`);
 }
-removeIfCanonical('domains/catalog-pricing/domain/PricingTier.ts', 'domains/catalog-pricing/pricing/domain/PricingTier.ts');
-for (const name of ['ICatalogRepository.ts']) {
-  if (exists(`domains/catalog-pricing/domain/repositories/${name}`)) {
-    removeIfCanonical(`domains/catalog-pricing/domain/repositories/${name}`, `domains/catalog-pricing/catalog/domain/repositories/${name}`);
-  }
-}
-if (exists('domains/catalog-pricing/domain/repositories/IPricingRepository.ts')) {
-  removeIfCanonical('domains/catalog-pricing/domain/repositories/IPricingRepository.ts', 'domains/catalog-pricing/pricing/domain/repositories/IPricingRepository.ts');
-}
-for (const [name, capability] of [['PrismaCatalogRepository.ts','catalog'], ['PrismaPricingRepository.ts','pricing']]) {
-  removeIfCanonical(`domains/catalog-pricing/infrastructure/repositories/${name}`, `domains/catalog-pricing/${capability}/infrastructure/repositories/${name}`);
-}
+coalesceFile('domains/catalog-pricing/domain/PricingTier.ts', 'domains/catalog-pricing/pricing/domain/PricingTier.ts');
+coalesceFile('domains/catalog-pricing/domain/repositories/ICatalogRepository.ts', 'domains/catalog-pricing/catalog/domain/repositories/ICatalogRepository.ts');
+coalesceFile('domains/catalog-pricing/domain/repositories/IPricingRepository.ts', 'domains/catalog-pricing/pricing/domain/repositories/IPricingRepository.ts');
+coalesceFile('domains/catalog-pricing/infrastructure/repositories/PrismaCatalogRepository.ts', 'domains/catalog-pricing/catalog/infrastructure/repositories/PrismaCatalogRepository.ts');
+coalesceFile('domains/catalog-pricing/infrastructure/repositories/PrismaPricingRepository.ts', 'domains/catalog-pricing/pricing/infrastructure/repositories/PrismaPricingRepository.ts');
 
-// Financials: Payment/Invoice/Payout are internal capabilities, not parallel
-// root-domain implementations.
+// Financials: Payment, Invoice and Payout are internal capabilities. Collapse
+// common-package/root-domain copies into their capability-local source trees.
 for (const capability of ['payment', 'invoice', 'payout']) {
-  if (exists(`domains/financials/domain/${capability}`)) rm(`domains/financials/domain/${capability}`);
+  coalesceTree(`domains/financials/domain/${capability}`, `domains/financials/${capability}/domain`);
 }
-for (const [name, capability] of [
-  ['PrismaPaymentRepository.ts','payment'],
-  ['PrismaInvoiceRepository.ts','invoice'],
-  ['PrismaPartnerPayoutRepository.ts','payout'],
-]) {
-  removeIfCanonical(`domains/financials/infrastructure/repositories/${name}`, `domains/financials/${capability}/infrastructure/repositories/${name}`);
-}
+coalesceFile('domains/financials/infrastructure/repositories/PrismaPaymentRepository.ts', 'domains/financials/payment/infrastructure/repositories/PrismaPaymentRepository.ts');
+coalesceFile('domains/financials/infrastructure/repositories/PrismaInvoiceRepository.ts', 'domains/financials/invoice/infrastructure/repositories/PrismaInvoiceRepository.ts');
+coalesceFile('domains/financials/infrastructure/repositories/PrismaPartnerPayoutRepository.ts', 'domains/financials/payout/infrastructure/repositories/PrismaPartnerPayoutRepository.ts');
 
-// Operations: Tracking owns its tracking session/ping model and adapter. Merge
-// API-migrated tracking application code into that capability-local application.
+// Money has exactly one universal implementation. Foundation already owns and
+// tests it; remove the old common-package Financials copy and rewire consumers.
+coalesceFile('domains/financials/domain/value-objects/Money.ts', 'foundation/kernel/src/domain/Money.ts');
+
+// Operations: Tracking owns tracking sessions/location pings and all tracking
+// application behavior. Location primitives that are not tracking-specific may
+// remain under Operations domain/location.
 for (const name of ['LocationPing.ts', 'TrackingSession.ts']) {
-  removeIfCanonical(`domains/operations/domain/location/${name}`, `domains/operations/tracking/domain/${name}`);
+  coalesceFile(`domains/operations/domain/location/${name}`, `domains/operations/tracking/domain/${name}`);
 }
-removeIfCanonical('domains/operations/infrastructure/repositories/PrismaTrackingSessionRepository.ts', 'domains/operations/tracking/infrastructure/repositories/PrismaTrackingSessionRepository.ts');
-moveInto('domains/operations/application/tracking', 'domains/operations/tracking/application');
+coalesceFile('domains/operations/infrastructure/repositories/PrismaTrackingSessionRepository.ts', 'domains/operations/tracking/infrastructure/repositories/PrismaTrackingSessionRepository.ts');
+coalesceTree('domains/operations/application/tracking', 'domains/operations/tracking/application');
 
-// Engagement: Review and Coupon keep their migrated capability-local models.
-for (const capability of ['review', 'coupon']) {
-  if (exists(`domains/engagement/domain/${capability}`)) rm(`domains/engagement/domain/${capability}`);
-}
-for (const [name, capability] of [
-  ['PrismaReviewRepository.ts','review'],
-  ['PrismaCouponRepository.ts','coupon'],
-  ['PrismaCouponUsageRepository.ts','coupon'],
-]) {
-  removeIfCanonical(`domains/engagement/infrastructure/repositories/${name}`, `domains/engagement/${capability}/infrastructure/repositories/${name}`);
-}
+// Engagement: Review and Coupon keep their capability-local migrated models.
+coalesceTree('domains/engagement/domain/review', 'domains/engagement/review/domain');
+coalesceTree('domains/engagement/domain/coupon', 'domains/engagement/coupon/domain');
+coalesceFile('domains/engagement/infrastructure/repositories/PrismaReviewRepository.ts', 'domains/engagement/review/infrastructure/repositories/PrismaReviewRepository.ts');
+coalesceFile('domains/engagement/infrastructure/repositories/PrismaCouponRepository.ts', 'domains/engagement/coupon/infrastructure/repositories/PrismaCouponRepository.ts');
+coalesceFile('domains/engagement/infrastructure/repositories/PrismaCouponUsageRepository.ts', 'domains/engagement/coupon/infrastructure/repositories/PrismaCouponUsageRepository.ts');
 
-// Prune empty directories left by de-duplication.
 function pruneEmpty(dir) {
   if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return;
   for (const entry of fs.readdirSync(dir)) {
@@ -121,9 +139,12 @@ for (const candidate of [
   'domains/partner/infrastructure/repositories',
   'domains/catalog-pricing/domain/repositories',
   'domains/catalog-pricing/infrastructure/repositories',
+  'domains/financials/domain/value-objects',
   'domains/financials/infrastructure/repositories',
   'domains/operations/domain/location',
   'domains/operations/infrastructure/repositories',
+  'domains/operations/application',
+  'domains/engagement/domain',
   'domains/engagement/infrastructure/repositories',
 ]) pruneEmpty(p(candidate));
 
