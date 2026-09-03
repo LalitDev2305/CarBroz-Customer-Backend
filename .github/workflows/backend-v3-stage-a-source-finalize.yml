@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   finalize-source-only:
-    if: ${{ !contains(github.event.head_commit.message, 'refactor(stage-a): finalize source ownership') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -80,7 +79,7 @@ jobs:
               await app.close();
             });
 
-            it('exposes only Partner, Customer, Admin product families plus health', () => {
+            it('exposes Partner, Customer, Admin and health route families', () => {
               const routes = app.printRoutes();
               expect(routes).toContain('partner');
               expect(routes).toContain('customer');
@@ -106,7 +105,5 @@ jobs:
           git config user.name "CarBroz Architecture Bot"
           git config user.email "architecture@carbroz.local"
           git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "refactor(stage-a): finalize source ownership and test taxonomy"
-            git push origin HEAD:feature/backend-v3-stage-a-cleanup
-          fi
+          git commit -m "refactor(stage-a): finalize source ownership and test taxonomy"
+          git push origin HEAD:feature/backend-v3-stage-a-cleanup
