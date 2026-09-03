@@ -20,13 +20,14 @@ jobs:
           node-version: 22
       - run: corepack enable
       - run: corepack prepare pnpm@11.9.0 --activate
-      - name: Normalize constitution gate markers
+      - name: Normalize migration runner
         run: |
           node --input-type=module - <<'NODE'
           import fs from 'node:fs';
           const file = 'tools/backend-v3-migrate.mjs';
           let s = fs.readFileSync(file, 'utf8');
           s = s.replace("['domains/partner/', 'domains/catalog-pricing/', 'domains/financials/', 'domains/operations/', 'domains/communications/', 'domains/engagement/', 'domains/configuration/', 'domains/enterprise/', 'apps/api', 'GLOBAL', 'PARTNER', 'CUSTOMER']", "['partner/', 'catalog-pricing/', 'financials/', 'operations/', 'communications/', 'engagement/', 'configuration/', 'enterprise/', 'apps/', 'GLOBAL', 'PARTNER', 'CUSTOMER']");
+          s = s.replace("if (!owner || !newAbs.endsWith('.ts')) continue;", "if (!owner || !newAbs.endsWith('.ts') || !fs.existsSync(newAbs)) continue;");
           fs.writeFileSync(file, s);
           NODE
       - name: Generate canonical architecture
