@@ -10,9 +10,9 @@ const write = (file, content) => fs.writeFileSync(p(file), content);
 const auditLogPath = 'domains/audit/domain/AuditLog.ts';
 if (exists(auditLogPath)) {
   let text = read(auditLogPath);
-  text = text.replace(/readonly\s+id\?\s*:\s*number\s*;/g, 'readonly id: number | undefined;');
-  text = text.replace(/readonly\s+publicId\?\s*:\s*string\s*;/g, 'readonly publicId: string | undefined;');
-  text = text.replace(/readonly\s+createdAt\?\s*:\s*Date\s*;/g, 'readonly createdAt: Date | undefined;');
+  text = text.replace(/this\.id\s*=\s*props\.id\s*;/g, 'if (props.id !== undefined) this.id = props.id;');
+  text = text.replace(/this\.publicId\s*=\s*props\.publicId\s*;/g, 'if (props.publicId !== undefined) this.publicId = props.publicId;');
+  text = text.replace(/this\.createdAt\s*=\s*props\.createdAt\s*;/g, 'if (props.createdAt !== undefined) this.createdAt = props.createdAt;');
   write(auditLogPath, text);
 }
 
