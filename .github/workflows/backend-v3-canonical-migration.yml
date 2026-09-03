@@ -27,6 +27,8 @@ jobs:
         run: node tools/run-backend-v3-migration.mjs
       - name: Finalize canonical platform workspaces
         run: node tools/finalize-backend-v3-platform.mjs
+      - name: Finalize package import boundaries
+        run: node tools/finalize-backend-v3-import-boundaries.mjs
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Prisma validate
@@ -43,6 +45,7 @@ jobs:
         run: |
           node tools/run-backend-v3-migration.mjs
           node tools/finalize-backend-v3-platform.mjs
+          node tools/finalize-backend-v3-import-boundaries.mjs
       - name: Commit validated migration
         shell: bash
         run: |
