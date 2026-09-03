@@ -1,4 +1,6 @@
-import { IUseCase, IUserRepository, IUserSessionRepository, ValidationError } from '@carbroz/common';
+import { type IUseCase, ValidationError } from '@carbroz/foundation-kernel';
+import { type IUserRepository } from '../domain/repositories/IUserRepository.js';
+import { type IUserSessionRepository } from '../domain/repositories/IUserSessionRepository.js';
 
 interface Input {
   phoneNumber: string;
@@ -33,10 +35,6 @@ export class VerifyOtpUseCase implements IUseCase<Input, any> {
       refreshToken,
     });
 
-    return {
-      user,
-      session,
-      nextScreen: { template: 'dashboard_template', api: 'home' },
-    };
+    return { user, session };
   }
 }
