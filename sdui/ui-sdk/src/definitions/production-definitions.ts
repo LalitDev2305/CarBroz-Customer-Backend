@@ -54,7 +54,10 @@ function requireComponents(type: string, input: InstanceInput): SduiComponent[] 
   return input.components;
 }
 
-function sectionContent(type: string, input: InstanceInput): Pick<SduiSection, 'elements'> | Pick<SduiSection, 'groups'> {
+function sectionContent(
+  type: string,
+  input: InstanceInput,
+): { elements: SduiElement[] } | { groups: SduiGroup[] } {
   const hasElements = Boolean(input.elements?.length);
   const hasGroups = Boolean(input.groups?.length);
   if (hasElements === hasGroups) {
@@ -63,7 +66,10 @@ function sectionContent(type: string, input: InstanceInput): Pick<SduiSection, '
   return hasElements ? { elements: input.elements! } : { groups: input.groups! };
 }
 
-function componentContent(type: string, input: InstanceInput): Pick<SduiComponent, 'elements'> | Pick<SduiComponent, 'sections'> {
+function componentContent(
+  type: string,
+  input: InstanceInput,
+): { elements: SduiElement[] } | { sections: SduiSection[] } {
   const hasElements = Boolean(input.elements?.length);
   const hasSections = Boolean(input.sections?.length);
   if (hasElements === hasSections) {
