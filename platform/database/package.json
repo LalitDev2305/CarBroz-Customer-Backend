@@ -17,7 +17,6 @@
     "@carbroz/domain-dispute": "workspace:*",
     "@carbroz/domain-invoice": "workspace:*",
     "@carbroz/domain-notification": "workspace:*",
-    "@carbroz/domain-partner-profile": "workspace:*",
     "@carbroz/domain-payment": "workspace:*",
     "@carbroz/domain-payout": "workspace:*",
     "@carbroz/domain-pricing": "workspace:*",
