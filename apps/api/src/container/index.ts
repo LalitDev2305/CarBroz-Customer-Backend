@@ -4,8 +4,6 @@ import {
   PrismaProvider,
   PrismaDatabaseProvider,
   PrismaTransactionProvider,
-  PrismaConfigRepository,
-  PrismaFeatureFlagRepository,
   PrismaUserRepository,
   PrismaUserSessionRepository,
   PrismaRoleRepository,
@@ -21,6 +19,7 @@ import { RefreshTokenUseCase } from '../modules/auth/use-cases/RefreshTokenUseCa
 import { LogoutUseCase } from '../modules/auth/use-cases/LogoutUseCase.js';
 
 import { registerBookingModule } from '@carbroz/domain-booking';
+import { registerCatalogPricingModule } from '@carbroz/domain-catalog-pricing';
 import {
   ArchiveVehicleUseCase,
   CreateVehicleUseCase,
@@ -76,7 +75,6 @@ import { UpdateCustomerProfileUseCase } from '../modules/customer/use-cases/Upda
 import { ManageAddressUseCase } from '../modules/customer/use-cases/ManageAddressUseCase.js';
 import { ExtractCustomerDataUseCase } from '../modules/customer/use-cases/ExtractCustomerDataUseCase.js';
 
-import { PrismaCatalogRepository, PrismaPricingRepository } from '@carbroz/platform-database';
 import { GetCatalogUseCase } from '../modules/catalog/use-cases/GetCatalogUseCase.js';
 import { CalculateServicePriceUseCase } from '../modules/catalog/use-cases/CalculateServicePriceUseCase.js';
 import { ManageCatalogUseCase } from '../modules/catalog/use-cases/ManageCatalogUseCase.js';
@@ -105,19 +103,6 @@ import { CancelBookingUseCase } from '../modules/booking/use-cases/CancelBooking
 import { ExpirePendingBookingsUseCase } from '../modules/booking/use-cases/ExpirePendingBookingsUseCase.js';
 import { BookingController } from '../modules/booking/api/booking.controller.js';
 
-import {
-  PrismaPaymentRepository,
-  PrismaInvoiceRepository,
-  PrismaPartnerPayoutRepository,
-  PrismaTrackingSessionRepository,
-  PrismaNotificationLogRepository,
-  PrismaDeviceTokenRepository,
-  PrismaReviewRepository,
-  PrismaCouponRepository,
-  PrismaCouponUsageRepository,
-  PrismaAuditLogRepository,
-  PrismaDisputeRepository,
-} from '@carbroz/platform-database';
 import { RazorpayPaymentGatewayProvider } from '../providers/payment/RazorpayPaymentGatewayProvider.js';
 import { CreatePaymentOrderUseCase } from '../modules/payment/use-cases/CreatePaymentOrderUseCase.js';
 import { GetPaymentUseCase } from '../modules/payment/use-cases/GetPaymentUseCase.js';
@@ -319,8 +304,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       prismaProvider: asClass(PrismaProvider).classic().singleton(),
       databaseProvider: asClass(PrismaDatabaseProvider).classic().singleton(),
       transactionProvider: asClass(PrismaTransactionProvider).classic().singleton(),
-      configRepository: asClass(PrismaConfigRepository).classic().singleton(),
-      featureFlagRepository: asClass(PrismaFeatureFlagRepository).classic().singleton(),
       configProvider: asClass(ConfigProvider).classic().singleton(),
       userRepository: asClass(PrismaUserRepository).classic().singleton(),
       userSessionRepository: asClass(PrismaUserSessionRepository).classic().singleton(),
@@ -354,8 +337,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       updateCustomerProfileUseCase: asClass(UpdateCustomerProfileUseCase).classic().scoped(),
       manageAddressUseCase: asClass(ManageAddressUseCase).classic().scoped(),
       extractCustomerDataUseCase: asClass(ExtractCustomerDataUseCase).classic().scoped(),
-      catalogRepository: asClass(PrismaCatalogRepository).classic().singleton(),
-      pricingRepository: asClass(PrismaPricingRepository).classic().singleton(),
       getCatalogUseCase: asClass(GetCatalogUseCase).classic().scoped(),
       calculateServicePriceUseCase: asClass(CalculateServicePriceUseCase).classic().scoped(),
       manageCatalogUseCase: asClass(ManageCatalogUseCase).classic().scoped(),
@@ -381,9 +362,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       cancelBookingUseCase: asClass(CancelBookingUseCase).classic().scoped(),
       expirePendingBookingsUseCase: asClass(ExpirePendingBookingsUseCase).classic().scoped(),
       bookingController: asClass(BookingController).classic().scoped(),
-      paymentRepository: asClass(PrismaPaymentRepository).classic().singleton(),
-      invoiceRepository: asClass(PrismaInvoiceRepository).classic().singleton(),
-      partnerPayoutRepository: asClass(PrismaPartnerPayoutRepository).classic().singleton(),
       paymentGatewayProvider: asClass(RazorpayPaymentGatewayProvider).classic().singleton(),
       createPaymentOrderUseCase: asClass(CreatePaymentOrderUseCase).classic().scoped(),
       getPaymentUseCase: asClass(GetPaymentUseCase).classic().scoped(),
@@ -396,9 +374,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       markPayoutPaidUseCase: asClass(MarkPayoutPaidUseCase).classic().scoped(),
       paymentController: asClass(PaymentController).classic().scoped(),
       payoutController: asClass(PayoutController).classic().scoped(),
-      trackingSessionRepository: asClass(PrismaTrackingSessionRepository).classic().singleton(),
-      notificationLogRepository: asClass(PrismaNotificationLogRepository).classic().singleton(),
-      deviceTokenRepository: asClass(PrismaDeviceTokenRepository).classic().singleton(),
       pushProvider: asClass(FirebasePushProvider).classic().singleton(),
       smsProvider: asClass(Msg91SmsProvider).classic().singleton(),
       emailProvider: asClass(ResendEmailProvider).classic().singleton(),
@@ -412,9 +387,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       deactivateDeviceTokenUseCase: asClass(DeactivateDeviceTokenUseCase).classic().scoped(),
       sendNotificationUseCase: asClass(SendNotificationUseCase).classic().scoped(),
       listNotificationHistoryUseCase: asClass(ListNotificationHistoryUseCase).classic().scoped(),
-      reviewRepository: asClass(PrismaReviewRepository).classic().singleton(),
-      couponRepository: asClass(PrismaCouponRepository).classic().singleton(),
-      couponUsageRepository: asClass(PrismaCouponUsageRepository).classic().singleton(),
       partnerRatingCalculator: asClass(PartnerRatingCalculator).classic().scoped(),
       couponDiscountCalculator: asClass(CouponDiscountCalculator).classic().scoped(),
       submitReviewUseCase: asClass(SubmitReviewUseCase).classic().scoped(),
@@ -426,9 +398,7 @@ export function getContainer(): AwilixContainer<Cradle> {
       validateCouponUseCase: asClass(ValidateCouponUseCase).classic().scoped(),
       applyCouponUseCase: asClass(ApplyCouponUseCase).classic().scoped(),
       listCouponsUseCase: asClass(ListCouponsUseCase).classic().scoped(),
-      auditLogRepository: asClass(PrismaAuditLogRepository).classic().singleton(),
       auditLogService: asClass(AuditLogService).classic().scoped(),
-      disputeRepository: asClass(PrismaDisputeRepository).classic().singleton(),
       disputeSettlementCalculator: asClass(DisputeSettlementCalculator).classic().scoped(),
       raiseDisputeUseCase: asClass(RaiseDisputeUseCase).classic().scoped(),
       resolveDisputeUseCase: asClass(ResolveDisputeUseCase).classic().scoped(),
@@ -440,6 +410,7 @@ export function getContainer(): AwilixContainer<Cradle> {
 
     registerCustomerModule(diContainer);
     registerPartnerModule(diContainer);
+    registerCatalogPricingModule(diContainer);
     registerBookingModule(diContainer);
     registerTrackingModule(diContainer);
     registerPaymentModule(diContainer);
