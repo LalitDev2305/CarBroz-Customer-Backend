@@ -1,16 +1,12 @@
 {
-  "name": "@carbroz/platform-notification",
+  "name": "@carbroz/platform-integrations",
   "version": "1.0.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc"
-  },
+  "scripts": { "build": "tsc" },
   "dependencies": {
     "@carbroz/common": "workspace:*"
   },
-  "devDependencies": {
-    "@types/node": "^26.1.0"
-  }
+  "devDependencies": { "@types/node": "^26.1.0" }
 }
