@@ -4,12 +4,12 @@ import { Coupon, CouponDiscountCalculator, CouponUsage, PartnerRatingCalculator,
 import { type IBookingRepository } from '@carbroz/domain-booking';
 import { type ICouponRepository, type ICouponUsageRepository, type IReviewRepository } from '@carbroz/domain-engagement';
 import { type IPartnerRepository, type Partner } from '@carbroz/domain-partner';
-import { SubmitReviewUseCase } from '../src/modules/review/use-cases/SubmitReviewUseCase.js';
-import { ModerateReviewUseCase } from '../src/modules/review/use-cases/ModerateReviewUseCase.js';
-import { GetPartnerReviewsUseCase } from '../src/modules/review/use-cases/GetPartnerReviewsUseCase.js';
-import { CreateCouponUseCase } from '../src/modules/coupon/use-cases/CreateCouponUseCase.js';
-import { ValidateCouponUseCase } from '../src/modules/coupon/use-cases/ValidateCouponUseCase.js';
-import { ApplyCouponUseCase } from '../src/modules/coupon/use-cases/ApplyCouponUseCase.js';
+import { SubmitReviewUseCase } from '../../apps/api/src/modules/review/use-cases/SubmitReviewUseCase.js';
+import { ModerateReviewUseCase } from '../../apps/api/src/modules/review/use-cases/ModerateReviewUseCase.js';
+import { GetPartnerReviewsUseCase } from '../../apps/api/src/modules/review/use-cases/GetPartnerReviewsUseCase.js';
+import { CreateCouponUseCase } from '../../apps/api/src/modules/coupon/use-cases/CreateCouponUseCase.js';
+import { ValidateCouponUseCase } from '../../apps/api/src/modules/coupon/use-cases/ValidateCouponUseCase.js';
+import { ApplyCouponUseCase } from '../../apps/api/src/modules/coupon/use-cases/ApplyCouponUseCase.js';
 
 describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
   const now = new Date();

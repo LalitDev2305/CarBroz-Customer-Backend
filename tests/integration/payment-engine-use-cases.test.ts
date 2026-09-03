@@ -1,10 +1,10 @@
 import crypto from 'node:crypto';
 import { describe, expect, it, beforeEach } from 'vitest';
-import { CreatePaymentOrderUseCase } from '../src/modules/payment/use-cases/CreatePaymentOrderUseCase.js';
-import { ProcessPaymentWebhookUseCase } from '../src/modules/payment/use-cases/ProcessPaymentWebhookUseCase.js';
-import { GenerateInvoiceUseCase } from '../src/modules/invoice/use-cases/GenerateInvoiceUseCase.js';
-import { CreatePayoutEligibilityUseCase } from '../src/modules/payout/use-cases/CreatePayoutEligibilityUseCase.js';
-import { RazorpayPaymentGatewayProvider } from '../src/providers/payment/RazorpayPaymentGatewayProvider.js';
+import { CreatePaymentOrderUseCase } from '../../apps/api/src/modules/payment/use-cases/CreatePaymentOrderUseCase.js';
+import { ProcessPaymentWebhookUseCase } from '../../apps/api/src/modules/payment/use-cases/ProcessPaymentWebhookUseCase.js';
+import { GenerateInvoiceUseCase } from '../../apps/api/src/modules/invoice/use-cases/GenerateInvoiceUseCase.js';
+import { CreatePayoutEligibilityUseCase } from '../../apps/api/src/modules/payout/use-cases/CreatePayoutEligibilityUseCase.js';
+import { RazorpayPaymentGatewayProvider } from '../../apps/api/src/providers/payment/RazorpayPaymentGatewayProvider.js';
 import { Booking } from '@carbroz/domain-booking';
 import { Invoice, PartnerPayout, Payment, PaymentWebhook } from '@carbroz/domain-financials';
 import { type IPaymentRepository, type IInvoiceRepository, type IPartnerPayoutRepository } from '@carbroz/domain-financials';

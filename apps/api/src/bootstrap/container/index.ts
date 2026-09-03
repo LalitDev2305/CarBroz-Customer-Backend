@@ -30,9 +30,7 @@ import { PrismaPartnerRepository, PrismaPartnerMemberRepository } from '@carbroz
 import { RegisterIndividualPartnerUseCase } from '@carbroz/domain-partner';
 import { RegisterOrganizationPartnerUseCase } from '@carbroz/domain-partner';
 import { GetPartnerProfileUseCase } from '@carbroz/domain-partner';
-import { VerifyPartnerUseCase } from '../../surfaces/partner/use-cases/VerifyPartnerUseCase.js';
-import { PartnerController } from '../../surfaces/partner/partner.controller.js';
-import { AdminPartnerController } from '../../surfaces/admin/admin-partner.controller.js';
+import { VerifyPartnerUseCase } from '@carbroz/domain-partner';
 
 import { GoogleMapsProvider } from '../providers/maps/GoogleMapsProvider.js';
 import { GeocodeAddressUseCase } from '@carbroz/domain-operations';
@@ -48,7 +46,7 @@ import { KycController } from '../../surfaces/partner/kyc.controller.js';
 import { AdminKycController } from '../../surfaces/admin/admin-kyc.controller.js';
 import { LoggerProvider } from '../providers/LoggerProvider.js';
 
-import { PrismaCustomerProfileRepository, PrismaAddressRepository } from '@carbroz/platform-database';
+import { PrismaCustomerProfileRepository, PrismaAddressRepository } from '@carbroz/domain-customer';
 import { GetCustomerProfileUseCase } from '@carbroz/domain-customer';
 import { UpdateCustomerProfileUseCase } from '@carbroz/domain-customer';
 import { ManageAddressUseCase } from '@carbroz/domain-customer';
@@ -146,8 +144,6 @@ import { RemoveFleetVehicleUseCase } from '@carbroz/domain-enterprise';
 import { ValidateCorporateBookingUseCase } from '@carbroz/domain-enterprise';
 import { GenerateCorporateInvoiceUseCase } from '@carbroz/domain-enterprise';
 import { ReconcileCorporatePaymentUseCase } from '@carbroz/domain-enterprise';
-import { CorporateController } from '../../surfaces/customer/corporate/controllers/CorporateController.js';
-import { AdminCorporateController } from '../../surfaces/customer/corporate/controllers/AdminCorporateController.js';
 
 export interface Cradle {
   prismaProvider: PrismaProvider;
@@ -175,8 +171,6 @@ export interface Cradle {
   registerOrganizationPartnerUseCase: RegisterOrganizationPartnerUseCase;
   getPartnerProfileUseCase: GetPartnerProfileUseCase;
   verifyPartnerUseCase: VerifyPartnerUseCase;
-  partnerController: PartnerController;
-  adminPartnerController: AdminPartnerController;
 
   mapsProvider: import('@carbroz/domain-operations').IMapsProvider;
   geocodeAddressUseCase: GeocodeAddressUseCase;
@@ -310,8 +304,6 @@ export interface Cradle {
   validateCorporateBookingUseCase: ValidateCorporateBookingUseCase;
   generateCorporateInvoiceUseCase: GenerateCorporateInvoiceUseCase;
   reconcilePaymentUseCase: ReconcileCorporatePaymentUseCase;
-  corporateController: CorporateController;
-  adminCorporateController: AdminCorporateController;
 }
 
 let isRegistered = false;
@@ -343,8 +335,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       registerOrganizationPartnerUseCase: asClass(RegisterOrganizationPartnerUseCase).classic().scoped(),
       getPartnerProfileUseCase: asClass(GetPartnerProfileUseCase).classic().scoped(),
       verifyPartnerUseCase: asClass(VerifyPartnerUseCase).classic().scoped(),
-      partnerController: asClass(PartnerController).classic().scoped(),
-      adminPartnerController: asClass(AdminPartnerController).classic().scoped(),
       mapsProvider: asClass(GoogleMapsProvider).classic().singleton(),
       geocodeAddressUseCase: asClass(GeocodeAddressUseCase).classic().scoped(),
       reverseGeocodeUseCase: asClass(ReverseGeocodeUseCase).classic().scoped(),
@@ -461,8 +451,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       validateCorporateBookingUseCase: asClass(ValidateCorporateBookingUseCase).classic().scoped(),
       generateCorporateInvoiceUseCase: asClass(GenerateCorporateInvoiceUseCase).classic().scoped(),
       reconcilePaymentUseCase: asClass(ReconcileCorporatePaymentUseCase).classic().scoped(),
-      corporateController: asClass(CorporateController).classic().scoped(),
-      adminCorporateController: asClass(AdminCorporateController).classic().scoped(),
     });
 
     registerGarageModule(diContainer);

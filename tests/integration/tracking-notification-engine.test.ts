@@ -5,15 +5,15 @@ import { NotificationLog, NotificationService } from '@carbroz/domain-communicat
 import { type IBookingRepository } from '@carbroz/domain-booking';
 import { type IDeviceTokenRepository, type INotificationLogRepository } from '@carbroz/domain-communications';
 import { type IMapsProvider, type ITrackingSessionRepository } from '@carbroz/domain-operations';
-import { StartTrackingSessionUseCase } from '../src/modules/tracking/use-cases/StartTrackingSessionUseCase.js';
-import { UpdateLocationPingUseCase } from '../src/modules/tracking/use-cases/UpdateLocationPingUseCase.js';
-import { GetCurrentTrackingUseCase } from '../src/modules/tracking/use-cases/GetCurrentTrackingUseCase.js';
-import { RegisterDeviceTokenUseCase } from '../src/modules/notification/use-cases/RegisterDeviceTokenUseCase.js';
-import { SendNotificationUseCase } from '../src/modules/notification/use-cases/SendNotificationUseCase.js';
-import { FirebasePushProvider } from '../src/providers/notification/FirebasePushProvider.js';
-import { Msg91SmsProvider } from '../src/providers/notification/Msg91SmsProvider.js';
-import { ResendEmailProvider } from '../src/providers/notification/ResendEmailProvider.js';
-import { MultiChannelNotificationProvider } from '../src/providers/notification/MultiChannelNotificationProvider.js';
+import { StartTrackingSessionUseCase } from '../../apps/api/src/modules/tracking/use-cases/StartTrackingSessionUseCase.js';
+import { UpdateLocationPingUseCase } from '../../apps/api/src/modules/tracking/use-cases/UpdateLocationPingUseCase.js';
+import { GetCurrentTrackingUseCase } from '../../apps/api/src/modules/tracking/use-cases/GetCurrentTrackingUseCase.js';
+import { RegisterDeviceTokenUseCase } from '../../apps/api/src/modules/notification/use-cases/RegisterDeviceTokenUseCase.js';
+import { SendNotificationUseCase } from '../../apps/api/src/modules/notification/use-cases/SendNotificationUseCase.js';
+import { FirebasePushProvider } from '../../apps/api/src/providers/notification/FirebasePushProvider.js';
+import { Msg91SmsProvider } from '../../apps/api/src/providers/notification/Msg91SmsProvider.js';
+import { ResendEmailProvider } from '../../apps/api/src/providers/notification/ResendEmailProvider.js';
+import { MultiChannelNotificationProvider } from '../../apps/api/src/providers/notification/MultiChannelNotificationProvider.js';
 
 describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
   const sessions = new Map<number, TrackingSession>();

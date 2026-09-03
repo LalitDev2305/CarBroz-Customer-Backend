@@ -1,8 +1,8 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { CreateVehicleUseCase } from '../src/modules/vehicle/use-cases/CreateVehicleUseCase.js';
-import { ListCustomerVehiclesUseCase } from '../src/modules/vehicle/use-cases/ListCustomerVehiclesUseCase.js';
-import { SetDefaultVehicleUseCase } from '../src/modules/vehicle/use-cases/SetDefaultVehicleUseCase.js';
-import { ArchiveVehicleUseCase } from '../src/modules/vehicle/use-cases/ArchiveVehicleUseCase.js';
+import { CreateVehicleUseCase } from '../../apps/api/src/modules/vehicle/use-cases/CreateVehicleUseCase.js';
+import { ListCustomerVehiclesUseCase } from '../../apps/api/src/modules/vehicle/use-cases/ListCustomerVehiclesUseCase.js';
+import { SetDefaultVehicleUseCase } from '../../apps/api/src/modules/vehicle/use-cases/SetDefaultVehicleUseCase.js';
+import { ArchiveVehicleUseCase } from '../../apps/api/src/modules/vehicle/use-cases/ArchiveVehicleUseCase.js';
 import { type IVehicleRepository, Vehicle } from '@carbroz/domain-customer';
 
 class MemoryVehicleRepository implements IVehicleRepository {

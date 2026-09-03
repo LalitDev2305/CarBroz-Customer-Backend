@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getContainer } from './index.js';
+import { getContainer } from '../../apps/api/src/bootstrap/container/index.js';
 import { asValue } from 'awilix';
 
 describe('DI Container', () => {

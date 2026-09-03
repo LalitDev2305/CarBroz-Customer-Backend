@@ -5,8 +5,8 @@ import { NotificationService } from '@carbroz/domain-communications';
 import { type IBookingRepository } from '@carbroz/domain-booking';
 import { type IDisputeRepository } from '@carbroz/domain-dispute';
 import { type IPaymentRepository } from '@carbroz/domain-financials';
-import { RaiseDisputeUseCase } from '../src/modules/dispute/use-cases/RaiseDisputeUseCase.js';
-import { ResolveDisputeUseCase } from '../src/modules/dispute/use-cases/ResolveDisputeUseCase.js';
+import { RaiseDisputeUseCase } from '../../apps/api/src/modules/dispute/use-cases/RaiseDisputeUseCase.js';
+import { ResolveDisputeUseCase } from '../../apps/api/src/modules/dispute/use-cases/ResolveDisputeUseCase.js';
 
 describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
   const disputes: Dispute[] = [];

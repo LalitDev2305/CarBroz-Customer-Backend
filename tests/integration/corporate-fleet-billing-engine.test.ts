@@ -1,19 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   RegisterCorporateAccountUseCase,
-} from '../src/modules/corporate/use-cases/RegisterCorporateAccountUseCase.js';
+} from '../../apps/api/src/modules/corporate/use-cases/RegisterCorporateAccountUseCase.js';
 import {
   ApproveCorporateAccountUseCase,
-} from '../src/modules/corporate/use-cases/ApproveCorporateAccountUseCase.js';
+} from '../../apps/api/src/modules/corporate/use-cases/ApproveCorporateAccountUseCase.js';
 import {
   ValidateCorporateBookingUseCase,
-} from '../src/modules/corporate/use-cases/ValidateCorporateBookingUseCase.js';
+} from '../../apps/api/src/modules/corporate/use-cases/ValidateCorporateBookingUseCase.js';
 import {
   GenerateCorporateInvoiceUseCase,
-} from '../src/modules/corporate/use-cases/GenerateCorporateInvoiceUseCase.js';
+} from '../../apps/api/src/modules/corporate/use-cases/GenerateCorporateInvoiceUseCase.js';
 import {
   ReconcileCorporatePaymentUseCase,
-} from '../src/modules/corporate/use-cases/ReconcileCorporatePaymentUseCase.js';
+} from '../../apps/api/src/modules/corporate/use-cases/ReconcileCorporatePaymentUseCase.js';
 import { CorporateAccount, CorporateMember, CorporateFleetVehicle, CorporateCreditLedger, CorporateInvoice } from '@carbroz/domain-enterprise';
 import { Money } from '@carbroz/foundation-kernel';
 

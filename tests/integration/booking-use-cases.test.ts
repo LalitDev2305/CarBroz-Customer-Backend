@@ -1,9 +1,9 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { CreateBookingUseCase } from '../src/modules/booking/use-cases/CreateBookingUseCase.js';
-import { ConfirmBookingUseCase } from '../src/modules/booking/use-cases/ConfirmBookingUseCase.js';
-import { AssignPartnerToBookingUseCase } from '../src/modules/booking/use-cases/AssignPartnerToBookingUseCase.js';
-import { CancelBookingUseCase } from '../src/modules/booking/use-cases/CancelBookingUseCase.js';
-import { ExpirePendingBookingsUseCase } from '../src/modules/booking/use-cases/ExpirePendingBookingsUseCase.js';
+import { CreateBookingUseCase } from '../../apps/api/src/modules/booking/use-cases/CreateBookingUseCase.js';
+import { ConfirmBookingUseCase } from '../../apps/api/src/modules/booking/use-cases/ConfirmBookingUseCase.js';
+import { AssignPartnerToBookingUseCase } from '../../apps/api/src/modules/booking/use-cases/AssignPartnerToBookingUseCase.js';
+import { CancelBookingUseCase } from '../../apps/api/src/modules/booking/use-cases/CancelBookingUseCase.js';
+import { ExpirePendingBookingsUseCase } from '../../apps/api/src/modules/booking/use-cases/ExpirePendingBookingsUseCase.js';
 import { Booking, type BookingStatus, type IBookingRepository } from '@carbroz/domain-booking';
 import { Vehicle, type IAddressRepository, type ICustomerProfileRepository, type IVehicleRepository } from '@carbroz/domain-customer';
 import { type ICatalogRepository, type IPricingRepository } from '@carbroz/domain-catalog-pricing';
