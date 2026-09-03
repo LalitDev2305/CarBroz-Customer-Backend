@@ -1,7 +1,7 @@
 import { ResponseHelper } from '../../transport/response/ResponseHelper.js';
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { VerifyPartnerUseCase } from '../../partner/use-cases/VerifyPartnerUseCase.js';
-import { verifyPartnerSchema } from '../partner/dto/partner.dto.js';
+import { type FastifyRequest, type FastifyReply } from 'fastify';
+import { VerifyPartnerUseCase } from '@carbroz/domain-partner';
+import { verifyPartnerSchema } from './dto/admin-partner.dto.js';
 import { type IRequestContext } from '@carbroz/foundation-kernel';
 
 export class AdminPartnerController {
@@ -10,16 +10,16 @@ export class AdminPartnerController {
     const params = request.params as { id: string };
     const context = {
       traceId: request.traceId,
-      authenticatedUser: request.user as any
+      authenticatedUser: request.user as any,
     } as IRequestContext;
     const useCase = request.diScope.resolve<VerifyPartnerUseCase>('verifyPartnerUseCase');
     const result = await useCase.execute({
-      context, 
+      context,
       data: {
         partnerId: params.id,
-        status: input.status
-      }
+        status: input.status,
+      },
     });
-    return reply.status(200).send(ResponseHelper.success(result, "Partner status updated successfully"));
+    return reply.status(200).send(ResponseHelper.success(result, 'Partner status updated successfully'));
   };
 }
