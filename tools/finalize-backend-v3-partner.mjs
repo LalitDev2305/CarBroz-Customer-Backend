@@ -121,10 +121,7 @@ export class PrismaPartnerProfileRepository implements IPartnerProfileRepository
 }
 `);
 
-// KYC persistence must omit optional undefined values rather than forwarding
-// them into exactOptionalPropertyTypes contracts.
 patch('domains/partner/kyc/infrastructure/repositories/PrismaKycDocumentRepository.ts', (text) => {
-  text = text.replace(/publicId:\s*entity\.publicId,/, 'publicId: entity.publicId,');
   text = text.replace(/rejectionReason:\s*document\.rejectionReason,/, '...(document.rejectionReason !== undefined ? { rejectionReason: document.rejectionReason } : {}),');
   text = text.replace(/verifiedById:\s*document\.verifiedById,/, '...(document.verifiedById !== undefined ? { verifiedById: document.verifiedById } : {}),');
   for (const name of ['type','fileUrl','status','rejectionReason','uploadedById','verifiedById']) {
@@ -135,8 +132,13 @@ patch('domains/partner/kyc/infrastructure/repositories/PrismaKycDocumentReposito
   return text;
 });
 
-// The common Storage contract was already classified into platform/storage;
-// make it reachable only through the platform public boundary.
+patch('domains/partner/application/self-service/GetPartnerProfileUseCase.ts', (text) =>
+  text.replace(
+    'const primaryMembership = memberships[0];\n    const partner = await this.partnerRepository.findById(primaryMembership.partnerId);',
+    'const primaryMembership = memberships[0];\n    if (!primaryMembership) {\n      throw new Error("Partner profile not found");\n    }\n    const partner = await this.partnerRepository.findById(primaryMembership.partnerId);',
+  )
+);
+
 patch('platform/storage/src/public/index.ts', (text) => text.includes('IStorageProvider') ? text : `export * from './IStorageProvider.js';\n${text}`);
 patch('platform/storage/src/index.ts', (text) => text.includes("./public/index.js") ? text : `export * from './public/index.js';\n${text}`);
 
