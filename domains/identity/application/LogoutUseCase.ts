@@ -1,4 +1,5 @@
-import { IUseCase, IUserSessionRepository } from '@carbroz/common';
+import { type IUseCase } from '@carbroz/foundation-kernel';
+import { type IUserSessionRepository } from '../domain/repositories/IUserSessionRepository.js';
 
 interface Input {
   deviceId?: string;
