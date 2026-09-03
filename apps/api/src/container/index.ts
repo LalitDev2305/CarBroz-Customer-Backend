@@ -10,7 +10,7 @@ import {
   PrismaUserSessionRepository,
   PrismaRoleRepository,
   PrismaPermissionRepository,
-  PrismaAdminRoleRepository
+  PrismaAdminRoleRepository,
 } from '@carbroz/platform-database';
 import { ConfigProvider } from '@carbroz/config';
 import { FeatureFlagProvider } from '@carbroz/platform-feature-flags';
@@ -27,8 +27,9 @@ import {
   CreateVehicleUseCase,
   ListCustomerVehiclesUseCase,
   SetDefaultVehicleUseCase,
-  registerGarageModule,
-} from '@carbroz/domain-garage';
+  registerCustomerModule,
+} from '@carbroz/domain-customer';
+import { registerPartnerModule } from '@carbroz/domain-partner';
 import { registerTrackingModule } from '@carbroz/domain-tracking';
 import { registerPaymentModule } from '@carbroz/domain-payment';
 import { registerInvoiceModule } from '@carbroz/domain-invoice';
@@ -37,11 +38,10 @@ import { registerNotificationModule } from '@carbroz/domain-notification';
 import { registerReviewModule } from '@carbroz/domain-review';
 import { registerCouponModule } from '@carbroz/domain-coupon';
 import { registerDisputeModule } from '@carbroz/domain-dispute';
-import { registerSduiRegistryModule } from '@carbroz/domain-sdui-registry';
+import { registerSduiRegistryModule } from '@carbroz/sdui-registry';
 import { registerAuditModule } from '@carbroz/domain-audit';
 import { registerConfigModule } from '@carbroz/domain-config';
 
-import { PrismaPartnerRepository, PrismaPartnerMemberRepository } from '@carbroz/platform-database';
 import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js';
 import { RegisterOrganizationPartnerUseCase } from '../modules/partner/use-cases/RegisterOrganizationPartnerUseCase.js';
 import { GetPartnerProfileUseCase } from '../modules/partner/use-cases/GetPartnerProfileUseCase.js';
@@ -54,7 +54,6 @@ import { GeocodeAddressUseCase } from '../modules/maps/use-cases/GeocodeAddressU
 import { ReverseGeocodeUseCase } from '../modules/maps/use-cases/ReverseGeocodeUseCase.js';
 import { CalculateDistanceUseCase } from '../modules/maps/use-cases/CalculateDistanceUseCase.js';
 
-import { PrismaPartnerProfileRepository, PrismaKycDocumentRepository } from '@carbroz/platform-database';
 import { MinIOStorageProvider } from '@carbroz/platform-storage';
 import { UploadKycDocumentUseCase } from '../modules/partner/use-cases/UploadKycDocumentUseCase.js';
 import { GetPartnerKycStatusUseCase } from '../modules/partner/use-cases/GetPartnerKycStatusUseCase.js';
@@ -63,7 +62,6 @@ import { KycController } from '../modules/partner/api/kyc.controller.js';
 import { AdminKycController } from '../modules/admin/api/admin-kyc.controller.js';
 import { LoggerProvider } from '../providers/LoggerProvider.js';
 
-import { PrismaCustomerProfileRepository, PrismaAddressRepository } from '@carbroz/platform-database';
 import { GetCustomerProfileUseCase } from '../modules/customer/use-cases/GetCustomerProfileUseCase.js';
 import { UpdateCustomerProfileUseCase } from '../modules/customer/use-cases/UpdateCustomerProfileUseCase.js';
 import { ManageAddressUseCase } from '../modules/customer/use-cases/ManageAddressUseCase.js';
@@ -102,6 +100,19 @@ import {
   PrismaPaymentRepository,
   PrismaInvoiceRepository,
   PrismaPartnerPayoutRepository,
+  PrismaTrackingSessionRepository,
+  PrismaNotificationLogRepository,
+  PrismaDeviceTokenRepository,
+  PrismaReviewRepository,
+  PrismaCouponRepository,
+  PrismaCouponUsageRepository,
+  PrismaAuditLogRepository,
+  PrismaDisputeRepository,
+  PrismaCorporateAccountRepository,
+  PrismaCorporateMemberRepository,
+  PrismaCorporateFleetVehicleRepository,
+  PrismaCorporateCreditLedgerRepository,
+  PrismaCorporateInvoiceRepository,
 } from '@carbroz/platform-database';
 import { RazorpayPaymentGatewayProvider } from '../providers/payment/RazorpayPaymentGatewayProvider.js';
 import { CreatePaymentOrderUseCase } from '../modules/payment/use-cases/CreatePaymentOrderUseCase.js';
@@ -115,14 +126,11 @@ import { ProcessPayoutBatchUseCase } from '../modules/payout/use-cases/ProcessPa
 import { MarkPayoutPaidUseCase } from '../modules/payout/use-cases/MarkPayoutPaidUseCase.js';
 import { PaymentController } from '../modules/payment/api/payment.controller.js';
 import { PayoutController } from '../modules/payout/api/payout.controller.js';
-import { PrismaTrackingSessionRepository } from '@carbroz/platform-database';
-import { PrismaNotificationLogRepository } from '@carbroz/platform-database';
-import { PrismaDeviceTokenRepository } from '@carbroz/platform-database';
 import { FirebasePushProvider } from '../providers/notification/FirebasePushProvider.js';
 import { Msg91SmsProvider } from '../providers/notification/Msg91SmsProvider.js';
 import { ResendEmailProvider } from '../providers/notification/ResendEmailProvider.js';
 import { MultiChannelNotificationProvider } from '@carbroz/platform-notification';
-import { NotificationService } from '@carbroz/common';
+import { NotificationService, PartnerRatingCalculator, CouponDiscountCalculator, AuditLogService, DisputeSettlementCalculator } from '@carbroz/common';
 import { StartTrackingSessionUseCase } from '../modules/tracking/use-cases/StartTrackingSessionUseCase.js';
 import { UpdateLocationPingUseCase } from '../modules/tracking/use-cases/UpdateLocationPingUseCase.js';
 import { GetCurrentTrackingUseCase } from '../modules/tracking/use-cases/GetCurrentTrackingUseCase.js';
@@ -131,13 +139,6 @@ import { RegisterDeviceTokenUseCase } from '../modules/notification/use-cases/Re
 import { DeactivateDeviceTokenUseCase } from '../modules/notification/use-cases/DeactivateDeviceTokenUseCase.js';
 import { SendNotificationUseCase } from '../modules/notification/use-cases/SendNotificationUseCase.js';
 import { ListNotificationHistoryUseCase } from '../modules/notification/use-cases/ListNotificationHistoryUseCase.js';
-
-import {
-  PrismaReviewRepository,
-  PrismaCouponRepository,
-  PrismaCouponUsageRepository,
-} from '@carbroz/platform-database';
-import { PartnerRatingCalculator, CouponDiscountCalculator } from '@carbroz/common';
 import { SubmitReviewUseCase } from '../modules/review/use-cases/SubmitReviewUseCase.js';
 import { ModerateReviewUseCase } from '../modules/review/use-cases/ModerateReviewUseCase.js';
 import { GetPartnerReviewsUseCase } from '../modules/review/use-cases/GetPartnerReviewsUseCase.js';
@@ -147,24 +148,10 @@ import { ArchiveCouponUseCase } from '../modules/coupon/use-cases/ArchiveCouponU
 import { ValidateCouponUseCase } from '../modules/coupon/use-cases/ValidateCouponUseCase.js';
 import { ApplyCouponUseCase } from '../modules/coupon/use-cases/ApplyCouponUseCase.js';
 import { ListCouponsUseCase } from '../modules/coupon/use-cases/ListCouponsUseCase.js';
-
-import { PrismaAuditLogRepository } from '@carbroz/platform-database';
-import { AuditLogService } from '@carbroz/common';
-
-import { PrismaDisputeRepository } from '@carbroz/platform-database';
-import { DisputeSettlementCalculator } from '@carbroz/common';
 import { RaiseDisputeUseCase } from '../modules/dispute/use-cases/RaiseDisputeUseCase.js';
 import { ResolveDisputeUseCase } from '../modules/dispute/use-cases/ResolveDisputeUseCase.js';
 import { GetDisputeUseCase } from '../modules/dispute/use-cases/GetDisputeUseCase.js';
 import { ListDisputesUseCase } from '../modules/dispute/use-cases/ListDisputesUseCase.js';
-
-import {
-  PrismaCorporateAccountRepository,
-  PrismaCorporateMemberRepository,
-  PrismaCorporateFleetVehicleRepository,
-  PrismaCorporateCreditLedgerRepository,
-  PrismaCorporateInvoiceRepository,
-} from '@carbroz/platform-database';
 import { RegisterCorporateAccountUseCase } from '../modules/corporate/use-cases/RegisterCorporateAccountUseCase.js';
 import { ApproveCorporateAccountUseCase } from '../modules/corporate/use-cases/ApproveCorporateAccountUseCase.js';
 import { AdjustCreditLimitUseCase } from '../modules/corporate/use-cases/AdjustCreditLimitUseCase.js';
@@ -197,7 +184,6 @@ export interface Cradle {
   verifyOtpUseCase: VerifyOtpUseCase;
   refreshTokenUseCase: RefreshTokenUseCase;
   logoutUseCase: LogoutUseCase;
-
   partnerRepository: import('@carbroz/common').IPartnerRepository;
   partnerMemberRepository: import('@carbroz/common').IPartnerMemberRepository;
   registerIndividualPartnerUseCase: RegisterIndividualPartnerUseCase;
@@ -206,12 +192,10 @@ export interface Cradle {
   verifyPartnerUseCase: VerifyPartnerUseCase;
   partnerController: PartnerController;
   adminPartnerController: AdminPartnerController;
-
   mapsProvider: import('@carbroz/common').IMapsProvider;
   geocodeAddressUseCase: GeocodeAddressUseCase;
   reverseGeocodeUseCase: ReverseGeocodeUseCase;
   calculateDistanceUseCase: CalculateDistanceUseCase;
-
   partnerProfileRepository: import('@carbroz/common').IPartnerProfileRepository;
   kycDocumentRepository: import('@carbroz/common').IKycDocumentRepository;
   storageProvider: import('@carbroz/common').IStorageProvider;
@@ -221,22 +205,19 @@ export interface Cradle {
   kycController: KycController;
   adminKycController: AdminKycController;
   logger: import('@carbroz/common').ILoggerProvider;
-
   customerProfileRepository: import('@carbroz/common').ICustomerProfileRepository;
   addressRepository: import('@carbroz/common').IAddressRepository;
   getCustomerProfileUseCase: GetCustomerProfileUseCase;
   updateCustomerProfileUseCase: UpdateCustomerProfileUseCase;
   manageAddressUseCase: ManageAddressUseCase;
   extractCustomerDataUseCase: ExtractCustomerDataUseCase;
-
   catalogRepository: import('@carbroz/common').ICatalogRepository;
   pricingRepository: import('@carbroz/common').IPricingRepository;
   getCatalogUseCase: GetCatalogUseCase;
   calculateServicePriceUseCase: CalculateServicePriceUseCase;
   manageCatalogUseCase: ManageCatalogUseCase;
   managePricingTierUseCase: ManagePricingTierUseCase;
-
-  sduiRegistryRepository: import('@carbroz/domain-sdui-registry').ISduiRegistryRepository;
+  sduiRegistryRepository: import('@carbroz/sdui-registry').ISduiRegistryRepository;
   getSduiScreenUseCase: GetSduiScreenUseCase;
   createSduiComponentUseCase: CreateSduiComponentUseCase;
   createSduiSectionUseCase: CreateSduiSectionUseCase;
@@ -250,8 +231,7 @@ export interface Cradle {
   getSduiVersionHistoryUseCase: GetSduiVersionHistoryUseCase;
   getSduiSpecificVersionUseCase: GetSduiSpecificVersionUseCase;
   compareSduiVersionsUseCase: CompareSduiVersionsUseCase;
-
-  vehicleRepository: import('@carbroz/domain-garage').IVehicleRepository;
+  vehicleRepository: import('@carbroz/domain-customer').IVehicleRepository;
   bookingRepository: import('@carbroz/domain-booking').IBookingRepository;
   createVehicleUseCase: CreateVehicleUseCase;
   listCustomerVehiclesUseCase: ListCustomerVehiclesUseCase;
@@ -265,7 +245,6 @@ export interface Cradle {
   cancelBookingUseCase: CancelBookingUseCase;
   expirePendingBookingsUseCase: ExpirePendingBookingsUseCase;
   bookingController: BookingController;
-
   paymentRepository: import('@carbroz/common').IPaymentRepository;
   invoiceRepository: import('@carbroz/common').IInvoiceRepository;
   partnerPayoutRepository: import('@carbroz/common').IPartnerPayoutRepository;
@@ -281,7 +260,6 @@ export interface Cradle {
   markPayoutPaidUseCase: MarkPayoutPaidUseCase;
   paymentController: PaymentController;
   payoutController: PayoutController;
-
   trackingSessionRepository: import('@carbroz/common').ITrackingSessionRepository;
   notificationLogRepository: import('@carbroz/common').INotificationLogRepository;
   deviceTokenRepository: import('@carbroz/common').IDeviceTokenRepository;
@@ -298,7 +276,6 @@ export interface Cradle {
   deactivateDeviceTokenUseCase: DeactivateDeviceTokenUseCase;
   sendNotificationUseCase: SendNotificationUseCase;
   listNotificationHistoryUseCase: ListNotificationHistoryUseCase;
-
   reviewRepository: import('@carbroz/common').IReviewRepository;
   couponRepository: import('@carbroz/common').ICouponRepository;
   couponUsageRepository: import('@carbroz/common').ICouponUsageRepository;
@@ -313,17 +290,14 @@ export interface Cradle {
   validateCouponUseCase: ValidateCouponUseCase;
   applyCouponUseCase: ApplyCouponUseCase;
   listCouponsUseCase: ListCouponsUseCase;
-
   auditLogRepository: import('@carbroz/common').IAuditLogRepository;
   auditLogService: AuditLogService;
-
   disputeRepository: import('@carbroz/common').IDisputeRepository;
   disputeSettlementCalculator: DisputeSettlementCalculator;
   raiseDisputeUseCase: RaiseDisputeUseCase;
   resolveDisputeUseCase: ResolveDisputeUseCase;
   getDisputeUseCase: GetDisputeUseCase;
   listDisputesUseCase: ListDisputesUseCase;
-
   corporateAccountRepo: import('@carbroz/common').ICorporateAccountRepository;
   corporateMemberRepo: import('@carbroz/common').ICorporateMemberRepository;
   fleetVehicleRepo: import('@carbroz/common').ICorporateFleetVehicleRepository;
@@ -366,8 +340,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       verifyOtpUseCase: asClass(VerifyOtpUseCase).classic().scoped(),
       refreshTokenUseCase: asClass(RefreshTokenUseCase).classic().scoped(),
       logoutUseCase: asClass(LogoutUseCase).classic().scoped(),
-      partnerRepository: asClass(PrismaPartnerRepository).classic().singleton(),
-      partnerMemberRepository: asClass(PrismaPartnerMemberRepository).classic().singleton(),
       registerIndividualPartnerUseCase: asClass(RegisterIndividualPartnerUseCase).classic().scoped(),
       registerOrganizationPartnerUseCase: asClass(RegisterOrganizationPartnerUseCase).classic().scoped(),
       getPartnerProfileUseCase: asClass(GetPartnerProfileUseCase).classic().scoped(),
@@ -378,8 +350,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       geocodeAddressUseCase: asClass(GeocodeAddressUseCase).classic().scoped(),
       reverseGeocodeUseCase: asClass(ReverseGeocodeUseCase).classic().scoped(),
       calculateDistanceUseCase: asClass(CalculateDistanceUseCase).classic().scoped(),
-      partnerProfileRepository: asClass(PrismaPartnerProfileRepository).classic().singleton(),
-      kycDocumentRepository: asClass(PrismaKycDocumentRepository).classic().singleton(),
       storageProvider: asClass(MinIOStorageProvider).classic().singleton(),
       logger: asClass(LoggerProvider).classic().singleton(),
       uploadKycDocumentUseCase: asClass(UploadKycDocumentUseCase).classic().scoped(),
@@ -387,8 +357,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       adminReviewKycDocumentUseCase: asClass(AdminReviewKycDocumentUseCase).classic().scoped(),
       kycController: asClass(KycController).classic().scoped(),
       adminKycController: asClass(AdminKycController).classic().scoped(),
-      customerProfileRepository: asClass(PrismaCustomerProfileRepository).classic().singleton(),
-      addressRepository: asClass(PrismaAddressRepository).classic().singleton(),
       getCustomerProfileUseCase: asClass(GetCustomerProfileUseCase).classic().scoped(),
       updateCustomerProfileUseCase: asClass(UpdateCustomerProfileUseCase).classic().scoped(),
       manageAddressUseCase: asClass(ManageAddressUseCase).classic().scoped(),
@@ -399,7 +367,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       calculateServicePriceUseCase: asClass(CalculateServicePriceUseCase).classic().scoped(),
       manageCatalogUseCase: asClass(ManageCatalogUseCase).classic().scoped(),
       managePricingTierUseCase: asClass(ManagePricingTierUseCase).classic().scoped(),
-
       getSduiScreenUseCase: asClass(GetSduiScreenUseCase).classic().scoped(),
       createSduiComponentUseCase: asClass(CreateSduiComponentUseCase).classic().scoped(),
       createSduiSectionUseCase: asClass(CreateSduiSectionUseCase).classic().scoped(),
@@ -413,7 +380,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       getSduiVersionHistoryUseCase: asClass(GetSduiVersionHistoryUseCase).classic().scoped(),
       getSduiSpecificVersionUseCase: asClass(GetSduiSpecificVersionUseCase).classic().scoped(),
       compareSduiVersionsUseCase: asClass(CompareSduiVersionsUseCase).classic().scoped(),
-
       vehicleController: asClass(VehicleController).classic().scoped(),
       createBookingUseCase: asClass(CreateBookingUseCase).classic().scoped(),
       confirmBookingUseCase: asClass(ConfirmBookingUseCase).classic().scoped(),
@@ -494,7 +460,8 @@ export function getContainer(): AwilixContainer<Cradle> {
       adminCorporateController: asClass(AdminCorporateController).classic().scoped(),
     });
 
-    registerGarageModule(diContainer);
+    registerCustomerModule(diContainer);
+    registerPartnerModule(diContainer);
     registerBookingModule(diContainer);
     registerTrackingModule(diContainer);
     registerPaymentModule(diContainer);
