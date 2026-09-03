@@ -10,9 +10,9 @@ if (!fs.existsSync(envPath)) {
 dotenv.config({ path: envPath });
 
 export default defineConfig({
-  schema: "packages/database/prisma/schema.prisma",
+  schema: "prisma/schema.prisma",
   migrations: {
-    path: "packages/database/prisma/migrations",
+    path: "prisma/migrations",
   },
   datasource: {
     url: process.env["DATABASE_URL"],
