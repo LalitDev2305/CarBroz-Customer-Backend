@@ -30,6 +30,7 @@ import { adminReviewRoutes } from '../surfaces/admin/reviews/admin-review.routes
 import { couponRoutes } from '../surfaces/customer/coupon/coupon.controller.js';
 import { adminCouponRoutes } from '../surfaces/admin/coupons/admin-coupon.routes.js';
 import { disputeRoutes } from '../surfaces/customer/dispute/dispute.controller.js';
+import { adminDisputeRoutes } from '../surfaces/admin/disputes/admin-dispute.routes.js';
 import { corporateRoutes } from '../surfaces/customer/corporate/routes/corporate.routes.js';
 import { adminCorporateRoutes } from '../surfaces/admin/corporate/admin-corporate.routes.js';
 
@@ -111,6 +112,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   await app.register(adminSduiRoutes, { prefix: '/api/v1/admin/sdui' });
   await app.register(adminReviewRoutes, { prefix: '/api/v1/admin/reviews' });
   await app.register(adminCouponRoutes, { prefix: '/api/v1/admin/coupons' });
+  await app.register(adminDisputeRoutes, { prefix: '/api/v1/admin/disputes' });
   await app.register(adminCorporateRoutes, { prefix: '/api/v1/admin/corporate' });
 
   return app;
