@@ -23,6 +23,8 @@ jobs:
           node-version: 22
       - run: corepack enable
       - run: corepack prepare pnpm@11.9.0 --activate
+      - name: Preserve canonical assets before legacy pruning
+        run: node tools/preserve-backend-v3-canonical-assets.mjs
       - name: Generate canonical architecture
         run: node tools/run-backend-v3-migration.mjs
       - name: Finalize canonical platform workspaces
@@ -33,6 +35,8 @@ jobs:
         run: node tools/finalize-backend-v3-symbol-ownership.mjs
       - name: Finalize canonical capability internals
         run: node tools/finalize-backend-v3-canonical-internals.mjs
+      - name: Finalize SDUI contracts
+        run: node tools/finalize-backend-v3-sdui.mjs
       - name: Finalize package import boundaries
         run: node tools/finalize-backend-v3-import-boundaries.mjs
       - name: Finalize strict TypeScript semantics
@@ -55,11 +59,13 @@ jobs:
         run: pnpm test
       - name: Verify final topology
         run: |
+          node tools/preserve-backend-v3-canonical-assets.mjs
           node tools/run-backend-v3-migration.mjs
           node tools/finalize-backend-v3-platform.mjs
           node tools/finalize-backend-v3-single-ownership.mjs
           node tools/finalize-backend-v3-symbol-ownership.mjs
           node tools/finalize-backend-v3-canonical-internals.mjs
+          node tools/finalize-backend-v3-sdui.mjs
           node tools/finalize-backend-v3-import-boundaries.mjs
           node tools/finalize-backend-v3-strictness.mjs
           node tools/finalize-backend-v3-customer-hydration.mjs
