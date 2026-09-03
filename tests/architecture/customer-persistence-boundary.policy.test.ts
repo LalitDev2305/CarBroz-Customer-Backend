@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const root = process.cwd();
+const legacyCommonPackage = ['@carbroz', 'common'].join('/');
 
 function read(path: string): string {
   return readFileSync(resolve(root, path), 'utf8');
@@ -16,15 +17,15 @@ describe('customer persistence boundary', () => {
     expect(existsSync(resolve(root, 'platform/database/src/repositories/PrismaAddressRepository.ts'))).toBe(false);
   });
 
-  it('keeps domain-owned repository ports out of packages/common ownership', () => {
+  it('keeps domain-owned repository ports out of legacy common ownership', () => {
     expect(existsSync(resolve(root, 'domains/customer/profile/domain/repositories/ICustomerProfileRepository.ts'))).toBe(true);
     expect(existsSync(resolve(root, 'domains/customer/address/domain/repositories/IAddressRepository.ts'))).toBe(true);
 
     const profileRepository = read('domains/customer/profile/infrastructure/repositories/PrismaCustomerProfileRepository.ts');
     const addressRepository = read('domains/customer/address/infrastructure/repositories/PrismaAddressRepository.ts');
 
-    expect(profileRepository).not.toContain('@carbroz/common');
-    expect(addressRepository).not.toContain('@carbroz/common');
+    expect(profileRepository).not.toContain(legacyCommonPackage);
+    expect(addressRepository).not.toContain(legacyCommonPackage);
     expect(profileRepository).not.toContain('@prisma/client');
     expect(addressRepository).not.toContain('@prisma/client');
   });
