@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 const root = process.cwd();
 
 const CANONICAL_ROOTS = ['apps', 'domains', 'sdui', 'platform', 'foundation', 'prisma', 'tests', 'docs'] as const;
-const TRANSITIONAL_ROOTS = ['packages', 'shared'] as const;
+const TRANSITIONAL_ROOTS = ['packages'] as const;
 const GENERATED_DIRECTORIES = new Set(['node_modules', 'dist', 'coverage', '.turbo']);
 
 const EXPECTED_CHILDREN: Record<string, readonly string[]> = {
@@ -13,7 +13,6 @@ const EXPECTED_CHILDREN: Record<string, readonly string[]> = {
   sdui: ['registry', 'ui-sdk'],
   foundation: ['kernel'],
   packages: ['common', 'config'],
-  shared: ['kernel'],
   domains: [
     'audit',
     'booking',
@@ -82,7 +81,7 @@ function readJson(path: string): Record<string, unknown> {
 }
 
 function workspacePackageDirectories(): string[] {
-  const roots = ['apps', 'domains', 'sdui', 'platform', 'foundation', 'packages', 'shared'];
+  const roots = ['apps', 'domains', 'sdui', 'platform', 'foundation', 'packages'];
 
   return roots.flatMap((workspaceRoot) =>
     childDirectories(workspaceRoot)
@@ -97,6 +96,10 @@ describe('workspace taxonomy policy', () => {
       if (workspaceRoot === 'prisma' || workspaceRoot === 'tests' || workspaceRoot === 'docs') continue;
       expect(existsSync(resolve(root, workspaceRoot)), `Missing classified root: ${workspaceRoot}`).toBe(true);
     }
+  });
+
+  it('removes the superseded shared root once foundation/kernel owns shared primitives', () => {
+    expect(existsSync(resolve(root, 'shared'))).toBe(false);
   });
 
   it('blocks unclassified package creation during the migration', () => {
@@ -127,9 +130,8 @@ describe('workspace taxonomy policy', () => {
     expect(violations, `Unclassified platform packages: ${violations.join(', ')}`).toEqual([]);
   });
 
-  it('keeps transitional catch-all roots closed to new packages', () => {
+  it('keeps the remaining transitional catch-all root closed to new packages', () => {
     expect(childDirectories('packages')).toEqual(['common', 'config']);
-    expect(childDirectories('shared')).toEqual(['kernel']);
   });
 
   it('keeps workspace package identities unique', () => {
@@ -161,7 +163,7 @@ describe('workspace taxonomy policy', () => {
     expect(existsSync(resolve(root, 'domains/garage'))).toBe(false);
   });
 
-  it('keeps migration workspace globs explicit until legacy roots are removed', () => {
+  it('keeps migration workspace globs explicit until packages/ is removed', () => {
     const workspace = readFileSync(resolve(root, 'pnpm-workspace.yaml'), 'utf8');
     const expectedGlobs = [
       '"apps/*"',
@@ -170,11 +172,11 @@ describe('workspace taxonomy policy', () => {
       '"platform/*"',
       '"foundation/*"',
       '"packages/*"',
-      '"shared/*"',
     ];
 
     for (const glob of expectedGlobs) {
       expect(workspace).toContain(glob);
     }
+    expect(workspace).not.toContain('"shared/*"');
   });
 });
