@@ -23,8 +23,6 @@ function walk(dir) {
 
 const sourceFiles = (dir) => walk(dir).filter((x) => /\.(?:ts|mts|cts)$/.test(x) && !x.includes(`${path.sep}dist${path.sep}`));
 
-// Files classified out of the old common package are part of the Foundation
-// public contract when another workspace is allowed to depend on them.
 const foundationPublic = 'foundation/kernel/src/public/index.ts';
 const foundationExports = [
   '../application/IUseCase.js',
@@ -87,18 +85,20 @@ function toRelativeJs(fromFile, toFile) {
   return relative;
 }
 
-// Build a declaration index so package imports can be normalized without
-// reaching through another workspace's source tree and self-package imports
-// can resolve to local source before dist exists.
 const declarationIndex = new Map();
+const declarationKindByFile = new Map();
 for (const workspace of workspaceByRoot) {
   const symbols = new Map();
   for (const file of sourceFiles(workspace.abs)) {
     const text = fs.readFileSync(file, 'utf8');
+    const fileSymbols = new Map();
     const declarationRx = /export\s+(?:declare\s+)?(?:abstract\s+)?(class|interface|enum|type|const|function)\s+([A-Za-z_$][\w$]*)/g;
     for (const match of text.matchAll(declarationRx)) {
-      if (!symbols.has(match[2])) symbols.set(match[2], { file, kind: match[1] });
+      const declaration = { file, kind: match[1] };
+      if (!symbols.has(match[2])) symbols.set(match[2], declaration);
+      if (!fileSymbols.has(match[2])) fileSymbols.set(match[2], match[1]);
     }
+    declarationKindByFile.set(path.resolve(file), fileSymbols);
   }
   declarationIndex.set(workspace.name, symbols);
 }
@@ -127,8 +127,6 @@ function rewriteNamedPackageImports(file, text) {
     const tokens = body.split(',').map((token) => token.trim()).filter(Boolean);
     const symbols = declarationIndex.get(packageName) ?? new Map();
 
-    // A workspace importing its own public package cannot resolve dist while it
-    // is building. Resolve every known symbol to its actual local source file.
     if (packageName === sourceWorkspace.name) {
       const grouped = new Map();
       const unresolved = [];
@@ -149,14 +147,28 @@ function rewriteNamedPackageImports(file, text) {
       return statements.join('\n');
     }
 
-    // With verbatimModuleSyntax enabled, interface/type-only imports must be
-    // explicit. Keep runtime imports as runtime values.
     const normalized = tokens.map((token) => {
       const parsed = parseImportToken(token);
       const declaration = symbols.get(parsed.imported);
       return formatToken(token, Boolean(wholeType) || declaration?.kind === 'interface' || declaration?.kind === 'type');
     });
     return `import { ${normalized.join(', ')} } from '${packageName}';`;
+  });
+}
+
+function rewriteRelativeNamedTypeImports(file, text) {
+  return text.replace(/import\s+(type\s+)?\{([^}]*)\}\s+from\s+['"](\.[^'"]+)['"];?/g, (all, wholeType, body, specifier) => {
+    const target = resolveRelativeTs(file, specifier);
+    if (!target) return all;
+    const targetSymbols = declarationKindByFile.get(path.resolve(target));
+    if (!targetSymbols) return all;
+    const tokens = body.split(',').map((token) => token.trim()).filter(Boolean);
+    const normalized = tokens.map((token) => {
+      const parsed = parseImportToken(token);
+      const kind = targetSymbols.get(parsed.imported);
+      return formatToken(token, Boolean(wholeType) || kind === 'interface' || kind === 'type');
+    });
+    return `import { ${normalized.join(', ')} } from '${specifier}';`;
   });
 }
 
@@ -181,23 +193,27 @@ for (const workspace of workspaceByRoot) {
     const before = fs.readFileSync(file, 'utf8');
     let after = rewriteCrossWorkspaceImports(file, before);
     after = rewriteNamedPackageImports(file, after);
+    after = rewriteRelativeNamedTypeImports(file, after);
     if (after !== before) fs.writeFileSync(file, after);
   }
 }
 
-// Preserve optional constructor-input semantics while making class storage
-// explicit under exactOptionalPropertyTypes.
 const auditLogPath = 'domains/audit/domain/AuditLog.ts';
 if (exists(auditLogPath)) {
   let text = read(auditLogPath);
-  for (const name of ['targetType', 'targetId', 'deviceId', 'ipAddress', 'userAgent', 'applicationPublicId', 'endpoint', 'surface']) {
-    text = text.replace(`readonly ${name}?: string;`, `readonly ${name}: string | undefined;`);
-  }
-  text = text.replace('readonly statusCode?: number;', 'readonly statusCode: number | undefined;');
+  text = text.replace('readonly id?: number;', 'readonly id: number | undefined;');
+  text = text.replace('readonly publicId?: string;', 'readonly publicId: string | undefined;');
+  text = text.replace('readonly createdAt?: Date;', 'readonly createdAt: Date | undefined;');
   write(auditLogPath, text);
 }
 
-// Recompute workspace dependencies from actual canonical package imports.
+const prismaAuditLogRepositoryPath = 'domains/audit/infrastructure/repositories/PrismaAuditLogRepository.ts';
+if (exists(prismaAuditLogRepositoryPath)) {
+  let text = read(prismaAuditLogRepositoryPath);
+  text = text.replace(/\.map\(\(([A-Za-z_$][\w$]*)\)\s*=>/g, '.map(($1: any) =>');
+  write(prismaAuditLogRepositoryPath, text);
+}
+
 const packageNames = new Set(workspaceByRoot.map(({ name }) => name));
 for (const workspace of workspaceByRoot) {
   const manifestPath = p(workspace.dir, 'package.json');
@@ -214,8 +230,6 @@ for (const workspace of workspaceByRoot) {
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
-// Guards: no source-level coupling across workspace roots and no resolvable
-// self-package imports may remain.
 for (const workspace of workspaceByRoot) {
   for (const file of sourceFiles(workspace.abs)) {
     const text = fs.readFileSync(file, 'utf8');
