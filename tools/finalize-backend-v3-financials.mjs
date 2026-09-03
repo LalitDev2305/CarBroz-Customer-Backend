@@ -30,12 +30,18 @@ patch('foundation/kernel/src/domain/Money.ts', (text) => {
 });
 
 // Financials must consume the one Foundation Money owner, never a removed
-// shared-kernel alias.
-patch('domains/financials/payment/domain/Payment.ts', (text) =>
-  text
-    .replace(/from ['"]@carbroz\/shared-kernel['"]/g, "from '@carbroz/foundation-kernel'")
-    .replace(/this\.currency\s*=\s*validatedMoney\.currency;/g, 'this.currency = validatedMoney.currency;')
-);
+// shared-kernel alias. Payment stores the currency from the validated Money
+// value so its required aggregate invariant is definitely initialized.
+patch('domains/financials/payment/domain/Payment.ts', (text) => {
+  text = text.replace(/from ['"]@carbroz\/shared-kernel['"]/g, "from '@carbroz/foundation-kernel'");
+  if (!/this\.currency\s*=/.test(text)) {
+    text = text.replace(
+      /this\.amountPaise\s*=\s*validatedMoney\.amountPaise;/,
+      'this.amountPaise = validatedMoney.amountPaise;\n    this.currency = validatedMoney.currency;',
+    );
+  }
+  return text;
+});
 
 // Public barrels may expose both the application input and a historical
 // capability input with the same name. Export the application class explicitly
