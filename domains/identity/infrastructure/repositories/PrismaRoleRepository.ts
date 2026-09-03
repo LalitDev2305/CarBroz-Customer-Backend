@@ -1,5 +1,4 @@
-import { IRoleRepository } from '@carbroz/common';
-import { Role } from '@carbroz/common';
+import { IRoleRepository, Role } from '@carbroz/common';
 import { PrismaClient } from '@prisma/client';
 
 export class PrismaRoleRepository implements IRoleRepository {
@@ -30,7 +29,7 @@ export class PrismaRoleRepository implements IRoleRepository {
     if (!role) return null;
     return {
       ...this.mapToDomain(role),
-      permissions: role.permissions.map(p => p.permissionId)
+      permissions: role.permissions.map((permission: { permissionId: number }) => permission.permissionId)
     };
   }
 
