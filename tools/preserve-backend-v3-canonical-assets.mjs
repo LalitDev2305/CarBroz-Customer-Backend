@@ -2,8 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const source = path.join(root, 'apps/api/src/modules/sdui/dtos');
-const target = path.join(root, 'sdui/registry/dtos');
 
 function copyTree(from, to) {
   if (!fs.existsSync(from)) return;
@@ -16,9 +14,24 @@ function copyTree(from, to) {
   }
 }
 
-// These DTOs are registry application contracts consumed by SDUI use cases.
-// They were historically stored under the API module and would otherwise be
-// deleted when apps/api/src/modules is retired.
-copyTree(source, target);
+function copyFile(from, to) {
+  if (!fs.existsSync(from)) return;
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  if (!fs.existsSync(to)) fs.copyFileSync(from, to);
+}
+
+// Registry application DTOs were historically stored under API modules.
+copyTree(
+  path.join(root, 'apps/api/src/modules/sdui/dtos'),
+  path.join(root, 'sdui/registry/dtos'),
+);
+
+// Corporate DTO shapes are application input contracts used by Enterprise use
+// cases. Preserve a domain-owned copy before the API module tree is retired;
+// HTTP validation/DTOs remain independently owned by the API surface.
+copyFile(
+  path.join(root, 'apps/api/src/modules/corporate/dtos/corporate.dto.ts'),
+  path.join(root, 'domains/enterprise/application/contracts/corporate.contracts.ts'),
+);
 
 console.log('Canonical assets preserved before legacy pruning.');
