@@ -7,9 +7,7 @@ const sourcePath = path.resolve('tools/backend-v3-migrate.mjs');
 let source = fs.readFileSync(sourcePath, 'utf8');
 
 function replaceOnce(search, replacement, label) {
-  if (!source.includes(search)) {
-    throw new Error(`Migration runner patch not found: ${label}`);
-  }
+  if (!source.includes(search)) throw new Error(`Migration runner patch not found: ${label}`);
   source = source.replace(search, replacement);
 }
 
@@ -17,6 +15,18 @@ replaceOnce(
   "['domains/partner/', 'domains/catalog-pricing/', 'domains/financials/', 'domains/operations/', 'domains/communications/', 'domains/engagement/', 'domains/configuration/', 'domains/enterprise/', 'apps/api', 'GLOBAL', 'PARTNER', 'CUSTOMER']",
   "['partner/', 'catalog-pricing/', 'financials/', 'operations/', 'communications/', 'engagement/', 'configuration/', 'enterprise/', 'apps/', 'GLOBAL', 'PARTNER', 'CUSTOMER']",
   'constitution markers',
+);
+
+replaceOnce(
+  "['domains/notification', 'domains/communications/notification'],",
+  "['domains/notification', 'domains/communications'],",
+  'communications bounded-context consolidation',
+);
+
+replaceOnce(
+  "[/^domain\\/notification\\/(.*)$/, 'domains/communications/domain/notification/$1'],",
+  "[/^domain\\/notification\\/(.*)$/, 'domains/communications/domain/$1'],",
+  'communications common-domain ownership',
 );
 
 replaceOnce(
