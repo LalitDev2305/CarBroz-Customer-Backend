@@ -7,10 +7,12 @@ on:
       - architecture-v2
       - architecture/backend-v3-clean
       - 'feature/**'
+      - 'fix/**'
   pull_request:
     branches:
       - main
       - architecture-v2
+      - architecture/backend-v3-clean
 
 jobs:
   build-and-test:
