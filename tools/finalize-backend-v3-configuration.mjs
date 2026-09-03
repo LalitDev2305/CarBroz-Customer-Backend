@@ -8,27 +8,54 @@ const write = (relative, content) => {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, content);
 };
-const patch = (relative, transform) => {
-  const file = p(relative);
-  if (!fs.existsSync(file)) return;
-  const before = fs.readFileSync(file, 'utf8');
-  const after = transform(before);
-  if (after !== before) fs.writeFileSync(file, after);
-};
 
-// Configuration owns its application input. API/Zod schemas remain transport-only.
-patch('domains/configuration/application/GetInitConfigUseCase.ts', (text) => {
-  text = text.replace(/^import .*GetInitConfigDto.*config\.dto\.js.*\n/m, '');
-  text = text.replace(/GetInitConfigDto/g, 'GetInitConfigInput');
-  if (!text.includes('export interface GetInitConfigInput')) {
-    const marker = 'export interface InitConfigResponse';
-    text = text.replace(marker, `export interface GetInitConfigInput {\n  appVersion?: string;\n  platform?: 'IOS' | 'ANDROID';\n}\n\n${marker}`);
+// Configuration application owns its input contract. API/Zod schemas stay at
+// the transport edge and map structurally into this input.
+write('domains/configuration/application/GetInitConfigUseCase.ts', `import type { IUseCase } from '@carbroz/foundation-kernel';
+import type { IFeatureFlagRepository } from '../domain/repositories/IFeatureFlagRepository.js';
+
+export interface GetInitConfigInput {
+  appVersion?: string;
+  platform?: 'IOS' | 'ANDROID';
+}
+
+export interface InitConfigResponse {
+  maintenanceMode: boolean;
+  minSupportedVersion: string;
+  latestVersion: string;
+  forceUpdate: boolean;
+  features: Record<string, boolean>;
+  contentVersions: Record<string, string>;
+}
+
+export class GetInitConfigUseCase implements IUseCase<GetInitConfigInput, InitConfigResponse> {
+  constructor(private readonly featureFlagRepository: IFeatureFlagRepository) {}
+
+  async execute(_request: GetInitConfigInput): Promise<InitConfigResponse> {
+    const flags = await this.featureFlagRepository.findAll();
+    const features = flags.reduce((acc, flag) => {
+      acc[flag.key] = flag.enabled;
+      return acc;
+    }, {} as Record<string, boolean>);
+
+    return {
+      maintenanceMode: features['maintenance_mode'] ?? false,
+      minSupportedVersion: '1.0.0',
+      latestVersion: '1.0.0',
+      forceUpdate: false,
+      features,
+      contentVersions: {
+        sdui: 'v1',
+        catalog: 'v1',
+      },
+    };
   }
-  return text;
-});
+}
+`);
 
-// Repository-specific persistence contract owned by Configuration. This keeps
-// Configuration independent of the concrete platform/database PrismaProvider.
+// Configuration owns a narrow persistence provider contract. The concrete
+// platform PrismaProvider satisfies this structurally at composition time; the
+// domain package never imports platform/database.
 write('domains/configuration/infrastructure/persistence/FeatureFlagPersistenceClient.ts', `export interface FeatureFlagPersistenceRecord {
   id: number;
   publicId: string;
@@ -44,20 +71,28 @@ export interface FeatureFlagPersistenceClient {
   featureFlag: {
     findUnique(args: { where: { id?: number; key?: string; deletedAt?: null } }): Promise<FeatureFlagPersistenceRecord | null>;
     findMany(args?: { where?: { deletedAt?: null } }): Promise<FeatureFlagPersistenceRecord[]>;
-    create(args: { data: Record<string, unknown> }): Promise<FeatureFlagPersistenceRecord>;
     update(args: { where: { id: number }; data: Record<string, unknown> }): Promise<FeatureFlagPersistenceRecord>;
   };
 }
+
+export interface FeatureFlagPersistenceProvider {
+  getClient(): FeatureFlagPersistenceClient;
+}
 `);
 
-write('domains/configuration/infrastructure/repositories/PrismaFeatureFlagRepository.ts', `import type { FeatureFlag, IFeatureFlagRepository } from '@carbroz/common';
+write('domains/configuration/infrastructure/repositories/PrismaFeatureFlagRepository.ts', `import type { FeatureFlag } from '../../domain/FeatureFlag.js';
+import type { IFeatureFlagRepository } from '../../domain/repositories/IFeatureFlagRepository.js';
 import type {
-  FeatureFlagPersistenceClient,
+  FeatureFlagPersistenceProvider,
   FeatureFlagPersistenceRecord,
 } from '../persistence/FeatureFlagPersistenceClient.js';
 
 export class PrismaFeatureFlagRepository implements IFeatureFlagRepository {
-  constructor(private readonly prisma: FeatureFlagPersistenceClient) {}
+  constructor(private readonly prismaProvider: FeatureFlagPersistenceProvider) {}
+
+  private get prisma() {
+    return this.prismaProvider.getClient();
+  }
 
   private mapToDomain(model: FeatureFlagPersistenceRecord): FeatureFlag {
     return {
@@ -106,15 +141,10 @@ export class PrismaFeatureFlagRepository implements IFeatureFlagRepository {
 
   async delete(id: number): Promise<boolean> {
     try {
-      await this.prisma.featureFlag.update({
-        where: { id },
-        data: { deletedAt: new Date() },
-      });
+      await this.prisma.featureFlag.update({ where: { id }, data: { deletedAt: new Date() } });
       return true;
     } catch (error: unknown) {
-      if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
-        return false;
-      }
+      if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') return false;
       throw error;
     }
   }
