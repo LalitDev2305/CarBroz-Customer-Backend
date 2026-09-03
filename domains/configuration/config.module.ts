@@ -1,6 +1,7 @@
 import { asFunction, type AwilixContainer } from 'awilix';
 import type { PrismaClient } from '@prisma/client';
-import type { IFeatureFlagRepository } from '@carbroz/common';
+import type { IConfigRepository, IFeatureFlagRepository } from '@carbroz/common';
+import { ConfigProvider } from './application/ConfigProvider.js';
 import { FeatureFlagProvider } from './application/FeatureFlagProvider.js';
 import { PrismaConfigRepository } from './infrastructure/repositories/PrismaConfigRepository.js';
 import { PrismaFeatureFlagRepository } from './infrastructure/repositories/PrismaFeatureFlagRepository.js';
@@ -9,6 +10,7 @@ interface ConfigurationCradle {
   prismaProvider: {
     getClient(): PrismaClient;
   };
+  configRepository: IConfigRepository;
   featureFlagRepository: IFeatureFlagRepository;
 }
 
@@ -19,6 +21,9 @@ export function registerConfigModule(container: AwilixContainer): void {
     ).singleton(),
     featureFlagRepository: asFunction(
       (cradle: ConfigurationCradle) => new PrismaFeatureFlagRepository(cradle.prismaProvider.getClient()),
+    ).singleton(),
+    configProvider: asFunction(
+      (cradle: ConfigurationCradle) => new ConfigProvider(cradle.configRepository),
     ).singleton(),
     featureFlagProvider: asFunction(
       (cradle: ConfigurationCradle) => new FeatureFlagProvider(cradle.featureFlagRepository),
