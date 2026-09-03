@@ -17,6 +17,10 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      # Prisma validate/generate require a syntactically valid datasource URL but do not
+      # connect to the database. Runtime/integration jobs must provide their own database.
+      DATABASE_URL: postgresql://carbroz_ci:carbroz_ci@127.0.0.1:5432/carbroz_ci
 
     steps:
       - name: Checkout codebase
