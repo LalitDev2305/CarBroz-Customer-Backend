@@ -1,6 +1,6 @@
 import { PaymentStatus } from './PaymentStatus.js';
 import { PaymentMethod } from './PaymentMethod.js';
-import { Money } from '@carbroz/shared-kernel';
+import { Money } from '@carbroz/foundation-kernel';
 
 export interface PaymentAttempt {
   attemptId: string;
@@ -75,9 +75,9 @@ export class Payment {
     if (!props.customerId) throw new Error('Payment must be associated with a customer');
     if (!props.idempotencyKey) throw new Error('Payment idempotency key is required');
 
-    const validatedMoney = Money.fromPaise(props.amountPaise, props.currency ?? 'INR');
-    if (validatedMoney.amountPaise <= 0) {
-      throw new Error('Payment amount must be a positive integer in paise');
+    const validatedMoney = Money.fromMinor(props.amountPaise, props.currency ?? 'INR');
+    if (validatedMoney.amountMinor <= 0) {
+      throw new Error('Payment amount must be a positive integer in minor units');
     }
 
     this.id = props.id;
@@ -87,7 +87,7 @@ export class Payment {
     this.provider = props.provider ?? 'RAZORPAY';
     this.providerOrderId = props.providerOrderId ?? null;
     this.providerPaymentId = props.providerPaymentId ?? null;
-    this.amountPaise = validatedMoney.amountPaise;
+    this.amountPaise = validatedMoney.amountMinor;
     this.currency = validatedMoney.currency;
     this.method = props.method ?? 'UPI';
     this.status = props.status ?? 'PENDING';
@@ -105,11 +105,11 @@ export class Payment {
   }
 
   get money(): Money {
-    return Money.fromPaise(this.amountPaise, this.currency);
+    return Money.fromMinor(this.amountPaise, this.currency);
   }
 
   markSuccess(providerPaymentId: string, method?: PaymentMethod): void {
-    if (this.status === 'SUCCESS') return; // Idempotent
+    if (this.status === 'SUCCESS') return;
     this.status = 'SUCCESS';
     this.providerPaymentId = providerPaymentId;
     if (method) this.method = method;
