@@ -11,34 +11,30 @@ import requestContextPlugin from './plugins/request-context.js';
 import shutdownPlugin from './plugins/shutdown.plugin.js';
 import jwtPlugin from './plugins/jwt.plugin.js';
 import authorizationPlugin from './plugins/authorization.plugin.js';
-import authRoutes from '../transport/auth/auth.routes.js';
 import healthRoutes from '../system/health/health.routes.js';
-import { configRoutes } from '../transport/config/config.routes.js';
-
-import appRoutes from './app.routes.js';
 import { partnerRoutes } from '../surfaces/partner/partner.routes.js';
+import partnerAuthRoutes from '../surfaces/partner/auth/partner-auth.routes.js';
 import { adminPartnerRoutes } from '../surfaces/admin/admin-partner.routes.js';
-import { mapsRoutes } from '../transport/maps/maps.routes.js';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 import fastifyMultipart from '@fastify/multipart';
 import { kycRoutes } from '../surfaces/partner/kyc.routes.js';
 import { adminKycRoutes } from '../surfaces/admin/admin-kyc.routes.js';
 import customerRoutes from '../surfaces/customer/customer.routes.js';
 import catalogRoutes from '../surfaces/customer/catalog/catalog.routes.js';
 import adminCatalogRoutes from '../surfaces/admin/admin-catalog.routes.js';
-import sduiRegistryRoutes from '../surfaces/admin/sdui/sdui-registry.routes.js';
 import adminSduiRoutes from '../surfaces/admin/admin-sdui.routes.js';
 import { reviewRoutes } from '../surfaces/customer/review/review.controller.js';
+import { adminReviewRoutes } from '../surfaces/admin/reviews/admin-review.routes.js';
 import { couponRoutes } from '../surfaces/customer/coupon/coupon.controller.js';
+import { adminCouponRoutes } from '../surfaces/admin/coupons/admin-coupon.routes.js';
 import { disputeRoutes } from '../surfaces/customer/dispute/dispute.controller.js';
 import { corporateRoutes } from '../surfaces/customer/corporate/routes/corporate.routes.js';
-import { adminCorporateRoutes } from '../surfaces/customer/corporate/routes/admin-corporate.routes.js';
+import { adminCorporateRoutes } from '../surfaces/admin/corporate/admin-corporate.routes.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const buildApp = async (): Promise<FastifyInstance> => {
   const app = Fastify({ logger: getFastifyLoggerConfig(LoggingConfig.logLevel) });
@@ -97,23 +93,24 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   });
 
   await app.register(healthRoutes, { prefix: '/health' });
-  await app.register(authRoutes, { prefix: '/v1/auth' });
-  await app.register(configRoutes, { prefix: '/v1/config' });
-  await app.register(appRoutes, { prefix: '/api/v1/app' });
-  await app.register(partnerRoutes, { prefix: '/api/v1/partners' });
+
+  await app.register(partnerAuthRoutes, { prefix: '/api/v1/partner/auth' });
+  await app.register(partnerRoutes, { prefix: '/api/v1/partner' });
+  await app.register(kycRoutes, { prefix: '/api/v1/partner' });
+
+  await app.register(customerRoutes, { prefix: '/api/v1/customer' });
+  await app.register(catalogRoutes, { prefix: '/api/v1/customer/catalog' });
+  await app.register(reviewRoutes, { prefix: '/api/v1/customer' });
+  await app.register(couponRoutes, { prefix: '/api/v1/customer' });
+  await app.register(disputeRoutes, { prefix: '/api/v1/customer' });
+  await app.register(corporateRoutes, { prefix: '/api/v1/customer/corporate' });
+
   await app.register(adminPartnerRoutes, { prefix: '/api/v1/admin/partners' });
-  await app.register(mapsRoutes, { prefix: '/api/v1/maps' });
-  await app.register(kycRoutes, { prefix: '/api/v1/partners' });
   await app.register(adminKycRoutes, { prefix: '/api/v1/admin/kyc' });
-  await app.register(customerRoutes, { prefix: '/api/v1/customers' });
-  await app.register(catalogRoutes, { prefix: '/api/v1/catalog' });
   await app.register(adminCatalogRoutes, { prefix: '/api/v1/admin/catalog' });
-  await app.register(sduiRegistryRoutes, { prefix: '/api/v1/sdui' });
   await app.register(adminSduiRoutes, { prefix: '/api/v1/admin/sdui' });
-  await app.register(reviewRoutes);
-  await app.register(couponRoutes);
-  await app.register(disputeRoutes);
-  await app.register(corporateRoutes, { prefix: '/api/v1/corporate' });
+  await app.register(adminReviewRoutes, { prefix: '/api/v1/admin/reviews' });
+  await app.register(adminCouponRoutes, { prefix: '/api/v1/admin/coupons' });
   await app.register(adminCorporateRoutes, { prefix: '/api/v1/admin/corporate' });
 
   return app;
