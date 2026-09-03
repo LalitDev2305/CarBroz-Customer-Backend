@@ -17,62 +17,43 @@ const EXPECTED_CHILDREN: Record<string, readonly string[]> = {
   domains: [
     'audit',
     'booking',
-    'catalog',
-    'config',
-    'coupon',
+    'catalog-pricing',
+    'communications',
+    'configuration',
     'customer',
     'dispute',
+    'engagement',
+    'enterprise',
+    'financials',
     'identity',
-    'invoice',
-    'notification',
-    'partner-kyc',
-    'partner-profile',
-    'payment',
-    'payout',
-    'pricing',
-    'review',
-    'tracking',
+    'operations',
+    'partner',
   ],
   platform: [
     'cache',
     'database',
-    'event-bus',
     'feature-flags',
-    'notification',
+    'integrations',
+    'messaging',
     'observability',
-    'queue',
     'storage',
   ],
 };
 
 const FINAL_DOMAIN_NAMES = new Set([
   'identity',
-  'customer',
   'partner',
-  'catalog',
+  'customer',
+  'catalog-pricing',
   'booking',
   'operations',
   'financials',
   'communications',
   'engagement',
   'configuration',
+  'dispute',
   'enterprise',
   'audit',
-]);
-
-const TRANSITIONAL_DOMAIN_NAMES = new Set([
-  'config',
-  'coupon',
-  'dispute',
-  'invoice',
-  'notification',
-  'partner-kyc',
-  'partner-profile',
-  'payment',
-  'payout',
-  'pricing',
-  'review',
-  'tracking',
 ]);
 
 const FINAL_PLATFORM_NAMES = new Set([
@@ -84,12 +65,7 @@ const FINAL_PLATFORM_NAMES = new Set([
   'integrations',
 ]);
 
-const TRANSITIONAL_PLATFORM_NAMES = new Set([
-  'event-bus',
-  'feature-flags',
-  'notification',
-  'queue',
-]);
+const TRANSITIONAL_PLATFORM_NAMES = new Set(['feature-flags']);
 
 function childDirectories(path: string): string[] {
   const absolute = resolve(root, path);
@@ -131,11 +107,8 @@ describe('workspace taxonomy policy', () => {
     }
   });
 
-  it('allows only canonical or constitution-listed transitional domain names', () => {
-    const violations = childDirectories('domains').filter(
-      (name) => !FINAL_DOMAIN_NAMES.has(name) && !TRANSITIONAL_DOMAIN_NAMES.has(name),
-    );
-
+  it('allows only final constitution domain names', () => {
+    const violations = childDirectories('domains').filter((name) => !FINAL_DOMAIN_NAMES.has(name));
     expect(violations, `Unclassified domain packages: ${violations.join(', ')}`).toEqual([]);
   });
 
@@ -146,7 +119,7 @@ describe('workspace taxonomy policy', () => {
     expect(existsSync(resolve(root, 'domains/garage'))).toBe(false);
   });
 
-  it('allows only canonical or constitution-listed transitional platform capabilities', () => {
+  it('allows only canonical or explicitly transitional platform capabilities', () => {
     const violations = childDirectories('platform').filter(
       (name) => !FINAL_PLATFORM_NAMES.has(name) && !TRANSITIONAL_PLATFORM_NAMES.has(name),
     );
@@ -184,10 +157,11 @@ describe('workspace taxonomy policy', () => {
     expect(readJson('sdui/registry/package.json').name).toBe('@carbroz/sdui-registry');
     expect(readJson('foundation/kernel/package.json').name).toBe('@carbroz/foundation-kernel');
     expect(readJson('domains/customer/package.json').name).toBe('@carbroz/domain-customer');
+    expect(readJson('domains/enterprise/package.json').name).toBe('@carbroz/domain-enterprise');
     expect(existsSync(resolve(root, 'domains/garage'))).toBe(false);
   });
 
-  it('keeps the migration workspace globs explicit and closed', () => {
+  it('keeps migration workspace globs explicit until legacy roots are removed', () => {
     const workspace = readFileSync(resolve(root, 'pnpm-workspace.yaml'), 'utf8');
     const expectedGlobs = [
       '"apps/*"',
