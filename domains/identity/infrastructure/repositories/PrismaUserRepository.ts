@@ -1,5 +1,5 @@
 import { User, IUserRepository } from '@carbroz/common';
-import { PrismaProvider } from '../providers/PrismaProvider.js';
+import { PrismaProvider } from '@carbroz/platform-database';
 
 export class PrismaUserRepository implements IUserRepository {
   private readonly prisma;
