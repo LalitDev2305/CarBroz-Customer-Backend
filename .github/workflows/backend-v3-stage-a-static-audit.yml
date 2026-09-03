@@ -1,0 +1,58 @@
+name: Backend V3 Stage A Static Source Audit
+
+on:
+  push:
+    branches:
+      - feature/backend-v3-stage-a-cleanup
+
+jobs:
+  source-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Static source inventory only
+        shell: bash
+        run: |
+          set +e
+          echo '=== TOP LEVEL ==='
+          find . -maxdepth 1 -mindepth 1 -printf '%f\n' | sort
+          echo '=== FORBIDDEN LEGACY IMPORTS ==='
+          grep -RInE "@carbroz/(common|config|domain-(partner-profile|partner-kyc|catalog|pricing|payment|invoice|payout|tracking|notification|review|coupon))" --include='*.ts' --include='*.json' apps domains sdui platform foundation tests 2>/dev/null || true
+          echo '=== HARDCODED SCREEN/PRESENTATION TOKENS OUTSIDE SDUI ==='
+          grep -RInE "nextScreen|dashboard_template|auth_template|auth_otp|auth_login|screenId|templateId|templateType" --include='*.ts' apps domains platform foundation 2>/dev/null || true
+          echo '=== BUSINESS USE CASE FILES UNDER API ==='
+          find apps/api/src -type f -name '*UseCase.ts' -print 2>/dev/null || true
+          echo '=== BUSINESS REPOSITORIES UNDER PLATFORM DATABASE ==='
+          find platform/database -type f -name 'Prisma*Repository.ts' ! -name 'PrismaRepositoryBase.ts' -print 2>/dev/null || true
+          echo '=== FORBIDDEN/TRANSITIONAL ROOTS ==='
+          for p in shared packages libs common tools domains/partner-profile domains/partner-kyc domains/catalog domains/pricing domains/payment domains/invoice domains/payout domains/tracking domains/notification domains/review domains/coupon domains/config platform/event-bus platform/queue platform/notification platform/feature-flags; do [ -e "$p" ] && echo "$p"; done
+          echo '=== GENERATED ARTIFACTS ==='
+          find . -type d -name dist -o -type f -name '*.tsbuildinfo' 2>/dev/null | grep -v node_modules || true
+          echo '=== NON-CANONICAL API TRANSPORT CAPABILITY DIRECTORIES ==='
+          find apps/api/src/transport -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort || true
+          echo '=== ROOT TEST TAXONOMY ==='
+          find tests -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort || true
+          echo '=== EXPORTED CLASS/ENUM DUPLICATES ==='
+          python3 - <<'PY'
+          import os,re,collections
+          roots=['apps','domains','sdui','platform','foundation']
+          owners=collections.defaultdict(list)
+          rx=re.compile(r'\bexport\s+(?:abstract\s+)?(?:class|enum)\s+([A-Za-z_$][\w$]*)')
+          for root in roots:
+              if not os.path.isdir(root): continue
+              for base,dirs,files in os.walk(root):
+                  dirs[:]=[d for d in dirs if d not in {'node_modules','dist'}]
+                  for name in files:
+                      if not name.endswith('.ts'): continue
+                      p=os.path.join(base,name)
+                      try: text=open(p,encoding='utf-8').read()
+                      except: continue
+                      for m in rx.finditer(text): owners[m.group(1)].append(p)
+          for name,paths in sorted(owners.items()):
+              if len(paths)>1:
+                  print(name+': '+ ' <> '.join(paths))
+          PY
+          echo '=== ALL SOURCE TEST FILES ==='
+          find apps domains sdui platform foundation tests -type f \( -name '*.test.ts' -o -name '*.spec.ts' \) -print 2>/dev/null | sort
