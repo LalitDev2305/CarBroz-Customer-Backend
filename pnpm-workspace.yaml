@@ -4,8 +4,6 @@ packages:
   - "sdui/*"
   - "platform/*"
   - "foundation/*"
-  - "packages/*"
-  - "shared/*"
 allowBuilds:
   '@prisma/client': true
   '@prisma/engines': true
