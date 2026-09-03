@@ -117,6 +117,14 @@ for (const file of walk(root).filter((x) => x.endsWith('package.json'))) {
   if (changed) fs.writeFileSync(file, JSON.stringify(manifest, null, 2) + '\n');
 }
 
+// Prisma schema, migrations and seed material have one canonical repository owner: /prisma.
+if (exists('platform/database/prisma')) {
+  fs.mkdirSync(p('prisma'), { recursive: true });
+  fs.cpSync(p('platform/database/prisma'), p('prisma'), { recursive: true, force: true });
+  fs.rmSync(p('platform/database/prisma'), { recursive: true, force: true });
+}
+if (!exists('prisma/schema.prisma')) throw new Error('Canonical prisma/schema.prisma is missing');
+
 // The canonical migration rewrites pnpm-workspace.yaml. Restore pnpm 11 build-script
 // approvals here so required native/Prisma packages can install non-interactively in CI.
 write('pnpm-workspace.yaml', `packages:\n  - 'apps/*'\n  - 'domains/*'\n  - 'sdui/*'\n  - 'platform/*'\n  - 'foundation/*'\nallowBuilds:\n  '@prisma/client': true\n  '@prisma/engines': true\n  bcrypt: true\n  esbuild: true\n  msgpackr-extract: true\n  prisma: true\n`);
