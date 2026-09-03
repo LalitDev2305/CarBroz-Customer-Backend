@@ -19,6 +19,7 @@
     "@carbroz/domain-engagement": "workspace:*",
     "@carbroz/domain-customer": "workspace:*",
     "@carbroz/domain-dispute": "workspace:*",
+    "@carbroz/domain-enterprise": "workspace:*",
     "@carbroz/domain-identity": "workspace:*",
     "@carbroz/domain-financials": "workspace:*",
     "@carbroz/domain-communications": "workspace:*",
