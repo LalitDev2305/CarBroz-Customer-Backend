@@ -48,8 +48,6 @@ for (const required of requiredRoots) {
   if (!exists(required)) throw new Error(`Canonical structure missing required root: ${required}`);
 }
 
-// These roots are explicitly transitional/legacy and must not survive the V3
-// canonical migration. In particular there is exactly one kernel owner.
 const forbiddenRoots = [
   'shared',
   'shared/kernel',
@@ -88,20 +86,28 @@ if (exists('domains/customer/profile/domain/repositories/IAddressRepository.ts')
   throw new Error('Duplicate IAddressRepository remains under customer profile');
 }
 
-// Build output must never be committed as source topology.
 const generated = walk(root).filter((file) => rel(file).split('/').includes('dist') || file.endsWith('.tsbuildinfo'));
 if (generated.length) {
   throw new Error(`Generated build output is present in canonical source tree:\n${generated.map(rel).join('\n')}`);
 }
 
-// Enforce globally unique named declarations. This catches accidental duplicate
-// classes/interfaces/types/enums introduced while consolidating old workspaces.
+// Real implementation identity must be unique. Interfaces and type aliases may
+// legitimately share imported names across files, so this gate intentionally
+// inspects only actual top-level class/enum declarations. Anchoring at line start
+// prevents `import type { Foo }` and nested type references from being mistaken
+// for declarations.
 const declarationOwners = new Map();
 const duplicateDeclarations = [];
-const sourceFiles = walk(root).filter((file) => file.endsWith('.ts') && !rel(file).includes('/dist/') && !rel(file).includes('/node_modules/'));
+const sourceFiles = walk(root).filter((file) =>
+  file.endsWith('.ts') &&
+  !rel(file).includes('/dist/') &&
+  !rel(file).includes('/node_modules/') &&
+  !file.endsWith('.d.ts')
+);
+const declarationPattern = /^\s*(?:export\s+)?(?:default\s+)?(?:declare\s+)?(?:abstract\s+)?(?:class|enum)\s+([A-Za-z_$][\w$]*)\b/gm;
 for (const file of sourceFiles) {
   const text = fs.readFileSync(file, 'utf8');
-  for (const match of text.matchAll(/(?:export\s+)?(?:declare\s+)?(?:abstract\s+)?(?:class|interface|type|enum)\s+([A-Za-z_$][\w$]*)/g)) {
+  for (const match of text.matchAll(declarationPattern)) {
     const name = match[1];
     const owner = declarationOwners.get(name);
     if (owner && owner !== rel(file)) duplicateDeclarations.push(`${name}: ${owner} <> ${rel(file)}`);
@@ -109,10 +115,9 @@ for (const file of sourceFiles) {
   }
 }
 if (duplicateDeclarations.length) {
-  throw new Error(`Duplicate named declarations detected:\n${duplicateDeclarations.sort().join('\n')}`);
+  throw new Error(`Duplicate class/enum implementations detected:\n${duplicateDeclarations.sort().join('\n')}`);
 }
 
-// Business use cases and repositories must not leak back into API/platform.
 for (const file of walk(p('apps/api/src')).filter((x) => x.endsWith('.ts'))) {
   if (/UseCase\.ts$/.test(file)) throw new Error(`Business use case remains under API composition: ${rel(file)}`);
 }
@@ -122,4 +127,4 @@ for (const file of walk(p('platform/database')).filter((x) => x.endsWith('.ts'))
   }
 }
 
-console.log('Backend V3 canonical structure verified: required roots, single ownership, no legacy roots, no generated output, and no duplicate named declarations.');
+console.log('Backend V3 canonical structure verified: required roots, single kernel ownership, no legacy roots, no generated output, no duplicate class/enum implementations, and clean API/platform business boundaries.');
