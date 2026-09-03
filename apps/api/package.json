@@ -27,7 +27,6 @@
     "@carbroz/domain-operations": "workspace:*",
     "@carbroz/sdui-registry": "workspace:*",
     "@carbroz/ui-sdk": "workspace:*",
-    "@carbroz/platform-feature-flags": "workspace:*",
     "@carbroz/platform-observability": "workspace:*",
     "@carbroz/platform-cache": "workspace:*",
     "@carbroz/platform-storage": "workspace:*",
