@@ -56,12 +56,29 @@ for (const relative of communicationsUseCases) {
   if (relative.endsWith('RegisterDeviceTokenUseCase.ts')) {
     text = text.replace(/appVersion:\s*input\.appVersion\s*,/g, 'appVersion: input.appVersion ?? null,');
   } else {
+    // bookingId is explicitly nullable in NotificationPayload. title/body/data
+    // are optional inputs whose constructor defaults are meaningful; omit them
+    // when absent instead of replacing absence with null.
     text = text.replace(/bookingId:\s*input\.bookingId\s*,/g, 'bookingId: input.bookingId ?? null,');
-    text = text.replace(/title:\s*input\.title\s*,/g, 'title: input.title ?? null,');
-    text = text.replace(/body:\s*input\.body\s*,/g, 'body: input.body ?? null,');
-    text = text.replace(/data:\s*input\.data\s*,/g, 'data: input.data ?? null,');
+    text = text.replace(/\s*title:\s*input\.title(?:\s*\?\?\s*null)?\s*,/g, '\n      ...(input.title !== undefined ? { title: input.title } : {}),');
+    text = text.replace(/\s*body:\s*input\.body(?:\s*\?\?\s*null)?\s*,/g, '\n      ...(input.body !== undefined ? { body: input.body } : {}),');
+    text = text.replace(/\s*data:\s*input\.data(?:\s*\?\?\s*null)?\s*,/g, '\n      ...(input.data !== undefined ? { data: input.data } : {}),');
   }
   fs.writeFileSync(file, text);
+}
+
+// Consolidation can place two application use cases with an internal input type
+// named SendNotificationInput in the same bounded context. The public contract
+// exposes both use-case classes but keeps that implementation-detail type from
+// the multi-channel use case private to avoid ambiguous wildcard exports.
+const communicationsPublic = p('domains/communications/public/index.ts');
+if (fs.existsSync(communicationsPublic)) {
+  let text = fs.readFileSync(communicationsPublic, 'utf8');
+  text = text.replace(
+    "export * from '../application/SendMultiChannelNotificationUseCase.js';",
+    "export { SendMultiChannelNotificationUseCase } from '../application/SendMultiChannelNotificationUseCase.js';",
+  );
+  fs.writeFileSync(communicationsPublic, text);
 }
 
 console.log('Backend V3 strict TypeScript normalization finalized.');
