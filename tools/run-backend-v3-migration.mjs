@@ -29,6 +29,14 @@ replaceOnce(
   'communications common-domain ownership',
 );
 
+// Customer Address is a first-class customer capability. Do not duplicate it
+// inside profile merely because an older common package also carried Address.
+replaceOnce(
+  "[/^domain\\/(CustomerProfile|Address)\\.ts$/, 'domains/customer/profile/domain'],\n  [/^domain\\/repositories\\/(ICustomerProfileRepository|IAddressRepository)\\.ts$/, 'domains/customer/profile/domain/repositories'],",
+  "[/^domain\\/CustomerProfile\\.ts$/, 'domains/customer/profile/domain'],\n  [/^domain\\/Address\\.ts$/, 'domains/customer/address/domain'],\n  [/^domain\\/repositories\\/ICustomerProfileRepository\\.ts$/, 'domains/customer/profile/domain/repositories'],\n  [/^domain\\/repositories\\/IAddressRepository\\.ts$/, 'domains/customer/address/domain/repositories'],",
+  'single customer address ownership',
+);
+
 replaceOnce(
   "if (!owner || !newAbs.endsWith('.ts')) continue;",
   "if (!owner || !newAbs.endsWith('.ts') || !fs.existsSync(newAbs)) continue;",
