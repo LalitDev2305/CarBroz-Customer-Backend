@@ -18,9 +18,10 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     env:
-      # Prisma validate/generate require a syntactically valid datasource URL but do not
-      # connect to the database. Runtime/integration jobs must provide their own database.
+      # Validation-only CI configuration. Runtime/integration jobs must provide their own
+      # environment-specific database and secret values.
       DATABASE_URL: postgresql://carbroz_ci:carbroz_ci@127.0.0.1:5432/carbroz_ci
+      JWT_SECRET: carbroz-ci-validation-only-secret-not-for-runtime
 
     steps:
       - name: Checkout codebase
