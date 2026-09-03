@@ -7,6 +7,7 @@ export * from '../contract/template.schema.js';
 export * from '../contract/screen.schema.js';
 export * from '../registry/DefinitionRegistry.js';
 export * from '../registry/registries.js';
+export * from '../definitions/production-definitions.js';
 export * from '../factory/NodeFactories.js';
 export * from '../builder/HierarchyBuilders.js';
 export * from '../builder/ScreenBuilder.js';
