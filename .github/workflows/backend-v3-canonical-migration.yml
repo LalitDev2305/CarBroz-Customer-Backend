@@ -22,6 +22,8 @@ jobs:
       - run: corepack prepare pnpm@11.9.0 --activate
       - name: Generate canonical architecture
         run: node tools/run-backend-v3-migration.mjs
+      - name: Finalize canonical platform workspaces
+        run: node tools/finalize-backend-v3-platform.mjs
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Prisma validate
@@ -35,7 +37,9 @@ jobs:
       - name: Test
         run: pnpm test
       - name: Verify final topology
-        run: node tools/run-backend-v3-migration.mjs
+        run: |
+          node tools/run-backend-v3-migration.mjs
+          node tools/finalize-backend-v3-platform.mjs
       - name: Commit validated migration
         shell: bash
         run: |
