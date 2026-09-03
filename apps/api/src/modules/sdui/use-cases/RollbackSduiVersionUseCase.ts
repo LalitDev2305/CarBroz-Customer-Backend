@@ -1,4 +1,5 @@
-import { ISduiRegistryRepository, IUseCase, IRequestContext, ForbiddenError, SduiScreenEntity } from '@carbroz/common';
+import { IUseCase, IRequestContext, ForbiddenError } from '@carbroz/common';
+import type { ISduiRegistryRepository, SduiScreenEntity } from '@carbroz/sdui-registry';
 import { RollbackSduiVersionDto } from '../dtos/sdui-registry.dto.js';
 
 export interface RollbackSduiVersionInput {
