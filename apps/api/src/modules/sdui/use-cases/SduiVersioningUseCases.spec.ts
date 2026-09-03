@@ -4,7 +4,8 @@ import { UpdateSduiDraftUseCase } from './UpdateSduiDraftUseCase.js';
 import { PublishSduiVersionUseCase } from './PublishSduiVersionUseCase.js';
 import { RollbackSduiVersionUseCase } from './RollbackSduiVersionUseCase.js';
 import { CompareSduiVersionsUseCase } from './CompareSduiVersionsUseCase.js';
-import { SduiScreenEntity, ForbiddenError, NotFoundError } from '@carbroz/common';
+import { ForbiddenError, NotFoundError } from '@carbroz/common';
+import { SduiScreenEntity } from '@carbroz/sdui-registry';
 
 describe('SDUI V3 Versioning UseCases', () => {
   let repository: any;
