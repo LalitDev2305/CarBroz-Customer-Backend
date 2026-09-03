@@ -12,8 +12,6 @@ function patch(relative, transform) {
   if (after !== before) fs.writeFileSync(file, after);
 }
 
-// Partner application input contracts belong to Partner application, not the
-// Partner HTTP DTO surface. HTTP schemas can map structurally to these inputs.
 for (const [relative, dtoName] of [
   ['domains/partner/application/self-service/RegisterIndividualPartnerUseCase.ts', 'RegisterIndividualPartnerDto'],
   ['domains/partner/application/self-service/RegisterOrganizationPartnerUseCase.ts', 'RegisterOrganizationPartnerDto'],
@@ -36,7 +34,6 @@ patch('domains/partner/application/administration/VerifyPartnerUseCase.ts', (tex
   return text;
 });
 
-// Tests stay with the owning application use case and must not depend on API DTOs.
 patch('domains/partner/application/self-service/RegisterIndividualPartnerUseCase.spec.ts', (text) =>
   text.replace(/^import .*partner\.dto\.js.*\n/m, '')
 );
@@ -44,9 +41,23 @@ patch('domains/partner/application/self-service/RegisterOrganizationPartnerUseCa
   text.replace(/^import .*partner\.dto\.js.*\n/m, '')
 );
 
-// Booking owns only the capability it needs from Partner. The concrete Partner
-// repository can satisfy this structural port at composition time without a
-// Booking -> Partner package dependency.
+// Enterprise application contracts are domain-owned. Any migrated corporate
+// use case that still points at the API DTO surface is redirected to the local
+// application contract preserved before legacy pruning.
+const enterpriseApplication = p('domains/enterprise/application');
+if (fs.existsSync(enterpriseApplication)) {
+  for (const entry of fs.readdirSync(enterpriseApplication, { withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith('.ts')) continue;
+    patch(`domains/enterprise/application/${entry.name}`, (text) => {
+      text = text.replace(/^import\s+\{([^}]*)\}\s+from\s+['"][^'"]*corporate\.dto\.js['"];?\n/m,
+        (_all, names) => `import {${names}} from './contracts/corporate.contracts.js';\n`);
+      text = text.replace(/^import\s+type\s+\{([^}]*)\}\s+from\s+['"][^'"]*corporate\.dto\.js['"];?\n/m,
+        (_all, names) => `import type {${names}} from './contracts/corporate.contracts.js';\n`);
+      return text;
+    });
+  }
+}
+
 patch('domains/booking/application/AssignPartnerToBookingUseCase.ts', (text) => {
   text = text.replace(/^import .*IPartnerRepository.*@carbroz\/domain-partner.*\n/m, '');
   text = text.replace(/^import .*IPartnerRepository.*@carbroz\/common.*\n/m, '');
@@ -58,8 +69,6 @@ patch('domains/booking/application/AssignPartnerToBookingUseCase.ts', (text) => 
   return text;
 });
 
-// Booking completion may trigger Financials, but Booking must not import the
-// Financials implementation. Composition injects any compatible handler.
 patch('domains/booking/application/TransitionBookingStatusUseCase.ts', (text) => {
   text = text.replace(/^import .*CreatePayoutEligibilityUseCase.*\n/m, '');
   if (!text.includes('interface BookingCompletionFinancialPort')) {
@@ -70,8 +79,6 @@ patch('domains/booking/application/TransitionBookingStatusUseCase.ts', (text) =>
   return text;
 });
 
-// exactOptionalPropertyTypes: absence is represented by omission, not explicit
-// undefined. Nullable persistence fields are normalized to null.
 patch('domains/booking/domain/Booking.ts', (text) =>
   text.replace(/\s*note,\n\s*\}\);/, "\n      ...(note !== undefined ? { note } : {}),\n    });")
 );
