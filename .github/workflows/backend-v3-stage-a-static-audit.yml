@@ -12,47 +12,141 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Static source inventory only
+
+      - name: Static architecture audit only
         shell: bash
         run: |
-          set +e
-          echo '=== TOP LEVEL ==='
-          find . -maxdepth 1 -mindepth 1 -printf '%f\n' | sort
-          echo '=== FORBIDDEN LEGACY IMPORTS ==='
-          grep -RInE "@carbroz/(common|config|domain-(partner-profile|partner-kyc|catalog|pricing|payment|invoice|payout|tracking|notification|review|coupon))" --include='*.ts' --include='*.json' apps domains sdui platform foundation tests 2>/dev/null || true
-          echo '=== HARDCODED SCREEN/PRESENTATION TOKENS OUTSIDE SDUI ==='
-          grep -RInE "nextScreen|dashboard_template|auth_template|auth_otp|auth_login|screenId|templateId|templateType" --include='*.ts' apps domains platform foundation 2>/dev/null || true
-          echo '=== BUSINESS USE CASE FILES UNDER API ==='
-          find apps/api/src -type f -name '*UseCase.ts' -print 2>/dev/null || true
-          echo '=== BUSINESS REPOSITORIES UNDER PLATFORM DATABASE ==='
-          find platform/database -type f -name 'Prisma*Repository.ts' ! -name 'PrismaRepositoryBase.ts' -print 2>/dev/null || true
-          echo '=== FORBIDDEN/TRANSITIONAL ROOTS ==='
-          for p in shared packages libs common tools domains/partner-profile domains/partner-kyc domains/catalog domains/pricing domains/payment domains/invoice domains/payout domains/tracking domains/notification domains/review domains/coupon domains/config platform/event-bus platform/queue platform/notification platform/feature-flags; do [ -e "$p" ] && echo "$p"; done
-          echo '=== GENERATED ARTIFACTS ==='
-          find . -type d -name dist -o -type f -name '*.tsbuildinfo' 2>/dev/null | grep -v node_modules || true
-          echo '=== NON-CANONICAL API TRANSPORT CAPABILITY DIRECTORIES ==='
-          find apps/api/src/transport -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort || true
-          echo '=== ROOT TEST TAXONOMY ==='
-          find tests -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort || true
-          echo '=== EXPORTED CLASS/ENUM DUPLICATES ==='
           python3 - <<'PY'
-          import os,re,collections
-          roots=['apps','domains','sdui','platform','foundation']
-          owners=collections.defaultdict(list)
+          from pathlib import Path
+          import re
+          import sys
+          from collections import defaultdict
+
+          failures=[]
+          root=Path('.')
+
+          def fail(message): failures.append(message)
+          def source_files(base):
+              p=Path(base)
+              if not p.exists(): return []
+              return [f for f in p.rglob('*.ts') if 'dist' not in f.parts and 'node_modules' not in f.parts]
+
+          required_roots=[
+              'apps/api','domains','sdui/ui-sdk','sdui/registry','platform','foundation/kernel',
+              'prisma','tests/architecture','tests/contracts','tests/integration','tests/e2e','docs'
+          ]
+          for p in required_roots:
+              if not Path(p).exists(): fail(f'MISSING CANONICAL ROOT: {p}')
+
+          forbidden_roots=[
+              'shared','packages','libs','common','tools',
+              'domains/partner-profile','domains/partner-kyc','domains/catalog','domains/pricing',
+              'domains/payment','domains/invoice','domains/payout','domains/tracking','domains/notification',
+              'domains/review','domains/coupon','domains/config',
+              'platform/event-bus','platform/queue','platform/notification','platform/feature-flags'
+          ]
+          for p in forbidden_roots:
+              if Path(p).exists(): fail(f'FORBIDDEN/TRANSITIONAL ROOT: {p}')
+
+          for f in root.rglob('*'):
+              if 'node_modules' in f.parts: continue
+              if f.is_dir() and f.name=='dist': fail(f'GENERATED DIST: {f}')
+              if f.is_file() and f.name.endswith('.tsbuildinfo'): fail(f'GENERATED TSBUILDINFO: {f}')
+
+          canonical_domain_roots={
+              'identity','partner','customer','catalog-pricing','booking','operations','financials',
+              'communications','engagement','configuration','dispute','enterprise','audit'
+          }
+          domains=Path('domains')
+          if domains.exists():
+              actual={p.name for p in domains.iterdir() if p.is_dir()}
+              for extra in sorted(actual-canonical_domain_roots): fail(f'NON-CANONICAL DOMAIN ROOT: domains/{extra}')
+              for missing in sorted(canonical_domain_roots-actual): fail(f'MISSING DOMAIN ROOT: domains/{missing}')
+
+          forbidden_packages={
+              '@carbroz/common','@carbroz/config','@carbroz/domain-partner-profile','@carbroz/domain-partner-kyc',
+              '@carbroz/domain-catalog','@carbroz/domain-pricing','@carbroz/domain-payment','@carbroz/domain-invoice',
+              '@carbroz/domain-payout','@carbroz/domain-tracking','@carbroz/domain-notification',
+              '@carbroz/domain-review','@carbroz/domain-coupon','@carbroz/domain-config'
+          }
+          for f in [*source_files('apps'),*source_files('domains'),*source_files('sdui'),*source_files('platform'),*source_files('foundation'),*source_files('tests')]:
+              text=f.read_text(errors='ignore')
+              for package in forbidden_packages:
+                  if re.search(r"['\"]"+re.escape(package)+r"['\"]", text):
+                      fail(f'LEGACY PACKAGE {package}: {f}')
+
+          presentation_tokens=['nextScreen','dashboard_template','auth_template','auth_otp','auth_login']
+          for f in [*source_files('apps'),*source_files('domains')]:
+              text=f.read_text(errors='ignore')
+              for token in presentation_tokens:
+                  if token in text: fail(f'HARDCODED SCREEN/PRESENTATION TOKEN {token}: {f}')
+
+          for f in source_files('apps/api/src'):
+              if f.name.endswith('UseCase.ts'): fail(f'BUSINESS USE CASE UNDER API: {f}')
+              if 'use-cases' in f.parts: fail(f'API USE-CASE DIRECTORY: {f}')
+
+          db=Path('platform/database')
+          if db.exists():
+              for f in db.rglob('Prisma*Repository.ts'):
+                  if f.name!='PrismaRepositoryBase.ts': fail(f'BUSINESS REPOSITORY UNDER PLATFORM DATABASE: {f}')
+
+          transport=Path('apps/api/src/transport')
+          allowed_transport={'middleware','response'}
+          if transport.exists():
+              for p in transport.iterdir():
+                  if p.is_dir() and p.name not in allowed_transport: fail(f'NON-CANONICAL SHARED TRANSPORT DIR: {p}')
+
+          for surface in ('customer','partner'):
+              base=Path('apps/api/src/surfaces')/surface
+              if not base.exists(): continue
+              for f in source_files(base):
+                  if re.search(r'admin', f.name, re.I): fail(f'ADMIN FILE HIDDEN UNDER {surface.upper()}: {f}')
+                  text=f.read_text(errors='ignore')
+                  other='partner' if surface=='customer' else 'customer'
+                  if re.search(rf"surfaces/{other}|\.\./{other}(?:/|['\"])", text):
+                      fail(f'CROSS-SURFACE {surface.upper()} -> {other.upper()}: {f}')
+
+          admin=Path('apps/api/src/surfaces/admin')
+          if admin.exists():
+              for f in source_files(admin):
+                  text=f.read_text(errors='ignore')
+                  if re.search(r"surfaces/(customer|partner)|\.\./(customer|partner)(?:/|['\"])", text):
+                      fail(f'ADMIN IMPORTS PRODUCT TRANSPORT INTERNALS: {f}')
+
+          container=Path('apps/api/src/bootstrap/container/index.ts')
+          if container.exists():
+              text=container.read_text(errors='ignore')
+              if "../../surfaces/partner/use-cases" in text: fail('DI CONTAINER IMPORTS PARTNER API USE CASE')
+              if "PrismaCustomerProfileRepository, PrismaAddressRepository } from '@carbroz/platform-database'" in text:
+                  fail('DI CONTAINER RESOLVES CUSTOMER BUSINESS REPOSITORIES FROM PLATFORM DATABASE')
+              for stale in ('partnerController: PartnerController','adminPartnerController: AdminPartnerController','adminCorporateController: AdminCorporateController'):
+                  if stale in text: fail(f'REDUNDANT/STALE CONTROLLER REGISTRATION: {stale}')
+
+          app=Path('apps/api/src/bootstrap/app.ts')
+          if app.exists():
+              text=app.read_text(errors='ignore')
+              retired=["prefix: '/v1/auth'","prefix: '/v1/config'","prefix: '/api/v1/app'","prefix: '/api/v1/maps'","prefix: '/api/v1/sdui'","prefix: '/api/v1/partners'","prefix: '/api/v1/customers'"]
+              for token in retired:
+                  if token in text: fail(f'RETIRED GLOBAL API FAMILY: {token}')
+
+          if Path('apps/api/tests').exists() and any(Path('apps/api/tests').iterdir()):
+              fail('LEGACY apps/api/tests STILL CONTAINS TEST SOURCES')
+
+          declarations=defaultdict(list)
           rx=re.compile(r'\bexport\s+(?:abstract\s+)?(?:class|enum)\s+([A-Za-z_$][\w$]*)')
-          for root in roots:
-              if not os.path.isdir(root): continue
-              for base,dirs,files in os.walk(root):
-                  dirs[:]=[d for d in dirs if d not in {'node_modules','dist'}]
-                  for name in files:
-                      if not name.endswith('.ts'): continue
-                      p=os.path.join(base,name)
-                      try: text=open(p,encoding='utf-8').read()
-                      except: continue
-                      for m in rx.finditer(text): owners[m.group(1)].append(p)
-          for name,paths in sorted(owners.items()):
-              if len(paths)>1:
-                  print(name+': '+ ' <> '.join(paths))
+          for base in ('apps','domains','sdui','platform','foundation'):
+              for f in source_files(base):
+                  text=f.read_text(errors='ignore')
+                  for m in rx.finditer(text): declarations[m.group(1)].append(str(f))
+          for name,owners in declarations.items():
+              if len(owners)>1: fail(f'DUPLICATE EXPORTED DECLARATION {name}: '+ ' <> '.join(owners))
+
+          print('=== STAGE A STATIC SOURCE AUDIT ===')
+          print('Canonical test roots:', ', '.join(sorted(p.name for p in Path('tests').iterdir() if p.is_dir())))
+          print('Shared transport roots:', ', '.join(sorted(p.name for p in transport.iterdir() if p.is_dir())))
+          if failures:
+              print('\n'.join('FAIL: '+x for x in failures))
+              print(f'\nTOTAL FAILURES: {len(failures)}')
+              sys.exit(1)
+          print('PASS: source topology, ownership, surface isolation, duplicate declarations, DI boundaries and test taxonomy are statically clean.')
           PY
-          echo '=== ALL SOURCE TEST FILES ==='
-          find apps domains sdui platform foundation tests -type f \( -name '*.test.ts' -o -name '*.spec.ts' \) -print 2>/dev/null | sort
