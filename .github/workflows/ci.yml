@@ -46,8 +46,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      # Stage A diagnostic only. Final architecture-freeze gate restores --frozen-lockfile
+      # after the canonical workspace migration regenerates and commits pnpm-lock.yaml.
+      - name: Install dependencies (Stage A migration diagnostic)
+        run: pnpm install --no-frozen-lockfile
 
       - name: Prisma validate
         run: pnpm prisma validate
