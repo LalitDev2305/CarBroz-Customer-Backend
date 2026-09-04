@@ -6,6 +6,7 @@ on:
       - fix/stage-a-production-definitions
     paths:
       - tools/architecture-closeout.mjs
+      - tools/generate-module-readmes.mjs
       - .github/workflows/architecture-closeout.yml
   workflow_dispatch:
 
@@ -43,6 +44,9 @@ jobs:
       - name: Execute constitution closeout migration
         run: node tools/architecture-closeout.mjs
 
+      - name: Generate final module architecture documentation
+        run: node tools/generate-module-readmes.mjs
+
       - name: Reinstall final workspace
         run: pnpm install --no-frozen-lockfile
 
@@ -64,6 +68,7 @@ jobs:
       - name: Remove one-time migration tooling
         run: |
           rm -f tools/architecture-closeout.mjs
+          rm -f tools/generate-module-readmes.mjs
           rm -f .github/workflows/architecture-closeout.yml
           rmdir tools 2>/dev/null || true
 
