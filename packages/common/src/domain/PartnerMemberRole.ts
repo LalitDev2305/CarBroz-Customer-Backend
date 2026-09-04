@@ -1,6 +1,1 @@
-export enum PartnerMemberRole {
-  OWNER = 'OWNER',
-  MANAGER = 'MANAGER',
-  SUPERVISOR = 'SUPERVISOR',
-  EMPLOYEE = 'EMPLOYEE'
-}
+export { PartnerMemberRole } from '@carbroz/domain-partner';
