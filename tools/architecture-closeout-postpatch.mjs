@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import ts from 'typescript';
 
 const root = process.cwd();
 const api = path.join(root, 'apps/api/src');
@@ -18,6 +19,23 @@ const walk = (dir) => {
     const absolute = path.join(dir, entry.name);
     return entry.isDirectory() ? walk(absolute) : [absolute];
   });
+};
+const relativeImport = (fromFile, toFile) => {
+  let specifier = path.relative(path.dirname(fromFile), toFile).replaceAll('\\', '/').replace(/\.ts$/, '.js');
+  if (!specifier.startsWith('.')) specifier = `./${specifier}`;
+  return specifier;
+};
+const resolveTsModule = (fromFile, specifier) => {
+  if (!specifier.startsWith('.')) return undefined;
+  const raw = path.resolve(path.dirname(fromFile), specifier);
+  const candidates = [
+    raw,
+    raw.replace(/\.js$/, '.ts'),
+    raw.replace(/\.mjs$/, '.mts'),
+    `${raw}.ts`,
+    path.join(raw, 'index.ts'),
+  ];
+  return candidates.find((candidate) => exists(candidate));
 };
 const copyTransportContract = (fromSurface, sourceName, targetName = sourceName) => {
   const source = p('apps/api/src/surfaces', fromSurface, 'dto', sourceName);
@@ -60,8 +78,6 @@ for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
   }
 }
 
-// Infrastructure adapters must consume their package internals directly. Importing a package from
-// inside itself creates an unnecessary public-boundary cycle and fails while the package is building.
 const loggerAdapter = p('platform/observability/src/adapters/LoggerProvider.ts');
 if (exists(loggerAdapter)) {
   let content = read(loggerAdapter);
@@ -69,6 +85,106 @@ if (exists(loggerAdapter)) {
     .replace("import { ILoggerProvider } from '@carbroz/platform-observability';", "import { ILoggerProvider } from '../ports/ILoggerProvider.js';")
     .replace("import { logger } from '@carbroz/platform-observability';", "import { logger } from '../index.js';");
   write(loggerAdapter, content);
+}
+
+// Build a symbol-to-declaration map from each package's public entry point. Internal source must use
+// local declaration imports rather than routing back through its own published package boundary.
+const collectExports = (entryFile, symbolMap, visited = new Set()) => {
+  const resolvedEntry = path.resolve(entryFile);
+  if (visited.has(resolvedEntry) || !exists(resolvedEntry)) return;
+  visited.add(resolvedEntry);
+  const source = ts.createSourceFile(resolvedEntry, read(resolvedEntry), ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+
+  for (const statement of source.statements) {
+    const modifiers = statement.modifiers ?? [];
+    const isExported = modifiers.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword);
+    if (isExported) {
+      if ((ts.isInterfaceDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isFunctionDeclaration(statement)) && statement.name) {
+        symbolMap.set(statement.name.text, resolvedEntry);
+      }
+      if (ts.isVariableStatement(statement)) {
+        for (const declaration of statement.declarationList.declarations) {
+          if (ts.isIdentifier(declaration.name)) symbolMap.set(declaration.name.text, resolvedEntry);
+        }
+      }
+    }
+
+    if (!ts.isExportDeclaration(statement) || !statement.moduleSpecifier || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
+    const target = resolveTsModule(resolvedEntry, statement.moduleSpecifier.text);
+    if (!target) continue;
+    if (!statement.exportClause) {
+      collectExports(target, symbolMap, visited);
+      continue;
+    }
+    if (ts.isNamedExports(statement.exportClause)) {
+      const targetExports = new Map();
+      collectExports(target, targetExports, new Set());
+      for (const element of statement.exportClause.elements) {
+        const exportedName = element.name.text;
+        const sourceName = element.propertyName?.text ?? exportedName;
+        symbolMap.set(exportedName, targetExports.get(sourceName) ?? target);
+      }
+    }
+  }
+};
+
+const selfImportResolutionErrors = [];
+for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
+  const baseDir = p(base);
+  if (!exists(baseDir)) continue;
+  for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const packageRoot = path.join(baseDir, entry.name);
+    const manifestFile = path.join(packageRoot, 'package.json');
+    if (!exists(manifestFile)) continue;
+    const manifest = JSON.parse(read(manifestFile));
+    const packageName = manifest.name;
+    if (!packageName) continue;
+    const publicEntry = [path.join(packageRoot, 'public/index.ts'), path.join(packageRoot, 'src/index.ts')].find(exists);
+    if (!publicEntry) continue;
+    const symbolMap = new Map();
+    collectExports(publicEntry, symbolMap);
+
+    for (const file of walk(packageRoot).filter((candidate) => candidate.endsWith('.ts'))) {
+      let content = read(file);
+      const source = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+      const replacements = [];
+      for (const statement of source.statements) {
+        if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
+        const specifier = statement.moduleSpecifier.text;
+        if (specifier !== packageName && !specifier.startsWith(`${packageName}/`)) continue;
+        const clause = statement.importClause;
+        if (!clause || clause.name || !clause.namedBindings || !ts.isNamedImports(clause.namedBindings) || specifier !== packageName) {
+          selfImportResolutionErrors.push(`${path.relative(root, file)} has unsupported self-import form: ${statement.getText(source)}`);
+          continue;
+        }
+        const groups = new Map();
+        for (const element of clause.namedBindings.elements) {
+          const exportedName = element.propertyName?.text ?? element.name.text;
+          const target = symbolMap.get(exportedName);
+          if (!target) {
+            selfImportResolutionErrors.push(`${path.relative(root, file)} cannot resolve self-imported symbol ${exportedName} from ${packageName}`);
+            continue;
+          }
+          const parts = groups.get(target) ?? [];
+          const alias = element.propertyName ? `${element.propertyName.text} as ${element.name.text}` : element.name.text;
+          parts.push(element.isTypeOnly && !clause.isTypeOnly ? `type ${alias}` : alias);
+          groups.set(target, parts);
+        }
+        if (groups.size) {
+          const rendered = [...groups.entries()].map(([target, names]) => {
+            const typePrefix = clause.isTypeOnly ? ' type' : '';
+            return `import${typePrefix} { ${names.join(', ')} } from '${relativeImport(file, target)}';`;
+          }).join('\n');
+          replacements.push({ start: statement.getFullStart(), end: statement.getEnd(), text: rendered });
+        }
+      }
+      for (const replacement of replacements.sort((a, b) => b.start - a.start)) {
+        content = content.slice(0, replacement.start) + replacement.text + content.slice(replacement.end);
+      }
+      if (replacements.length) write(file, content);
+    }
+  }
 }
 
 write(
@@ -82,7 +198,6 @@ if (exists(rootPackageFile)) {
   if (rootPackage.pnpm) delete rootPackage.pnpm;
   write(rootPackageFile, `${JSON.stringify(rootPackage, null, 2)}\n`);
 }
-
 write(p('.env'), 'DATABASE_URL=postgresql://carbroz_validation:carbroz_validation@127.0.0.1:5432/carbroz_validation\n');
 
 for (const name of ['canonical-topology.policy.test.ts', 'engineering-quality.policy.test.ts']) {
@@ -95,7 +210,7 @@ for (const name of ['canonical-topology.policy.test.ts', 'engineering-quality.po
   }
 }
 
-const violations = [];
+const violations = [...selfImportResolutionErrors];
 const surfaces = ['partner', 'customer', 'admin'];
 const importPattern = /(?:from\s+|import\s*\(\s*)['\"]([^'\"]+)['\"]/g;
 
@@ -125,15 +240,11 @@ for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
     const content = read(file);
     for (const match of content.matchAll(importPattern)) {
       const specifier = match[1];
-      if (specifier === '@carbroz/common' || specifier.includes('packages/common')) {
-        violations.push(`${path.relative(root, file)} retains legacy Common import ${specifier}`);
-      }
+      if (specifier === '@carbroz/common' || specifier.includes('packages/common')) violations.push(`${path.relative(root, file)} retains legacy Common import ${specifier}`);
     }
   }
 }
 
-// A workspace package must not import itself through its published package name. Internal code uses
-// relative imports; only external consumers use the package's public boundary.
 for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
   const baseDir = p(base);
   if (!exists(baseDir)) continue;
@@ -148,9 +259,7 @@ for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
       const content = read(file);
       for (const match of content.matchAll(importPattern)) {
         const specifier = match[1];
-        if (specifier === packageName || specifier.startsWith(`${packageName}/`)) {
-          violations.push(`${path.relative(root, file)} self-imports ${specifier}`);
-        }
+        if (specifier === packageName || specifier.startsWith(`${packageName}/`)) violations.push(`${path.relative(root, file)} self-imports ${specifier}`);
       }
     }
   }
@@ -162,19 +271,15 @@ for (const base of ['domains', 'sdui', 'platform', 'foundation']) {
     const tsconfig = path.join(packageRoot, 'tsconfig.json');
     if (exists(tsconfig)) {
       const config = read(tsconfig);
-      if (!/exclude[\s\S]*(?:spec|test)/i.test(config) && read(file).includes("from 'vitest'")) {
-        violations.push(`${path.relative(root, file)} is a Vitest source inside a production package without an explicit test exclusion`);
-      }
+      if (!/exclude[\s\S]*(?:spec|test)/i.test(config) && read(file).includes("from 'vitest'")) violations.push(`${path.relative(root, file)} is a Vitest source inside a production package without an explicit test exclusion`);
     }
   }
 }
 
 for (const file of walk(api).filter((candidate) => candidate.endsWith('.ts'))) {
   const content = read(file);
-  if (/log\.(?:trace|debug|info|warn|error)\([^\n]*(?:mockOtp|otp|phoneNumber|refreshToken|accessToken|request\.body|response\.body|authorization)/i.test(content)) {
-    violations.push(`${path.relative(root, file)} contains sensitive/raw logging`);
-  }
+  if (/log\.(?:trace|debug|info|warn|error)\([^\n]*(?:mockOtp|otp|phoneNumber|refreshToken|accessToken|request\.body|response\.body|authorization)/i.test(content)) violations.push(`${path.relative(root, file)} contains sensitive/raw logging`);
 }
 
 if (violations.length) throw new Error(`Post-closeout invariants failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
-console.log('[architecture-closeout-postpatch] Common eliminated; Foundation Money canonical; package self-imports eliminated; all invariants passed');
+console.log('[architecture-closeout-postpatch] internal self-imports resolved to local declarations; all post-closeout invariants passed');
