@@ -1,1 +1,1 @@
-export type VehicleStatus = 'ACTIVE' | 'ARCHIVED';
+export type { VehicleStatus } from '@carbroz/domain-customer';
