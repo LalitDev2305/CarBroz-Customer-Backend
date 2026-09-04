@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { PartnerMember, PartnerMemberRole, PartnerMemberStatus, IPartnerMemberRepository } from '@carbroz/common';
+import type { PartnerMember } from '../../domain/PartnerMember.js';
+import { PartnerMemberRole } from '../../domain/PartnerMemberRole.js';
+import { PartnerMemberStatus } from '../../domain/PartnerMemberStatus.js';
+import type { IPartnerMemberRepository } from '../../domain/repositories/IPartnerMemberRepository.js';
 
 type PartnerMemberRecord = {
   id: number;
