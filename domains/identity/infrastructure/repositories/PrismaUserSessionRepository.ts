@@ -1,4 +1,5 @@
-import { UserSession, IUserSessionRepository } from '@carbroz/common';
+import type { UserSession } from '../../domain/UserSession.js';
+import type { IUserSessionRepository } from '../../domain/repositories/IUserSessionRepository.js';
 import { PrismaProvider } from '@carbroz/platform-database';
 
 export class PrismaUserSessionRepository implements IUserSessionRepository {
