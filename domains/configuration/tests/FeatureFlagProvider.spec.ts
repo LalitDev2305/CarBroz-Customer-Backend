@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { IFeatureFlagRepository } from '@carbroz/common';
+import type { IFeatureFlagRepository } from '../domain/repositories/IFeatureFlagRepository.js';
 import { FeatureFlagProvider } from '../application/FeatureFlagProvider.js';
 
 describe('FeatureFlagProvider', () => {
