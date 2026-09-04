@@ -27,8 +27,6 @@ const copyTransportContract = (fromSurface, sourceName, targetName = sourceName)
   fs.copyFileSync(source, target);
 };
 
-// Product surfaces own transport schemas independently. Admin may reuse bounded-context application
-// behavior, but it must not compile against Customer/Partner HTTP DTO modules.
 for (const name of ['review.dto.ts', 'coupon.dto.ts', 'dispute.dto.ts']) copyTransportContract('customer', name);
 copyTransportContract('customer', 'catalog.catalog.dto.ts', 'admin-catalog.dto.ts');
 copyTransportContract('partner', 'partner.partner.dto.ts', 'admin-partner.dto.ts');
@@ -45,10 +43,7 @@ for (const [fileRel, [from, to]] of adminRewrites) {
   if (exists(file)) write(file, read(file).replaceAll(from, to));
 }
 
-// IProvider was an empty marker interface. Keeping or relocating it would preserve accidental
-// abstraction without adding a contract. Money is the opposite: it is a real universal value
-// object already owned and exported by Foundation. Remove the marker and route every stale Money
-// import through the single canonical Foundation authority.
+// IProvider was an empty marker interface; Money is a real universal value object owned by Foundation.
 for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
   for (const file of walk(p(base)).filter((candidate) => candidate.endsWith('.ts'))) {
     let content = read(file);
@@ -65,8 +60,17 @@ for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
   }
 }
 
-// pnpm 11 reads build-script approvals from pnpm-workspace.yaml. Re-establish the canonical final
-// workspace and narrowly allow only dependencies whose install scripts are required by this repo.
+// Infrastructure adapters must consume their package internals directly. Importing a package from
+// inside itself creates an unnecessary public-boundary cycle and fails while the package is building.
+const loggerAdapter = p('platform/observability/src/adapters/LoggerProvider.ts');
+if (exists(loggerAdapter)) {
+  let content = read(loggerAdapter);
+  content = content
+    .replace("import { ILoggerProvider } from '@carbroz/platform-observability';", "import { ILoggerProvider } from '../ports/ILoggerProvider.js';")
+    .replace("import { logger } from '@carbroz/platform-observability';", "import { logger } from '../index.js';");
+  write(loggerAdapter, content);
+}
+
 write(
   p('pnpm-workspace.yaml'),
   `packages:\n  - "apps/*"\n  - "domains/*"\n  - "sdui/*"\n  - "platform/*"\n  - "foundation/*"\nallowBuilds:\n  '@prisma/client': true\n  '@prisma/engines': true\n  bcrypt: true\n  esbuild: true\n  msgpackr-extract: true\n  prisma: true\n`,
@@ -79,8 +83,6 @@ if (exists(rootPackageFile)) {
   write(rootPackageFile, `${JSON.stringify(rootPackage, null, 2)}\n`);
 }
 
-// Prisma validate/generate require DATABASE_URL to be syntactically present without connecting.
-// This ignored, non-secret datasource exists only during the one-time executor.
 write(p('.env'), 'DATABASE_URL=postgresql://carbroz_validation:carbroz_validation@127.0.0.1:5432/carbroz_validation\n');
 
 for (const name of ['canonical-topology.policy.test.ts', 'engineering-quality.policy.test.ts']) {
@@ -118,7 +120,6 @@ for (const surface of surfaces) {
   }
 }
 
-// Catch both package aliases and relative filesystem paths into the removed Common authority.
 for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
   for (const file of walk(p(base)).filter((candidate) => candidate.endsWith('.ts'))) {
     const content = read(file);
@@ -126,6 +127,30 @@ for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
       const specifier = match[1];
       if (specifier === '@carbroz/common' || specifier.includes('packages/common')) {
         violations.push(`${path.relative(root, file)} retains legacy Common import ${specifier}`);
+      }
+    }
+  }
+}
+
+// A workspace package must not import itself through its published package name. Internal code uses
+// relative imports; only external consumers use the package's public boundary.
+for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
+  const baseDir = p(base);
+  if (!exists(baseDir)) continue;
+  for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const packageRoot = path.join(baseDir, entry.name);
+    const manifestFile = path.join(packageRoot, 'package.json');
+    if (!exists(manifestFile)) continue;
+    const packageName = JSON.parse(read(manifestFile)).name;
+    if (!packageName) continue;
+    for (const file of walk(packageRoot).filter((candidate) => candidate.endsWith('.ts'))) {
+      const content = read(file);
+      for (const match of content.matchAll(importPattern)) {
+        const specifier = match[1];
+        if (specifier === packageName || specifier.startsWith(`${packageName}/`)) {
+          violations.push(`${path.relative(root, file)} self-imports ${specifier}`);
+        }
       }
     }
   }
@@ -152,4 +177,4 @@ for (const file of walk(api).filter((candidate) => candidate.endsWith('.ts'))) {
 }
 
 if (violations.length) throw new Error(`Post-closeout invariants failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
-console.log('[architecture-closeout-postpatch] legacy Common imports eliminated; Money routed through Foundation; all post-closeout invariants passed');
+console.log('[architecture-closeout-postpatch] Common eliminated; Foundation Money canonical; package self-imports eliminated; all invariants passed');
