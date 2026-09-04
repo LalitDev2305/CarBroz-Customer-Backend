@@ -1,4 +1,5 @@
-import { AdminUserRole, IAdminRoleRepository } from '@carbroz/common';
+import type { AdminUserRole } from '../../domain/AdminUserRole.js';
+import type { IAdminRoleRepository } from '../../domain/repositories/IAdminRoleRepository.js';
 import { PrismaClient } from '@prisma/client';
 
 export class PrismaAdminRoleRepository implements IAdminRoleRepository {
