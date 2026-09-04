@@ -1,16 +1,27 @@
 import { ILoggerProvider } from '@carbroz/common';
-import { logger } from '@carbroz/platform-observability';
+import { createLogger } from '@carbroz/platform-observability';
 
+const logger = createLogger();
+
+/**
+ * Adapts the platform logger to the stable logging provider contract used by application code.
+ *
+ * The adapter owns no business semantics. Structured context is passed through to the
+ * observability implementation, whose redaction policy protects sensitive values.
+ */
 export class LoggerProvider implements ILoggerProvider {
   info(message: string, context?: Record<string, unknown>): void {
     logger.info(context || {}, message);
   }
+
   error(message: string, error?: Error, context?: Record<string, unknown>): void {
     logger.error({ ...context, err: error }, message);
   }
+
   warn(message: string, context?: Record<string, unknown>): void {
     logger.warn(context || {}, message);
   }
+
   debug(message: string, context?: Record<string, unknown>): void {
     logger.debug(context || {}, message);
   }
