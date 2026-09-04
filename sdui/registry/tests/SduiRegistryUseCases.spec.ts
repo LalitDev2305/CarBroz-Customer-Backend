@@ -169,15 +169,20 @@ describe('SDUI Registry application lifecycle', () => {
     const useCase = new CompareSduiVersionsUseCase(repository);
     const v1Layout = {
       ...validLayoutJson,
-      template: { ...validLayoutJson.template, components: [{ id: 'c1', type: 'layout', elements: [] }] },
+      template: {
+        ...validLayoutJson.template,
+        components: [
+          { id: 'c1', type: 'layout', elements: [{ id: 'e1', type: 'text', properties: {} }] },
+        ],
+      },
     };
     const v2Layout = {
       ...validLayoutJson,
       template: {
         ...validLayoutJson.template,
         components: [
-          { id: 'c1', type: 'layout', elements: [] },
-          { id: 'c2', type: 'layout', elements: [] },
+          { id: 'c1', type: 'layout', elements: [{ id: 'e1', type: 'text', properties: {} }] },
+          { id: 'c2', type: 'layout', elements: [{ id: 'e2', type: 'text', properties: {} }] },
         ],
       },
     };
@@ -216,6 +221,7 @@ describe('SDUI Registry application lifecycle', () => {
     });
     expect(result.comparisonSummary.isIdentical).toBe(false);
     expect(result.comparisonSummary.componentsCountDelta).toBe(1);
+    expect(result.comparisonSummary.elementsCountDelta).toBe(1);
   });
 
   it('throws when a compared version is missing', async () => {
