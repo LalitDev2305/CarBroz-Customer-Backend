@@ -1,20 +1,3 @@
-import { IUseCase, IRequestContext, ForbiddenError } from '@carbroz/common';
-import type { ISduiRegistryRepository, SduiScreenEntity } from '@carbroz/sdui-registry';
-import { CreateSduiDraftDto } from '../dtos/sdui-registry.dto.js';
-
-export interface CreateSduiDraftInput {
-  context: IRequestContext;
-  data: CreateSduiDraftDto;
-}
-
-export class CreateSduiDraftUseCase implements IUseCase<CreateSduiDraftInput, SduiScreenEntity> {
-  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
-
-  public async execute(input: CreateSduiDraftInput): Promise<SduiScreenEntity> {
-    if (!input.context.authenticatedUser?.isAdmin) {
-      throw new ForbiddenError('Only administrators can create SDUI drafts');
-    }
-
-    return await this.sduiRegistryRepository.createDraft(input.data);
-  }
-}
+/** @deprecated Import CreateSduiDraftUseCase from @carbroz/sdui-registry. */
+export { CreateSduiDraftUseCase } from '@carbroz/sdui-registry';
+export type { CreateSduiDraftInput } from '@carbroz/sdui-registry';
