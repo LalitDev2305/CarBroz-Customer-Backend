@@ -1,6 +1,6 @@
 import { buildApp } from './app.js';
 import { getContainer } from './container/index.js';
-import { AppConfig } from '@carbroz/config';
+import { AppConfig } from './config/runtime-config.js';
 
 const start = async () => {
   try {
