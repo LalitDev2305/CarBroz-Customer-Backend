@@ -1,28 +1,12 @@
-import { IConfigProvider, IFeatureFlagProvider } from '@carbroz/common';
-
-export interface InitConfigResult {
-  maintenance: {
-    enabled: boolean;
-    message: string;
-  };
-  forceUpdate: {
-    android: {
-      minVersion: string;
-      latestVersion: string;
-    };
-    ios: {
-      minVersion: string;
-      latestVersion: string;
-    };
-  };
-  featureFlags: Record<string, boolean>;
-}
+import type {
+  IConfigProvider,
+  IFeatureFlagProvider,
+  InitConfigSnapshot,
+} from '@carbroz/domain-configuration';
 
 /**
- * Builds the transport-neutral application bootstrap configuration consumed by API surfaces.
- *
- * Configuration owns the meaning and defaults of configuration keys and feature flags. HTTP DTOs,
- * response wrappers and validation schemas remain transport concerns and must not be imported here.
+ * Builds the transport-neutral application bootstrap configuration owned by Configuration.
+ * HTTP DTOs, response wrappers and validation schemas remain transport concerns.
  */
 export class GetInitConfigUseCase {
   constructor(
@@ -30,7 +14,7 @@ export class GetInitConfigUseCase {
     private readonly featureFlagProvider: IFeatureFlagProvider,
   ) {}
 
-  public async execute(): Promise<InitConfigResult> {
+  async execute(): Promise<InitConfigSnapshot> {
     const [
       maintenanceEnabled,
       maintenanceMessage,
