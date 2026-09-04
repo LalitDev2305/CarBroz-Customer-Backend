@@ -1,5 +1,1 @@
-export enum PartnerMemberStatus {
-  ACTIVE = 'ACTIVE',
-  INVITED = 'INVITED',
-  SUSPENDED = 'SUSPENDED'
-}
+export { PartnerMemberStatus } from '@carbroz/domain-partner';
