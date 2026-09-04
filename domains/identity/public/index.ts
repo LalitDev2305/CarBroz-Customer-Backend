@@ -9,6 +9,7 @@ export * from '../domain/repositories/IUserSessionRepository.js';
 export * from '../domain/repositories/IRoleRepository.js';
 export * from '../domain/repositories/IPermissionRepository.js';
 export * from '../domain/repositories/IAdminRoleRepository.js';
+export * from '../application/AuthUseCases.js';
 export * from '../infrastructure/repositories/PrismaUserRepository.js';
 export * from '../infrastructure/repositories/PrismaUserSessionRepository.js';
 export * from '../infrastructure/repositories/PrismaRoleRepository.js';
