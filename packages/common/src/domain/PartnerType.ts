@@ -1,4 +1,1 @@
-export enum PartnerType {
-  INDIVIDUAL = 'INDIVIDUAL',
-  ORGANIZATION = 'ORGANIZATION'
-}
+export { PartnerType } from '@carbroz/domain-partner';
