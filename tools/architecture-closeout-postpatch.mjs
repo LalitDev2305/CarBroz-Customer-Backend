@@ -20,7 +20,7 @@ const walk = (dir) => {
   });
 };
 
-// Product surfaces own their transport schemas independently. Copying a schema is intentional here:
+// Product surfaces own transport schemas independently. Copying schemas is intentional:
 // sharing transport DTOs between products would couple public APIs even when the business use case is shared.
 for (const name of ['review.dto.ts', 'coupon.dto.ts', 'dispute.dto.ts']) {
   const source = p('apps/api/src/surfaces/customer/dto', name);
@@ -54,17 +54,28 @@ for (const name of ['canonical-topology.policy.test.ts', 'engineering-quality.po
 
 const violations = [];
 const surfaces = ['partner', 'customer', 'admin'];
+const importPattern = /(?:from\s+|import\s*\(\s*)['\"]([^'\"]+)['\"]/g;
+
+// Resolve actual relative import targets before deciding whether one product surface depends on another.
+// Domain paths such as domains/partner are valid and must not be confused with apps/api/src/surfaces/partner.
 for (const surface of surfaces) {
   const surfaceRoot = p('apps/api/src/surfaces', surface);
   for (const file of walk(surfaceRoot).filter((f) => f.endsWith('.ts'))) {
     const content = read(file);
-    for (const other of surfaces.filter((candidate) => candidate !== surface)) {
-      const relativePatterns = [
-        new RegExp(`from\\s+['\"][^'\"]*\\/${other}\\/`, 'g'),
-        new RegExp(`from\\s+['\"]@carbroz\\/api[^'\"]*${other}`, 'g'),
-      ];
-      if (relativePatterns.some((pattern) => pattern.test(content))) {
-        violations.push(`${path.relative(root, file)} imports ${other} surface`);
+    for (const match of content.matchAll(importPattern)) {
+      const specifier = match[1];
+      for (const other of surfaces.filter((candidate) => candidate !== surface)) {
+        let importsOtherSurface = false;
+        if (specifier.startsWith('.')) {
+          const resolved = path.resolve(path.dirname(file), specifier.replace(/\.js$/, '.ts'));
+          const otherRoot = path.resolve(p('apps/api/src/surfaces', other));
+          importsOtherSurface = resolved === otherRoot || resolved.startsWith(`${otherRoot}${path.sep}`);
+        } else {
+          importsOtherSurface = new RegExp(`^@carbroz/api(?:/|$).*surfaces/${other}(?:/|$)`).test(specifier);
+        }
+        if (importsOtherSurface) {
+          violations.push(`${path.relative(root, file)} imports ${other} surface via ${specifier}`);
+        }
       }
     }
   }
@@ -97,4 +108,4 @@ if (violations.length) {
   throw new Error(`Post-closeout invariants failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
 }
 
-console.log('[architecture-closeout-postpatch] surface isolation and safety invariants passed');
+console.log('[architecture-closeout-postpatch] resolved surface isolation and safety invariants passed');
