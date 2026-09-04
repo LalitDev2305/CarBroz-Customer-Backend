@@ -46,8 +46,9 @@ for (const [fileRel, [from, to]] of adminRewrites) {
 }
 
 // IProvider was an empty marker interface. Keeping or relocating it would preserve accidental
-// abstraction without adding a contract. Remove only that legacy marker dependency while retaining
-// every concrete provider interface's real methods and any other inheritance.
+// abstraction without adding a contract. Money is the opposite: it is a real universal value
+// object already owned and exported by Foundation. Remove the marker and route every stale Money
+// import through the single canonical Foundation authority.
 for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
   for (const file of walk(p(base)).filter((candidate) => candidate.endsWith('.ts'))) {
     let content = read(file);
@@ -58,7 +59,8 @@ for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
     content = content
       .replace(/\s+extends\s+IProvider\s*,\s*/g, ' extends ')
       .replace(/,\s*IProvider(?=\s*\{)/g, '')
-      .replace(/\s+extends\s+IProvider(?=\s*\{)/g, '');
+      .replace(/\s+extends\s+IProvider(?=\s*\{)/g, '')
+      .replace(/(['"])(?:\.\.\/)+packages\/common\/src\/domain\/value-objects\/Money\.js\1/g, "'@carbroz/foundation-kernel'");
     write(file, content);
   }
 }
@@ -150,4 +152,4 @@ for (const file of walk(api).filter((candidate) => candidate.endsWith('.ts'))) {
 }
 
 if (violations.length) throw new Error(`Post-closeout invariants failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
-console.log('[architecture-closeout-postpatch] legacy Common relative imports removed; provider marker eliminated; all post-closeout invariants passed');
+console.log('[architecture-closeout-postpatch] legacy Common imports eliminated; Money routed through Foundation; all post-closeout invariants passed');
