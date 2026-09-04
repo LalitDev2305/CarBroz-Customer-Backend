@@ -38,6 +38,7 @@ const owners = new Map([
   ['ICorporateAccountRepository', '@carbroz/domain-enterprise'], ['ICorporateMemberRepository', '@carbroz/domain-enterprise'],
   ['ICorporateFleetVehicleRepository', '@carbroz/domain-enterprise'], ['ICorporateCreditLedgerRepository', '@carbroz/domain-enterprise'],
   ['ICorporateInvoiceRepository', '@carbroz/domain-enterprise'],
+  ['IConfigRepository', '@carbroz/domain-configuration'], ['IFeatureFlagRepository', '@carbroz/domain-configuration'],
   ['IConfigProvider', '@carbroz/domain-configuration'], ['IFeatureFlagProvider', '@carbroz/domain-configuration'],
   ['ISduiRegistryRepository', '@carbroz/sdui-registry'],
   ['ILoggerProvider', '@carbroz/platform-observability'], ['IStorageProvider', '@carbroz/platform-storage'],
@@ -59,7 +60,7 @@ for (const file of walk(root)) {
     );
     content = content
       .split('\n')
-      .filter((line) => !(line.includes('request.log.') && /(otp|mockOtp|phoneNumber|deviceId|refreshToken|token)/i.test(line)))
+      .filter((line) => !(line.includes('request.log.') && /(otp|mockOtp|phoneNumber|deviceId|refreshToken|authorization|cookie|token)/i.test(line)))
       .join('\n');
   }
 
@@ -72,15 +73,19 @@ for (const file of walk(root)) {
   fs.writeFileSync(file, content);
 }
 
-const container = path.join(root, 'apps/api/src/bootstrap/container/index.ts');
-if (fs.existsSync(container)) {
-  const lines = fs.readFileSync(container, 'utf8').split('\n').filter((line) => line.includes('@carbroz/common'));
-  for (const line of lines) console.log('[closeout-residue][container-common]', line.trim());
+// Correct security evidence: inspect logging statements, not legitimate authentication variables.
+const sensitiveLogViolations = [];
+for (const file of walk(path.join(root, 'apps'))) {
+  const relative = path.relative(root, file).replaceAll('\\', '/');
+  const lines = fs.readFileSync(file, 'utf8').split('\n');
+  lines.forEach((line, index) => {
+    if (/(?:request\.)?log\.(?:trace|debug|info|warn|error|fatal)\s*\(/.test(line) && /(otp|mockOtp|phoneNumber|deviceId|refreshToken|authorization|cookie|password|secret)/i.test(line)) {
+      sensitiveLogViolations.push(`${relative}:${index + 1}`);
+    }
+  });
 }
-const auth = path.join(root, 'apps/api/src/transport/auth/auth.controller.ts');
-if (fs.existsSync(auth)) {
-  const unsafe = fs.readFileSync(auth, 'utf8').split('\n').filter((line) => /Mock OTP generated|request\.body.*log|log.*phoneNumber|refreshToken|mockOtp/i.test(line));
-  for (const line of unsafe) console.log('[closeout-residue][auth-unsafe]', line.trim());
+if (sensitiveLogViolations.length) {
+  throw new Error(`Sensitive logging remains: ${sensitiveLogViolations.join(', ')}`);
 }
 
-console.log('[architecture-closeout-residue] cleanup and exact residue diagnostics completed');
+console.log('[architecture-closeout-residue] Configuration ownership complete and precise sensitive-log gate passed');
