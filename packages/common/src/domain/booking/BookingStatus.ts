@@ -1,8 +1,1 @@
-export type BookingStatus =
-  | 'CREATED'
-  | 'CONFIRMED'
-  | 'ASSIGNED'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'CANCELLED'
-  | 'EXPIRED';
+export type { BookingStatus } from '@carbroz/domain-booking';
