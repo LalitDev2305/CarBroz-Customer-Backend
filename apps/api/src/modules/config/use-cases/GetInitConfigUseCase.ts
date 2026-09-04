@@ -1,19 +1,36 @@
 import { IConfigProvider, IFeatureFlagProvider } from '@carbroz/common';
-import { InitConfigResponseDto } from '../dtos/config.dto.js';
 
+export interface InitConfigResult {
+  maintenance: {
+    enabled: boolean;
+    message: string;
+  };
+  forceUpdate: {
+    android: {
+      minVersion: string;
+      latestVersion: string;
+    };
+    ios: {
+      minVersion: string;
+      latestVersion: string;
+    };
+  };
+  featureFlags: Record<string, boolean>;
+}
+
+/**
+ * Builds the transport-neutral application bootstrap configuration consumed by API surfaces.
+ *
+ * Configuration owns the meaning and defaults of configuration keys and feature flags. HTTP DTOs,
+ * response wrappers and validation schemas remain transport concerns and must not be imported here.
+ */
 export class GetInitConfigUseCase {
-  private configProvider: IConfigProvider;
-  private featureFlagProvider: IFeatureFlagProvider;
-
   constructor(
-    configProvider: IConfigProvider,
-    featureFlagProvider: IFeatureFlagProvider
-  ) {
-    this.configProvider = configProvider;
-    this.featureFlagProvider = featureFlagProvider;
-  }
+    private readonly configProvider: IConfigProvider,
+    private readonly featureFlagProvider: IFeatureFlagProvider,
+  ) {}
 
-  public async execute(): Promise<InitConfigResponseDto> {
+  public async execute(): Promise<InitConfigResult> {
     const [
       maintenanceEnabled,
       maintenanceMessage,
@@ -38,14 +55,8 @@ export class GetInitConfigUseCase {
         message: maintenanceMessage,
       },
       forceUpdate: {
-        android: {
-          minVersion: androidMin,
-          latestVersion: androidLatest,
-        },
-        ios: {
-          minVersion: iosMin,
-          latestVersion: iosLatest,
-        },
+        android: { minVersion: androidMin, latestVersion: androidLatest },
+        ios: { minVersion: iosMin, latestVersion: iosLatest },
       },
       featureFlags,
     };
