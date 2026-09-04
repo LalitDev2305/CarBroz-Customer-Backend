@@ -78,6 +78,22 @@ for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
   }
 }
 
+// Common contained compatibility wrappers that merely re-exported Configuration's real provider
+// contracts. The migration must not turn those wrappers into new ports inside the owning package.
+for (const duplicate of [
+  'domains/configuration/application/ports/IConfigProvider.ts',
+  'domains/configuration/application/ports/IFeatureFlagProvider.ts',
+]) {
+  fs.rmSync(p(duplicate), { force: true });
+}
+const configurationPublic = p('domains/configuration/public/index.ts');
+if (exists(configurationPublic)) {
+  let content = read(configurationPublic)
+    .replace(/^export \* from '\.\.\/application\/ports\/IConfigProvider\.js';\s*$/gm, '')
+    .replace(/^export \* from '\.\.\/application\/ports\/IFeatureFlagProvider\.js';\s*$/gm, '');
+  write(configurationPublic, content.replace(/\n{3,}/g, '\n\n'));
+}
+
 const loggerAdapter = p('platform/observability/src/adapters/LoggerProvider.ts');
 if (exists(loggerAdapter)) {
   let content = read(loggerAdapter);
