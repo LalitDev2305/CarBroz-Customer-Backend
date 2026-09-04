@@ -3,7 +3,20 @@ import { GetCatalogUseCase } from './GetCatalogUseCase.js';
 import { CalculateServicePriceUseCase } from './CalculateServicePriceUseCase.js';
 import { ManageCatalogUseCase } from './ManageCatalogUseCase.js';
 import { ManagePricingTierUseCase } from './ManagePricingTierUseCase.js';
-import { ServiceCategory, Service, ServiceAddon, PricingTier, VehicleTypeMultiplierEntity } from '@carbroz/common';
+import { ServiceCategory, Service, ServiceAddon, VehicleTypeMultiplierEntity } from '@carbroz/common';
+import type { ExecutionContext } from '@carbroz/foundation-kernel';
+
+const adminContext: ExecutionContext = {
+  correlationId: 'catalog-admin-test',
+  timestamp: new Date('2026-01-01T00:00:00.000Z'),
+  actor: { id: 1, kind: 'ADMIN', roles: ['ADMIN'] },
+};
+
+const customerContext: ExecutionContext = {
+  correlationId: 'catalog-customer-test',
+  timestamp: new Date('2026-01-01T00:00:00.000Z'),
+  actor: { id: 2, kind: 'CUSTOMER', roles: ['CUSTOMER'], customerId: 2 },
+};
 
 describe('Catalog & Pricing UseCases', () => {
   let catalogRepo: any;
@@ -30,7 +43,7 @@ describe('Catalog & Pricing UseCases', () => {
   });
 
   describe('GetCatalogUseCase', () => {
-    it('should return categories with nested active services', async () => {
+    it('returns categories with nested active services', async () => {
       const useCase = new GetCatalogUseCase(catalogRepo);
       const mockCategory = new ServiceCategory({ id: 1, name: 'Wash & Clean', slug: 'wash-clean', isActive: true });
       const mockService = new Service({ id: 10, categoryId: 1, name: 'Full Car Wash', slug: 'full-car-wash', basePrice: 5000 });
@@ -41,14 +54,16 @@ describe('Catalog & Pricing UseCases', () => {
       const result = await useCase.execute();
 
       expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('Wash & Clean');
-      expect(result[0].services).toHaveLength(1);
-      expect(result[0].services![0].name).toBe('Full Car Wash');
+      const firstCategory = result.at(0);
+      expect(firstCategory).toBeDefined();
+      expect(firstCategory!.name).toBe('Wash & Clean');
+      expect(firstCategory!.services).toHaveLength(1);
+      expect(firstCategory!.services!.at(0)?.name).toBe('Full Car Wash');
     });
   });
 
   describe('CalculateServicePriceUseCase', () => {
-    it('should calculate dynamic price with vehicle multiplier and addons', async () => {
+    it('calculates dynamic price with vehicle multiplier and addons', async () => {
       const useCase = new CalculateServicePriceUseCase(catalogRepo, pricingRepo);
       const mockService = new Service({ id: 10, categoryId: 1, name: 'Full Wash', slug: 'full-wash', basePrice: 10000, isActive: true });
       const mockAddon = new ServiceAddon({ id: 100, serviceId: 10, name: 'Interior Polish', price: 2000, isActive: true });
@@ -58,13 +73,7 @@ describe('Catalog & Pricing UseCases', () => {
       pricingRepo.findVehicleMultiplier.mockResolvedValue(mockMultiplier);
       catalogRepo.findAddonsByIds.mockResolvedValue([mockAddon]);
 
-      const result = await useCase.execute({
-        data: {
-          serviceId: 10,
-          vehicleType: 'SUV',
-          addonIds: [100]
-        }
-      });
+      const result = await useCase.execute({ data: { serviceId: 10, vehicleType: 'SUV', addonIds: [100] } });
 
       expect(result.basePrice).toBe(10000);
       expect(result.vehicleMultiplier).toBe(1.5);
@@ -73,52 +82,61 @@ describe('Catalog & Pricing UseCases', () => {
       expect(result.totalPrice).toBe(17000);
     });
 
-    it('should throw NOT_FOUND if service does not exist', async () => {
+    it('rejects a missing or inactive service', async () => {
       const useCase = new CalculateServicePriceUseCase(catalogRepo, pricingRepo);
       catalogRepo.findServiceById.mockResolvedValue(null);
 
-      await expect(useCase.execute({
-        data: { serviceId: 99, vehicleType: 'SEDAN' }
-      })).rejects.toThrow('NOT_FOUND');
+      await expect(useCase.execute({ data: { serviceId: 99, vehicleType: 'SEDAN' } })).rejects.toThrow('NOT_FOUND');
     });
   });
 
   describe('ManageCatalogUseCase', () => {
-    it('should allow admin to create category', async () => {
+    it('allows an admin actor to create a category', async () => {
       const useCase = new ManageCatalogUseCase(catalogRepo);
       catalogRepo.createCategory.mockResolvedValue(new ServiceCategory({ id: 1, name: 'Detailing', slug: 'detailing' }));
 
       const result = await useCase.execute({
-        context: { authenticatedUser: { id: 1, isAdmin: true } } as any,
-        data: { action: 'CREATE_CATEGORY', payload: { name: 'Detailing', slug: 'detailing' } }
-      });
+        context: adminContext,
+        data: { action: 'CREATE_CATEGORY', payload: { name: 'Detailing', slug: 'detailing' } },
+      }) as ServiceCategory;
 
       expect(result.name).toBe('Detailing');
-      expect(catalogRepo.createCategory).toHaveBeenCalled();
+      expect(catalogRepo.createCategory).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw FORBIDDEN if user is not admin', async () => {
+    it('rejects a non-admin actor', async () => {
       const useCase = new ManageCatalogUseCase(catalogRepo);
 
       await expect(useCase.execute({
-        context: { authenticatedUser: { id: 2, isAdmin: false } } as any,
-        data: { action: 'CREATE_CATEGORY', payload: { name: 'Test' } }
+        context: customerContext,
+        data: { action: 'CREATE_CATEGORY', payload: { name: 'Test' } },
       })).rejects.toThrow('FORBIDDEN');
+      expect(catalogRepo.createCategory).not.toHaveBeenCalled();
     });
   });
 
   describe('ManagePricingTierUseCase', () => {
-    it('should allow admin to set vehicle multiplier', async () => {
+    it('allows an admin actor to set a vehicle multiplier', async () => {
       const useCase = new ManagePricingTierUseCase(pricingRepo);
       pricingRepo.upsertVehicleMultiplier.mockResolvedValue(new VehicleTypeMultiplierEntity({ serviceId: 10, vehicleType: 'SUV', multiplier: 1.25 }));
 
       const result = await useCase.execute({
-        context: { authenticatedUser: { id: 1, isAdmin: true } } as any,
-        data: { action: 'SET_VEHICLE_MULTIPLIER', serviceId: 10, payload: { vehicleType: 'SUV', multiplier: 1.25 } }
-      });
+        context: adminContext,
+        data: { action: 'SET_VEHICLE_MULTIPLIER', serviceId: 10, payload: { vehicleType: 'SUV', multiplier: 1.25 } },
+      }) as VehicleTypeMultiplierEntity;
 
       expect(result.multiplier).toBe(1.25);
       expect(pricingRepo.upsertVehicleMultiplier).toHaveBeenCalledWith(10, 'SUV', 1.25);
+    });
+
+    it('rejects pricing mutation for a non-admin actor', async () => {
+      const useCase = new ManagePricingTierUseCase(pricingRepo);
+
+      await expect(useCase.execute({
+        context: customerContext,
+        data: { action: 'SET_VEHICLE_MULTIPLIER', serviceId: 10, payload: { vehicleType: 'SUV', multiplier: 1.25 } },
+      })).rejects.toThrow('FORBIDDEN');
+      expect(pricingRepo.upsertVehicleMultiplier).not.toHaveBeenCalled();
     });
   });
 });
