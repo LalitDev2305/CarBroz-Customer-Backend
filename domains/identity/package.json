@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@carbroz/foundation-kernel": "workspace:*",
-    "@carbroz/platform-database": "workspace:*",
     "@prisma/client": "^6.19.3",
     "awilix": "^12.0.0"
   },
