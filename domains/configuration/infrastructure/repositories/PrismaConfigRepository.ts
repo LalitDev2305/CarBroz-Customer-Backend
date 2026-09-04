@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { IConfigRepository, SystemConfig } from '@carbroz/common';
+import type { SystemConfig } from '../../domain/SystemConfig.js';
+import type { IConfigRepository } from '../../domain/repositories/IConfigRepository.js';
 
 export class PrismaConfigRepository implements IConfigRepository {
   private unitOfWorkPrisma: any = null;
