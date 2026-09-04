@@ -19,13 +19,13 @@ export function registerIdentityModule(container: AwilixContainer): void {
       (cradle: IdentityCradle) => new PrismaUserSessionRepository(cradle.prismaProvider),
     ).singleton(),
     roleRepository: asFunction(
-      (cradle: IdentityCradle) => new PrismaRoleRepository(cradle.prismaProvider),
+      (cradle: IdentityCradle) => new PrismaRoleRepository(cradle.prismaProvider.getClient()),
     ).singleton(),
     permissionRepository: asFunction(
-      (cradle: IdentityCradle) => new PrismaPermissionRepository(cradle.prismaProvider),
+      (cradle: IdentityCradle) => new PrismaPermissionRepository(cradle.prismaProvider.getClient()),
     ).singleton(),
     adminRoleRepository: asFunction(
-      (cradle: IdentityCradle) => new PrismaAdminRoleRepository(cradle.prismaProvider),
+      (cradle: IdentityCradle) => new PrismaAdminRoleRepository(cradle.prismaProvider.getClient()),
     ).singleton(),
   });
 }
