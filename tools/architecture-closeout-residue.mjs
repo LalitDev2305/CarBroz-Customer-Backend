@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const p = (...parts) => path.join(root, ...parts);
 const walk = (dir) => {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -16,6 +15,8 @@ const walk = (dir) => {
 };
 
 const owners = new Map([
+  ['IUseCase', '@carbroz/foundation-kernel'], ['ITransactionProvider', '@carbroz/foundation-kernel'],
+  ['IClockProvider', '@carbroz/foundation-kernel'], ['IIdGeneratorProvider', '@carbroz/foundation-kernel'],
   ['IUserRepository', '@carbroz/domain-identity'], ['IUserSessionRepository', '@carbroz/domain-identity'],
   ['IRoleRepository', '@carbroz/domain-identity'], ['IPermissionRepository', '@carbroz/domain-identity'],
   ['IAdminRoleRepository', '@carbroz/domain-identity'], ['IAuthorizationProvider', '@carbroz/domain-identity'],
@@ -37,6 +38,8 @@ const owners = new Map([
   ['ICorporateAccountRepository', '@carbroz/domain-enterprise'], ['ICorporateMemberRepository', '@carbroz/domain-enterprise'],
   ['ICorporateFleetVehicleRepository', '@carbroz/domain-enterprise'], ['ICorporateCreditLedgerRepository', '@carbroz/domain-enterprise'],
   ['ICorporateInvoiceRepository', '@carbroz/domain-enterprise'],
+  ['IConfigProvider', '@carbroz/domain-configuration'], ['IFeatureFlagProvider', '@carbroz/domain-configuration'],
+  ['ISduiRegistryRepository', '@carbroz/sdui-registry'],
   ['ILoggerProvider', '@carbroz/platform-observability'], ['IStorageProvider', '@carbroz/platform-storage'],
   ['ICacheProvider', '@carbroz/platform-cache'], ['IDatabaseProvider', '@carbroz/platform-database'],
 ]);
@@ -54,10 +57,10 @@ for (const file of walk(root)) {
       /import\s*\{\s*ResponseHelper\s*\}\s*from\s*['"]@carbroz\/common['"];?/g,
       "import { ResponseHelper } from '../response/ResponseHelper.js';",
     );
-    content = content.replace(
-      /\s*request\.log\.info\([^;]*(?:Mock OTP|mockOtp|phoneNumber|deviceId)[^;]*;?/gi,
-      "\n    request.log.info({ event: 'auth.otp.request.completed', correlationId: request.traceId }, 'auth.otp.request.completed');",
-    );
+    content = content
+      .split('\n')
+      .filter((line) => !(line.includes('request.log.') && /(otp|mockOtp|phoneNumber|deviceId|refreshToken|token)/i.test(line)))
+      .join('\n');
   }
 
   if (relative === 'foundation/kernel/src/errors/errors.ts') {
@@ -69,4 +72,4 @@ for (const file of walk(root)) {
   fs.writeFileSync(file, content);
 }
 
-console.log('[architecture-closeout-residue] dynamic Common references and unsafe Auth residue cleaned');
+console.log('[architecture-closeout-residue] all dynamic DI ownership references and sensitive Auth logs cleaned');
