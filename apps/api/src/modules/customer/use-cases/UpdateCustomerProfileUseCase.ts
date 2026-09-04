@@ -1,4 +1,5 @@
-import { IUseCase, IRequestContext, ICustomerProfileRepository, CustomerProfile } from '@carbroz/common';
+import type { ExecutionContext, IUseCase } from '@carbroz/foundation-kernel';
+import { ICustomerProfileRepository, CustomerProfile } from '@carbroz/common';
 
 export interface UpdateCustomerProfileRequest {
   userId: number;
@@ -9,21 +10,31 @@ export interface UpdateCustomerProfileRequest {
   marketingOptIn?: boolean;
 }
 
-export class UpdateCustomerProfileUseCase implements IUseCase<{ context: IRequestContext; data: UpdateCustomerProfileRequest }, CustomerProfile> {
+export interface UpdateCustomerProfileInput {
+  context: ExecutionContext;
+  data: UpdateCustomerProfileRequest;
+}
+
+function canAccessCustomer(context: ExecutionContext, customerId: number): boolean {
+  const actor = context.actor;
+  if (!actor) return false;
+  return actor.kind === 'ADMIN'
+    || actor.roles.includes('ADMIN')
+    || actor.customerId === customerId
+    || String(actor.id) === String(customerId);
+}
+
+/** Updates only Customer-owned profile fields for an authorized actor. */
+export class UpdateCustomerProfileUseCase implements IUseCase<UpdateCustomerProfileInput, CustomerProfile> {
   constructor(private readonly customerProfileRepository: ICustomerProfileRepository) {}
 
-  async execute(request: { context: IRequestContext; data: UpdateCustomerProfileRequest }): Promise<CustomerProfile> {
-    const user = request.context.authenticatedUser as any;
-    if (user?.id !== request.data.userId && !user?.isAdmin) {
+  async execute(request: UpdateCustomerProfileInput): Promise<CustomerProfile> {
+    if (!canAccessCustomer(request.context, request.data.userId)) {
       throw new Error('FORBIDDEN: You do not have permission to edit this profile');
     }
 
     let profile = await this.customerProfileRepository.findByUserId(request.data.userId);
-    if (!profile) {
-      profile = new CustomerProfile({
-        userId: request.data.userId,
-      });
-    }
+    if (!profile) profile = new CustomerProfile({ userId: request.data.userId });
 
     if (request.data.firstName !== undefined) profile.firstName = request.data.firstName;
     if (request.data.lastName !== undefined) profile.lastName = request.data.lastName;
@@ -32,7 +43,6 @@ export class UpdateCustomerProfileUseCase implements IUseCase<{ context: IReques
     if (request.data.marketingOptIn !== undefined) profile.marketingOptIn = request.data.marketingOptIn;
 
     profile.updatedAt = new Date();
-    
     return this.customerProfileRepository.save(profile);
   }
 }
