@@ -66,7 +66,18 @@ jobs:
         run: pnpm build
 
       - name: Run ESLint
-        run: pnpm exec eslint --quiet .
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm exec eslint --quiet . 2>&1 | tee eslint-output.txt
+
+      - name: Upload ESLint diagnostic
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-diagnostic
+          path: eslint-output.txt
+          if-no-files-found: error
 
       - name: Run Vitest suite
         run: pnpm test
