@@ -1,17 +1,3 @@
-import { IUseCase } from '@carbroz/common';
-import type { ISduiRegistryRepository, SduiScreenEntity } from '@carbroz/sdui-registry';
-import type { SduiTargetApp } from '@carbroz/ui-sdk';
-
-export interface GetSduiVersionHistoryInput {
-  screenId: string;
-  targetApp?: SduiTargetApp;
-}
-
-export class GetSduiVersionHistoryUseCase implements IUseCase<GetSduiVersionHistoryInput, SduiScreenEntity[]> {
-  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
-
-  public async execute(input: GetSduiVersionHistoryInput): Promise<SduiScreenEntity[]> {
-    const { screenId, targetApp = 'CUSTOMER' } = input;
-    return await this.sduiRegistryRepository.getVersionHistory(screenId, targetApp);
-  }
-}
+/** @deprecated Import GetSduiVersionHistoryUseCase from @carbroz/sdui-registry. */
+export { GetSduiVersionHistoryUseCase } from '@carbroz/sdui-registry';
+export type { GetSduiVersionHistoryInput } from '@carbroz/sdui-registry';
