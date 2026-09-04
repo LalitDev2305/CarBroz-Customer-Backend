@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { Invoice, InvoiceStatus, IInvoiceRepository } from '@carbroz/common';
+import type { IInvoiceRepository } from '../../domain/repositories/IInvoiceRepository.js';
+import { Invoice } from '../../domain/Invoice.js';
+import type { InvoiceStatus } from '../../domain/InvoiceStatus.js';
 
 export class PrismaInvoiceRepository implements IInvoiceRepository {
   private unitOfWorkPrisma: any = null;
