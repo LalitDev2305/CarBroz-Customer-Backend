@@ -1,4 +1,4 @@
-import { IUseCase, IRequestContext, ICatalogRepository, IPricingRepository } from '@carbroz/common';
+import { IUseCase, ICatalogRepository, IPricingRepository } from '@carbroz/common';
 
 export interface CalculatePriceRequest {
   serviceId: number;
@@ -18,13 +18,14 @@ export interface CalculatedPriceResult {
   totalPrice: number;
 }
 
-export class CalculateServicePriceUseCase implements IUseCase<{ context?: IRequestContext; data: CalculatePriceRequest }, CalculatedPriceResult> {
+/** Calculates a service price from catalog data and pricing policy without transport context. */
+export class CalculateServicePriceUseCase implements IUseCase<{ data: CalculatePriceRequest }, CalculatedPriceResult> {
   constructor(
     private readonly catalogRepository: ICatalogRepository,
     private readonly pricingRepository: IPricingRepository
   ) {}
 
-  async execute(request: { context?: IRequestContext; data: CalculatePriceRequest }): Promise<CalculatedPriceResult> {
+  async execute(request: { data: CalculatePriceRequest }): Promise<CalculatedPriceResult> {
     const { serviceId, vehicleType, addonIds = [] } = request.data;
 
     const service = await this.catalogRepository.findServiceById(serviceId);
@@ -32,13 +33,10 @@ export class CalculateServicePriceUseCase implements IUseCase<{ context?: IReque
       throw new Error('NOT_FOUND: Service not found or inactive');
     }
 
-    // Get Vehicle Multiplier
     const multiplierEntity = await this.pricingRepository.findVehicleMultiplier(serviceId, vehicleType.toUpperCase());
     const vehicleMultiplier = multiplierEntity ? multiplierEntity.multiplier : 1.0;
-
     const adjustedBasePrice = Math.round(service.basePrice * vehicleMultiplier);
 
-    // Get Selected Addons
     let addonsTotal = 0;
     const selectedAddons: Array<{ id: number; name: string; price: number }> = [];
 
@@ -47,16 +45,10 @@ export class CalculateServicePriceUseCase implements IUseCase<{ context?: IReque
       for (const addon of addons) {
         if (addon.serviceId === serviceId && addon.isActive) {
           addonsTotal += addon.price;
-          selectedAddons.push({
-            id: addon.id!,
-            name: addon.name,
-            price: addon.price
-          });
+          selectedAddons.push({ id: addon.id!, name: addon.name, price: addon.price });
         }
       }
     }
-
-    const totalPrice = adjustedBasePrice + addonsTotal;
 
     return {
       serviceId: service.id!,
@@ -67,7 +59,7 @@ export class CalculateServicePriceUseCase implements IUseCase<{ context?: IReque
       adjustedBasePrice,
       addonsTotal,
       addons: selectedAddons,
-      totalPrice
+      totalPrice: adjustedBasePrice + addonsTotal,
     };
   }
 }
