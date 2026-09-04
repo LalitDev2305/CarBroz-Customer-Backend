@@ -228,7 +228,7 @@ for (const name of ['canonical-topology.policy.test.ts', 'engineering-quality.po
 
 const violations = [...selfImportResolutionErrors];
 const surfaces = ['partner', 'customer', 'admin'];
-const importPattern = /(?:from\s+|import\s*\(\s*)['\"]([^'\"]+)['\"]/g;
+const importPattern = /(?:from\s+|import\s*\(\s*)['"]([^'"]+)['"]/g;
 
 for (const surface of surfaces) {
   const surfaceRoot = p('apps/api/src/surfaces', surface);
@@ -237,7 +237,7 @@ for (const surface of surfaces) {
     for (const match of content.matchAll(importPattern)) {
       const specifier = match[1];
       for (const other of surfaces.filter((candidate) => candidate !== surface)) {
-        let importsOtherSurface = false;
+        let importsOtherSurface;
         if (specifier.startsWith('.')) {
           const resolved = path.resolve(path.dirname(file), specifier.replace(/\.js$/, '.ts'));
           const otherRoot = path.resolve(p('apps/api/src/surfaces', other));
