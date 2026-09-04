@@ -1,0 +1,77 @@
+name: Backend Architecture Closeout Executor
+
+on:
+  push:
+    branches:
+      - fix/stage-a-production-definitions
+    paths:
+      - tools/architecture-closeout.mjs
+      - .github/workflows/architecture-closeout.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backend-architecture-closeout
+  cancel-in-progress: true
+
+jobs:
+  closeout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout architecture branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/stage-a-production-definitions
+          fetch-depth: 0
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate repository pnpm version
+        run: corepack prepare pnpm@11.9.0 --activate
+
+      - name: Install current workspace
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Execute constitution closeout migration
+        run: node tools/architecture-closeout.mjs
+
+      - name: Reinstall final workspace
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Validate Prisma
+        run: pnpm exec prisma validate
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+
+      - name: Build final monorepo
+        run: pnpm -r build
+
+      - name: Lint final monorepo
+        run: pnpm lint
+
+      - name: Test final monorepo
+        run: pnpm test -- --run
+
+      - name: Remove one-time migration tooling
+        run: |
+          rm -f tools/architecture-closeout.mjs
+          rm -f .github/workflows/architecture-closeout.yml
+          rmdir tools 2>/dev/null || true
+
+      - name: Commit constitution-closed source
+        run: |
+          git config user.name "CarBroz Architecture Bot"
+          git config user.email "architecture@carbroz.local"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "refactor(architecture): close backend constitution"
+          git push origin HEAD:fix/stage-a-production-definitions
