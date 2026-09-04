@@ -1,5 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import { IPaymentRepository, Payment, PaymentMethod, PaymentStatus, PaymentWebhook } from '@carbroz/common';
+import type { IPaymentRepository } from '../../domain/repositories/IPaymentRepository.js';
+import { Payment } from '../../domain/Payment.js';
+import type { PaymentMethod } from '../../domain/PaymentMethod.js';
+import type { PaymentStatus } from '../../domain/PaymentStatus.js';
+import { PaymentWebhook } from '../../domain/PaymentWebhook.js';
 
 export class PrismaPaymentRepository implements IPaymentRepository {
   private unitOfWorkPrisma: any = null;
