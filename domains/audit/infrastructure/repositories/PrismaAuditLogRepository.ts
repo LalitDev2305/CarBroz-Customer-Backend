@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { ActorType, AuditLog, IAuditLogRepository } from '@carbroz/common';
+import type { IAuditLogRepository } from '../../domain/repositories/IAuditLogRepository.js';
+import type { ActorType } from '../../domain/AuditActor.js';
+import { AuditLog } from '../../domain/AuditLog.js';
 
 export class PrismaAuditLogRepository implements IAuditLogRepository {
   private unitOfWorkPrisma: any = null;
