@@ -32,9 +32,48 @@ driverSource = driverSource.replace(
 const driver = path.join(root, '.architecture-closeout-driver.mjs');
 fs.writeFileSync(driver, driverSource);
 
+const write = (file, content) => {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, content.endsWith('\n') ? content : `${content}\n`);
+};
+
+function normalizeObservabilityAdapter() {
+  const loggerAdapter = path.join(root, 'platform/observability/src/adapters/LoggerProvider.ts');
+  if (!fs.existsSync(loggerAdapter)) return;
+  write(loggerAdapter, `import type { ILoggerProvider } from '../ports/ILoggerProvider.js';
+import { createLogger } from '../index.js';
+
+/**
+ * Adapts the canonical observability logger factory to the stable ILoggerProvider contract.
+ * Redaction and logger configuration remain owned by createLogger; this adapter adds no policy.
+ */
+export class LoggerProvider implements ILoggerProvider {
+  private readonly logger = createLogger();
+
+  info(message: string, context?: Record<string, unknown>): void {
+    this.logger.info(context ?? {}, message);
+  }
+
+  error(message: string, error?: Error, context?: Record<string, unknown>): void {
+    this.logger.error({ ...context, err: error }, message);
+  }
+
+  warn(message: string, context?: Record<string, unknown>): void {
+    this.logger.warn(context ?? {}, message);
+  }
+
+  debug(message: string, context?: Record<string, unknown>): void {
+    this.logger.debug(context ?? {}, message);
+  }
+}
+`);
+  console.log('[closeout-orchestrator] observability logger adapter normalized');
+}
+
 try {
   execFileSync(process.execPath, ['--check', driver], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [driver], { cwd: root, stdio: 'inherit' });
+  normalizeObservabilityAdapter();
   fs.rmSync(path.join(root, 'tools/architecture-closeout-residue.mjs'), { force: true });
 } finally {
   fs.rmSync(driver, { force: true });
