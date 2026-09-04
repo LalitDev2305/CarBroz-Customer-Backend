@@ -1,4 +1,1 @@
-export interface IDomainEvent {
-  eventName: string;
-  occurredOn: Date;
-}
+export type { IDomainEvent } from '@carbroz/foundation-kernel';
