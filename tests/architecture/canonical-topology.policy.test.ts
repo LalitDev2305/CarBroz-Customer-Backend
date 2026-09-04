@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -44,6 +44,14 @@ describe('canonical repository topology migration', () => {
   it('registers sdui as an explicit workspace category during migration', () => {
     const workspace = read('pnpm-workspace.yaml');
     expect(workspace).toContain('"sdui/*"');
+  });
+
+  it('keeps platform database free of business repository implementations', () => {
+    const repositoryDir = resolve(root, 'platform/database/src/repositories');
+    const repositoryFiles = readdirSync(repositoryDir).filter((entry) => entry.endsWith('.ts'));
+
+    expect(repositoryFiles).toEqual(['PrismaRepositoryBase.ts']);
+    expect(existsSync(resolve(repositoryDir, 'RepositoryFactory.ts'))).toBe(false);
   });
 
   it('freezes the canonical business topology in the Master Constitution', () => {
