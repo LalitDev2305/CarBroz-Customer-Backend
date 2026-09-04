@@ -1,54 +1,18 @@
-export class AppError extends Error {
-  public readonly statusCode: number;
-  public readonly errorCode: string;
-
-  constructor(message: string, statusCode: number, errorCode: string) {
-    super(message);
-    this.name = this.constructor.name;
-    this.statusCode = statusCode;
-    this.errorCode = errorCode;
-    (Error as any).captureStackTrace(this, this.constructor);
-  }
-}
-
-export class ValidationError extends AppError {
-  constructor(message: string = 'Validation Error') {
-    super(message, 400, 'VALIDATION_ERROR');
-  }
-}
-
-export class BadRequestError extends AppError {
-  constructor(message: string = 'Bad Request') {
-    super(message, 400, 'BAD_REQUEST');
-  }
-}
-
-export class UnauthorizedError extends AppError {
-  constructor(message: string = 'Unauthorized') {
-    super(message, 401, 'UNAUTHORIZED');
-  }
-}
-
-export class ForbiddenError extends AppError {
-  constructor(message: string = 'Forbidden') {
-    super(message, 403, 'FORBIDDEN');
-  }
-}
-
-export class NotFoundError extends AppError {
-  constructor(message: string = 'Not Found') {
-    super(message, 404, 'NOT_FOUND');
-  }
-}
-
-export class ConflictError extends AppError {
-  constructor(message: string = 'Conflict') {
-    super(message, 409, 'CONFLICT');
-  }
-}
-
-export class InternalServerError extends AppError {
-  constructor(message: string = 'Internal Server Error') {
-    super(message, 500, 'INTERNAL_SERVER_ERROR');
-  }
-}
+/**
+ * Transitional compatibility exports for universal application errors.
+ *
+ * @deprecated `packages/common` is scheduled for deletion by the Backend V3
+ * Master Constitution. New code must import these primitives directly from
+ * `@carbroz/foundation-kernel`. Re-exporting the exact Foundation constructors
+ * preserves `instanceof` behavior while legacy consumers migrate.
+ */
+export {
+  ApplicationError as AppError,
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  InternalServerError,
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from '@carbroz/foundation-kernel';
