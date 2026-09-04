@@ -27,9 +27,8 @@ const copyTransportContract = (fromSurface, sourceName, targetName = sourceName)
   fs.copyFileSync(source, target);
 };
 
-// Product surfaces own transport schemas independently. Copying the validation contract at the
-// transport boundary is intentional: Admin may share bounded-context application behavior, but it
-// must not compile against Customer/Partner HTTP DTO modules.
+// Product surfaces own transport schemas independently. Admin may reuse bounded-context application
+// behavior, but it must not compile against Customer/Partner HTTP DTO modules.
 for (const name of ['review.dto.ts', 'coupon.dto.ts', 'dispute.dto.ts']) {
   copyTransportContract('customer', name);
 }
@@ -48,27 +47,23 @@ for (const [fileRel, [from, to]] of adminRewrites) {
   if (exists(file)) write(file, read(file).replaceAll(from, to));
 }
 
-// pnpm 11 blocks dependency lifecycle scripts unless explicitly approved. These packages are
-// intentional runtime/build dependencies already used by the repository; approve only their
-// required install scripts rather than enabling dependency scripts globally.
+// pnpm 11 reads build-script approvals from pnpm-workspace.yaml. The migration rewrites this file,
+// so re-establish the canonical final workspace and narrowly allow only dependencies whose install
+// scripts are required by this repository. Never enable dependency scripts globally.
+write(
+  p('pnpm-workspace.yaml'),
+  `packages:\n  - "apps/*"\n  - "domains/*"\n  - "sdui/*"\n  - "platform/*"\n  - "foundation/*"\nallowBuilds:\n  '@prisma/client': true\n  '@prisma/engines': true\n  bcrypt: true\n  esbuild: true\n  msgpackr-extract: true\n  prisma: true\n`,
+);
+
+// Remove obsolete pnpm configuration from package.json so there is one authoritative pnpm 11 source.
 const rootPackageFile = p('package.json');
 if (exists(rootPackageFile)) {
   const rootPackage = JSON.parse(read(rootPackageFile));
-  rootPackage.pnpm = {
-    ...(rootPackage.pnpm ?? {}),
-    onlyBuiltDependencies: [
-      '@prisma/client',
-      '@prisma/engines',
-      'bcrypt',
-      'esbuild',
-      'msgpackr-extract',
-      'prisma',
-    ],
-  };
+  if (rootPackage.pnpm) delete rootPackage.pnpm;
   write(rootPackageFile, `${JSON.stringify(rootPackage, null, 2)}\n`);
 }
 
-// The architecture tests must never recurse into VCS internals while scanning the repository.
+// Architecture tests must never recurse into VCS internals while scanning the repository.
 for (const name of ['canonical-topology.policy.test.ts', 'engineering-quality.policy.test.ts']) {
   const file = p('tests/architecture', name);
   if (exists(file)) {
@@ -109,7 +104,6 @@ for (const surface of surfaces) {
 }
 
 // Tests may live near source, but production package builds must not accidentally depend on Vitest.
-// Fail loudly rather than silently moving a test whose relative imports might become semantically different.
 for (const base of ['domains', 'sdui', 'platform', 'foundation']) {
   for (const file of walk(p(base)).filter((f) => /\.(?:spec|test)\.ts$/.test(f))) {
     const packageRoot = file.split(path.sep).slice(0, file.includes(`${path.sep}domains${path.sep}financials${path.sep}`) ? 3 : 2).join(path.sep);
@@ -135,4 +129,4 @@ if (violations.length) {
   throw new Error(`Post-closeout invariants failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
 }
 
-console.log('[architecture-closeout-postpatch] admin transport ownership, approved dependency builds, surface isolation, and safety invariants passed');
+console.log('[architecture-closeout-postpatch] admin transport ownership, pnpm 11 workspace policy, surface isolation, and safety invariants passed');
