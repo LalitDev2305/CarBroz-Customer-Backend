@@ -10,6 +10,7 @@
   "dependencies": {
     "@carbroz/domain-configuration": "workspace:*",
     "@carbroz/domain-identity": "workspace:*",
+    "@carbroz/domain-partner": "workspace:*",
     "@carbroz/foundation-kernel": "workspace:*"
   },
   "devDependencies": {
