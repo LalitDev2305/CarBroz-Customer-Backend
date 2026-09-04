@@ -7,19 +7,15 @@ export class SduiRegistryController {
   constructor(private readonly getSduiScreenUseCase: GetSduiScreenUseCase) {}
 
   public getScreen = async (request: FastifyRequest, reply: FastifyReply) => {
-    const params = request.params as any;
-    const query = request.query as any;
+    const params = request.params as { screenId: string };
+    const query = request.query as { targetApp?: unknown };
 
     const dto = getSduiScreenSchema.parse({
       screenId: params.screenId,
-      targetApp: query.targetApp || 'CUSTOMER'
+      targetApp: query.targetApp || 'CUSTOMER',
     });
 
-    const screenLayout = await this.getSduiScreenUseCase.execute({
-      context: (request as any).requestContext,
-      data: dto
-    });
-
+    const screenLayout = await this.getSduiScreenUseCase.execute({ data: dto });
     return reply.send(ResponseHelper.success(screenLayout));
   };
 }
