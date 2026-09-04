@@ -3,7 +3,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import fastifyRateLimit from '@fastify/rate-limit';
 import { getFastifyLoggerConfig } from '@carbroz/platform-observability';
-import { SecurityConfig, LoggingConfig } from '@carbroz/config';
+import { SecurityConfig, LoggingConfig } from './config/runtime-config.js';
 import { globalErrorHandler } from './middlewares/error-handler.js';
 import diPlugin from './plugins/di.plugin.js';
 import requestContextPlugin from './plugins/request-context.js';
