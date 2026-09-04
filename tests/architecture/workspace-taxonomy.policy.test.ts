@@ -12,7 +12,7 @@ const EXPECTED_CHILDREN: Record<string, readonly string[]> = {
   apps: ['api'],
   sdui: ['registry', 'ui-sdk'],
   foundation: ['kernel'],
-  packages: ['common', 'config'],
+  packages: ['common'],
   domains: [
     'audit',
     'booking',
@@ -126,7 +126,8 @@ describe('workspace taxonomy policy', () => {
   });
 
   it('keeps the remaining transitional catch-all root closed to new packages', () => {
-    expect(childDirectories('packages')).toEqual(['common', 'config']);
+    expect(childDirectories('packages')).toEqual(['common']);
+    expect(existsSync(resolve(root, 'packages/config'))).toBe(false);
   });
 
   it('keeps workspace package identities unique', () => {
