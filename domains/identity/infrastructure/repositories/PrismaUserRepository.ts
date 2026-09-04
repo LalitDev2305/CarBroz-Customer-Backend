@@ -1,4 +1,5 @@
-import { User, IUserRepository } from '@carbroz/common';
+import type { User } from '../../domain/User.js';
+import type { IUserRepository } from '../../domain/repositories/IUserRepository.js';
 import { PrismaProvider } from '@carbroz/platform-database';
 
 export class PrismaUserRepository implements IUserRepository {
