@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 
 // One-time closeout entrypoint: deterministic transform -> residue audit -> static gate -> CI validation.
 // Final output rejects Common, removes duplicate compatibility/application authorities, resolves self-imports,
-// and applies narrowly scoped post-transform convergence fixes before validation.
+// applies scoped post-transform convergence fixes, and revalidates active Customer/Configuration boundaries.
 const root = process.cwd();
 const baselineCommit = 'fbd7e0d38ba58136c7cc0be596314d62f20dcb6c';
 let driverSource = execFileSync('git', ['show', `${baselineCommit}:tools/architecture-closeout.mjs`], {
@@ -178,8 +178,6 @@ export class SendMultiChannelNotificationUseCase {
   const publicIndex = path.join(base, 'public/index.ts');
   if (fs.existsSync(publicIndex)) {
     let content = fs.readFileSync(publicIndex, 'utf8');
-    // Remove the stale export whose source was deleted. The migrated use case under
-    // application/use-cases is already exported by the migration's application export pass.
     content = content
       .replace(/^export \* from '\.\.\/application\/RegisterDeviceTokenUseCase\.js';\s*$/gm, '')
       .replace(/\n{3,}/g, '\n\n');
