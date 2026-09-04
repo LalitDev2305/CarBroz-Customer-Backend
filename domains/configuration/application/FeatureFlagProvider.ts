@@ -1,4 +1,5 @@
-import type { IFeatureFlagProvider, IFeatureFlagRepository } from '@carbroz/common';
+import type { IFeatureFlagProvider } from './IFeatureFlagProvider.js';
+import type { IFeatureFlagRepository } from '../domain/repositories/IFeatureFlagRepository.js';
 
 export class FeatureFlagProvider implements IFeatureFlagProvider {
   constructor(private readonly repository: IFeatureFlagRepository) {}
