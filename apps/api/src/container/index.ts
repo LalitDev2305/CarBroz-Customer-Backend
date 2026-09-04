@@ -1,7 +1,6 @@
 import { InjectionMode, asClass, AwilixContainer } from 'awilix';
 import { diContainer } from '@fastify/awilix';
 import { PrismaProvider, PrismaDatabaseProvider, PrismaTransactionProvider } from '@carbroz/platform-database';
-import { ConfigProvider } from '@carbroz/config';
 import { registerIdentityModule } from '@carbroz/domain-identity';
 import { AuthorizationProvider } from '../providers/AuthorizationProvider.js';
 import { GuestLoginUseCase } from '../modules/auth/use-cases/GuestLoginUseCase.js';
@@ -21,7 +20,7 @@ import { registerReviewModule, registerCouponModule } from '@carbroz/domain-enga
 import { registerDisputeModule } from '@carbroz/domain-dispute';
 import { registerSduiRegistryModule } from '@carbroz/sdui-registry';
 import { registerAuditModule } from '@carbroz/domain-audit';
-import { FeatureFlagProvider, registerConfigModule } from '@carbroz/domain-configuration';
+import { ConfigProvider, FeatureFlagProvider, registerConfigModule } from '@carbroz/domain-configuration';
 import { RegisterCorporateAccountUseCase, ApproveCorporateAccountUseCase, AdjustCreditLimitUseCase, AddCorporateMemberUseCase, RemoveCorporateMemberUseCase, EnrollFleetVehicleUseCase, RemoveFleetVehicleUseCase, ValidateCorporateBookingUseCase, GenerateCorporateInvoiceUseCase, ReconcileCorporatePaymentUseCase, registerEnterpriseModule } from '@carbroz/domain-enterprise';
 
 import { RegisterIndividualPartnerUseCase } from '../modules/partner/use-cases/RegisterIndividualPartnerUseCase.js';
@@ -271,7 +270,6 @@ export function getContainer(): AwilixContainer<Cradle> {
       prismaProvider: asClass(PrismaProvider).classic().singleton(),
       databaseProvider: asClass(PrismaDatabaseProvider).classic().singleton(),
       transactionProvider: asClass(PrismaTransactionProvider).classic().singleton(),
-      configProvider: asClass(ConfigProvider).classic().singleton(),
       authorizationProvider: asClass(AuthorizationProvider).classic().singleton(),
       guestLoginUseCase: asClass(GuestLoginUseCase).classic().scoped(),
       sendOtpUseCase: asClass(SendOtpUseCase).classic().scoped(),
