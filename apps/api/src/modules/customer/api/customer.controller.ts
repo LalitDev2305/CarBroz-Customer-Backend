@@ -1,25 +1,66 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
+import type { ActorIdentity, ExecutionContext } from '@carbroz/foundation-kernel';
+import { ResponseHelper } from '@carbroz/common';
 import { updateProfileSchema, addAddressSchema, updateAddressSchema } from '../dtos/customer.dto.js';
 import { GetCustomerProfileUseCase } from '../use-cases/GetCustomerProfileUseCase.js';
 import { UpdateCustomerProfileUseCase } from '../use-cases/UpdateCustomerProfileUseCase.js';
 import { ManageAddressUseCase } from '../use-cases/ManageAddressUseCase.js';
 import { ExtractCustomerDataUseCase } from '../use-cases/ExtractCustomerDataUseCase.js';
-import { IRequestContext, ResponseHelper } from '@carbroz/common';
 
+type AuthenticatedRequestUser = {
+  id?: string | number;
+  customerId?: number;
+  partnerId?: number;
+  tenantId?: string;
+  role?: string;
+  roles?: string[];
+  isAdmin?: boolean;
+};
+
+/**
+ * Customer HTTP adapter.
+ *
+ * This controller owns parsing, HTTP status mapping and conversion from Fastify authentication
+ * state into the transport-neutral Foundation ExecutionContext. Customer application services
+ * never receive FastifyRequest, headers, JWT payloads or framework-specific user objects.
+ */
 export class CustomerController {
   constructor(
     private readonly getCustomerProfileUseCase: GetCustomerProfileUseCase,
     private readonly updateCustomerProfileUseCase: UpdateCustomerProfileUseCase,
     private readonly manageAddressUseCase: ManageAddressUseCase,
-    private readonly extractCustomerDataUseCase: ExtractCustomerDataUseCase
+    private readonly extractCustomerDataUseCase: ExtractCustomerDataUseCase,
   ) {}
 
-  private getContext(req: FastifyRequest): IRequestContext {
+  private getContext(req: FastifyRequest): ExecutionContext {
+    const user = (req.user ?? {}) as AuthenticatedRequestUser;
+    const roles = Array.isArray(user.roles)
+      ? [...user.roles]
+      : user.role
+        ? [user.role]
+        : [];
+
+    if (user.isAdmin && !roles.includes('ADMIN')) roles.push('ADMIN');
+    const isAdmin = user.isAdmin === true || roles.includes('ADMIN');
+
+    let actor: ActorIdentity | undefined;
+    if (user.id !== undefined) {
+      actor = {
+        id: user.id,
+        kind: isAdmin ? 'ADMIN' : 'CUSTOMER',
+        roles,
+        customerId: user.customerId ?? (typeof user.id === 'number' ? user.id : undefined),
+        partnerId: user.partnerId,
+        tenantId: user.tenantId,
+      };
+    }
+
     return {
-      traceId: req.traceId,
-      authenticatedUser: req.user as any
-    } as IRequestContext;
+      correlationId: req.traceId ?? req.id,
+      actor,
+      timestamp: new Date(),
+    };
   }
 
   async getProfile(req: FastifyRequest, reply: FastifyReply) {
@@ -27,7 +68,7 @@ export class CustomerController {
       const context = this.getContext(req);
       const result = await this.getCustomerProfileUseCase.execute({
         context,
-        data: { userId: (req.user as any).id }
+        data: { userId: (req.user as any).id },
       });
       return reply.send(ResponseHelper.success(result));
     } catch (error: any) {
@@ -45,8 +86,8 @@ export class CustomerController {
         context,
         data: {
           userId: (req.user as any).id,
-          ...parsedBody
-        }
+          ...parsedBody,
+        },
       });
       return reply.send(ResponseHelper.success(result));
     } catch (error: any) {
@@ -64,7 +105,7 @@ export class CustomerController {
       const context = this.getContext(req);
       const result = await this.manageAddressUseCase.execute({
         context,
-        data: { userId: (req.user as any).id, action: 'GET_ALL' }
+        data: { userId: (req.user as any).id, action: 'GET_ALL' },
       });
       return reply.send(ResponseHelper.success(result));
     } catch (error: any) {
@@ -80,7 +121,7 @@ export class CustomerController {
       const context = this.getContext(req);
       const result = await this.manageAddressUseCase.execute({
         context,
-        data: { userId: (req.user as any).id, action: 'ADD', payload: parsedBody }
+        data: { userId: (req.user as any).id, action: 'ADD', payload: parsedBody },
       });
       return reply.send(ResponseHelper.success(result));
     } catch (error: any) {
@@ -99,12 +140,12 @@ export class CustomerController {
       const context = this.getContext(req);
       const result = await this.manageAddressUseCase.execute({
         context,
-        data: { 
-          userId: (req.user as any).id, 
-          action: 'UPDATE', 
+        data: {
+          userId: (req.user as any).id,
+          action: 'UPDATE',
           addressId: parseInt(req.params.addressId, 10),
-          payload: parsedBody 
-        }
+          payload: parsedBody,
+        },
       });
       return reply.send(ResponseHelper.success(result));
     } catch (error: any) {
@@ -122,11 +163,11 @@ export class CustomerController {
       const context = this.getContext(req);
       await this.manageAddressUseCase.execute({
         context,
-        data: { 
-          userId: (req.user as any).id, 
-          action: 'DELETE', 
-          addressId: parseInt(req.params.addressId, 10)
-        }
+        data: {
+          userId: (req.user as any).id,
+          action: 'DELETE',
+          addressId: parseInt(req.params.addressId, 10),
+        },
       });
       return reply.send(ResponseHelper.success(null, 'Address deleted'));
     } catch (error: any) {
@@ -141,7 +182,7 @@ export class CustomerController {
       const context = this.getContext(req);
       const result = await this.extractCustomerDataUseCase.execute({
         context,
-        data: { userId: (req.user as any).id }
+        data: { userId: (req.user as any).id },
       });
       return reply.send(ResponseHelper.success(result));
     } catch (error: any) {
