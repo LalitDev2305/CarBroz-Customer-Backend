@@ -71,4 +71,3 @@ export const ProvidersConfig = {
   minioAccessKey: env.MINIO_ACCESS_KEY,
   minioSecretKey: env.MINIO_SECRET_KEY,
 };
-export * from './providers/ConfigProvider.js';
