@@ -8,6 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@carbroz/domain-audit": "workspace:*",
     "@carbroz/domain-booking": "workspace:*",
     "@carbroz/domain-catalog-pricing": "workspace:*",
     "@carbroz/domain-configuration": "workspace:*",
