@@ -3,7 +3,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 // One-time closeout entrypoint: deterministic transform -> residue audit -> static gate -> CI validation.
-// Admin owns its transport contracts and pnpm build scripts are explicitly allowlisted for required trusted dependencies.
+// Final workspace policy is emitted in pnpm-workspace.yaml, the canonical pnpm 11 settings location.
 const root = process.cwd();
 const baselineCommit = 'fbd7e0d38ba58136c7cc0be596314d62f20dcb6c';
 let driverSource = execFileSync('git', ['show', `${baselineCommit}:tools/architecture-closeout.mjs`], {
