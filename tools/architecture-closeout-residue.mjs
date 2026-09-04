@@ -73,6 +73,118 @@ for (const file of walk(root)) {
   fs.writeFileSync(file, content);
 }
 
+function normalizeSduiRegistryApplication() {
+  const applicationRoot = path.join(root, 'sdui/registry/application');
+  const useCasesRoot = path.join(applicationRoot, 'use-cases');
+  if (!fs.existsSync(useCasesRoot)) return;
+
+  fs.writeFileSync(path.join(applicationRoot, 'contracts.ts'), `import type { SduiScreen, SduiTargetApp } from '@carbroz/ui-sdk';
+
+/** Transport-neutral reusable registry node definition input. */
+export interface SduiRegistryNodeInput {
+  name: string;
+  componentType: string;
+  schemaJson: Record<string, unknown>;
+  supportedProperties?: Record<string, unknown>;
+  supportedActions?: Record<string, unknown>;
+}
+
+export type CreateSduiComponentDto = SduiRegistryNodeInput;
+export type CreateSduiSectionDto = SduiRegistryNodeInput;
+export type CreateSduiGroupDto = SduiRegistryNodeInput;
+export type CreateSduiElementDto = SduiRegistryNodeInput;
+
+export interface GetSduiScreenDto {
+  screenId: string;
+  targetApp: SduiTargetApp;
+}
+
+export type SduiJsonContract = SduiScreen;
+
+export interface CreateSduiDraftDto {
+  screenId: string;
+  targetApp: SduiTargetApp;
+  layoutJson: SduiScreen;
+  createdFromVersion?: number;
+  changeDescription?: string;
+  overwriteExistingDraft: boolean;
+}
+
+export interface UpdateSduiDraftDto {
+  screenId: string;
+  targetApp: SduiTargetApp;
+  layoutJson: SduiScreen;
+  lockVersion: number;
+  changeDescription?: string;
+}
+
+export interface PublishSduiVersionDto {
+  screenId: string;
+  targetApp: SduiTargetApp;
+  versionNumber: number;
+}
+
+export type ArchiveSduiVersionDto = PublishSduiVersionDto;
+
+export interface RollbackSduiVersionDto {
+  screenId: string;
+  targetApp: SduiTargetApp;
+  targetVersionNumber: number;
+}
+
+export interface CompareSduiVersionsDto {
+  screenId: string;
+  targetApp: SduiTargetApp;
+  sourceVersion: number;
+  targetVersion: number;
+}
+`);
+
+  for (const file of walk(useCasesRoot)) {
+    let content = fs.readFileSync(file, 'utf8');
+    content = content.replace(
+      /from ['"][^'"]*apps\/api\/src\/transport\/sdui\/dto\/sdui-registry\.dto\.js['"]/g,
+      "from '../contracts.js'",
+    );
+
+    if (content.includes('IRequestContext')) {
+      if (!content.includes("ExecutionContext } from '@carbroz/foundation-kernel'")) {
+        content = `import type { ExecutionContext } from '@carbroz/foundation-kernel';\n${content}`;
+      }
+      content = content.replaceAll('IRequestContext', 'ExecutionContext');
+    }
+
+    content = content.replaceAll('!input.context.authenticatedUser?.isAdmin', "input.context.actor?.kind !== 'ADMIN'");
+    content = content.replaceAll('!request.context.authenticatedUser?.isAdmin', "request.context.actor?.kind !== 'ADMIN'");
+    content = content.replaceAll('input.context.authenticatedUser?.isAdmin', "input.context.actor?.kind === 'ADMIN'");
+    content = content.replaceAll('request.context.authenticatedUser?.isAdmin', "request.context.actor?.kind === 'ADMIN'");
+
+    fs.writeFileSync(file, content);
+  }
+
+  const publicIndex = path.join(root, 'sdui/registry/public/index.ts');
+  if (fs.existsSync(publicIndex)) {
+    let content = fs.readFileSync(publicIndex, 'utf8');
+    if (!content.includes("../application/contracts.js")) {
+      content += "\nexport * from '../application/contracts.js';\n";
+      fs.writeFileSync(publicIndex, content);
+    }
+  }
+
+  const violations = [];
+  for (const file of walk(applicationRoot)) {
+    const content = fs.readFileSync(file, 'utf8');
+    if (content.includes('apps/api/src/transport/sdui')) violations.push(`${path.relative(root, file)} imports API SDUI transport`);
+    if (content.includes('IRequestContext')) violations.push(`${path.relative(root, file)} retains IRequestContext`);
+    if (content.includes('authenticatedUser')) violations.push(`${path.relative(root, file)} retains transport user shape`);
+  }
+  if (violations.length) throw new Error(`SDUI registry application isolation failed: ${violations.join(', ')}`);
+
+  console.log('[architecture-closeout-residue] SDUI registry application contracts normalized and isolated from API transport');
+}
+
+normalizeSduiRegistryApplication();
+
 // Correct security evidence: inspect logging statements, not legitimate authentication variables.
 const sensitiveLogViolations = [];
 for (const file of walk(path.join(root, 'apps'))) {
@@ -88,4 +200,4 @@ if (sensitiveLogViolations.length) {
   throw new Error(`Sensitive logging remains: ${sensitiveLogViolations.join(', ')}`);
 }
 
-console.log('[architecture-closeout-residue] Configuration ownership complete and precise sensitive-log gate passed');
+console.log('[architecture-closeout-residue] Configuration, SDUI application ownership, and precise sensitive-log gates passed');
