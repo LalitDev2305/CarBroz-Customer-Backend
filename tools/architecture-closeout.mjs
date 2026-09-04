@@ -3,7 +3,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 // One-time closeout entrypoint: deterministic transform -> residue audit -> static gate -> CI validation.
-// Final output rejects Common and resolves internal package self-imports to their actual local declarations.
+// Final output rejects Common, removes duplicate compatibility ports, and resolves package self-imports locally.
 const root = process.cwd();
 const baselineCommit = 'fbd7e0d38ba58136c7cc0be596314d62f20dcb6c';
 let driverSource = execFileSync('git', ['show', `${baselineCommit}:tools/architecture-closeout.mjs`], {
