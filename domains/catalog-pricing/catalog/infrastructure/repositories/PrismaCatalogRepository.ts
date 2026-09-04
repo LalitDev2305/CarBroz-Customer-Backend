@@ -1,9 +1,11 @@
 import { PrismaClient } from '@prisma/client';
-import { ICatalogRepository, ServiceCategory, Service, ServiceAddon } from '@carbroz/common';
+import type { ICatalogRepository } from '../../domain/repositories/ICatalogRepository.js';
+import { ServiceCategory } from '../../domain/ServiceCategory.js';
+import { Service } from '../../domain/Service.js';
+import { ServiceAddon } from '../../domain/ServiceAddon.js';
 
 export class PrismaCatalogRepository implements ICatalogRepository {
   constructor(private readonly prisma: PrismaClient) {}
-
 
   async findById(id: number): Promise<ServiceCategory | null> {
     const model = await this.prisma.serviceCategory.findUnique({ where: { id, deletedAt: null } });
