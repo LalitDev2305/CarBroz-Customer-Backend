@@ -1,6 +1,1 @@
-export interface AdminUserRole {
-  userId: number;
-  roleId: number;
-  assignedBy: number | null;
-  assignedAt: Date;
-}
+export type { AdminUserRole } from '@carbroz/domain-identity';
