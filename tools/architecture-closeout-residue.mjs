@@ -72,4 +72,15 @@ for (const file of walk(root)) {
   fs.writeFileSync(file, content);
 }
 
-console.log('[architecture-closeout-residue] all dynamic DI ownership references and sensitive Auth logs cleaned');
+const container = path.join(root, 'apps/api/src/bootstrap/container/index.ts');
+if (fs.existsSync(container)) {
+  const lines = fs.readFileSync(container, 'utf8').split('\n').filter((line) => line.includes('@carbroz/common'));
+  for (const line of lines) console.log('[closeout-residue][container-common]', line.trim());
+}
+const auth = path.join(root, 'apps/api/src/transport/auth/auth.controller.ts');
+if (fs.existsSync(auth)) {
+  const unsafe = fs.readFileSync(auth, 'utf8').split('\n').filter((line) => /Mock OTP generated|request\.body.*log|log.*phoneNumber|refreshToken|mockOtp/i.test(line));
+  for (const line of unsafe) console.log('[closeout-residue][auth-unsafe]', line.trim());
+}
+
+console.log('[architecture-closeout-residue] cleanup and exact residue diagnostics completed');
