@@ -1,6 +1,7 @@
 import { asFunction, type AwilixContainer } from 'awilix';
 import type { PrismaClient } from '@prisma/client';
-import type { IConfigRepository, IFeatureFlagRepository } from '@carbroz/common';
+import type { IConfigRepository } from './domain/repositories/IConfigRepository.js';
+import type { IFeatureFlagRepository } from './domain/repositories/IFeatureFlagRepository.js';
 import { ConfigProvider } from './application/ConfigProvider.js';
 import { FeatureFlagProvider } from './application/FeatureFlagProvider.js';
 import { PrismaConfigRepository } from './infrastructure/repositories/PrismaConfigRepository.js';
