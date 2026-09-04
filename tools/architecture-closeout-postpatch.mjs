@@ -63,6 +63,11 @@ if (exists(rootPackageFile)) {
   write(rootPackageFile, `${JSON.stringify(rootPackage, null, 2)}\n`);
 }
 
+// Prisma validate/generate require DATABASE_URL to be syntactically present even though they do not
+// connect to the database. Supply a non-secret, validation-only URL in the ignored .env file for the
+// one-time executor. Production configuration remains environment-owned and receives no fallback.
+write(p('.env'), 'DATABASE_URL=postgresql://carbroz_validation:carbroz_validation@127.0.0.1:5432/carbroz_validation\n');
+
 // Architecture tests must never recurse into VCS internals while scanning the repository.
 for (const name of ['canonical-topology.policy.test.ts', 'engineering-quality.policy.test.ts']) {
   const file = p('tests/architecture', name);
@@ -129,4 +134,4 @@ if (violations.length) {
   throw new Error(`Post-closeout invariants failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
 }
 
-console.log('[architecture-closeout-postpatch] admin transport ownership, pnpm 11 workspace policy, surface isolation, and safety invariants passed');
+console.log('[architecture-closeout-postpatch] admin transport ownership, pnpm 11 workspace policy, Prisma validation environment, surface isolation, and safety invariants passed');
