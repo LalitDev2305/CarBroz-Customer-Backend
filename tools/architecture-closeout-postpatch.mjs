@@ -19,22 +19,29 @@ const walk = (dir) => {
     return entry.isDirectory() ? walk(absolute) : [absolute];
   });
 };
+const copyTransportContract = (fromSurface, sourceName, targetName = sourceName) => {
+  const source = p('apps/api/src/surfaces', fromSurface, 'dto', sourceName);
+  const target = p('apps/api/src/surfaces/admin/dto', targetName);
+  if (!exists(source)) return;
+  ensureDir(path.dirname(target));
+  fs.copyFileSync(source, target);
+};
 
-// Product surfaces own transport schemas independently. Copying schemas is intentional:
-// sharing transport DTOs between products would couple public APIs even when the business use case is shared.
+// Product surfaces own transport schemas independently. Copying the validation contract at the
+// transport boundary is intentional: Admin may share bounded-context application behavior, but it
+// must not compile against Customer/Partner HTTP DTO modules.
 for (const name of ['review.dto.ts', 'coupon.dto.ts', 'dispute.dto.ts']) {
-  const source = p('apps/api/src/surfaces/customer/dto', name);
-  const target = p('apps/api/src/surfaces/admin/dto', name);
-  if (exists(source)) {
-    ensureDir(path.dirname(target));
-    fs.copyFileSync(source, target);
-  }
+  copyTransportContract('customer', name);
 }
+copyTransportContract('customer', 'catalog.catalog.dto.ts', 'admin-catalog.dto.ts');
+copyTransportContract('partner', 'partner.partner.dto.ts', 'admin-partner.dto.ts');
 
 const adminRewrites = new Map([
   ['apps/api/src/surfaces/admin/routes/review.routes.ts', ["../../customer/dto/review.dto.js", "../dto/review.dto.js"]],
   ['apps/api/src/surfaces/admin/routes/coupon.routes.ts', ["../../customer/dto/coupon.dto.js", "../dto/coupon.dto.js"]],
   ['apps/api/src/surfaces/admin/routes/dispute.routes.ts', ["../../customer/dto/dispute.dto.js", "../dto/dispute.dto.js"]],
+  ['apps/api/src/surfaces/admin/controllers/admin-catalog.controller.ts', ["../../customer/dto/catalog.catalog.dto.js", "../dto/admin-catalog.dto.js"]],
+  ['apps/api/src/surfaces/admin/controllers/admin-partner.controller.ts', ["../../partner/dto/partner.partner.dto.js", "../dto/admin-partner.dto.js"]],
 ]);
 for (const [fileRel, [from, to]] of adminRewrites) {
   const file = p(fileRel);
@@ -108,4 +115,4 @@ if (violations.length) {
   throw new Error(`Post-closeout invariants failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
 }
 
-console.log('[architecture-closeout-postpatch] resolved surface isolation and safety invariants passed');
+console.log('[architecture-closeout-postpatch] admin transport ownership, surface isolation, and safety invariants passed');
