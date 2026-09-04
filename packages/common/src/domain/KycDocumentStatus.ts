@@ -1,5 +1,1 @@
-export enum KycDocumentStatus {
-  PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-}
+export { KycDocumentStatus } from '@carbroz/domain-partner';
