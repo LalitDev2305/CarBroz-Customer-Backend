@@ -222,7 +222,67 @@ export interface CompareSduiVersionsDto {
   console.log('[architecture-closeout-residue] SDUI registry application contracts normalized and isolated from API transport');
 }
 
+function normalizeBookingApplication() {
+  const bookingRoot = path.join(root, 'domains/booking');
+  const applicationRoot = path.join(bookingRoot, 'application');
+  const useCasesRoot = path.join(applicationRoot, 'use-cases');
+  if (!fs.existsSync(useCasesRoot)) return;
+
+  const portsRoot = path.join(applicationRoot, 'ports');
+  fs.mkdirSync(portsRoot, { recursive: true });
+  fs.writeFileSync(path.join(portsRoot, 'IBookingCompletionEffect.ts'), `/**
+ * Outbound application port invoked after a booking is durably completed.
+ *
+ * Booking owns the lifecycle fact; downstream bounded contexts decide what
+ * effect completion causes. Implementations may trigger financial eligibility,
+ * notifications, analytics, or other reactions without leaking those concerns
+ * into the Booking application layer.
+ */
+export interface IBookingCompletionEffect {
+  execute(bookingId: number): Promise<unknown>;
+}
+`);
+
+  const createBookingPath = path.join(useCasesRoot, 'CreateBookingUseCase.ts');
+  if (fs.existsSync(createBookingPath)) {
+    let content = fs.readFileSync(createBookingPath, 'utf8');
+    content = content.replace(
+      /const addonSnapshots = \[\];/,
+      "const addonSnapshots: BookingSnapshots['addons'] = [];",
+    );
+    fs.writeFileSync(createBookingPath, content);
+  }
+
+  const transitionPath = path.join(useCasesRoot, 'TransitionBookingStatusUseCase.ts');
+  if (fs.existsSync(transitionPath)) {
+    let content = fs.readFileSync(transitionPath, 'utf8');
+    content = content.replace(
+      /^import .*CreatePayoutEligibilityUseCase.*\n/m,
+      "import type { IBookingCompletionEffect } from '../ports/IBookingCompletionEffect.js';\n",
+    );
+    content = content.replaceAll('createPayoutEligibilityUseCase?: CreatePayoutEligibilityUseCase', 'bookingCompletionEffect?: IBookingCompletionEffect');
+    content = content.replaceAll('this.createPayoutEligibilityUseCase', 'this.bookingCompletionEffect');
+    fs.writeFileSync(transitionPath, content);
+  }
+
+  const violations = [];
+  for (const file of walk(applicationRoot)) {
+    const relative = path.relative(root, file).replaceAll('\\', '/');
+    const content = fs.readFileSync(file, 'utf8');
+    if (/financials|CreatePayoutEligibilityUseCase/.test(content)) {
+      violations.push(`${relative} leaks Financials implementation semantics into Booking`);
+    }
+    if (/const\s+addonSnapshots\s*=\s*\[\]/.test(content)) {
+      violations.push(`${relative} retains untyped addon snapshot collection`);
+    }
+  }
+  if (violations.length) throw new Error(`Booking application isolation failed: ${violations.join(', ')}`);
+
+  console.log('[architecture-closeout-residue] Booking completion effect isolated and snapshot collection strictly typed');
+}
+
 normalizeSduiRegistryApplication();
+normalizeBookingApplication();
 
 // Correct security evidence: inspect logging statements, not legitimate authentication variables.
 const sensitiveLogViolations = [];
@@ -239,4 +299,4 @@ if (sensitiveLogViolations.length) {
   throw new Error(`Sensitive logging remains: ${sensitiveLogViolations.join(', ')}`);
 }
 
-console.log('[architecture-closeout-residue] Configuration, SDUI application ownership, and precise sensitive-log gates passed');
+console.log('[architecture-closeout-residue] Configuration, SDUI application ownership, Booking isolation, and precise sensitive-log gates passed');
