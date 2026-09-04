@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 
 // One-time closeout entrypoint: deterministic transform -> residue audit -> static gate -> CI validation.
 // Final output rejects Common, removes duplicate compatibility/application authorities, resolves self-imports,
-// applies scoped post-transform convergence fixes, and revalidates active Customer/Configuration boundaries.
+// applies scoped post-transform convergence fixes, and revalidates Customer, Configuration and Identity boundaries.
 const root = process.cwd();
 const baselineCommit = 'fbd7e0d38ba58136c7cc0be596314d62f20dcb6c';
 let driverSource = execFileSync('git', ['show', `${baselineCommit}:tools/architecture-closeout.mjs`], {
@@ -75,13 +75,8 @@ function normalizeCommunicationsApplication() {
   const base = path.join(root, 'domains/communications');
   if (!fs.existsSync(base)) return;
 
-  // The old domain-local RegisterDeviceTokenUseCase injected Prisma directly and duplicates the
-  // migrated port-based use case. Keep the port-based application authority and remove the duplicate.
   fs.rmSync(path.join(base, 'application/RegisterDeviceTokenUseCase.ts'), { force: true });
 
-  // Preserve unique legacy capabilities, but make application code depend on domain repository ports
-  // rather than Prisma implementations. These interfaces are adopted into domain/repositories by the
-  // closeout migration before this normalization runs.
   const unregister = path.join(base, 'application/UnregisterDeviceTokenUseCase.ts');
   if (fs.existsSync(unregister)) {
     write(unregister, `import type { IDeviceTokenRepository } from '../domain/repositories/IDeviceTokenRepository.js';
