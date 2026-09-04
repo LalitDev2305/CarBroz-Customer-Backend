@@ -25,9 +25,17 @@ import {
   updateSduiDraftSchema,
 } from '../../sdui/dtos/sdui-registry.dto.js';
 
-const targetApps = ['CUSTOMER', 'PARTNER', 'ADMIN'] as const;
+const targetApps = ['GLOBAL', 'CUSTOMER', 'PARTNER'] as const;
 type TargetApp = (typeof targetApps)[number];
 
+/**
+ * Parses the optional runtime SDUI publication scope accepted by Admin queries.
+ *
+ * @remarks
+ * Admin is the management surface, not an SDUI runtime target. The allowed
+ * values intentionally mirror the canonical UI SDK scopes: GLOBAL, CUSTOMER
+ * and PARTNER.
+ */
 function parseTargetApp(value: unknown): TargetApp | undefined {
   if (value === undefined) return undefined;
   if (typeof value !== 'string' || !targetApps.includes(value as TargetApp)) {
@@ -36,6 +44,15 @@ function parseTargetApp(value: unknown): TargetApp | undefined {
   return value as TargetApp;
 }
 
+/**
+ * Admin transport controller for SDUI management operations.
+ *
+ * @remarks
+ * This controller owns HTTP parsing/response concerns only. SDUI lifecycle
+ * rules belong to `@carbroz/sdui-registry`; structural contracts belong to
+ * `@carbroz/ui-sdk`. The current use-case imports remain transitional until
+ * the SDUI Registry application migration is completed.
+ */
 export class AdminSduiController {
   constructor(
     private readonly createSduiComponentUseCase: CreateSduiComponentUseCase,
