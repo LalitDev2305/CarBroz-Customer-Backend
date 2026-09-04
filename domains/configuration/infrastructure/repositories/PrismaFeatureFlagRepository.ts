@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
-import type { FeatureFlag, IFeatureFlagRepository } from '@carbroz/common';
+import type { FeatureFlag } from '../../domain/FeatureFlag.js';
+import type { IFeatureFlagRepository } from '../../domain/repositories/IFeatureFlagRepository.js';
 
 export class PrismaFeatureFlagRepository implements IFeatureFlagRepository {
   constructor(private readonly prisma: PrismaClient) {}
