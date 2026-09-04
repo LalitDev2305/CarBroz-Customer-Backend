@@ -1,4 +1,5 @@
-import { IRoleRepository, Role } from '@carbroz/common';
+import type { IRoleRepository } from '../../domain/repositories/IRoleRepository.js';
+import type { Role } from '../../domain/Role.js';
 import { PrismaClient } from '@prisma/client';
 
 export class PrismaRoleRepository implements IRoleRepository {
