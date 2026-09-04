@@ -6,7 +6,6 @@
   "types": "dist/public/index.d.ts",
   "scripts": { "build": "tsc" },
   "dependencies": {
-    "@carbroz/common": "workspace:*",
     "@carbroz/foundation-kernel": "workspace:*",
     "@prisma/client": "^6.19.3",
     "awilix": "^12.0.0"
