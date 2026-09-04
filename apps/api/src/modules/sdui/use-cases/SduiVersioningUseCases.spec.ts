@@ -1,16 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { ExecutionContext } from '@carbroz/foundation-kernel';
+import { ForbiddenError, NotFoundError } from '@carbroz/foundation-kernel';
 import { CreateSduiDraftUseCase } from './CreateSduiDraftUseCase.js';
 import { UpdateSduiDraftUseCase } from './UpdateSduiDraftUseCase.js';
 import { PublishSduiVersionUseCase } from './PublishSduiVersionUseCase.js';
 import { RollbackSduiVersionUseCase } from './RollbackSduiVersionUseCase.js';
 import { CompareSduiVersionsUseCase } from './CompareSduiVersionsUseCase.js';
-import { ForbiddenError, NotFoundError } from '@carbroz/common';
 import { SduiScreenEntity } from '@carbroz/sdui-registry';
 
 describe('SDUI V3 Versioning UseCases', () => {
   let repository: any;
-  const adminContext: any = { authenticatedUser: { id: 1, isAdmin: true } };
-  const userContext: any = { authenticatedUser: { id: 2, isAdmin: false } };
+  const adminContext: ExecutionContext = {
+    correlationId: 'test-admin',
+    timestamp: new Date('2026-01-01T00:00:00.000Z'),
+    actor: { id: 1, kind: 'ADMIN', roles: ['ADMIN'] },
+  };
+  const userContext: ExecutionContext = {
+    correlationId: 'test-customer',
+    timestamp: new Date('2026-01-01T00:00:00.000Z'),
+    actor: { id: 2, kind: 'CUSTOMER', roles: ['CUSTOMER'], customerId: 2 },
+  };
 
   const validLayoutJson = {
     screenId: 'auth_login',
@@ -35,12 +44,13 @@ describe('SDUI V3 Versioning UseCases', () => {
     const result = await useCase.execute({ context: adminContext, data: { screenId: 'auth_login', targetApp: 'CUSTOMER', layoutJson: validLayoutJson, overwriteExistingDraft: false } });
     expect(result.versionNumber).toBe(2);
     expect(result.status).toBe('DRAFT');
-    expect(repository.createDraft).toHaveBeenCalled();
+    expect(repository.createDraft).toHaveBeenCalledTimes(1);
   });
 
-  it('rejects non-admin draft creation', async () => {
+  it('rejects non-admin draft creation without persistence side effects', async () => {
     const useCase = new CreateSduiDraftUseCase(repository);
     await expect(useCase.execute({ context: userContext, data: { screenId: 'auth_login', targetApp: 'CUSTOMER', layoutJson: validLayoutJson, overwriteExistingDraft: false } })).rejects.toThrow(ForbiddenError);
+    expect(repository.createDraft).not.toHaveBeenCalled();
   });
 
   it('updates a canonical draft with optimistic lock version', async () => {
@@ -51,7 +61,7 @@ describe('SDUI V3 Versioning UseCases', () => {
     expect(result.lockVersion).toBe(2);
   });
 
-  it('publishes the target version', async () => {
+  it('publishes the target version with the canonical actor identity', async () => {
     const useCase = new PublishSduiVersionUseCase(repository);
     const mockPublished = new SduiScreenEntity({ id: 1, publicId: 'uuid-1', screenId: 'auth_login', targetApp: 'CUSTOMER', versionNumber: 2, status: 'PUBLISHED', layoutJson: validLayoutJson, lockVersion: 2, publishedAt: new Date(), publishedBy: 'user-1', createdAt: new Date(), updatedAt: new Date() });
     repository.publishVersion.mockResolvedValue(mockPublished);
