@@ -1,40 +1,36 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import {
-  AppError as LegacyAppError,
-  ForbiddenError as LegacyForbiddenError,
-  NotFoundError as LegacyNotFoundError,
-} from '@carbroz/common';
-import {
-  ApplicationError,
-  ForbiddenError,
-  KernelError,
-  NotFoundError,
-} from '@carbroz/foundation-kernel';
 
-describe('Foundation error ownership migration', () => {
-  it('preserves one constructor identity through the transitional common facade', () => {
-    expect(LegacyAppError).toBe(ApplicationError);
-    expect(LegacyForbiddenError).toBe(ForbiddenError);
-    expect(LegacyNotFoundError).toBe(NotFoundError);
+const root = process.cwd();
+
+function read(path: string): string {
+  return readFileSync(resolve(root, path), 'utf8');
+}
+
+describe('Foundation error ownership migration policy', () => {
+  it('keeps universal application errors owned by Foundation', () => {
+    const foundationErrors = read('foundation/kernel/src/errors/errors.ts');
+
+    expect(foundationErrors).toContain('export class ApplicationError extends KernelError');
+    expect(foundationErrors).toContain('export class ForbiddenError extends ApplicationError');
+    expect(foundationErrors).toContain('export class NotFoundError extends ApplicationError');
   });
 
-  it('preserves legacy instanceof behavior while canonical ownership moves to Foundation', () => {
-    const error = new LegacyForbiddenError('admin only');
+  it('keeps packages/common as a compatibility re-export instead of a second error hierarchy', () => {
+    const commonErrors = read('packages/common/src/exceptions.ts');
 
-    expect(error).toBeInstanceOf(ForbiddenError);
-    expect(error).toBeInstanceOf(ApplicationError);
-    expect(error).toBeInstanceOf(KernelError);
-    expect(error.statusCode).toBe(403);
-    expect(error.errorCode).toBe('FORBIDDEN');
-    expect(error.code).toBe('FORBIDDEN');
+    expect(commonErrors).toContain("from '@carbroz/foundation-kernel'");
+    expect(commonErrors).toContain('ApplicationError as AppError');
+    expect(commonErrors).not.toMatch(/class\s+(AppError|ForbiddenError|NotFoundError|ConflictError)/);
   });
 
-  it('preserves not-found transport metadata without duplicating the class hierarchy', () => {
-    const error = new NotFoundError('missing');
+  it('documents that new code must bypass the transitional common facade', () => {
+    const commonErrors = read('packages/common/src/exceptions.ts');
+    const foundationReadme = read('foundation/kernel/README.md');
 
-    expect(error).toBeInstanceOf(LegacyNotFoundError);
-    expect(error.statusCode).toBe(404);
-    expect(error.errorCode).toBe('NOT_FOUND');
-    expect(error.code).toBe('NOT_FOUND');
+    expect(commonErrors).toContain('@deprecated');
+    expect(commonErrors).toContain('@carbroz/foundation-kernel');
+    expect(foundationReadme).toContain('New code imports directly from `@carbroz/foundation-kernel`');
   });
 });
