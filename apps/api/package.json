@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@carbroz/common": "workspace:*",
+    "@carbroz/foundation-kernel": "workspace:*",
     "@carbroz/platform-database": "workspace:*",
     "@carbroz/domain-audit": "workspace:*",
     "@carbroz/domain-booking": "workspace:*",
