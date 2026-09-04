@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { IPartnerPayoutRepository, PartnerPayout, PayoutStatus } from '@carbroz/common';
+import type { IPartnerPayoutRepository } from '../../domain/repositories/IPartnerPayoutRepository.js';
+import { PartnerPayout } from '../../domain/PartnerPayout.js';
+import type { PayoutStatus } from '../../domain/PayoutStatus.js';
 
 export class PrismaPartnerPayoutRepository implements IPartnerPayoutRepository {
   private unitOfWorkPrisma: any = null;
