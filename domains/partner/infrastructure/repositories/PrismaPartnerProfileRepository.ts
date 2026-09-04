@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { PartnerProfile, IPartnerProfileRepository } from '@carbroz/common';
+import type { PartnerProfile } from '../../domain/PartnerProfile.js';
+import type { IPartnerProfileRepository } from '../../domain/repositories/IPartnerProfileRepository.js';
 
 type PartnerProfileCreateInput = Omit<PartnerProfile, 'id' | 'publicId' | 'createdAt' | 'updatedAt'>;
 
