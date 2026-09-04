@@ -1,5 +1,1 @@
-export interface IEntity<TId> {
-  id: TId;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type { IEntity } from '@carbroz/foundation-kernel';
