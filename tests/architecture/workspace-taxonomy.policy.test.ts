@@ -113,7 +113,7 @@ describe('workspace taxonomy policy', () => {
   });
 
   it('keeps Customer fragments physically consolidated under domains/customer', () => {
-    expect(childDirectories('domains/customer')).toEqual(['address', 'garage', 'profile', 'public']);
+    expect(childDirectories('domains/customer')).toEqual(['address', 'application', 'garage', 'profile', 'public']);
     expect(existsSync(resolve(root, 'domains/address'))).toBe(false);
     expect(existsSync(resolve(root, 'domains/customer-profile'))).toBe(false);
     expect(existsSync(resolve(root, 'domains/garage'))).toBe(false);
