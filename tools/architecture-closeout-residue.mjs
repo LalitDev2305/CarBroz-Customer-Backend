@@ -73,6 +73,44 @@ for (const file of walk(root)) {
   fs.writeFileSync(file, content);
 }
 
+function hasExecutionContextImport(content) {
+  return /import\s+(?:type\s+)?\{[^}]*\bExecutionContext\b[^}]*\}\s+from\s+['"]@carbroz\/foundation-kernel['"]/.test(content);
+}
+
+function deduplicateExecutionContextImports(content) {
+  const lines = content.split('\n');
+  let seenExecutionContext = false;
+  const normalized = [];
+
+  for (const line of lines) {
+    const foundationImport = /import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+['"]@carbroz\/foundation-kernel['"];?/.exec(line);
+    if (!foundationImport) {
+      normalized.push(line);
+      continue;
+    }
+
+    const members = foundationImport[1].split(',').map((member) => member.trim()).filter(Boolean);
+    if (!members.includes('ExecutionContext')) {
+      normalized.push(line);
+      continue;
+    }
+
+    if (!seenExecutionContext) {
+      seenExecutionContext = true;
+      normalized.push(line);
+      continue;
+    }
+
+    const remaining = members.filter((member) => member !== 'ExecutionContext');
+    if (remaining.length) {
+      const typePrefix = /^import\s+type\s+/.test(line) ? 'type ' : '';
+      normalized.push(`import ${typePrefix}{ ${remaining.join(', ')} } from '@carbroz/foundation-kernel';`);
+    }
+  }
+
+  return normalized.join('\n');
+}
+
 function normalizeSduiRegistryApplication() {
   const applicationRoot = path.join(root, 'sdui/registry/application');
   const useCasesRoot = path.join(applicationRoot, 'use-cases');
@@ -148,12 +186,13 @@ export interface CompareSduiVersionsDto {
     );
 
     if (content.includes('IRequestContext')) {
-      if (!content.includes("ExecutionContext } from '@carbroz/foundation-kernel'")) {
+      if (!hasExecutionContextImport(content)) {
         content = `import type { ExecutionContext } from '@carbroz/foundation-kernel';\n${content}`;
       }
       content = content.replaceAll('IRequestContext', 'ExecutionContext');
     }
 
+    content = deduplicateExecutionContextImports(content);
     content = content.replaceAll('!input.context.authenticatedUser?.isAdmin', "input.context.actor?.kind !== 'ADMIN'");
     content = content.replaceAll('!request.context.authenticatedUser?.isAdmin', "request.context.actor?.kind !== 'ADMIN'");
     content = content.replaceAll('input.context.authenticatedUser?.isAdmin', "input.context.actor?.kind === 'ADMIN'");
