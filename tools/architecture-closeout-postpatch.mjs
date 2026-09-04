@@ -48,6 +48,26 @@ for (const [fileRel, [from, to]] of adminRewrites) {
   if (exists(file)) write(file, read(file).replaceAll(from, to));
 }
 
+// pnpm 11 blocks dependency lifecycle scripts unless explicitly approved. These packages are
+// intentional runtime/build dependencies already used by the repository; approve only their
+// required install scripts rather than enabling dependency scripts globally.
+const rootPackageFile = p('package.json');
+if (exists(rootPackageFile)) {
+  const rootPackage = JSON.parse(read(rootPackageFile));
+  rootPackage.pnpm = {
+    ...(rootPackage.pnpm ?? {}),
+    onlyBuiltDependencies: [
+      '@prisma/client',
+      '@prisma/engines',
+      'bcrypt',
+      'esbuild',
+      'msgpackr-extract',
+      'prisma',
+    ],
+  };
+  write(rootPackageFile, `${JSON.stringify(rootPackage, null, 2)}\n`);
+}
+
 // The architecture tests must never recurse into VCS internals while scanning the repository.
 for (const name of ['canonical-topology.policy.test.ts', 'engineering-quality.policy.test.ts']) {
   const file = p('tests/architecture', name);
@@ -115,4 +135,4 @@ if (violations.length) {
   throw new Error(`Post-closeout invariants failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
 }
 
-console.log('[architecture-closeout-postpatch] admin transport ownership, surface isolation, and safety invariants passed');
+console.log('[architecture-closeout-postpatch] admin transport ownership, approved dependency builds, surface isolation, and safety invariants passed');
