@@ -29,9 +29,7 @@ const copyTransportContract = (fromSurface, sourceName, targetName = sourceName)
 
 // Product surfaces own transport schemas independently. Admin may reuse bounded-context application
 // behavior, but it must not compile against Customer/Partner HTTP DTO modules.
-for (const name of ['review.dto.ts', 'coupon.dto.ts', 'dispute.dto.ts']) {
-  copyTransportContract('customer', name);
-}
+for (const name of ['review.dto.ts', 'coupon.dto.ts', 'dispute.dto.ts']) copyTransportContract('customer', name);
 copyTransportContract('customer', 'catalog.catalog.dto.ts', 'admin-catalog.dto.ts');
 copyTransportContract('partner', 'partner.partner.dto.ts', 'admin-partner.dto.ts');
 
@@ -47,15 +45,31 @@ for (const [fileRel, [from, to]] of adminRewrites) {
   if (exists(file)) write(file, read(file).replaceAll(from, to));
 }
 
-// pnpm 11 reads build-script approvals from pnpm-workspace.yaml. The migration rewrites this file,
-// so re-establish the canonical final workspace and narrowly allow only dependencies whose install
-// scripts are required by this repository. Never enable dependency scripts globally.
+// IProvider was an empty marker interface. Keeping or relocating it would preserve accidental
+// abstraction without adding a contract. Remove only that legacy marker dependency while retaining
+// every concrete provider interface's real methods and any other inheritance.
+for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
+  for (const file of walk(p(base)).filter((candidate) => candidate.endsWith('.ts'))) {
+    let content = read(file);
+    content = content.replace(
+      /^import\s+(?:type\s+)?\{\s*IProvider\s*\}\s+from\s+['"][^'"]*packages\/common\/src\/providers\/IProvider(?:\.js)?['"];?\s*$/gm,
+      '',
+    );
+    content = content
+      .replace(/\s+extends\s+IProvider\s*,\s*/g, ' extends ')
+      .replace(/,\s*IProvider(?=\s*\{)/g, '')
+      .replace(/\s+extends\s+IProvider(?=\s*\{)/g, '');
+    write(file, content);
+  }
+}
+
+// pnpm 11 reads build-script approvals from pnpm-workspace.yaml. Re-establish the canonical final
+// workspace and narrowly allow only dependencies whose install scripts are required by this repo.
 write(
   p('pnpm-workspace.yaml'),
   `packages:\n  - "apps/*"\n  - "domains/*"\n  - "sdui/*"\n  - "platform/*"\n  - "foundation/*"\nallowBuilds:\n  '@prisma/client': true\n  '@prisma/engines': true\n  bcrypt: true\n  esbuild: true\n  msgpackr-extract: true\n  prisma: true\n`,
 );
 
-// Remove obsolete pnpm configuration from package.json so there is one authoritative pnpm 11 source.
 const rootPackageFile = p('package.json');
 if (exists(rootPackageFile)) {
   const rootPackage = JSON.parse(read(rootPackageFile));
@@ -63,12 +77,10 @@ if (exists(rootPackageFile)) {
   write(rootPackageFile, `${JSON.stringify(rootPackage, null, 2)}\n`);
 }
 
-// Prisma validate/generate require DATABASE_URL to be syntactically present even though they do not
-// connect to the database. Supply a non-secret, validation-only URL in the ignored .env file for the
-// one-time executor. Production configuration remains environment-owned and receives no fallback.
+// Prisma validate/generate require DATABASE_URL to be syntactically present without connecting.
+// This ignored, non-secret datasource exists only during the one-time executor.
 write(p('.env'), 'DATABASE_URL=postgresql://carbroz_validation:carbroz_validation@127.0.0.1:5432/carbroz_validation\n');
 
-// Architecture tests must never recurse into VCS internals while scanning the repository.
 for (const name of ['canonical-topology.policy.test.ts', 'engineering-quality.policy.test.ts']) {
   const file = p('tests/architecture', name);
   if (exists(file)) {
@@ -83,11 +95,9 @@ const violations = [];
 const surfaces = ['partner', 'customer', 'admin'];
 const importPattern = /(?:from\s+|import\s*\(\s*)['\"]([^'\"]+)['\"]/g;
 
-// Resolve actual relative import targets before deciding whether one product surface depends on another.
-// Domain paths such as domains/partner are valid and must not be confused with apps/api/src/surfaces/partner.
 for (const surface of surfaces) {
   const surfaceRoot = p('apps/api/src/surfaces', surface);
-  for (const file of walk(surfaceRoot).filter((f) => f.endsWith('.ts'))) {
+  for (const file of walk(surfaceRoot).filter((candidate) => candidate.endsWith('.ts'))) {
     const content = read(file);
     for (const match of content.matchAll(importPattern)) {
       const specifier = match[1];
@@ -100,17 +110,27 @@ for (const surface of surfaces) {
         } else {
           importsOtherSurface = new RegExp(`^@carbroz/api(?:/|$).*surfaces/${other}(?:/|$)`).test(specifier);
         }
-        if (importsOtherSurface) {
-          violations.push(`${path.relative(root, file)} imports ${other} surface via ${specifier}`);
-        }
+        if (importsOtherSurface) violations.push(`${path.relative(root, file)} imports ${other} surface via ${specifier}`);
       }
     }
   }
 }
 
-// Tests may live near source, but production package builds must not accidentally depend on Vitest.
+// Catch both package aliases and relative filesystem paths into the removed Common authority.
+for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
+  for (const file of walk(p(base)).filter((candidate) => candidate.endsWith('.ts'))) {
+    const content = read(file);
+    for (const match of content.matchAll(importPattern)) {
+      const specifier = match[1];
+      if (specifier === '@carbroz/common' || specifier.includes('packages/common')) {
+        violations.push(`${path.relative(root, file)} retains legacy Common import ${specifier}`);
+      }
+    }
+  }
+}
+
 for (const base of ['domains', 'sdui', 'platform', 'foundation']) {
-  for (const file of walk(p(base)).filter((f) => /\.(?:spec|test)\.ts$/.test(f))) {
+  for (const file of walk(p(base)).filter((candidate) => /\.(?:spec|test)\.ts$/.test(candidate))) {
     const packageRoot = file.split(path.sep).slice(0, file.includes(`${path.sep}domains${path.sep}financials${path.sep}`) ? 3 : 2).join(path.sep);
     const tsconfig = path.join(packageRoot, 'tsconfig.json');
     if (exists(tsconfig)) {
@@ -122,16 +142,12 @@ for (const base of ['domains', 'sdui', 'platform', 'foundation']) {
   }
 }
 
-// Recheck sensitive logging after every transformation.
-for (const file of walk(api).filter((f) => f.endsWith('.ts'))) {
+for (const file of walk(api).filter((candidate) => candidate.endsWith('.ts'))) {
   const content = read(file);
   if (/log\.(?:trace|debug|info|warn|error)\([^\n]*(?:mockOtp|otp|phoneNumber|refreshToken|accessToken|request\.body|response\.body|authorization)/i.test(content)) {
     violations.push(`${path.relative(root, file)} contains sensitive/raw logging`);
   }
 }
 
-if (violations.length) {
-  throw new Error(`Post-closeout invariants failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
-}
-
-console.log('[architecture-closeout-postpatch] admin transport ownership, pnpm 11 workspace policy, Prisma validation environment, surface isolation, and safety invariants passed');
+if (violations.length) throw new Error(`Post-closeout invariants failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
+console.log('[architecture-closeout-postpatch] legacy Common relative imports removed; provider marker eliminated; all post-closeout invariants passed');
