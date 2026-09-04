@@ -1,4 +1,5 @@
-import type { IConfigProvider, IConfigRepository } from '@carbroz/common';
+import type { IConfigProvider } from './IConfigProvider.js';
+import type { IConfigRepository } from '../domain/repositories/IConfigRepository.js';
 
 export class ConfigProvider implements IConfigProvider {
   constructor(private readonly configRepository: IConfigRepository) {}
