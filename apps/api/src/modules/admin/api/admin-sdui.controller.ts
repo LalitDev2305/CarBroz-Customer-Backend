@@ -1,17 +1,20 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ResponseHelper } from '@carbroz/common';
-import { CreateSduiComponentUseCase } from '../../sdui/use-cases/CreateSduiComponentUseCase.js';
-import { CreateSduiSectionUseCase } from '../../sdui/use-cases/CreateSduiSectionUseCase.js';
-import { CreateSduiGroupUseCase } from '../../sdui/use-cases/CreateSduiGroupUseCase.js';
-import { CreateSduiElementUseCase } from '../../sdui/use-cases/CreateSduiElementUseCase.js';
-import { CreateSduiDraftUseCase } from '../../sdui/use-cases/CreateSduiDraftUseCase.js';
-import { UpdateSduiDraftUseCase } from '../../sdui/use-cases/UpdateSduiDraftUseCase.js';
-import { PublishSduiVersionUseCase } from '../../sdui/use-cases/PublishSduiVersionUseCase.js';
-import { ArchiveSduiVersionUseCase } from '../../sdui/use-cases/ArchiveSduiVersionUseCase.js';
-import { RollbackSduiVersionUseCase } from '../../sdui/use-cases/RollbackSduiVersionUseCase.js';
-import { GetSduiVersionHistoryUseCase } from '../../sdui/use-cases/GetSduiVersionHistoryUseCase.js';
-import { GetSduiSpecificVersionUseCase } from '../../sdui/use-cases/GetSduiSpecificVersionUseCase.js';
-import { CompareSduiVersionsUseCase } from '../../sdui/use-cases/CompareSduiVersionsUseCase.js';
+import {
+  ArchiveSduiVersionUseCase,
+  CompareSduiVersionsUseCase,
+  CreateSduiComponentUseCase,
+  CreateSduiDraftUseCase,
+  CreateSduiElementUseCase,
+  CreateSduiGroupUseCase,
+  CreateSduiSectionUseCase,
+  GetSduiSpecificVersionUseCase,
+  GetSduiVersionHistoryUseCase,
+  PublishSduiVersionUseCase,
+  RollbackSduiVersionUseCase,
+  UpdateSduiDraftUseCase,
+} from '@carbroz/sdui-registry';
+import { toExecutionContext } from '../../../context/toExecutionContext.js';
 import {
   archiveSduiVersionSchema,
   compareSduiVersionsSchema,
@@ -28,14 +31,7 @@ import {
 const targetApps = ['GLOBAL', 'CUSTOMER', 'PARTNER'] as const;
 type TargetApp = (typeof targetApps)[number];
 
-/**
- * Parses the optional runtime SDUI publication scope accepted by Admin queries.
- *
- * @remarks
- * Admin is the management surface, not an SDUI runtime target. The allowed
- * values intentionally mirror the canonical UI SDK scopes: GLOBAL, CUSTOMER
- * and PARTNER.
- */
+/** Parses the optional runtime SDUI publication scope accepted by Admin queries. */
 function parseTargetApp(value: unknown): TargetApp | undefined {
   if (value === undefined) return undefined;
   if (typeof value !== 'string' || !targetApps.includes(value as TargetApp)) {
@@ -45,13 +41,11 @@ function parseTargetApp(value: unknown): TargetApp | undefined {
 }
 
 /**
- * Admin transport controller for SDUI management operations.
+ * Admin HTTP adapter for SDUI management operations.
  *
- * @remarks
- * This controller owns HTTP parsing/response concerns only. SDUI lifecycle
- * rules belong to `@carbroz/sdui-registry`; structural contracts belong to
- * `@carbroz/ui-sdk`. The current use-case imports remain transitional until
- * the SDUI Registry application migration is completed.
+ * Business/application behavior is owned by `@carbroz/sdui-registry`;
+ * this controller only validates transport input, adapts execution context,
+ * delegates, and formats HTTP responses.
  */
 export class AdminSduiController {
   constructor(
@@ -72,7 +66,7 @@ export class AdminSduiController {
   public registerComponent = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = createSduiComponentSchema.parse(request.body);
     const result = await this.createSduiComponentUseCase.execute({
-      context: (request as any).requestContext,
+      context: toExecutionContext(request),
       data: dto,
     });
     return reply.status(201).send(ResponseHelper.success(result, 'Component created successfully'));
@@ -81,7 +75,7 @@ export class AdminSduiController {
   public registerSection = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = createSduiSectionSchema.parse(request.body);
     const result = await this.createSduiSectionUseCase.execute({
-      context: (request as any).requestContext,
+      context: toExecutionContext(request),
       data: dto,
     });
     return reply.status(201).send(ResponseHelper.success(result, 'Section created successfully'));
@@ -90,7 +84,7 @@ export class AdminSduiController {
   public registerGroup = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = createSduiGroupSchema.parse(request.body);
     const result = await this.createSduiGroupUseCase.execute({
-      context: (request as any).requestContext,
+      context: toExecutionContext(request),
       data: dto,
     });
     return reply.status(201).send(ResponseHelper.success(result, 'Group created successfully'));
@@ -99,7 +93,7 @@ export class AdminSduiController {
   public registerElement = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = createSduiElementSchema.parse(request.body);
     const result = await this.createSduiElementUseCase.execute({
-      context: (request as any).requestContext,
+      context: toExecutionContext(request),
       data: dto,
     });
     return reply.status(201).send(ResponseHelper.success(result, 'Element created successfully'));
@@ -108,7 +102,7 @@ export class AdminSduiController {
   public createDraft = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = createSduiDraftSchema.parse(request.body);
     const result = await this.createSduiDraftUseCase.execute({
-      context: (request as any).requestContext,
+      context: toExecutionContext(request),
       data: dto,
     });
     return reply.status(201).send(ResponseHelper.success(result, 'SDUI draft created successfully'));
@@ -117,7 +111,7 @@ export class AdminSduiController {
   public updateDraft = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = updateSduiDraftSchema.parse(request.body);
     const result = await this.updateSduiDraftUseCase.execute({
-      context: (request as any).requestContext,
+      context: toExecutionContext(request),
       data: dto,
     });
     return reply.send(ResponseHelper.success(result, 'SDUI draft updated successfully'));
@@ -126,7 +120,7 @@ export class AdminSduiController {
   public publishVersion = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = publishSduiVersionSchema.parse(request.body);
     const result = await this.publishSduiVersionUseCase.execute({
-      context: (request as any).requestContext,
+      context: toExecutionContext(request),
       data: dto,
     });
     return reply.send(ResponseHelper.success(result, 'SDUI screen version published successfully'));
@@ -135,7 +129,7 @@ export class AdminSduiController {
   public archiveVersion = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = archiveSduiVersionSchema.parse(request.body);
     const result = await this.archiveSduiVersionUseCase.execute({
-      context: (request as any).requestContext,
+      context: toExecutionContext(request),
       data: dto,
     });
     return reply.send(ResponseHelper.success(result, 'SDUI screen version archived successfully'));
@@ -144,7 +138,7 @@ export class AdminSduiController {
   public rollbackVersion = async (request: FastifyRequest, reply: FastifyReply) => {
     const dto = rollbackSduiVersionSchema.parse(request.body);
     const result = await this.rollbackSduiVersionUseCase.execute({
-      context: (request as any).requestContext,
+      context: toExecutionContext(request),
       data: dto,
     });
     return reply.status(201).send(ResponseHelper.success(result, 'SDUI screen version rolled back successfully'));
