@@ -9,7 +9,8 @@ import {
 } from '../../catalog/dtos/catalog.dto.js';
 import { ManageCatalogUseCase } from '../../catalog/use-cases/ManageCatalogUseCase.js';
 import { ManagePricingTierUseCase } from '../../catalog/use-cases/ManagePricingTierUseCase.js';
-import { IRequestContext, ResponseHelper } from '@carbroz/common';
+import { ResponseHelper } from '@carbroz/common';
+import { toExecutionContext } from '../../../context/toExecutionContext.js';
 
 export class AdminCatalogController {
   constructor(
@@ -17,18 +18,11 @@ export class AdminCatalogController {
     private readonly managePricingTierUseCase: ManagePricingTierUseCase
   ) {}
 
-  private getContext(req: FastifyRequest): IRequestContext {
-    return {
-      traceId: req.traceId,
-      authenticatedUser: req.user as any
-    } as IRequestContext;
-  }
-
   async createCategory(req: FastifyRequest, reply: FastifyReply) {
     try {
       const parsed = createCategorySchema.parse(req.body);
       const result = await this.manageCatalogUseCase.execute({
-        context: this.getContext(req),
+        context: toExecutionContext(req),
         data: { action: 'CREATE_CATEGORY', payload: parsed }
       });
       return reply.status(201).send(ResponseHelper.success(result));
@@ -46,7 +40,7 @@ export class AdminCatalogController {
     try {
       const parsed = createServiceSchema.parse(req.body);
       const result = await this.manageCatalogUseCase.execute({
-        context: this.getContext(req),
+        context: toExecutionContext(req),
         data: { action: 'CREATE_SERVICE', payload: parsed }
       });
       return reply.status(201).send(ResponseHelper.success(result));
@@ -64,7 +58,7 @@ export class AdminCatalogController {
     try {
       const parsed = createAddonSchema.parse(req.body);
       const result = await this.manageCatalogUseCase.execute({
-        context: this.getContext(req),
+        context: toExecutionContext(req),
         data: { action: 'CREATE_ADDON', payload: parsed }
       });
       return reply.status(201).send(ResponseHelper.success(result));
@@ -82,7 +76,7 @@ export class AdminCatalogController {
     try {
       const parsed = createPricingTierSchema.parse(req.body);
       const result = await this.managePricingTierUseCase.execute({
-        context: this.getContext(req),
+        context: toExecutionContext(req),
         data: { action: 'CREATE_TIER', serviceId: parsed.serviceId, payload: parsed }
       });
       return reply.status(201).send(ResponseHelper.success(result));
@@ -100,7 +94,7 @@ export class AdminCatalogController {
     try {
       const parsed = setVehicleMultiplierSchema.parse(req.body);
       const result = await this.managePricingTierUseCase.execute({
-        context: this.getContext(req),
+        context: toExecutionContext(req),
         data: { action: 'SET_VEHICLE_MULTIPLIER', serviceId: parsed.serviceId, payload: parsed }
       });
       return reply.send(ResponseHelper.success(result));
