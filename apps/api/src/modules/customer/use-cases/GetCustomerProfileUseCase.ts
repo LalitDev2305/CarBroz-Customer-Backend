@@ -1,21 +1,35 @@
-import { IUseCase, IRequestContext, ICustomerProfileRepository, CustomerProfile } from '@carbroz/common';
+import type { ExecutionContext, IUseCase } from '@carbroz/foundation-kernel';
+import { ICustomerProfileRepository, CustomerProfile } from '@carbroz/common';
 
 export interface GetCustomerProfileRequest {
   userId: number;
 }
 
-export class GetCustomerProfileUseCase implements IUseCase<{ context: IRequestContext; data: GetCustomerProfileRequest }, CustomerProfile> {
+export interface GetCustomerProfileInput {
+  context: ExecutionContext;
+  data: GetCustomerProfileRequest;
+}
+
+function canAccessCustomer(context: ExecutionContext, customerId: number): boolean {
+  const actor = context.actor;
+  if (!actor) return false;
+  return actor.kind === 'ADMIN'
+    || actor.roles.includes('ADMIN')
+    || actor.customerId === customerId
+    || String(actor.id) === String(customerId);
+}
+
+/** Retrieves (or initializes) the profile owned by the authorized customer actor. */
+export class GetCustomerProfileUseCase implements IUseCase<GetCustomerProfileInput, CustomerProfile> {
   constructor(private readonly customerProfileRepository: ICustomerProfileRepository) {}
 
-  async execute(request: { context: IRequestContext; data: GetCustomerProfileRequest }): Promise<CustomerProfile> {
-    const user = request.context.authenticatedUser as any;
-    if (user?.id !== request.data.userId && !user?.isAdmin) {
+  async execute(request: GetCustomerProfileInput): Promise<CustomerProfile> {
+    if (!canAccessCustomer(request.context, request.data.userId)) {
       throw new Error('FORBIDDEN: You do not have permission to view this profile');
     }
 
     let profile = await this.customerProfileRepository.findByUserId(request.data.userId);
     if (!profile) {
-      // Auto-create empty profile
       profile = await this.customerProfileRepository.save(
         new CustomerProfile({
           userId: request.data.userId,
@@ -24,7 +38,7 @@ export class GetCustomerProfileUseCase implements IUseCase<{ context: IRequestCo
           dateOfBirth: null,
           gender: null,
           marketingOptIn: false,
-        })
+        }),
       );
     }
     return profile;
