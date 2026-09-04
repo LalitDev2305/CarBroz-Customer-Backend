@@ -12,4 +12,5 @@ export * from '../garage/application/use-cases/CreateVehicleUseCase.js';
 export * from '../garage/application/use-cases/ListCustomerVehiclesUseCase.js';
 export * from '../garage/application/use-cases/SetDefaultVehicleUseCase.js';
 export * from '../garage/application/use-cases/ArchiveVehicleUseCase.js';
+export * from '../application/CustomerUseCases.js';
 export * from '../customer.module.js';
