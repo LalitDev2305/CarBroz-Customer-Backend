@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin';
 import fastifyJwt from '@fastify/jwt';
 import { FastifyPluginAsync } from 'fastify';
-import { JwtConfig } from '@carbroz/config';
+import { JwtConfig } from '../config/runtime-config.js';
 import { JwtPayload } from '../modules/auth/infrastructure/jwt.service.interface.js';
 
 declare module 'fastify' {
