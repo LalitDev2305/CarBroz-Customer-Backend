@@ -1,12 +1,9 @@
+import type { PrismaClient } from '@prisma/client';
 import type { UserSession } from '../../domain/UserSession.js';
 import type { IUserSessionRepository } from '../../domain/repositories/IUserSessionRepository.js';
-import { PrismaProvider } from '@carbroz/platform-database';
 
 export class PrismaUserSessionRepository implements IUserSessionRepository {
-  private readonly prisma;
-  constructor(prismaProvider: PrismaProvider) {
-    this.prisma = prismaProvider.getClient();
-  }
+  constructor(private readonly prisma: PrismaClient) {}
 
   async findById(id: number): Promise<UserSession | null> {
     const session = await this.prisma.userSession.findUnique({
