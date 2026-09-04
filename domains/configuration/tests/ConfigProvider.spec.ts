@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ConfigProvider } from '../application/ConfigProvider.js';
-import { IConfigRepository } from '@carbroz/common';
+import type { IConfigRepository } from '../domain/repositories/IConfigRepository.js';
 
 describe('ConfigProvider', () => {
   let repository: IConfigRepository;
