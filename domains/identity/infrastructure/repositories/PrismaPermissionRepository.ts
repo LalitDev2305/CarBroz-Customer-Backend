@@ -1,5 +1,5 @@
-import { IPermissionRepository } from '@carbroz/common';
-import { Permission } from '@carbroz/common';
+import type { IPermissionRepository } from '../../domain/repositories/IPermissionRepository.js';
+import type { Permission } from '../../domain/Permission.js';
 import { PrismaClient } from '@prisma/client';
 
 export class PrismaPermissionRepository implements IPermissionRepository {
