@@ -3,7 +3,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 // One-time closeout entrypoint: deterministic transform -> residue audit -> static gate -> CI validation.
-// Final workspace policy is emitted in pnpm-workspace.yaml and Prisma receives only an ignored validation datasource.
+// Final output rejects both package-alias and relative filesystem dependencies on the removed Common authority.
 const root = process.cwd();
 const baselineCommit = 'fbd7e0d38ba58136c7cc0be596314d62f20dcb6c';
 let driverSource = execFileSync('git', ['show', `${baselineCommit}:tools/architecture-closeout.mjs`], {
