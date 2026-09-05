@@ -1,9 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Execute deterministic hardening plus canonical runtime-regression convergence, including symbol-aware Tracking import reuse, before evaluating the final candidate tree.
+// Execute deterministic hardening plus canonical runtime-regression convergence before evaluating the final candidate tree.
 await import('./architecture-closeout-hardening.mjs');
 await import('./architecture-closeout-runtime-regression.mjs');
+await import('./architecture-closeout-coverage-tests.mjs');
 
 const root = process.cwd();
 const violations = [];
@@ -215,6 +216,7 @@ if (fs.existsSync(path.join(root, 'closeout-test-output.txt'))) {
   fs.rmSync(path.join(root, 'coverage'), { recursive: true, force: true });
   fs.rmSync(path.join(root, 'tools/architecture-closeout-hardening.mjs'), { force: true });
   fs.rmSync(path.join(root, 'tools/architecture-closeout-runtime-regression.mjs'), { force: true });
+  fs.rmSync(path.join(root, 'tools/architecture-closeout-coverage-tests.mjs'), { force: true });
 }
 
 console.log('[constitution-gate] canonical topology, ownership, dependency direction, documentation, tests, providers, observability and executable-production coverage scope verified');
