@@ -35,18 +35,19 @@ for (const workspaceRoot of requiredWorkspaceRoots) {
 if (/packages\/\*/.test(workspace)) throw new Error('pnpm workspace still includes transitional packages/*');
 
 // The final architecture policies are generated during the atomic transform. Parse/lint them now so
-// generator escaping defects fail before expensive Prisma/build validation.
-for (const policy of [
+// generator escaping defects fail before expensive Prisma/build validation. Use the already-installed
+// binary directly: invoking pnpm here would re-resolve the intentionally transformed workspace before
+// the workflow reaches its dedicated post-transform reinstall step.
+const architecturePolicies = [
   'tests/architecture/canonical-topology.policy.test.ts',
   'tests/architecture/engineering-quality.policy.test.ts',
-]) {
+];
+for (const policy of architecturePolicies) {
   if (!fs.existsSync(path.join(root, policy))) throw new Error(`Generated architecture policy missing: ${policy}`);
 }
-execFileSync('pnpm', [
-  'exec', 'eslint',
-  'tests/architecture/canonical-topology.policy.test.ts',
-  'tests/architecture/engineering-quality.policy.test.ts',
-], { cwd: root, stdio: 'inherit' });
+const eslintBinary = path.join(root, 'node_modules/.bin/eslint');
+if (!fs.existsSync(eslintBinary)) throw new Error('Installed ESLint binary is unavailable for generated-policy validation');
+execFileSync(eslintBinary, architecturePolicies, { cwd: root, stdio: 'inherit' });
 console.log('[architecture-closeout-finalize] emitted architecture policies parse and lint successfully');
 
 // The frozen API topology is transport/composition only. These legacy directories are evidence
