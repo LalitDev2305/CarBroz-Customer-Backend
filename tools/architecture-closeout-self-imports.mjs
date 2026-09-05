@@ -44,7 +44,7 @@ for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
 
 const failures = [];
 let rewrittenFiles = 0;
-let matchedImports = 0;
+let matchedStatements = 0;
 
 for (const packageRoot of packageRoots) {
   const manifest = JSON.parse(read(path.join(packageRoot, 'package.json')));
@@ -84,55 +84,84 @@ for (const packageRoot of packageRoots) {
     }
   }
 
+  const resolveSymbol = (file, symbol) => {
+    const candidates = (declarations.get(symbol) ?? []).filter((candidate) => path.resolve(candidate) !== path.resolve(file));
+    const nonPublic = candidates.filter((candidate) => !candidate.includes(`${path.sep}public${path.sep}`) && !candidate.endsWith(`${path.sep}index.ts`));
+    const usable = nonPublic.length ? nonPublic : candidates;
+    if (usable.length !== 1) {
+      failures.push(`${path.relative(root, file)} cannot uniquely resolve ${symbol} from ${packageName}; candidates=${usable.map((candidate) => path.relative(root, candidate)).join(',') || 'none'}`);
+      return null;
+    }
+    return usable[0];
+  };
+
   for (const file of sourceFiles) {
     let content = read(file);
     const source = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
     const replacements = [];
 
     for (const statement of source.statements) {
-      if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
+      const isImport = ts.isImportDeclaration(statement);
+      const isExport = ts.isExportDeclaration(statement);
+      if (!isImport && !isExport) continue;
+      if (!statement.moduleSpecifier || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
       const specifier = statement.moduleSpecifier.text;
       if (specifier !== packageName && !specifier.startsWith(`${packageName}/`)) continue;
-      matchedImports++;
+      matchedStatements++;
 
       const directTarget = resolveTsTarget(packageRoot, packageName, specifier);
       if (directTarget) {
         const quote = statement.moduleSpecifier.getText(source)[0] === '"' ? '"' : "'";
-        const replacementSpecifier = relativeImport(file, directTarget);
-        const start = statement.moduleSpecifier.getStart(source);
-        const end = statement.moduleSpecifier.getEnd();
-        replacements.push({ start, end, text: `${quote}${replacementSpecifier}${quote}` });
+        replacements.push({
+          start: statement.moduleSpecifier.getStart(source),
+          end: statement.moduleSpecifier.getEnd(),
+          text: `${quote}${relativeImport(file, directTarget)}${quote}`,
+        });
         continue;
       }
 
-      const clause = statement.importClause;
-      if (!clause || clause.name || !clause.namedBindings || !ts.isNamedImports(clause.namedBindings)) {
-        failures.push(`${path.relative(root, file)} has unsupported bare self-import: ${statement.getText(source)}`);
-        continue;
-      }
-
-      const groups = new Map();
-      let importFailed = false;
-      for (const element of clause.namedBindings.elements) {
-        const sourceName = element.propertyName?.text ?? element.name.text;
-        const candidates = (declarations.get(sourceName) ?? []).filter((candidate) => path.resolve(candidate) !== path.resolve(file));
-        const nonPublic = candidates.filter((candidate) => !candidate.includes(`${path.sep}public${path.sep}`) && !candidate.endsWith(`${path.sep}index.ts`));
-        const usable = nonPublic.length ? nonPublic : candidates;
-        if (usable.length !== 1) {
-          failures.push(`${path.relative(root, file)} cannot uniquely resolve ${sourceName} from ${packageName}; candidates=${usable.map((candidate) => path.relative(root, candidate)).join(',') || 'none'}`);
-          importFailed = true;
+      if (isImport) {
+        const clause = statement.importClause;
+        if (!clause || clause.name || !clause.namedBindings || !ts.isNamedImports(clause.namedBindings)) {
+          failures.push(`${path.relative(root, file)} has unsupported bare self-import: ${statement.getText(source)}`);
           continue;
         }
-        const target = usable[0];
+        const groups = new Map();
+        let failed = false;
+        for (const element of clause.namedBindings.elements) {
+          const sourceName = element.propertyName?.text ?? element.name.text;
+          const target = resolveSymbol(file, sourceName);
+          if (!target) { failed = true; continue; }
+          const parts = groups.get(target) ?? [];
+          const alias = element.propertyName ? `${element.propertyName.text} as ${element.name.text}` : element.name.text;
+          parts.push(element.isTypeOnly && !clause.isTypeOnly ? `type ${alias}` : alias);
+          groups.set(target, parts);
+        }
+        if (failed) continue;
+        const rendered = [...groups.entries()]
+          .map(([target, names]) => `import${clause.isTypeOnly ? ' type' : ''} { ${names.join(', ')} } from '${relativeImport(file, target)}';`)
+          .join('\n');
+        replacements.push({ start: statement.getFullStart(), end: statement.getEnd(), text: rendered });
+        continue;
+      }
+
+      if (!statement.exportClause || !ts.isNamedExports(statement.exportClause)) {
+        failures.push(`${path.relative(root, file)} has unsupported bare self re-export: ${statement.getText(source)}`);
+        continue;
+      }
+      const groups = new Map();
+      let failed = false;
+      for (const element of statement.exportClause.elements) {
+        const sourceName = element.propertyName?.text ?? element.name.text;
+        const target = resolveSymbol(file, sourceName);
+        if (!target) { failed = true; continue; }
         const parts = groups.get(target) ?? [];
-        const alias = element.propertyName ? `${element.propertyName.text} as ${element.name.text}` : element.name.text;
-        parts.push(element.isTypeOnly && !clause.isTypeOnly ? `type ${alias}` : alias);
+        parts.push(element.propertyName ? `${element.propertyName.text} as ${element.name.text}` : element.name.text);
         groups.set(target, parts);
       }
-      if (importFailed) continue;
-
+      if (failed) continue;
       const rendered = [...groups.entries()]
-        .map(([target, names]) => `import${clause.isTypeOnly ? ' type' : ''} { ${names.join(', ')} } from '${relativeImport(file, target)}';`)
+        .map(([target, names]) => `export${statement.isTypeOnly ? ' type' : ''} { ${names.join(', ')} } from '${relativeImport(file, target)}';`)
         .join('\n');
       replacements.push({ start: statement.getFullStart(), end: statement.getEnd(), text: rendered });
     }
@@ -150,16 +179,16 @@ for (const packageRoot of packageRoots) {
 if (failures.length) throw new Error(`Canonical self-import resolution failed:\n${failures.map((failure) => `- ${failure}`).join('\n')}`);
 
 const residue = [];
-const importPattern = /(?:from\s+|import\s*\(\s*)['"]([^'"]+)['"]/g;
+const dependencyPattern = /(?:from\s+|import\s*\(\s*)['"]([^'"]+)['"]/g;
 for (const packageRoot of packageRoots) {
   const packageName = JSON.parse(read(path.join(packageRoot, 'package.json'))).name;
   if (!packageName) continue;
   for (const file of walk(packageRoot).filter((candidate) => candidate.endsWith('.ts'))) {
-    for (const match of read(file).matchAll(importPattern)) {
+    for (const match of read(file).matchAll(dependencyPattern)) {
       if (match[1] === packageName || match[1].startsWith(`${packageName}/`)) residue.push(`${path.relative(root, file)} -> ${match[1]}`);
     }
   }
 }
 if (residue.length) throw new Error(`Self-import residue remains after rewrite:\n${residue.map((item) => `- ${item}`).join('\n')}`);
 
-console.log(`[architecture-closeout-self-imports] matched ${matchedImports} self-imports and rewrote ${rewrittenFiles} package-internal files; zero residue remains`);
+console.log(`[architecture-closeout-self-imports] matched ${matchedStatements} self import/re-export statements and rewrote ${rewrittenFiles} package-internal files; zero residue remains`);
