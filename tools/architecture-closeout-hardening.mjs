@@ -67,6 +67,10 @@ function normalizeRuntimeConfigObservability() {
     }
   }
 
+  source = source.replace(
+    "console.error('❌ Invalid environment variables:', parsedEnv.error.format());",
+    "runtimeConfigLogger.error({ issues: parsedEnv.error.issues.map((issue) => ({ path: issue.path.join('.'), code: issue.code })) }, 'runtime.configuration.invalid');",
+  );
   source = source
     .replace(/\bconsole\.log\s*\(/g, 'runtimeConfigLogger.info(')
     .replace(/\bconsole\.info\s*\(/g, 'runtimeConfigLogger.info(')
