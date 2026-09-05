@@ -139,10 +139,15 @@ describe('API Booking ownership policy', () => {
   const trackingTest = path.join(root, 'tests/integration/application/tracking-notification-engine.test.ts');
   if (fs.existsSync(trackingTest)) {
     let source = fs.readFileSync(trackingTest, 'utf8');
-    if (!source.includes('findByBookingId:')) {
-      const marker = /(^\s*findByPublicId:\s*async[^\n]*\n)/m;
-      if (!marker.test(source)) throw new Error('Tracking integration repository mock shape changed; findByBookingId cannot be inserted safely');
-      source = source.replace(marker, `    findByBookingId: async () => null,\n$1`);
+    if (!/\bfindByBookingId\s*:/.test(source)) {
+      const marker = /^(\s*)(findByPublicId\s*:)/m;
+      if (!marker.test(source)) {
+        throw new Error('Tracking integration repository mock shape changed; no findByPublicId member is available for structural insertion');
+      }
+      source = source.replace(marker, (_full, indent, member) => `${indent}findByBookingId: async () => null,\n${indent}${member}`);
+    }
+    if (!/\bfindByBookingId\s*:/.test(source)) {
+      throw new Error('Tracking integration repository mock is missing canonical findByBookingId after convergence');
     }
     fs.writeFileSync(trackingTest, source);
   }
@@ -276,7 +281,7 @@ describe('Backend V3 engineering quality boundaries', () => {
   });
 
   it('forbids deep package imports and relative imports into another bounded context', () => {
-    const offenders: string[] = [];
+    const offenders = [];
     for (const file of production.filter((candidate) => relative(candidate).startsWith('domains/'))) {
       const sourceParts = relative(file).split('/');
       const sourceDomain = sourceParts[1];
