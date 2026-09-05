@@ -20,6 +20,7 @@ export class GenerateCorporateInvoiceUseCase {
   ) {}
 
   async execute(dto: GenerateCorporateInvoiceDto, adminUserId: number) {
+    void this.notificationService;
     const account = await this.corporateAccountRepo.findByPublicId(dto.accountPublicId);
     if (!account) {
       throw new Error(`Corporate account not found with publicId: ${dto.accountPublicId}`);
@@ -50,7 +51,7 @@ export class GenerateCorporateInvoiceUseCase {
       };
     });
 
-    const subtotalMoney = Money.fromPaise(Number(subtotalPaise));
+    const subtotalMoney = Money.fromMinor(Number(subtotalPaise));
     const isInterstate = !account.gstin.startsWith('27');
     const taxCalculator = new TaxCalculator();
     const taxResult = taxCalculator.calculateInvoiceTax(subtotalMoney, isInterstate);
@@ -64,11 +65,11 @@ export class GenerateCorporateInvoiceUseCase {
       corporateAccountId: account.id!,
       billingPeriodStart: startDate,
       billingPeriodEnd: endDate,
-      subtotalPaise: taxResult.subtotal.amountPaise,
-      cgstPaise: taxResult.cgst.amountPaise,
-      sgstPaise: taxResult.sgst.amountPaise,
-      igstPaise: taxResult.igst.amountPaise,
-      totalAmountPaise: taxResult.totalPrice.amountPaise,
+      subtotalPaise: taxResult.subtotal.amountMinor,
+      cgstPaise: taxResult.cgst.amountMinor,
+      sgstPaise: taxResult.sgst.amountMinor,
+      igstPaise: taxResult.igst.amountMinor,
+      totalAmountPaise: taxResult.totalPrice.amountMinor,
       dueDate,
       status: 'ISSUED',
       lines,
