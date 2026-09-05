@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const surfaces = path.join(root, 'apps/api/src/surfaces');
+const apiSource = path.join(root, 'apps/api/src');
+const surfaces = path.join(apiSource, 'surfaces');
 
 const write = (file, content) => {
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -17,6 +18,14 @@ const walk = (dir) => {
     return entry.isFile() && entry.name.endsWith('.ts') ? [absolute] : [];
   });
 };
+
+// The frozen API topology is transport/composition only. These legacy directories are evidence
+// that apps/api is still acting as a second application/infrastructure ownership layer.
+const legacyApiRoots = ['modules', 'container', 'providers'];
+const legacyResidue = legacyApiRoots.filter((name) => fs.existsSync(path.join(apiSource, name)));
+if (legacyResidue.length) {
+  throw new Error(`Legacy API ownership roots remain after closeout: ${legacyResidue.join(', ')}`);
+}
 
 // Admin and Customer may validate similar payloads, but their transport contracts are
 // independently versioned. Duplicate the transport schema instead of importing another surface.
@@ -51,4 +60,4 @@ if (violations.length) {
   throw new Error(`Product surface isolation failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
 }
 
-console.log('[architecture-closeout-finalize] product surface isolation is physically independent');
+console.log('[architecture-closeout-finalize] API topology is transport/composition only and product surfaces are physically independent');
