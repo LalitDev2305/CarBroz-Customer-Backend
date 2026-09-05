@@ -113,12 +113,8 @@ export class AuthorizationProvider {
     .replace(/^\s*authorizationProvider:\s*asClass\(AuthorizationProvider\)\.singleton\(\),?\r?\n/gm, '')
     .replace(/^\s*authorizationProvider:[^\n]*AuthorizationProvider[^\n]*\r?\n/gm, '');
 
-  if (apiContainer.includes('AuthorizationProvider')) {
-    throw new Error('API composition still references the concrete Identity AuthorizationProvider');
-  }
-  if (!apiContainer.includes('registerIdentityModule')) {
-    throw new Error('API composition does not invoke the Identity-owned composition module');
-  }
+  if (apiContainer.includes('AuthorizationProvider')) throw new Error('API composition still references the concrete Identity AuthorizationProvider');
+  if (!apiContainer.includes('registerIdentityModule')) throw new Error('API composition does not invoke the Identity-owned composition module');
   fs.writeFileSync(apiContainerFile, apiContainer);
 }
 
@@ -153,16 +149,11 @@ function actorKindFromRoles(roles: readonly string[]): ActorKind {
 
 function requireNumericActorId(value: string | number): number {
   const id = Number(value);
-  if (!Number.isSafeInteger(id) || id <= 0) {
-    throw new Error('AUTHENTICATED_ACTOR_ID_INVALID');
-  }
+  if (!Number.isSafeInteger(id) || id <= 0) throw new Error('AUTHENTICATED_ACTOR_ID_INVALID');
   return id;
 }
 
-/**
- * Converts authenticated Fastify/JWT metadata into Foundation's strict transport-neutral context.
- * Missing or malformed identities are rejected at the transport boundary rather than propagated into domains.
- */
+/** Transport-edge adapter. Domain/application code receives only a strict Foundation context. */
 export function toExecutionContext(request: FastifyRequest): ExecutionContext {
   const jwtUser = request.user;
   if (!jwtUser) throw new Error('AUTHENTICATED_ACTOR_REQUIRED');
@@ -173,24 +164,23 @@ export function toExecutionContext(request: FastifyRequest): ExecutionContext {
     roles: jwtUser.roles,
   };
 
-  return {
-    correlationId: request.traceId || request.id,
-    actor,
-    timestamp: new Date(),
-  };
+  return { correlationId: request.traceId || request.id, actor, timestamp: new Date() };
 }
 `);
 
-  // Some legacy Customer handlers constructed their own optional actor. Converge those to the same
-  // transport adapter so Foundation's required actor and numeric-id invariants have one authority.
   const customerController = path.join(apiRoot, 'surfaces/customer/controllers/customer.customer.controller.ts');
   if (fs.existsSync(customerController)) {
     let content = fs.readFileSync(customerController, 'utf8');
+
+    // The migrated controller previously emitted a ternary-built optional actor. Match the declaration
+    // by its canonical type boundary rather than depending on its internal object formatting.
     content = content.replace(
-      /const\s+actor:\s*ActorContext\s*\|\s*undefined\s*=\s*request\.user\s*\?[\s\S]*?\n\s*:\s*undefined;/m,
+      /const\s+actor:\s*ActorContext\s*\|\s*undefined\s*=\s*[\s\S]*?;(?=\r?\n)/m,
       'const actor: ActorContext = toExecutionContext(request).actor;',
     );
-    content = content.replace(/id:\s*request\.user\.id/g, 'id: Number(request.user.id)');
+    content = content
+      .replace(/\bActorContext\s*\|\s*undefined\b/g, 'ActorContext')
+      .replace(/id:\s*request\.user\.id/g, 'id: Number(request.user.id)');
     content = ensureExecutionContextImport(customerController, content);
     fs.writeFileSync(customerController, content);
   }
@@ -198,15 +188,11 @@ export function toExecutionContext(request: FastifyRequest): ExecutionContext {
   const actorIdentityResidue = walk(apiRoot)
     .filter((candidate) => candidate.endsWith('.ts'))
     .filter((file) => fs.readFileSync(file, 'utf8').includes('ActorIdentity'));
-  if (actorIdentityResidue.length) {
-    throw new Error(`Non-canonical ActorIdentity survived API convergence: ${actorIdentityResidue.join(', ')}`);
-  }
+  if (actorIdentityResidue.length) throw new Error(`Non-canonical ActorIdentity survived API convergence: ${actorIdentityResidue.join(', ')}`);
 
   if (fs.existsSync(customerController)) {
     const customerSource = fs.readFileSync(customerController, 'utf8');
-    if (customerSource.includes('ActorContext | undefined')) {
-      throw new Error('Customer transport still permits an optional application actor');
-    }
+    if (customerSource.includes('ActorContext | undefined')) throw new Error('Customer transport still permits an optional application actor');
   }
 }
 
@@ -236,24 +222,16 @@ if (classStart >= 0) {
   if (nextBoundary <= classStart) throw new Error('Unable to locate deterministic boundary after Booking dispatch class');
   source = source.slice(0, classStart) + source.slice(nextBoundary);
 }
-
 source = source.replace(/^\/\*\*[^\n]*AssignPartnerToBookingUseCase[^\n]*\*\/\r?\n/m, '');
 source = source.replace(/^import\s+type\s+\{[^\n}]*IPartnerRepository[^\n}]*\}\s+from\s+['"][^'"]+['"];?\r?\n/m, '');
-
-const executableResidue = source.split(/\r?\n/).filter(
-  (line) => line.includes('export class AssignPartnerToBookingUseCase') || line.includes('IPartnerRepository'),
-);
-if (executableResidue.length) {
-  throw new Error(`Booking still retains executable dispatch/Partner repository authority after last-mile closeout:\n${executableResidue.join('\n')}`);
-}
+const executableResidue = source.split(/\r?\n/).filter((line) => line.includes('export class AssignPartnerToBookingUseCase') || line.includes('IPartnerRepository'));
+if (executableResidue.length) throw new Error(`Booking still retains executable dispatch/Partner repository authority after last-mile closeout:\n${executableResidue.join('\n')}`);
 fs.writeFileSync(bookingUseCases, source);
 
 const operationsDispatch = path.join(root, 'domains/operations/application/dispatch/AssignPartnerToBookingUseCase.ts');
 const operationsPublic = path.join(root, 'domains/operations/public/index.ts');
 if (!fs.existsSync(operationsDispatch)) throw new Error('Operations dispatch owner was not created');
-if (!fs.existsSync(operationsPublic) || !fs.readFileSync(operationsPublic, 'utf8').includes('AssignPartnerToBookingUseCase')) {
-  throw new Error('Operations dispatch owner is not publicly exposed');
-}
+if (!fs.existsSync(operationsPublic) || !fs.readFileSync(operationsPublic, 'utf8').includes('AssignPartnerToBookingUseCase')) throw new Error('Operations dispatch owner is not publicly exposed');
 
 write('tests/contracts/canonical-public-contracts.contract.test.ts', `import fs from 'node:fs';
 import path from 'node:path';
@@ -261,20 +239,11 @@ import { describe, expect, it } from 'vitest';
 
 const root = process.cwd();
 const publicEntries = [
-  'domains/identity/public/index.ts',
-  'domains/partner/public/index.ts',
-  'domains/customer/public/index.ts',
-  'domains/catalog-pricing/public/index.ts',
-  'domains/booking/public/index.ts',
-  'domains/operations/public/index.ts',
-  'domains/financials/public/index.ts',
-  'domains/communications/public/index.ts',
-  'domains/engagement/public/index.ts',
-  'domains/configuration/public/index.ts',
-  'domains/dispute/public/index.ts',
-  'domains/enterprise/public/index.ts',
-  'domains/audit/public/index.ts',
-  'sdui/registry/public/index.ts',
+  'domains/identity/public/index.ts', 'domains/partner/public/index.ts', 'domains/customer/public/index.ts',
+  'domains/catalog-pricing/public/index.ts', 'domains/booking/public/index.ts', 'domains/operations/public/index.ts',
+  'domains/financials/public/index.ts', 'domains/communications/public/index.ts', 'domains/engagement/public/index.ts',
+  'domains/configuration/public/index.ts', 'domains/dispute/public/index.ts', 'domains/enterprise/public/index.ts',
+  'domains/audit/public/index.ts', 'sdui/registry/public/index.ts',
 ] as const;
 
 describe('canonical public contracts', () => {
@@ -301,8 +270,6 @@ describe('canonical public contracts', () => {
 });
 `);
 
-// The finalizer has completed before this helper runs. It is intentionally absent from the frozen
-// repository, so remove it before lint/coverage inspect the final candidate rather than migration tooling.
 fs.rmSync(path.join(root, 'tools/architecture-closeout-finalize.mjs'), { force: true });
 fs.rmSync(path.join(root, 'tools/architecture-closeout-postfinal.mjs'), { force: true });
 
