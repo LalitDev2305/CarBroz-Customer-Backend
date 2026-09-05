@@ -19,6 +19,18 @@ export interface ForceUpdateConfig {
 /** Immutable snapshot of evaluated feature flags. */
 export type FeatureFlagSnapshot = Readonly<Record<string, boolean>>;
 
+/** Transport-neutral startup destination owned by Configuration. */
+export interface StartupRouteConfig {
+  readonly destination: string;
+  readonly api: string;
+}
+
+/** Startup routing policy for anonymous and authenticated clients. */
+export interface StartupRoutingConfig {
+  readonly guest: StartupRouteConfig;
+  readonly authenticated: StartupRouteConfig;
+}
+
 /**
  * Transport-neutral startup configuration produced by the Configuration bounded context.
  * API surfaces may map this shape to their own DTOs, but Configuration never imports transport DTOs.
@@ -27,4 +39,5 @@ export interface InitConfigSnapshot {
   readonly maintenance: MaintenanceConfig;
   readonly forceUpdate: ForceUpdateConfig;
   readonly featureFlags: FeatureFlagSnapshot;
+  readonly startupRouting: StartupRoutingConfig;
 }
