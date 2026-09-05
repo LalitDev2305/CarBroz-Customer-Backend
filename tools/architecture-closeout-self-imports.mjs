@@ -30,6 +30,12 @@ const resolveTsTarget = (packageRoot, packageName, specifier) => {
   return candidates.find(exists) ?? null;
 };
 
+// Explicit owner overrides exist only where duplicate internal names are proven but the package
+// public boundary has one canonical owner. This prevents the migration from guessing by path order.
+const canonicalSymbolOwners = new Map([
+  ['@carbroz/domain-financials::CreatePaymentOrderInput', 'application/FinancialUseCases.ts'],
+]);
+
 // Deliberately mirror the post-closeout invariant package-root enumeration.
 const packageRoots = [];
 for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
@@ -85,6 +91,16 @@ for (const packageRoot of packageRoots) {
   }
 
   const resolveSymbol = (file, symbol) => {
+    const overrideRel = canonicalSymbolOwners.get(`${packageName}::${symbol}`);
+    if (overrideRel) {
+      const override = path.join(packageRoot, overrideRel);
+      if (!exists(override)) {
+        failures.push(`${path.relative(root, file)} canonical owner override for ${symbol} does not exist: ${path.relative(root, override)}`);
+        return null;
+      }
+      return override;
+    }
+
     const candidates = (declarations.get(symbol) ?? []).filter((candidate) => path.resolve(candidate) !== path.resolve(file));
     const nonPublic = candidates.filter((candidate) => !candidate.includes(`${path.sep}public${path.sep}`) && !candidate.endsWith(`${path.sep}index.ts`));
     const usable = nonPublic.length ? nonPublic : candidates;
