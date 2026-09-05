@@ -3,7 +3,15 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const root = process.cwd();
-const appSource = fs.readFileSync(path.join(root, 'apps/api/src/app.ts'), 'utf8');
+const compositionRootCandidates = [
+  path.join(root, 'apps/api/src/bootstrap/app.ts'),
+  path.join(root, 'apps/api/src/app.ts'),
+];
+const compositionRoot = compositionRootCandidates.find((candidate) => fs.existsSync(candidate));
+if (!compositionRoot) {
+  throw new Error('Canonical API composition root not found');
+}
+const appSource = fs.readFileSync(compositionRoot, 'utf8');
 
 describe('API version prefix policy', () => {
   it('keeps shared auth and configuration endpoints inside the canonical /api/v1 namespace', () => {
