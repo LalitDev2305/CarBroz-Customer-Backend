@@ -1,34 +1,32 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { GetInitConfigUseCase } from '@carbroz/domain-configuration';
 
+/**
+ * Compatibility HTTP adapter for the legacy /api/v1/app/init surface.
+ * Configuration remains the single owner of bootstrap/runtime product decisions.
+ */
 export class AppController {
+  constructor(private readonly getInitConfigUseCase: GetInitConfigUseCase) {}
+
   public init = async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      // Postgres Auth Check
-      // We check if request.user is set by the JWT plugin
-      const isLoggedIn = !!request.user;
+    const config = await this.getInitConfigUseCase.execute();
+    const isLoggedIn = Boolean(request.user);
+    const route = isLoggedIn ? config.startupRouting.authenticated : config.startupRouting.guest;
 
-      // Construct the Config Payload
-      const configPayload = {
-        status: 'success',
-        data: {
-          isLoggedIn,
-          config: {
-            forceUpdate: false,
-            supportPhone: '+91 9876543210'
-          },
-          nextRoute: {
-            type: 'navigation',
-            payload: isLoggedIn 
-              ? { destination: 'dashboard_template', api: 'dashboard/home' }
-              : { destination: 'auth_template', api: 'auth/auth_login' } // As requested: new user -> auth_login
-          }
-        }
-      };
-
-      return reply.send(configPayload);
-    } catch (error) {
-      request.log.error(error);
-      return reply.status(500).send({ message: 'Internal Server Error' });
-    }
+    return reply.status(200).send({
+      status: 'success',
+      data: {
+        isLoggedIn,
+        config: {
+          maintenance: config.maintenance,
+          forceUpdate: config.forceUpdate,
+          featureFlags: config.featureFlags,
+        },
+        nextRoute: {
+          type: 'navigation',
+          payload: route,
+        },
+      },
+    });
   };
 }
