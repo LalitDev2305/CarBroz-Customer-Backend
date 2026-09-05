@@ -31,6 +31,8 @@ export type { IInvoiceRepository } from '../invoice/domain/repositories/IInvoice
 export * from '../payout/domain/PartnerPayout.js';
 export * from '../payout/domain/PayoutStatus.js';
 export type { IPartnerPayoutRepository } from '../payout/domain/repositories/IPartnerPayoutRepository.js';
+export * from '../domain/FinancialConfiguration.js';
+export * from '../domain/TaxCalculator.js';
 export * from '../application/FinancialUseCases.js';
 export * from '../payment/payment.module.js';
 export * from '../invoice/invoice.module.js';
