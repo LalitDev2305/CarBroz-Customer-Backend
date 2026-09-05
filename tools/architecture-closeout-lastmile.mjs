@@ -13,12 +13,18 @@ if (classStart >= 0) {
   source = source.slice(0, classStart) + source.slice(nextBoundary);
 }
 
+// Remove generated symbol documentation that would otherwise incorrectly claim Booking owns dispatch.
+source = source.replace(/^\/\*\*[^\n]*AssignPartnerToBookingUseCase[^\n]*\*\/\r?\n/m, '');
+
 // The self-import convergence step may rewrite workspace imports to relative paths, so remove the
 // now-unused Partner repository import by symbol rather than by one historical module specifier.
 source = source.replace(/^import\s+type\s+\{[^\n}]*IPartnerRepository[^\n}]*\}\s+from\s+['"][^'"]+['"];?\r?\n/m, '');
-if (source.includes('AssignPartnerToBookingUseCase') || source.includes('IPartnerRepository')) {
-  const residue = source.split(/\r?\n/).filter((line) => line.includes('AssignPartnerToBookingUseCase') || line.includes('IPartnerRepository'));
-  throw new Error(`Booking still retains dispatch/Partner repository authority after last-mile closeout:\n${residue.join('\n')}`);
+
+const executableResidue = source.split(/\r?\n/).filter(
+  (line) => line.includes('export class AssignPartnerToBookingUseCase') || line.includes('IPartnerRepository'),
+);
+if (executableResidue.length) {
+  throw new Error(`Booking still retains executable dispatch/Partner repository authority after last-mile closeout:\n${executableResidue.join('\n')}`);
 }
 fs.writeFileSync(bookingUseCases, source);
 
@@ -29,4 +35,4 @@ if (!fs.existsSync(operationsPublic) || !fs.readFileSync(operationsPublic, 'utf8
   throw new Error('Operations dispatch owner is not publicly exposed');
 }
 
-console.log('[architecture-closeout-lastmile] Booking dispatch duplicate removed; Operations is the single assignment owner');
+console.log('[architecture-closeout-lastmile] Booking dispatch duplicate and stale ownership docs removed; Operations is the single assignment owner');
