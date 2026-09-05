@@ -203,8 +203,27 @@ describe('canonical Observability behavior', () => {
 `);
 }
 
+function requireDocumentationEvidence() {
+  const required = [
+    'tests/architecture/tsdoc-documentation.policy.test.ts',
+    'tests/architecture/module-test-documentation.policy.test.ts',
+    'docs/FINAL-MODULE-TEST-EVIDENCE.json',
+  ];
+  const missing = required.filter((file) => !exists(p(file)));
+  if (missing.length > 0) {
+    throw new Error(`Final documentation evidence is incomplete: ${missing.join(', ')}`);
+  }
+
+  const evidence = JSON.parse(fs.readFileSync(p('docs/FINAL-MODULE-TEST-EVIDENCE.json'), 'utf8'));
+  if (!Array.isArray(evidence.modules) || evidence.modules.length === 0) {
+    throw new Error('Final module test evidence resolved zero documented module surfaces');
+  }
+  console.log(`[architecture-closeout-coverage-tests] documentation evidence covers ${evidence.modules.length} module surfaces`);
+}
+
 normalizeFinalRuntimeSweep();
 generateObservabilityCoverage();
 await import('./architecture-closeout-documentation.mjs');
+requireDocumentationEvidence();
 if (exists(p('closeout-test-output.txt'))) fs.rmSync(p('tools/architecture-closeout-documentation.mjs'), { force: true });
 console.log('[architecture-closeout-coverage-tests] final behavioral coverage and documentation evidence generated');
