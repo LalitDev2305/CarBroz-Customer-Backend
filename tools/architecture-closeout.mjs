@@ -7,6 +7,8 @@ import { execFileSync } from 'node:child_process';
 // applies scoped post-transform convergence fixes, and revalidates Customer, Configuration and Identity boundaries.
 const root = process.cwd();
 const baselineCommit = 'fbd7e0d38ba58136c7cc0be596314d62f20dcb6c';
+const selfImportResolver = path.join(root, 'tools/architecture-closeout-self-imports.mjs');
+if (!fs.existsSync(selfImportResolver)) throw new Error('Required architecture self-import resolver is missing');
 let driverSource = execFileSync('git', ['show', `${baselineCommit}:tools/architecture-closeout.mjs`], {
   cwd: root,
   encoding: 'utf8',
