@@ -105,6 +105,9 @@ for (const evidence of [
   'tests/contracts/canonical-public-contracts.contract.test.ts',
   'tests/e2e/api-health.e2e.test.ts',
   'tests/integration',
+  'tests/unit/foundation-kernel.behavior.test.ts',
+  'tests/unit/observability.behavior.test.ts',
+  'tests/unit/sdui-registry-domain.behavior.test.ts',
 ]) required(evidence, 'required positive/negative/regression evidence layer is missing');
 
 const vitestConfigFile = path.join(root, 'vitest.config.ts');
