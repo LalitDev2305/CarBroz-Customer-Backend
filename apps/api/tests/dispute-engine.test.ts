@@ -118,7 +118,7 @@ describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
 
     expect(dispute.publicId).toBeDefined();
     expect(dispute.status).toBe('OPEN');
-    expect(dispute.requestedRefundAmount.amountPaise).toBe(25000);
+    expect(dispute.requestedRefundAmount.amountMinor).toBe(25000);
     expect(notificationsSent.length).toBe(1);
     expect(auditLogs.length).toBe(1);
   });
@@ -134,7 +134,7 @@ describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
     await expect(
       useCase.execute({
         bookingPublicId: 'booking_101',
-        actorId: 99, // Unauthorized user
+        actorId: 99,
         actorType: 'CUSTOMER',
         disputeReason: 'WRONG_BILLING',
         requestedRefundPaise: 10000,
@@ -160,6 +160,6 @@ describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
     });
 
     expect(resolved.status).toBe('RESOLVED_REFUNDED');
-    expect(resolved.refundedAmount.amountPaise).toBe(25000);
+    expect(resolved.refundedAmount.amountMinor).toBe(25000);
   });
 });
