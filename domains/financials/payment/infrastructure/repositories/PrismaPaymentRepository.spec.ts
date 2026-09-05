@@ -53,11 +53,33 @@ function fixture() {
 }
 
 function paymentDomain() {
-  return new Payment(paymentRecord());
+  return new Payment({
+    id: 1,
+    publicId: 'payment_1',
+    bookingId: 10,
+    customerId: 20,
+    provider: 'RAZORPAY',
+    providerOrderId: 'order_1',
+    amountPaise: 49900,
+    currency: 'INR',
+    method: 'UPI',
+    status: 'PENDING',
+    idempotencyKey: 'idem_1',
+    lockVersion: 1,
+  });
 }
 
 function webhookDomain() {
-  return new PaymentWebhook(webhookRecord());
+  return new PaymentWebhook({
+    id: 2,
+    publicId: 'webhook_2',
+    provider: 'RAZORPAY',
+    eventId: 'event_2',
+    eventType: 'payment.captured',
+    payloadHash: 'hash_2',
+    processingStatus: 'PENDING',
+    receivedAt: new Date('2026-01-01T00:00:00.000Z'),
+  });
 }
 
 describe('PrismaPaymentRepository', () => {
