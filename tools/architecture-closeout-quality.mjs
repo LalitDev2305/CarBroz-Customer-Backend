@@ -139,15 +139,42 @@ describe('API Booking ownership policy', () => {
   const trackingTest = path.join(root, 'tests/integration/application/tracking-notification-engine.test.ts');
   if (fs.existsSync(trackingTest)) {
     let source = fs.readFileSync(trackingTest, 'utf8');
-    if (!/\bfindByBookingId\s*:/.test(source)) {
-      const marker = /^(\s*)(findByPublicId\s*:)/m;
-      if (!marker.test(source)) {
-        throw new Error('Tracking integration repository mock shape changed; no findByPublicId member is available for structural insertion');
+    const needsPublicId = !/\bfindByPublicId\s*:/.test(source);
+    const needsBookingId = !/\bfindByBookingId\s*:/.test(source);
+
+    if (needsPublicId || needsBookingId) {
+      const additions = [];
+      if (needsPublicId) additions.push('findByPublicId: async () => null,');
+      if (needsBookingId) additions.push('findByBookingId: async () => null,');
+
+      const preferredMarker = /^(\s*)(findActiveByPartnerId\s*:)/gm;
+      let inserted = 0;
+      source = source.replace(preferredMarker, (_full, indent, member) => {
+        inserted += 1;
+        return `${additions.map((line) => `${indent}${line}`).join('\n')}\n${indent}${member}`;
+      });
+
+      if (inserted === 0) {
+        const fallbackMarkers = [
+          /^(\s*)(findById\s*:)/gm,
+          /^(\s*)(update\s*:)/gm,
+        ];
+        for (const marker of fallbackMarkers) {
+          if (inserted > 0) break;
+          source = source.replace(marker, (_full, indent, member) => {
+            inserted += 1;
+            return `${additions.map((line) => `${indent}${line}`).join('\n')}\n${indent}${member}`;
+          });
+        }
       }
-      source = source.replace(marker, (_full, indent, member) => `${indent}findByBookingId: async () => null,\n${indent}${member}`);
+
+      if (inserted === 0) {
+        throw new Error('Tracking integration repository mock shape changed; no canonical repository member is available for fixture convergence');
+      }
     }
-    if (!/\bfindByBookingId\s*:/.test(source)) {
-      throw new Error('Tracking integration repository mock is missing canonical findByBookingId after convergence');
+
+    if (!/\bfindByPublicId\s*:/.test(source) || !/\bfindByBookingId\s*:/.test(source)) {
+      throw new Error('Tracking integration repository mock is missing canonical lookup methods after convergence');
     }
     fs.writeFileSync(trackingTest, source);
   }
