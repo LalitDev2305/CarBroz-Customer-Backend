@@ -51,8 +51,9 @@ function canonicalizeTrackingRepositoryImports() {
     .join('\n')
     .replace(/^\s+/, '');
 
+  const canonicalInterfaceImport = "import type { ITrackingSessionRepository } from '../../domain/ITrackingSessionRepository.js';";
   const header = [
-    "import type { ITrackingSessionRepository } from '../../domain/ITrackingSessionRepository.js';",
+    canonicalInterfaceImport,
     "import { TrackingSession } from '../../domain/TrackingSession.js';",
     "import type { TrackingStatus } from '../../domain/TrackingStatus.js';",
     '',
@@ -61,9 +62,18 @@ function canonicalizeTrackingRepositoryImports() {
   fs.writeFileSync(repository, `${header}${body.endsWith('\n') ? body : `${body}\n`}`);
 
   const finalSource = fs.readFileSync(repository, 'utf8');
-  const matches = finalSource.match(/\bITrackingSessionRepository\b/g) ?? [];
-  if (matches.length !== 2) {
-    throw new Error(`Tracking repository interface authority is not canonical after import convergence: ${matches.length} references`);
+  const interfaceImports = finalSource
+    .split(/\r?\n/)
+    .filter((line) => /^import\b/.test(line.trim()) && /\bITrackingSessionRepository\b/.test(line));
+
+  if (interfaceImports.length !== 1 || interfaceImports[0] !== canonicalInterfaceImport) {
+    throw new Error(`Tracking repository interface import is not canonical: ${interfaceImports.join(' | ')}`);
+  }
+  if (!/implements\s+ITrackingSessionRepository\b/.test(finalSource)) {
+    throw new Error('PrismaTrackingSessionRepository no longer implements the canonical tracking repository port');
+  }
+  if (/@carbroz\/common/.test(finalSource)) {
+    throw new Error('PrismaTrackingSessionRepository retains transitional @carbroz/common ownership');
   }
 }
 
