@@ -2,18 +2,38 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const target = path.join(root, 'tests/integration/application/tracking-notification-engine.test.ts');
 const core = path.join(root, 'tools/architecture-closeout-quality-core.mjs');
 
-if (fs.existsSync(target)) {
-  const source = fs.readFileSync(target, 'utf8');
-  const lines = source.split(/\r?\n/).slice(0, 220);
-  console.log('[architecture-closeout-quality] tracking fixture diagnostic begin');
-  for (let index = 0; index < lines.length; index += 1) {
-    console.log(String(index + 1).padStart(4, '0') + ' | ' + lines[index]);
-  }
-  console.log('[architecture-closeout-quality] tracking fixture diagnostic end');
+if (!fs.existsSync(core)) {
+  throw new Error('Final architecture quality core helper is missing');
 }
+
+let source = fs.readFileSync(core, 'utf8');
+
+const replacements = [
+  [
+    "const needsPublicId = !/\\bfindByPublicId\\s*:/.test(source);",
+    "const needsPublicId = !/\\b(?:async\\s+)?findByPublicId\\s*(?::|\\()/.test(source);",
+  ],
+  [
+    "const needsBookingId = !/\\bfindByBookingId\\s*:/.test(source);",
+    "const needsBookingId = !/\\b(?:async\\s+)?findByBookingId\\s*(?::|\\()/.test(source);",
+  ],
+  [
+    "if (!/\\bfindByPublicId\\s*:/.test(source) || !/\\bfindByBookingId\\s*:/.test(source)) {",
+    "if (!/\\b(?:async\\s+)?findByPublicId\\s*(?::|\\()/.test(source) || !/\\b(?:async\\s+)?findByBookingId\\s*(?::|\\()/.test(source)) {",
+  ],
+];
+
+for (const [before, after] of replacements) {
+  if (!source.includes(before)) {
+    throw new Error(`Unable to locate tracking fixture convergence marker: ${before}`);
+  }
+  source = source.replace(before, after);
+}
+
+fs.writeFileSync(core, source);
+console.log('[architecture-closeout-quality] tracking repository fixture detector accepts property and method syntax');
 
 try {
   await import('./architecture-closeout-quality-core.mjs');
