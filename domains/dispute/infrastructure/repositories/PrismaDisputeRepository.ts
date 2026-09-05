@@ -19,8 +19,8 @@ export class PrismaDisputeRepository implements IDisputeRepository {
       raisedByActorType: record.raisedByActorType as 'CUSTOMER' | 'PARTNER',
       disputeReason: record.disputeReason,
       description: record.description,
-      requestedRefundAmount: Money.fromPaise(record.requestedRefundPaise),
-      refundedAmount: Money.fromPaise(record.refundedAmountPaise),
+      requestedRefundAmount: Money.fromMinor(record.requestedRefundPaise),
+      refundedAmount: Money.fromMinor(record.refundedAmountPaise),
       status: record.status as DisputeStatus,
       resolutionNotes: record.resolutionNotes,
       resolvedAt: record.resolvedAt,
@@ -37,8 +37,8 @@ export class PrismaDisputeRepository implements IDisputeRepository {
         raisedByActorType: dispute.raisedByActorType,
         disputeReason: dispute.disputeReason,
         description: dispute.description,
-        requestedRefundPaise: dispute.requestedRefundAmount.amountPaise,
-        refundedAmountPaise: dispute.refundedAmount.amountPaise,
+        requestedRefundPaise: dispute.requestedRefundAmount.amountMinor,
+        refundedAmountPaise: dispute.refundedAmount.amountMinor,
         status: dispute.status,
       },
     });
@@ -49,7 +49,7 @@ export class PrismaDisputeRepository implements IDisputeRepository {
     const record = await this.prisma.dispute.update({
       where: { id: dispute.id },
       data: {
-        refundedAmountPaise: dispute.refundedAmount.amountPaise,
+        refundedAmountPaise: dispute.refundedAmount.amountMinor,
         status: dispute.status,
         resolutionNotes: dispute.resolutionNotes,
         resolvedAt: dispute.resolvedAt,
