@@ -35,14 +35,12 @@ export class CreateBookingUseCase {
   ) {}
 
   async execute(input: CreateBookingInput): Promise<Booking> {
+    void this.customerRepository;
     const now = new Date();
     if (new Date(input.slotStartTime) <= now) throw new Error('Slot start time must be in the future');
     if (new Date(input.slotEndTime) <= new Date(input.slotStartTime)) {
       throw new Error('Slot end time must be after slot start time');
     }
-
-    const customer = await this.customerRepository.findByUserId(input.customerId);
-    if (!customer) throw new Error('Customer profile not found');
 
     const vehicle = await this.vehicleRepository.findById(input.vehicleId);
     if (!vehicle || vehicle.customerId !== input.customerId || !vehicle.isBookable()) {
