@@ -16,7 +16,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: executableProductionFiles,
-      reporter: ['text', 'json', 'html'],
+      // Keep the strict coverage report actionable in CI: omit already-perfect files so
+      // closeout diagnostics show only production behavior that still needs tests.
+      reporter: [['text', { skipFull: true }], 'json', 'html'],
       thresholds: {
         lines: 85,
         functions: 85,
