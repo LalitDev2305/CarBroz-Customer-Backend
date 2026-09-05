@@ -8,14 +8,27 @@ function domainPublicIndexes(): string[] {
   const domainsRoot = path.join(root, 'domains');
   if (!fs.existsSync(domainsRoot)) return [];
 
-  return fs.readdirSync(domainsRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => path.join(domainsRoot, entry.name, 'public', 'index.ts'))
-    .filter((file) => fs.existsSync(file));
+  const indexes: string[] = [];
+  const visit = (directory: string): void => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (entry.name === 'node_modules' || entry.name === 'dist') continue;
+      const absolute = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        visit(absolute);
+        continue;
+      }
+      if (entry.isFile() && entry.name === 'index.ts' && path.basename(path.dirname(absolute)) === 'public') {
+        indexes.push(absolute);
+      }
+    }
+  };
+
+  visit(domainsRoot);
+  return indexes.sort();
 }
 
 describe('domain public boundary policy', () => {
-  it('does not expose concrete infrastructure implementations from domain public entry points', () => {
+  it('does not expose concrete infrastructure implementations from any domain public entry point', () => {
     const violations = domainPublicIndexes().flatMap((file) => {
       const source = fs.readFileSync(file, 'utf8');
       const matches = source.split(/\r?\n/)
