@@ -26,19 +26,19 @@ describe('Phase 22 — Corporate Accounts, Fleet Management & B2B Billing Domain
 
     expect(account.status).toBe('PENDING_APPROVAL');
     expect(account.creditLimitPaise).toBe(0n);
-    expect(account.canCoverAmount(Money.fromPaise(50000))).toBe(false);
+    expect(account.canCoverAmount(Money.fromMinor(50000))).toBe(false);
 
-    account.approve(Money.fromPaise(500000)); // 5000 INR
+    account.approve(Money.fromMinor(500000));
     expect(account.status).toBe('ACTIVE');
     expect(account.creditLimitPaise).toBe(500000n);
-    expect(account.canCoverAmount(Money.fromPaise(50000))).toBe(true);
+    expect(account.canCoverAmount(Money.fromMinor(50000))).toBe(true);
 
-    account.adjustCreditLimit(Money.fromPaise(1000000)); // 10000 INR
+    account.adjustCreditLimit(Money.fromMinor(1000000));
     expect(account.creditLimitPaise).toBe(1000000n);
 
     account.suspend('Payment default');
     expect(account.status).toBe('SUSPENDED');
-    expect(account.canCoverAmount(Money.fromPaise(50000))).toBe(false);
+    expect(account.canCoverAmount(Money.fromMinor(50000))).toBe(false);
   });
 
   it('should instantiate CorporateMember and update status', () => {
@@ -92,11 +92,11 @@ describe('Phase 22 — Corporate Accounts, Fleet Management & B2B Billing Domain
       corporateAccountId: 1,
       billingPeriodStart: new Date('2026-08-01'),
       billingPeriodEnd: new Date('2026-08-31'),
-      subtotalPaise: 100000, // 1000 INR
+      subtotalPaise: 100000,
       cgstPaise: 9000,
       sgstPaise: 9000,
       igstPaise: 0,
-      totalAmountPaise: 118000, // 1180 INR
+      totalAmountPaise: 118000,
       dueDate: new Date('2026-09-15'),
       lines: [
         {
