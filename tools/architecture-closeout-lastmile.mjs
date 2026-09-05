@@ -2,6 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
+const write = (relative, content) => {
+  const file = path.join(root, relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, content.endsWith('\n') ? content : `${content}\n`);
+};
+
 const bookingUseCases = path.join(root, 'domains/booking/application/BookingUseCases.ts');
 if (!fs.existsSync(bookingUseCases)) throw new Error('Booking application file missing during last-mile closeout');
 
@@ -13,11 +19,7 @@ if (classStart >= 0) {
   source = source.slice(0, classStart) + source.slice(nextBoundary);
 }
 
-// Remove generated symbol documentation that would otherwise incorrectly claim Booking owns dispatch.
 source = source.replace(/^\/\*\*[^\n]*AssignPartnerToBookingUseCase[^\n]*\*\/\r?\n/m, '');
-
-// The self-import convergence step may rewrite workspace imports to relative paths, so remove the
-// now-unused Partner repository import by symbol rather than by one historical module specifier.
 source = source.replace(/^import\s+type\s+\{[^\n}]*IPartnerRepository[^\n}]*\}\s+from\s+['"][^'"]+['"];?\r?\n/m, '');
 
 const executableResidue = source.split(/\r?\n/).filter(
@@ -35,4 +37,55 @@ if (!fs.existsSync(operationsPublic) || !fs.readFileSync(operationsPublic, 'utf8
   throw new Error('Operations dispatch owner is not publicly exposed');
 }
 
-console.log('[architecture-closeout-lastmile] Booking dispatch duplicate and stale ownership docs removed; Operations is the single assignment owner');
+write('tests/contracts/canonical-public-contracts.contract.test.ts', `import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+const root = process.cwd();
+const publicEntries = [
+  'domains/identity/public/index.ts',
+  'domains/partner/public/index.ts',
+  'domains/customer/public/index.ts',
+  'domains/catalog-pricing/public/index.ts',
+  'domains/booking/public/index.ts',
+  'domains/operations/public/index.ts',
+  'domains/financials/public/index.ts',
+  'domains/communications/public/index.ts',
+  'domains/engagement/public/index.ts',
+  'domains/configuration/public/index.ts',
+  'domains/dispute/public/index.ts',
+  'domains/enterprise/public/index.ts',
+  'domains/audit/public/index.ts',
+  'sdui/registry/public/index.ts',
+] as const;
+
+describe('canonical public contracts', () => {
+  it('publishes deliberate bounded-context entry points without concrete infrastructure', () => {
+    for (const entry of publicEntries) {
+      const file = path.join(root, entry);
+      expect(fs.existsSync(file)).toBe(true);
+      const publicSource = fs.readFileSync(file, 'utf8');
+      expect(publicSource).not.toContain('/infrastructure/');
+      expect(publicSource).not.toContain('@prisma/client');
+    }
+  });
+
+  it('keeps universal Money and strict ExecutionContext authority in Foundation', () => {
+    const money = fs.readFileSync(path.join(root, 'foundation/kernel/src/domain/Money.ts'), 'utf8');
+    const contracts = fs.readFileSync(path.join(root, 'foundation/kernel/src/application/contracts.ts'), 'utf8');
+    expect(money).toContain('class Money');
+    expect(money).toContain('amountMinor');
+    expect(contracts).toContain('interface ExecutionContext');
+    expect(contracts).toContain('actor: ActorContext');
+    expect(contracts).toContain('id: number');
+    expect(contracts).not.toContain('actor?:');
+  });
+});
+`);
+
+// The finalizer has completed before this helper runs. It is intentionally absent from the frozen
+// repository, so remove it before lint/coverage inspect the final candidate rather than migration tooling.
+fs.rmSync(path.join(root, 'tools/architecture-closeout-finalize.mjs'), { force: true });
+fs.rmSync(path.join(root, 'tools/architecture-closeout-postfinal.mjs'), { force: true });
+
+console.log('[architecture-closeout-lastmile] Booking dispatch ownership, public-contract test and temporary finalizer cleanup completed');
