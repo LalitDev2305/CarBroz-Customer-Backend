@@ -12,4 +12,14 @@ describe('strict production coverage diagnostics policy', () => {
     expect(config).toContain("'json'");
     expect(config).toContain("'html'");
   });
+
+  it('executes CarBroz workspace package imports from the TypeScript source being certified', () => {
+    const config = fs.readFileSync(path.join(process.cwd(), 'vitest.config.ts'), 'utf8');
+
+    expect(config).toContain('findWorkspaceSourceAliases');
+    expect(config).toContain("packageJson.name?.startsWith('@carbroz/')");
+    expect(config).toContain('alias: findWorkspaceSourceAliases()');
+    expect(config).toContain("path.join(packageRoot, 'public', 'index.ts')");
+    expect(config).toContain("path.join(packageRoot, 'src', 'public', 'index.ts')");
+  });
 });
