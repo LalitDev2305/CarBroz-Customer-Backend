@@ -123,8 +123,18 @@ function normalizeTrackingBehavioralFixture() {
   source = source.replace(/bookingPublicId:\s*dummyBooking\.publicId!,/g, 'sessionId: session.id,');
   source = source.replace(/^\s*partnerUserId:\s*20,?\s*$/gm, '');
 
-  if (!source.includes("import { TrackingSession } from '@carbroz/domain-operations';")) {
+  const operationsImports = [...source.matchAll(/import\s*\{([^}]*)\}\s*from\s*['"]@carbroz\/domain-operations['"];?/g)];
+  const hasTrackingSessionImport = operationsImports.some((match) =>
+    match[1].split(',').map((name) => name.trim()).some((name) => name === 'TrackingSession' || name.endsWith(' as TrackingSession')),
+  );
+  if (!hasTrackingSessionImport) {
     source = "import { TrackingSession } from '@carbroz/domain-operations';\n" + source;
+  }
+
+  const duplicateTrackingSessionImports = [...source.matchAll(/import\s*\{([^}]*)\}\s*from\s*['"]@carbroz\/domain-operations['"];?/g)]
+    .reduce((count, match) => count + match[1].split(',').map((name) => name.trim()).filter((name) => name === 'TrackingSession' || name.endsWith(' as TrackingSession')).length, 0);
+  if (duplicateTrackingSessionImports !== 1) {
+    throw new Error(`Tracking behavioral fixture must import canonical TrackingSession exactly once; found ${duplicateTrackingSessionImports}`);
   }
 
   const updateUseCaseMarker = '    const updateUseCase = new UpdateLiveGpsLocationUseCase(mockTrackingRepo';
