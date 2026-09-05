@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Execute deterministic hardening plus canonical runtime-regression convergence, including seeded Tracking behavior, before evaluating the final candidate tree.
+// Execute deterministic hardening plus canonical runtime-regression convergence, including symbol-aware Tracking import reuse, before evaluating the final candidate tree.
 await import('./architecture-closeout-hardening.mjs');
 await import('./architecture-closeout-runtime-regression.mjs');
 
