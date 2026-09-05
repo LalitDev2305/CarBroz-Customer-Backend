@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   GetInitConfigUseCase,
@@ -31,6 +33,16 @@ function providers(values: Readonly<Record<string, string>>, flags: Readonly<Rec
 }
 
 describe('Configuration frontend bootstrap freeze', () => {
+  it('has exactly one physical GetInitConfigUseCase owner under Configuration application', () => {
+    const root = process.cwd();
+    const canonical = path.join(root, 'domains/configuration/application/use-cases/GetInitConfigUseCase.ts');
+    const legacy = path.join(root, 'apps/api/src/modules/config/use-cases/GetInitConfigUseCase.ts');
+    expect(fs.existsSync(canonical)).toBe(true);
+    expect(fs.existsSync(legacy)).toBe(false);
+    const source = fs.readFileSync(canonical, 'utf8');
+    expect(source).not.toContain("from '@carbroz/domain-configuration'");
+  });
+
   it('keeps Configuration as the single owner of the complete frontend startup snapshot', async () => {
     const { configProvider, featureFlagProvider } = providers(
       {
