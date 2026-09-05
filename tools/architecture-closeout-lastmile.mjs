@@ -171,7 +171,7 @@ export function toExecutionContext(request: FastifyRequest): ExecutionContext {
   const customerController = path.join(apiRoot, 'surfaces/customer/controllers/customer.customer.controller.ts');
   if (fs.existsSync(customerController)) {
     let content = fs.readFileSync(customerController, 'utf8');
-    const methodPattern = /  private getContext\(req: FastifyRequest\): ExecutionContext \{[\s\S]*?\n  \}\n\n  async getProfile/;
+    const methodPattern = / {2}private getContext\(req: FastifyRequest\): ExecutionContext \{[\s\S]*?\n {2}\}\n\n {2}async getProfile/;
     if (!methodPattern.test(content)) throw new Error('Customer controller context adapter shape changed; refusing a partial actor rewrite');
     content = content.replace(
       methodPattern,
