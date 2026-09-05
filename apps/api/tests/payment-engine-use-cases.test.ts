@@ -11,6 +11,7 @@ import {
   PartnerPayout,
   Payment,
   PaymentWebhook,
+  TaxCalculator,
 } from '@carbroz/common';
 import type {
   IPaymentRepository,
@@ -189,6 +190,7 @@ describe('Payment Engine Use Cases & Webhook Security', () => {
     payoutRepo = new MemoryPayoutRepository();
     provider = new RazorpayPaymentGatewayProvider('dummy_key', 'test_secret');
     txProvider = { runInTransaction: async (cb) => cb() };
+    dummyBooking.status = 'CREATED';
 
     bookingRepo = {
       findById: async (id: number) => (id === 100 ? dummyBooking : null),
@@ -196,8 +198,9 @@ describe('Payment Engine Use Cases & Webhook Security', () => {
       update: async (b: Booking) => b,
     };
 
+    const taxCalculator = new TaxCalculator();
     createOrderUseCase = new CreatePaymentOrderUseCase(paymentRepo, bookingRepo, provider);
-    generateInvoiceUseCase = new GenerateInvoiceUseCase(invoiceRepo, bookingRepo);
+    generateInvoiceUseCase = new GenerateInvoiceUseCase(invoiceRepo, bookingRepo, taxCalculator);
     processWebhookUseCase = new ProcessPaymentWebhookUseCase(
       paymentRepo,
       bookingRepo,
@@ -205,14 +208,14 @@ describe('Payment Engine Use Cases & Webhook Security', () => {
       generateInvoiceUseCase,
       txProvider
     );
-    createPayoutUseCase = new CreatePayoutEligibilityUseCase(payoutRepo, bookingRepo);
+    createPayoutUseCase = new CreatePayoutEligibilityUseCase(payoutRepo, bookingRepo, taxCalculator);
   });
 
   it('should create payment checkout order', async () => {
     const res = await createOrderUseCase.execute({ bookingPublicId: 'bk_100', customerId: 10 });
     expect(res.payment.status).toBe('PENDING');
     expect(res.payment.amountPaise).toBe(47200);
-    expect(res.checkoutParams.orderId).toBeDefined();
+    expect(res.checkoutParams.providerOrderId).toBeDefined();
   });
 
   it('should process payment webhook safely and generate tax invoice', async () => {
@@ -234,8 +237,6 @@ describe('Payment Engine Use Cases & Webhook Security', () => {
     });
 
     const rawBuffer = Buffer.from(rawPayload, 'utf8');
-
-    // Generate valid HMAC signature
     const signature = crypto
       .createHmac('sha256', 'test_secret')
       .update(rawBuffer)
@@ -279,8 +280,6 @@ describe('Payment Engine Use Cases & Webhook Security', () => {
     const signature = crypto.createHmac('sha256', 'test_secret').update(rawBuffer).digest('hex');
 
     await processWebhookUseCase.execute({ rawBodyBuffer: rawBuffer, signature, webhookSecret: 'test_secret' });
-
-    // Replayed Webhook Call
     const replayResult = await processWebhookUseCase.execute({ rawBodyBuffer: rawBuffer, signature, webhookSecret: 'test_secret' });
     expect(replayResult.message).toContain('idempotent');
   });
@@ -302,6 +301,6 @@ describe('Payment Engine Use Cases & Webhook Security', () => {
     const payout = await createPayoutUseCase.execute(100);
     expect(payout.status).toBe('SCHEDULED');
     expect(payout.grossAmountPaise).toBe(47200);
-    expect(payout.netPayoutPaise).toBe(39648); // 47200 - 15% (7080) - 1% (472)
+    expect(payout.netPayoutPaise).toBe(39648);
   });
 });
