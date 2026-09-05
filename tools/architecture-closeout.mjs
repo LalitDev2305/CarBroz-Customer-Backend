@@ -202,6 +202,25 @@ export class SendMultiChannelNotificationUseCase {
   console.log('[closeout-orchestrator] Communications application authorities converged on repository ports');
 }
 
+function enforcePermanentFreezeCi() {
+  const ciFile = path.join(root, '.github/workflows/ci.yml');
+  if (!fs.existsSync(ciFile)) throw new Error('Permanent CI workflow is missing');
+  let ci = fs.readFileSync(ciFile, 'utf8');
+  if (!ci.includes('pnpm install --frozen-lockfile')) {
+    throw new Error('Permanent CI did not converge to frozen-lockfile installation');
+  }
+  if (!ci.includes('pnpm test:freeze')) {
+    const marker = `      - name: Upload Vitest diagnostic\n        if: failure()\n        uses: actions/upload-artifact@v4\n        with:\n          name: vitest-diagnostic\n          path: vitest-output.txt\n          if-no-files-found: error\n`;
+    if (!ci.includes(marker)) throw new Error('Unable to locate permanent CI Vitest diagnostic stage');
+    ci = ci.replace(marker, `${marker}\n      - name: Enforce production coverage freeze\n        run: pnpm test:freeze\n`);
+    write(ciFile, ci);
+  }
+  if (!fs.readFileSync(ciFile, 'utf8').includes('pnpm test:freeze')) {
+    throw new Error('Permanent CI coverage freeze gate was not installed');
+  }
+  console.log('[closeout-orchestrator] permanent CI enforces frozen lockfile and production coverage freeze');
+}
+
 function removeExecutedCloseoutHelpers() {
   for (const helper of [
     'architecture-closeout-self-imports.mjs',
@@ -223,6 +242,7 @@ try {
   execFileSync(process.execPath, [finopsConvergence], { cwd: root, stdio: 'inherit' });
   normalizeObservabilityAdapter();
   normalizeCommunicationsApplication();
+  enforcePermanentFreezeCi();
   removeExecutedCloseoutHelpers();
 } finally {
   fs.rmSync(driver, { force: true });
