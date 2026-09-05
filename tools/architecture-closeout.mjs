@@ -46,6 +46,11 @@ const write = (file, content) => {
   fs.writeFileSync(file, content.endsWith('\n') ? content : `${content}\n`);
 };
 
+function syntaxCheck(file, label) {
+  execFileSync(process.execPath, ['--check', file], { cwd: root, stdio: 'inherit' });
+  console.log(`[closeout-orchestrator] ${label} syntax verified`);
+}
+
 function normalizePostpatchSelfImportStage() {
   const postpatch = path.join(root, 'tools/architecture-closeout-postpatch.mjs');
   if (!fs.existsSync(postpatch)) return;
@@ -260,6 +265,10 @@ function removeExecutedCloseoutHelpers() {
 }
 
 try {
+  syntaxCheck(selfImportResolver, 'self-import convergence helper');
+  syntaxCheck(partnerConvergence, 'Partner convergence helper');
+  syntaxCheck(finopsConvergence, 'Financials/Operations convergence helper');
+  syntaxCheck(apiConvergence, 'API convergence helper');
   normalizePostpatchSelfImportStage();
   execFileSync(process.execPath, ['--check', driver], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [driver], { cwd: root, stdio: 'inherit' });
