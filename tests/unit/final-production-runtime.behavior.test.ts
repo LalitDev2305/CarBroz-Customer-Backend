@@ -149,8 +149,7 @@ function collectCallbacks(value: unknown, callbacks: Callable[]): void {
 function dependency(mode: Mode, callbacks: Callable[], literal?: unknown): any {
   const target = function runtimeDependency() {};
   const entity = fx({ status: mode === 'conflict' ? 'COMPLETED' : 'ACTIVE', value: literal ?? 'sample' });
-  let proxy: any;
-  proxy = new Proxy(target, {
+  const proxy: any = new Proxy(target, {
     get(_target, property) {
       if (property === 'then') return undefined;
       if (property === Symbol.toPrimitive) return () => 1;
