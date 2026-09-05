@@ -11,10 +11,12 @@ const selfImportResolver = path.join(root, 'tools/architecture-closeout-self-imp
 const partnerConvergence = path.join(root, 'tools/architecture-closeout-partner.mjs');
 const finopsConvergence = path.join(root, 'tools/architecture-closeout-finops.mjs');
 const apiConvergence = path.join(root, 'tools/architecture-closeout-api.mjs');
+const qualityConvergence = path.join(root, 'tools/architecture-closeout-quality.mjs');
 if (!fs.existsSync(selfImportResolver)) throw new Error('Required architecture self-import resolver is missing');
 if (!fs.existsSync(partnerConvergence)) throw new Error('Required Partner application closeout helper is missing');
 if (!fs.existsSync(finopsConvergence)) throw new Error('Required Financials/Operations closeout helper is missing');
 if (!fs.existsSync(apiConvergence)) throw new Error('Required API public-boundary closeout helper is missing');
+if (!fs.existsSync(qualityConvergence)) throw new Error('Required final architecture quality helper is missing');
 let driverSource = execFileSync('git', ['show', `${baselineCommit}:tools/architecture-closeout.mjs`], {
   cwd: root,
   encoding: 'utf8',
@@ -257,6 +259,7 @@ function removeExecutedCloseoutHelpers() {
     'architecture-closeout-partner.mjs',
     'architecture-closeout-finops.mjs',
     'architecture-closeout-api.mjs',
+    'architecture-closeout-quality.mjs',
     'architecture-closeout-residue.mjs',
   ]) {
     fs.rmSync(path.join(root, 'tools', helper), { force: true });
@@ -269,12 +272,14 @@ try {
   syntaxCheck(partnerConvergence, 'Partner convergence helper');
   syntaxCheck(finopsConvergence, 'Financials/Operations convergence helper');
   syntaxCheck(apiConvergence, 'API convergence helper');
+  syntaxCheck(qualityConvergence, 'final architecture quality helper');
   normalizePostpatchSelfImportStage();
   execFileSync(process.execPath, ['--check', driver], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [driver], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [partnerConvergence], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [finopsConvergence], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [apiConvergence], { cwd: root, stdio: 'inherit' });
+  execFileSync(process.execPath, [qualityConvergence], { cwd: root, stdio: 'inherit' });
   enforceApiTransportCloseout();
   normalizeObservabilityAdapter();
   normalizeCommunicationsApplication();
