@@ -9,6 +9,7 @@ on:
       - tools/architecture-closeout-residue.mjs
       - tools/architecture-closeout-finalize.mjs
       - tools/architecture-closeout-lastmile.mjs
+      - tools/architecture-closeout-quality.mjs
       - tools/generate-module-readmes.mjs
       - tests/integration/database/**
       - .github/workflows/architecture-closeout.yml
