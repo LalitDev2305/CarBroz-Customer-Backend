@@ -6,6 +6,8 @@ on:
       - fix/stage-a-production-definitions
     paths:
       - tools/architecture-closeout.mjs
+      - tools/architecture-closeout-residue.mjs
+      - tools/architecture-closeout-finalize.mjs
       - tools/generate-module-readmes.mjs
       - .github/workflows/architecture-closeout.yml
   workflow_dispatch:
@@ -44,6 +46,9 @@ jobs:
       - name: Execute constitution closeout migration
         run: node tools/architecture-closeout.mjs
 
+      - name: Finalize product-surface isolation
+        run: node tools/architecture-closeout-finalize.mjs
+
       - name: Generate final module architecture documentation
         run: node tools/generate-module-readmes.mjs
 
@@ -65,9 +70,14 @@ jobs:
       - name: Test final monorepo
         run: pnpm test -- --run
 
+      - name: Enforce final production coverage
+        run: pnpm test:freeze
+
       - name: Remove one-time migration tooling
         run: |
           rm -f tools/architecture-closeout.mjs
+          rm -f tools/architecture-closeout-residue.mjs
+          rm -f tools/architecture-closeout-finalize.mjs
           rm -f tools/generate-module-readmes.mjs
           rm -f .github/workflows/architecture-closeout.yml
           rmdir tools 2>/dev/null || true
