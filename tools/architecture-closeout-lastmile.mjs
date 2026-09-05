@@ -8,6 +8,149 @@ const write = (relative, content) => {
   fs.writeFileSync(file, content.endsWith('\n') ? content : `${content}\n`);
 };
 
+function walk(dir) {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const absolute = path.join(dir, entry.name);
+    return entry.isDirectory() ? walk(absolute) : [absolute];
+  });
+}
+
+function normalizeIdentityAuthorizationComposition() {
+  write('domains/identity/infrastructure/authorization/AuthorizationProvider.ts', `import type { IAdminRoleRepository } from '../../domain/repositories/IAdminRoleRepository.js';
+import type { IRoleRepository } from '../../domain/repositories/IRoleRepository.js';
+import type { IPermissionRepository } from '../../domain/repositories/IPermissionRepository.js';
+
+/** Identity-owned RBAC implementation. API composition consumes only the public authorization port. */
+export class AuthorizationProvider {
+  constructor(
+    private readonly adminRoleRepository: IAdminRoleRepository,
+    private readonly roleRepository: IRoleRepository,
+    private readonly permissionRepository: IPermissionRepository,
+  ) {}
+
+  async hasPermission(userId: number, permissionKey: string): Promise<boolean> {
+    const roleIds = await this.adminRoleRepository.findRolesForUser(userId);
+    if (roleIds.length === 0) return false;
+
+    for (const roleId of roleIds) {
+      const role = await this.roleRepository.findWithPermissions(roleId);
+      if (role?.name === 'SUPER_ADMIN') return true;
+    }
+
+    const permission = await this.permissionRepository.findByKey(permissionKey);
+    if (!permission) return false;
+
+    for (const roleId of roleIds) {
+      const role = await this.roleRepository.findWithPermissions(roleId);
+      if (role?.permissions.includes(permission.id)) return true;
+    }
+    return false;
+  }
+
+  async hasAnyPermission(userId: number, permissionKeys: string[]): Promise<boolean> {
+    for (const permissionKey of permissionKeys) {
+      if (await this.hasPermission(userId, permissionKey)) return true;
+    }
+    return false;
+  }
+
+  async hasAllPermissions(userId: number, permissionKeys: string[]): Promise<boolean> {
+    for (const permissionKey of permissionKeys) {
+      if (!(await this.hasPermission(userId, permissionKey))) return false;
+    }
+    return true;
+  }
+
+  async getRoles(userId: number): Promise<string[]> {
+    const roleIds = await this.adminRoleRepository.findRolesForUser(userId);
+    const roles = [];
+    for (const roleId of roleIds) {
+      const role = await this.roleRepository.findById(roleId);
+      if (role) roles.push(role.name);
+    }
+    return roles;
+  }
+}
+`);
+
+  const identityModuleFile = path.join(root, 'domains/identity/identity.module.ts');
+  if (!fs.existsSync(identityModuleFile)) throw new Error('Identity composition module missing during last-mile closeout');
+  let identityModule = fs.readFileSync(identityModuleFile, 'utf8');
+  identityModule = identityModule.replace(
+    "import { asFunction, type AwilixContainer } from 'awilix';",
+    "import { asClass, asFunction, type AwilixContainer } from 'awilix';",
+  );
+  if (!identityModule.includes("./infrastructure/authorization/AuthorizationProvider.js")) {
+    const repositoryImport = "import { PrismaAdminRoleRepository } from './infrastructure/repositories/PrismaAdminRoleRepository.js';";
+    if (!identityModule.includes(repositoryImport)) throw new Error('Identity module repository import marker missing');
+    identityModule = identityModule.replace(
+      repositoryImport,
+      `${repositoryImport}\nimport { AuthorizationProvider } from './infrastructure/authorization/AuthorizationProvider.js';`,
+    );
+  }
+  const registrationMarker = '  container.register({\n';
+  if (!identityModule.includes('authorizationProvider:')) {
+    if (!identityModule.includes(registrationMarker)) throw new Error('Identity registration marker missing');
+    identityModule = identityModule.replace(
+      registrationMarker,
+      `${registrationMarker}    authorizationProvider: asClass(AuthorizationProvider).singleton(),\n`,
+    );
+  }
+  fs.writeFileSync(identityModuleFile, identityModule);
+
+  const apiContainerFile = path.join(root, 'apps/api/src/bootstrap/container/index.ts');
+  if (!fs.existsSync(apiContainerFile)) throw new Error('Canonical API bootstrap container missing during last-mile closeout');
+  let apiContainer = fs.readFileSync(apiContainerFile, 'utf8');
+  apiContainer = apiContainer.replace(
+    /import\s+\{([^}]*)\}\s+from\s+(['"]@carbroz\/domain-identity['"]);?/g,
+    (_full, names, moduleSpecifier) => {
+      const kept = names.split(',').map((name) => name.trim()).filter((name) => name && name !== 'AuthorizationProvider');
+      return kept.length ? `import { ${kept.join(', ')} } from ${moduleSpecifier};` : '';
+    },
+  );
+  apiContainer = apiContainer
+    .replace(/^\s*authorizationProvider:\s*asClass\(AuthorizationProvider\)\.singleton\(\),?\r?\n/gm, '')
+    .replace(/^\s*authorizationProvider:[^\n]*AuthorizationProvider[^\n]*\r?\n/gm, '');
+
+  if (apiContainer.includes('AuthorizationProvider')) {
+    throw new Error('API composition still references the concrete Identity AuthorizationProvider');
+  }
+  if (!apiContainer.includes('registerIdentityModule')) {
+    throw new Error('API composition does not invoke the Identity-owned composition module');
+  }
+  fs.writeFileSync(apiContainerFile, apiContainer);
+}
+
+function normalizeApiActorContext() {
+  const apiRoot = path.join(root, 'apps/api/src');
+  for (const file of walk(apiRoot).filter((candidate) => candidate.endsWith('.ts'))) {
+    const content = fs.readFileSync(file, 'utf8');
+    if (!content.includes('ActorIdentity')) continue;
+    fs.writeFileSync(file, content.replace(/\bActorIdentity\b/g, 'ActorContext'));
+  }
+  const residue = walk(apiRoot)
+    .filter((candidate) => candidate.endsWith('.ts'))
+    .filter((file) => fs.readFileSync(file, 'utf8').includes('ActorIdentity'));
+  if (residue.length) throw new Error(`Non-canonical ActorIdentity survived API convergence: ${residue.join(', ')}`);
+}
+
+function normalizeConstitutionReferences() {
+  const textExtensions = new Set(['.md', '.ts', '.mjs', '.yml', '.yaml', '.json']);
+  for (const base of ['docs', 'tests', 'tools', '.github']) {
+    for (const file of walk(path.join(root, base))) {
+      if (!textExtensions.has(path.extname(file))) continue;
+      const content = fs.readFileSync(file, 'utf8');
+      if (!content.includes('MASTER_BACKEND_CONSTITUTION.md')) continue;
+      fs.writeFileSync(file, content.replaceAll('MASTER_BACKEND_CONSTITUTION.md', 'MASTER-BACKEND-CONSTITUTION.md'));
+    }
+  }
+}
+
+normalizeIdentityAuthorizationComposition();
+normalizeApiActorContext();
+normalizeConstitutionReferences();
+
 const bookingUseCases = path.join(root, 'domains/booking/application/BookingUseCases.ts');
 if (!fs.existsSync(bookingUseCases)) throw new Error('Booking application file missing during last-mile closeout');
 
@@ -88,4 +231,4 @@ describe('canonical public contracts', () => {
 fs.rmSync(path.join(root, 'tools/architecture-closeout-finalize.mjs'), { force: true });
 fs.rmSync(path.join(root, 'tools/architecture-closeout-postfinal.mjs'), { force: true });
 
-console.log('[architecture-closeout-lastmile] Booking dispatch ownership, public-contract test and temporary finalizer cleanup completed');
+console.log('[architecture-closeout-lastmile] Identity authorization ownership, API actor context, Booking dispatch ownership, public-contract test and temporary finalizer cleanup completed');
