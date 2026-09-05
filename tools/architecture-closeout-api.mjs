@@ -97,9 +97,8 @@ for (const file of walk(apiRoot).filter(f => f.endsWith('.ts'))) {
   if (!/\bIRequestContext\b/.test(c)) continue;
   c = c.replace(/import\s+(?:type\s+)?\{\s*IRequestContext\s*\}\s+from\s+['"][^'"]+['"];?\s*/g, '');
   c = c.replace(/\bIRequestContext\b/g, 'ExecutionContext');
-  // Common legacy request-context object shapes used by Partner/KYC/Maps controllers.
   c = c.replace(/const context = \{[\s\S]*?authenticatedUser:\s*request\.user\s+as\s+any[\s\S]*?\}\s+as\s+ExecutionContext;/g, 'const context = toExecutionContext(request);');
-  if (c.includes('toExecutionContext(request)') && !c.includes("from '../../../context/toExecutionContext.js'") && !c.includes("from '../../context/toExecutionContext.js'") && !c.includes("from '../context/toExecutionContext.js'")) {
+  if (c.includes('toExecutionContext(request)') && !c.includes('toExecutionContext.js')) {
     let rel = path.relative(path.dirname(file), path.join(apiRoot,'context/toExecutionContext.ts')).replaceAll('\\','/').replace(/\.ts$/,'.js');
     if (!rel.startsWith('.')) rel=`./${rel}`;
     c = `import { toExecutionContext } from '${rel}';\n${c}`;
@@ -107,21 +106,53 @@ for (const file of walk(apiRoot).filter(f => f.endsWith('.ts'))) {
   write(file,c);
 }
 
-// Old API auth-domain artifacts were deleted by design. JWT/RBAC transport must consume Identity/Foundation public contracts.
-for (const file of walk(apiRoot).filter(f => f.endsWith('.ts'))) {
-  let c=read(file);
-  c=c.replace(/from\s+['"][^'"]*modules\/auth\/infrastructure\/jwt\.service\.interface\.js['"]/g, "from '@carbroz/domain-identity'");
-  c=c.replace(/from\s+['"][^'"]*modules\/auth\/domain\/rbac\.js['"]/g, "from '@carbroz/domain-identity'");
-  c=c.replace(/from\s+['"][^'"]*domain\/rbac\.js['"]/g, "from '@carbroz/domain-identity'");
+// JwtPayload describes @fastify/jwt transport claims and remains transport-local rather than becoming an Identity domain type.
+const jwtPlugin = path.join(apiRoot, 'bootstrap/plugins/jwt.plugin.ts');
+if (exists(jwtPlugin)) {
+  let c = read(jwtPlugin);
+  c = c.replace(/^import\s+\{\s*JwtPayload\s*\}\s+from\s+['"][^'"]+['"];?\s*$/m, '');
+  if (!c.includes('interface JwtPayload {')) {
+    const marker = "import { JwtConfig } from '../config/runtime-config.js';";
+    const typeDef = `\n\ninterface JwtPayload {\n  sub?: string;\n  id: string;\n  phone: string;\n  roles: string[];\n  iat?: number;\n  exp?: number;\n  iss?: string;\n  aud?: string;\n}`;
+    if (!c.includes(marker)) throw new Error('JWT transport config import marker not found');
+    c = c.replace(marker, `${marker}${typeDef}`);
+  }
+  write(jwtPlugin, c);
+}
+
+// Route guard role/permission constants are HTTP authorization policy, not persistent Identity entities.
+const transportRbac = path.join(apiRoot, 'transport/auth/rbac.ts');
+write(transportRbac, `export enum AppRole {\n  CUSTOMER = 'CUSTOMER',\n  PARTNER = 'PARTNER',\n  ADMIN = 'ADMIN',\n}\n\nexport enum AppPermission {\n  USER_READ = 'USER_READ',\n  USER_WRITE = 'USER_WRITE',\n  BOOKING_READ = 'BOOKING_READ',\n  BOOKING_CREATE = 'BOOKING_CREATE',\n  SYSTEM_ADMIN = 'SYSTEM_ADMIN',\n}\n\nexport const RolePermissions: Readonly<Record<AppRole, readonly AppPermission[]>> = {\n  [AppRole.CUSTOMER]: [AppPermission.USER_READ, AppPermission.BOOKING_READ, AppPermission.BOOKING_CREATE],\n  [AppRole.PARTNER]: [AppPermission.USER_READ, AppPermission.USER_WRITE, AppPermission.BOOKING_READ],\n  [AppRole.ADMIN]: [AppPermission.SYSTEM_ADMIN],\n};\n`);
+for (const file of walk(apiRoot).filter(f => f.endsWith('.ts') && f !== transportRbac)) {
+  let c = read(file);
+  if (!/\b(?:AppRole|AppPermission|RolePermissions)\b/.test(c)) continue;
+  c = c.replace(/^import\s+\{[^\n]*(?:AppRole|AppPermission|RolePermissions)[^\n]*\}\s+from\s+['"]@carbroz\/domain-identity['"];?\s*$/m, (line) => {
+    const names = ['AppRole','AppPermission','RolePermissions'].filter(name => line.includes(name));
+    let rel = path.relative(path.dirname(file), transportRbac).replaceAll('\\','/').replace(/\.ts$/,'.js');
+    if (!rel.startsWith('.')) rel=`./${rel}`;
+    return `import { ${names.join(', ')} } from '${rel}';`;
+  });
   write(file,c);
 }
 
-// Partner status is a domain enum, never a free transport string.
-for (const file of walk(path.join(apiRoot,'surfaces/admin')).filter(f=>f.endsWith('.ts'))) {
-  let c=read(file);
-  if (c.includes("'ACTIVE' | 'SUSPENDED' | 'REJECTED'")) c=c.replace(/'ACTIVE' \| 'SUSPENDED' \| 'REJECTED'/g, 'PartnerStatus');
-  if (c.includes('PartnerStatus') && !c.includes("@carbroz/domain-partner")) c=`import { PartnerStatus } from '@carbroz/domain-partner';\n${c}`;
-  write(file,c);
+// Partner status is a domain enum; transport schema strings are explicitly converted at the boundary.
+const adminPartner = path.join(apiRoot,'surfaces/admin/controllers/admin-partner.controller.ts');
+if (exists(adminPartner)) {
+  let c=read(adminPartner);
+  if (!c.includes("@carbroz/domain-partner")) c=`import { PartnerStatus } from '@carbroz/domain-partner';\n${c}`;
+  c=c.replace(/status:\s*input\.status(?!\s+as\s+PartnerStatus)/g, 'status: input.status as PartnerStatus');
+  write(adminPartner,c);
+}
+
+// Dispute transport is split by authority. Customer may create a dispute, but global listing and
+// resolution are Admin-only. We intentionally do not expose an unscoped Customer list endpoint.
+const customerDispute = path.join(apiRoot,'surfaces/customer/routes/dispute.routes.ts');
+if (exists(customerDispute)) {
+  write(customerDispute, `import type { FastifyInstance } from 'fastify';\nimport { RaiseDisputeUseCase } from '@carbroz/domain-dispute';\nimport { ResponseHelper } from '../../../transport/response/ResponseHelper.js';\nimport { raiseDisputeSchema } from '../dto/dispute.dto.js';\n\n/** Customer-owned dispute creation endpoint. */\nexport async function registerCustomerDisputeRoutes(app: FastifyInstance): Promise<void> {\n  app.post('/', { preHandler: [app.authenticate] }, async (request, reply) => {\n    const input = raiseDisputeSchema.parse(request.body);\n    const user = request.user as { id: string | number; roles?: string[]; role?: string };\n    const roles = user.roles ?? (user.role ? [user.role] : []);\n    const actorType: 'CUSTOMER' | 'PARTNER' = roles.includes('PARTNER') ? 'PARTNER' : 'CUSTOMER';\n    const uc = app.diContainer.resolve<RaiseDisputeUseCase>('raiseDisputeUseCase');\n    const dispute = await uc.execute({\n      bookingPublicId: input.bookingPublicId,\n      actorId: Number(user.id),\n      actorType,\n      disputeReason: input.disputeReason,\n      description: input.description,\n      requestedRefundPaise: input.requestedRefundPaise,\n    });\n    return reply.status(201).send(ResponseHelper.created(dispute, 'Dispute raised successfully'));\n  });\n}\n`);
+}
+const adminDispute = path.join(apiRoot,'surfaces/admin/routes/dispute.routes.ts');
+if (exists(adminDispute)) {
+  write(adminDispute, `import type { FastifyInstance } from 'fastify';\nimport { DisputeStatus, ListDisputesUseCase, ResolveDisputeUseCase } from '@carbroz/domain-dispute';\nimport { ResponseHelper } from '../../../transport/response/ResponseHelper.js';\nimport { resolveDisputeSchema } from '../dto/dispute.dto.js';\n\n/** Admin-only global dispute listing and resolution endpoints. */\nexport async function registerAdminDisputeRoutes(app: FastifyInstance): Promise<void> {\n  app.get('/', { preHandler: [app.authenticate] }, async (request, reply) => {\n    const query = request.query as { status?: string; limit?: string; offset?: string };\n    const status = query.status ? query.status as DisputeStatus : undefined;\n    const uc = app.diContainer.resolve<ListDisputesUseCase>('listDisputesUseCase');\n    const disputes = await uc.execute(status, query.limit ? Number.parseInt(query.limit, 10) : 50, query.offset ? Number.parseInt(query.offset, 10) : 0);\n    return reply.send(ResponseHelper.success(disputes, 'Disputes retrieved successfully'));\n  });\n\n  app.post('/:publicId/resolve', { preHandler: [app.authenticate] }, async (request, reply) => {\n    const { publicId } = request.params as { publicId: string };\n    const input = resolveDisputeSchema.parse(request.body);\n    const user = request.user as { id: string | number };\n    const uc = app.diContainer.resolve<ResolveDisputeUseCase>('resolveDisputeUseCase');\n    const dispute = await uc.execute({\n      disputePublicId: publicId,\n      adminId: Number(user.id),\n      action: input.action,\n      approvedRefundPaise: input.approvedRefundPaise,\n      resolutionNotes: input.resolutionNotes,\n    });\n    return reply.send(ResponseHelper.success(dispute, 'Dispute resolved successfully'));\n  });\n}\n`);
 }
 
 // Remove known stale imports whose transport controllers were intentionally removed during topology convergence.
@@ -141,5 +172,6 @@ for (const file of walk(apiRoot).filter(f=>f.endsWith('.ts'))) {
     if (target && !target.startsWith(`${apiRoot}${path.sep}`)) violations.push(`${path.relative(root,file)} imports workspace source ${m[1]}`);
   }
 }
+if (exists(customerDispute) && /ListDisputesUseCase|GetDisputeUseCase/.test(read(customerDispute))) violations.push('Customer dispute surface exposes an unscoped read/list authority');
 if (violations.length) throw new Error(`API closeout boundary failed:\n${[...new Set(violations)].map(v=>`- ${v}`).join('\n')}`);
-console.log('[architecture-closeout-api] API imports public workspace boundaries and retains transport/composition ownership only');
+console.log('[architecture-closeout-api] API public contracts, transport auth policy, and dispute surface authority converged');
