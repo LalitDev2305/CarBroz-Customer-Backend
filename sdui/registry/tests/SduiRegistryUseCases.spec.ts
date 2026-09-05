@@ -38,6 +38,7 @@ describe('SDUI Registry application lifecycle', () => {
   const anonymousContext: ExecutionContext = {
     correlationId: 'test-anonymous',
     timestamp: new Date('2026-01-01T00:00:00.000Z'),
+    actor: undefined,
   };
 
   const validLayoutJson = {
