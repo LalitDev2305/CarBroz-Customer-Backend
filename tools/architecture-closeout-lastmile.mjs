@@ -171,16 +171,13 @@ export function toExecutionContext(request: FastifyRequest): ExecutionContext {
   const customerController = path.join(apiRoot, 'surfaces/customer/controllers/customer.customer.controller.ts');
   if (fs.existsSync(customerController)) {
     let content = fs.readFileSync(customerController, 'utf8');
-
-    // The migrated controller previously emitted a ternary-built optional actor. Match the declaration
-    // by its canonical type boundary rather than depending on its internal object formatting.
     content = content.replace(
-      /const\s+actor:\s*ActorContext\s*\|\s*undefined\s*=\s*[\s\S]*?;(?=\r?\n)/m,
+      /const\s+actor:\s*ActorContext(?:\s*\|\s*undefined)?\s*=\s*[\s\S]*?;(?=\r?\n)/m,
       'const actor: ActorContext = toExecutionContext(request).actor;',
     );
     content = content
       .replace(/\bActorContext\s*\|\s*undefined\b/g, 'ActorContext')
-      .replace(/id:\s*request\.user\.id/g, 'id: Number(request.user.id)');
+      .replace(/\brequest\.user\.id\b/g, 'toExecutionContext(request).actor.id');
     content = ensureExecutionContextImport(customerController, content);
     fs.writeFileSync(customerController, content);
   }
@@ -193,6 +190,8 @@ export function toExecutionContext(request: FastifyRequest): ExecutionContext {
   if (fs.existsSync(customerController)) {
     const customerSource = fs.readFileSync(customerController, 'utf8');
     if (customerSource.includes('ActorContext | undefined')) throw new Error('Customer transport still permits an optional application actor');
+    if (/const\s+actor:\s*ActorContext\s*=\s*request\.user/.test(customerSource)) throw new Error('Customer transport still conditionally constructs its application actor');
+    if (customerSource.includes('request.user.id')) throw new Error('Customer transport bypasses canonical numeric actor normalization');
   }
 }
 
