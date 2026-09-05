@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 // One-time closeout entrypoint: deterministic transform -> residue audit -> static gate -> CI validation.
 // Final output rejects Common, removes duplicate compatibility/application authorities, resolves self-imports,
 // applies scoped post-transform convergence fixes, and revalidates Customer, Configuration and Identity boundaries.
+// The last-mile Customer HTTP adapter must delegate actor normalization to the single canonical toExecutionContext edge.
 const root = process.cwd();
 const baselineCommit = 'fbd7e0d38ba58136c7cc0be596314d62f20dcb6c';
 const selfImportResolver = path.join(root, 'tools/architecture-closeout-self-imports.mjs');
