@@ -19,18 +19,32 @@ const relativeImport = (fromFile, toFile) => {
   if (!specifier.startsWith('.')) specifier = `./${specifier}`;
   return specifier;
 };
+const resolveTsTarget = (packageRoot, packageName, specifier) => {
+  if (!specifier.startsWith(`${packageName}/`)) return null;
+  const suffix = specifier.slice(packageName.length + 1);
+  const candidates = [
+    path.join(packageRoot, `${suffix.replace(/\.js$/, '')}.ts`),
+    path.join(packageRoot, suffix.replace(/\.js$/, '.ts')),
+    path.join(packageRoot, suffix, 'index.ts'),
+  ];
+  return candidates.find(exists) ?? null;
+};
 
+// Deliberately mirror the post-closeout invariant package-root enumeration.
 const packageRoots = [];
 for (const base of ['apps', 'domains', 'sdui', 'platform', 'foundation']) {
   const baseDir = path.join(root, base);
   if (!exists(baseDir)) continue;
-  for (const candidate of walk(baseDir).filter((file) => path.basename(file) === 'package.json')) {
-    packageRoots.push(path.dirname(candidate));
+  for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const packageRoot = path.join(baseDir, entry.name);
+    if (exists(path.join(packageRoot, 'package.json'))) packageRoots.push(packageRoot);
   }
 }
 
 const failures = [];
 let rewrittenFiles = 0;
+let matchedImports = 0;
 
 for (const packageRoot of packageRoots) {
   const manifest = JSON.parse(read(path.join(packageRoot, 'package.json')));
@@ -53,9 +67,7 @@ for (const packageRoot of packageRoots) {
           ts.isEnumDeclaration(statement) ||
           ts.isFunctionDeclaration(statement)) &&
         statement.name
-      ) {
-        name = statement.name.text;
-      }
+      ) name = statement.name.text;
       if (name) {
         const targets = declarations.get(name) ?? [];
         targets.push(file);
@@ -80,11 +92,22 @@ for (const packageRoot of packageRoots) {
     for (const statement of source.statements) {
       if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
       const specifier = statement.moduleSpecifier.text;
-      if (specifier !== packageName) continue;
+      if (specifier !== packageName && !specifier.startsWith(`${packageName}/`)) continue;
+      matchedImports++;
+
+      const directTarget = resolveTsTarget(packageRoot, packageName, specifier);
+      if (directTarget) {
+        const quote = statement.moduleSpecifier.getText(source)[0] === '"' ? '"' : "'";
+        const replacementSpecifier = relativeImport(file, directTarget);
+        const start = statement.moduleSpecifier.getStart(source);
+        const end = statement.moduleSpecifier.getEnd();
+        replacements.push({ start, end, text: `${quote}${replacementSpecifier}${quote}` });
+        continue;
+      }
 
       const clause = statement.importClause;
       if (!clause || clause.name || !clause.namedBindings || !ts.isNamedImports(clause.namedBindings)) {
-        failures.push(`${path.relative(root, file)} has unsupported self-import: ${statement.getText(source)}`);
+        failures.push(`${path.relative(root, file)} has unsupported bare self-import: ${statement.getText(source)}`);
         continue;
       }
 
@@ -93,12 +116,10 @@ for (const packageRoot of packageRoots) {
       for (const element of clause.namedBindings.elements) {
         const sourceName = element.propertyName?.text ?? element.name.text;
         const candidates = (declarations.get(sourceName) ?? []).filter((candidate) => path.resolve(candidate) !== path.resolve(file));
-        const preferred = candidates.filter((candidate) => !candidate.includes(`${path.sep}public${path.sep}`));
-        const usable = preferred.length ? preferred : candidates;
+        const nonPublic = candidates.filter((candidate) => !candidate.includes(`${path.sep}public${path.sep}`) && !candidate.endsWith(`${path.sep}index.ts`));
+        const usable = nonPublic.length ? nonPublic : candidates;
         if (usable.length !== 1) {
-          failures.push(
-            `${path.relative(root, file)} cannot uniquely resolve ${sourceName} from ${packageName}; candidates=${usable.map((candidate) => path.relative(root, candidate)).join(',') || 'none'}`,
-          );
+          failures.push(`${path.relative(root, file)} cannot uniquely resolve ${sourceName} from ${packageName}; candidates=${usable.map((candidate) => path.relative(root, candidate)).join(',') || 'none'}`);
           importFailed = true;
           continue;
         }
@@ -126,8 +147,19 @@ for (const packageRoot of packageRoots) {
   }
 }
 
-if (failures.length) {
-  throw new Error(`Canonical self-import resolution failed:\n${failures.map((failure) => `- ${failure}`).join('\n')}`);
-}
+if (failures.length) throw new Error(`Canonical self-import resolution failed:\n${failures.map((failure) => `- ${failure}`).join('\n')}`);
 
-console.log(`[architecture-closeout-self-imports] rewrote ${rewrittenFiles} package-internal files to local declarations`);
+const residue = [];
+const importPattern = /(?:from\s+|import\s*\(\s*)['"]([^'"]+)['"]/g;
+for (const packageRoot of packageRoots) {
+  const packageName = JSON.parse(read(path.join(packageRoot, 'package.json'))).name;
+  if (!packageName) continue;
+  for (const file of walk(packageRoot).filter((candidate) => candidate.endsWith('.ts'))) {
+    for (const match of read(file).matchAll(importPattern)) {
+      if (match[1] === packageName || match[1].startsWith(`${packageName}/`)) residue.push(`${path.relative(root, file)} -> ${match[1]}`);
+    }
+  }
+}
+if (residue.length) throw new Error(`Self-import residue remains after rewrite:\n${residue.map((item) => `- ${item}`).join('\n')}`);
+
+console.log(`[architecture-closeout-self-imports] matched ${matchedImports} self-imports and rewrote ${rewrittenFiles} package-internal files; zero residue remains`);
