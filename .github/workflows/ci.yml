@@ -18,10 +18,22 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     env:
-      # Validation-only CI configuration. Runtime/integration jobs must provide their own
-      # environment-specific database and secret values.
       DATABASE_URL: postgresql://carbroz_ci:carbroz_ci@127.0.0.1:5432/carbroz_ci
       JWT_SECRET: carbroz-ci-validation-only-secret-not-for-runtime
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: carbroz_ci
+          POSTGRES_PASSWORD: carbroz_ci
+          POSTGRES_DB: carbroz_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U carbroz_ci -d carbroz_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout codebase
@@ -61,6 +73,9 @@ jobs:
 
       - name: Prisma generate
         run: pnpm prisma generate
+
+      - name: Apply PostgreSQL migrations
+        run: pnpm prisma migrate deploy
 
       - name: Build monorepo packages
         run: pnpm build
