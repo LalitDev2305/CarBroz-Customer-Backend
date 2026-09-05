@@ -8,6 +8,9 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@carbroz/domain-catalog-pricing": "workspace:*",
+    "@carbroz/domain-customer": "workspace:*",
+    "@carbroz/domain-partner": "workspace:*",
     "@prisma/client": "^6.19.3",
     "awilix": "^12.0.0"
   },
