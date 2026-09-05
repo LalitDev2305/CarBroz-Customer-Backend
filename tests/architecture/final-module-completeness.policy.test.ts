@@ -3,7 +3,10 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const root = process.cwd();
-const transitional = fs.existsSync(path.join(root, 'tools/architecture-closeout.mjs')) || fs.existsSync(path.join(root, 'packages'));
+// The source branch remains intentionally transitional until the one-shot closeout removes packages/.
+// During the atomic workflow the canonical candidate has no packages/ even though the orchestrator itself
+// is deleted only after tests, so packages/ is the reliable switch for final-tree assertions.
+const transitional = fs.existsSync(path.join(root, 'packages'));
 const finalDescribe = transitional ? describe.skip : describe;
 
 const canonicalWorkspaces = [
