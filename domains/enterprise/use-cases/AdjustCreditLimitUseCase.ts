@@ -21,13 +21,12 @@ export class AdjustCreditLimitUseCase {
     }
 
     const oldLimit = account.creditLimitPaise;
-    const newLimitMoney = Money.fromPaise(dto.newCreditLimitPaise);
+    const newLimitMoney = Money.fromMinor(dto.newCreditLimitPaise);
     account.adjustCreditLimit(newLimitMoney);
     const updatedAccount = await this.corporateAccountRepo.update(account);
 
     const deltaPaise = BigInt(dto.newCreditLimitPaise) - oldLimit;
 
-    // Record adjustment in ledger
     const ledgerEntry = new CorporateCreditLedger({
       corporateAccountId: updatedAccount.id!,
       entryType: 'ADJUSTMENT',
