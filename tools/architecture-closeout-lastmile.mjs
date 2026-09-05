@@ -12,9 +12,13 @@ if (classStart >= 0) {
   if (nextBoundary <= classStart) throw new Error('Unable to locate deterministic boundary after Booking dispatch class');
   source = source.slice(0, classStart) + source.slice(nextBoundary);
 }
-source = source.replace(/^import type \{ IPartnerRepository \} from '@carbroz\/domain-partner';\r?\n/m, '');
+
+// The self-import convergence step may rewrite workspace imports to relative paths, so remove the
+// now-unused Partner repository import by symbol rather than by one historical module specifier.
+source = source.replace(/^import\s+type\s+\{[^\n}]*IPartnerRepository[^\n}]*\}\s+from\s+['"][^'"]+['"];?\r?\n/m, '');
 if (source.includes('AssignPartnerToBookingUseCase') || source.includes('IPartnerRepository')) {
-  throw new Error('Booking still retains dispatch/Partner repository authority after last-mile closeout');
+  const residue = source.split(/\r?\n/).filter((line) => line.includes('AssignPartnerToBookingUseCase') || line.includes('IPartnerRepository'));
+  throw new Error(`Booking still retains dispatch/Partner repository authority after last-mile closeout:\n${residue.join('\n')}`);
 }
 fs.writeFileSync(bookingUseCases, source);
 
