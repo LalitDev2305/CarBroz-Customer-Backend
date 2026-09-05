@@ -38,7 +38,7 @@ export class ResolveDisputeUseCase {
     }
 
     if (command.action === 'REFUND') {
-      const refundAmount = Money.fromPaise(command.approvedRefundPaise ?? dispute.requestedRefundAmount.amountPaise);
+      const refundAmount = Money.fromMinor(command.approvedRefundPaise ?? dispute.requestedRefundAmount.amountMinor);
       dispute.resolveRefund(refundAmount, command.resolutionNotes);
 
       // Verify payment record exists
@@ -61,7 +61,7 @@ export class ResolveDisputeUseCase {
       resourcePublicId: dispute.publicId,
       newValue: {
         status: updatedDispute.status,
-        refundedAmountPaise: updatedDispute.refundedAmount.amountPaise,
+        refundedAmountPaise: updatedDispute.refundedAmount.amountMinor,
         notes: command.resolutionNotes,
       },
     });
