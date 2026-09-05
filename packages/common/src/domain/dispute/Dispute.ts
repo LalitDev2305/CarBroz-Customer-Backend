@@ -60,7 +60,7 @@ export class Dispute {
     if (this.status !== 'OPEN' && this.status !== 'UNDER_REVIEW') {
       throw new Error(`Cannot resolve dispute in status ${this.status}`);
     }
-    if (approvedRefundAmount.amountPaise > this.requestedRefundAmount.amountPaise) {
+    if (approvedRefundAmount.amountMinor > this.requestedRefundAmount.amountMinor) {
       throw new Error('Approved refund cannot exceed requested refund amount');
     }
     this.refundedAmount = approvedRefundAmount;
