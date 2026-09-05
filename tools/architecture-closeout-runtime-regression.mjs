@@ -123,9 +123,22 @@ function normalizeTrackingBehavioralFixture() {
   source = source.replace(/bookingPublicId:\s*dummyBooking\.publicId!,/g, 'sessionId: session.id,');
   source = source.replace(/^\s*partnerUserId:\s*20,?\s*$/gm, '');
 
+  if (!source.includes("import { TrackingSession } from '@carbroz/domain-operations';")) {
+    source = "import { TrackingSession } from '@carbroz/domain-operations';\n" + source;
+  }
+
+  const updateUseCaseMarker = '    const updateUseCase = new UpdateLiveGpsLocationUseCase(mockTrackingRepo';
+  if (!source.includes(updateUseCaseMarker)) {
+    throw new Error('Unable to locate canonical tracking update use-case fixture marker');
+  }
+  const sessionFixture = `    const session = await mockTrackingRepo.create(new TrackingSession({\n      id: 9001,\n      publicId: 'tracking_fixture_update',\n      bookingId: 1,\n      partnerId: 20,\n      customerId: 10,\n      currentLatitude: 12.9716,\n      currentLongitude: 77.5946,\n      etaMinutes: 30,\n    }));\n\n`;
+  if (!source.includes("publicId: 'tracking_fixture_update'")) {
+    source = source.replace(updateUseCaseMarker, `${sessionFixture}${updateUseCaseMarker}`);
+  }
+
   if (source.includes('UpdateLocationPingUseCase')) throw new Error('Legacy UpdateLocationPingUseCase test authority survived');
-  const updateBlock = source.match(/new\s+UpdateLiveGpsLocationUseCase\([\s\S]*?await\s+updateUseCase\.execute\(\{[\s\S]*?\}\);/);
-  if (!updateBlock) throw new Error('Unable to locate canonical tracking update behavioral fixture after symbol migration');
+  const updateBlock = source.match(/const\s+session\s*=\s*await\s+mockTrackingRepo\.create[\s\S]*?new\s+UpdateLiveGpsLocationUseCase\([\s\S]*?await\s+updateUseCase\.execute\(\{[\s\S]*?\}\);/);
+  if (!updateBlock) throw new Error('Unable to locate seeded canonical tracking update behavioral fixture after migration');
   if (!/sessionId:\s*session\.id/.test(updateBlock[0])) throw new Error('Tracking update fixture does not target the canonical tracking session id');
   if (/bookingPublicId|partnerUserId/.test(updateBlock[0])) throw new Error('Tracking update fixture retains legacy public/user identifiers');
   write(file, source);
