@@ -21,7 +21,7 @@ export class CouponDiscountCalculator {
 
   async calculateDiscount(input: CalculateDiscountInput): Promise<CouponDiscountResult> {
     const { coupon, userId, bookingAmountPaise, now = new Date() } = input;
-    const bookingMoney = Money.fromPaise(bookingAmountPaise);
+    const bookingMoney = Money.fromMinor(bookingAmountPaise);
 
     if (!coupon.isActive) {
       return {
@@ -84,7 +84,7 @@ export class CouponDiscountCalculator {
       rawDiscountPaise = bookingAmountPaise;
     }
 
-    const discountMoney = Money.fromPaise(rawDiscountPaise);
+    const discountMoney = Money.fromMinor(rawDiscountPaise);
     const finalPriceMoney = bookingMoney.subtract(discountMoney);
 
     return {
