@@ -225,9 +225,16 @@ function enforcePermanentFreezeCi() {
 
 function enforceApiTransportCloseout() {
   const rbac = path.join(root, 'apps/api/src/transport/auth/rbac.ts');
+  const rbacMiddleware = path.join(root, 'apps/api/src/transport/middleware/rbac.middleware.ts');
   const customerDispute = path.join(root, 'apps/api/src/surfaces/customer/routes/dispute.routes.ts');
   const adminDispute = path.join(root, 'apps/api/src/surfaces/admin/routes/dispute.routes.ts');
   if (!fs.existsSync(rbac)) throw new Error('Transport-local RBAC policy was not produced');
+  if (!fs.existsSync(rbacMiddleware)) throw new Error('Transport RBAC middleware was not produced');
+  const rbacMiddlewareSource = fs.readFileSync(rbacMiddleware, 'utf8');
+  if (/\/modules\//.test(rbacMiddlewareSource)) throw new Error('Transport RBAC middleware still references legacy modules');
+  if (!/from\s+['"][^'"]*auth\/rbac\.js['"]/.test(rbacMiddlewareSource)) {
+    throw new Error('Transport RBAC middleware does not consume the transport-local RBAC policy');
+  }
   if (!fs.existsSync(customerDispute) || !fs.existsSync(adminDispute)) throw new Error('Dispute product-surface split is incomplete');
   if (/ListDisputesUseCase|GetDisputeUseCase/.test(fs.readFileSync(customerDispute, 'utf8'))) {
     throw new Error('Customer dispute surface retains an unscoped read/list authority');
