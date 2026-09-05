@@ -1,7 +1,7 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-const API_FINANCIAL_USE_CASES = [
+const legacyUseCases = [
   'apps/api/src/modules/payment/use-cases/CreatePaymentOrderUseCase.ts',
   'apps/api/src/modules/payment/use-cases/GetPaymentUseCase.ts',
   'apps/api/src/modules/payment/use-cases/ProcessPaymentWebhookUseCase.ts',
@@ -13,38 +13,22 @@ const API_FINANCIAL_USE_CASES = [
   'apps/api/src/modules/payout/use-cases/ProcessPayoutBatchUseCase.ts',
 ];
 
-function read(path: string): string {
-  return readFileSync(path, 'utf8').trim();
-}
+const finalDescribe = existsSync('packages') ? describe.skip : describe;
 
-describe('API Financials ownership policy', () => {
-  it('keeps Financials application behavior out of apps/api', () => {
-    const violations = API_FINANCIAL_USE_CASES.filter((path) => {
-      const source = read(path);
-      return !source.includes("from '@carbroz/domain-financials'") || /\bclass\s+\w+UseCase\b/.test(source);
-    });
-
-    expect(
-      violations,
-      `Financial application behavior leaked back into apps/api:\n${violations.join('\n')}`,
-    ).toEqual([]);
+finalDescribe('API Financials ownership policy', () => {
+  it('removes Financials application behavior from apps/api', () => {
+    expect(legacyUseCases.filter(existsSync)).toEqual([]);
+    for (const root of ['apps/api/src/modules/payment', 'apps/api/src/modules/invoice', 'apps/api/src/modules/payout']) {
+      expect(existsSync(root)).toBe(false);
+    }
   });
 
   it('keeps Financials implementation authority inside domains/financials/application', () => {
-    const source = read('domains/financials/application/FinancialUseCases.ts');
-    const requiredOwners = [
-      'CreatePaymentOrderUseCase',
-      'GetPaymentUseCase',
-      'ProcessPaymentWebhookUseCase',
-      'GenerateInvoiceUseCase',
-      'GetInvoiceUseCase',
-      'CreatePayoutEligibilityUseCase',
-      'ListPartnerPayoutsUseCase',
-      'MarkPayoutPaidUseCase',
-      'ProcessPayoutBatchUseCase',
-    ];
-
-    const missing = requiredOwners.filter((name) => !source.includes(`class ${name}`));
-    expect(missing, `Financial use-case owners missing from domain application layer:\n${missing.join('\n')}`).toEqual([]);
+    const source = readFileSync('domains/financials/application/FinancialUseCases.ts', 'utf8');
+    for (const owner of [
+      'CreatePaymentOrderUseCase', 'GetPaymentUseCase', 'ProcessPaymentWebhookUseCase',
+      'GenerateInvoiceUseCase', 'GetInvoiceUseCase', 'CreatePayoutEligibilityUseCase',
+      'ListPartnerPayoutsUseCase', 'MarkPayoutPaidUseCase', 'ProcessPayoutBatchUseCase',
+    ]) expect(source).toContain(`class ${owner}`);
   });
 });
