@@ -52,7 +52,7 @@ export class RaiseDisputeUseCase {
       raisedByActorType: command.actorType,
       disputeReason: command.disputeReason,
       description: command.description,
-      requestedRefundAmount: Money.fromPaise(command.requestedRefundPaise),
+      requestedRefundAmount: Money.fromMinor(command.requestedRefundPaise),
     });
 
     const savedDispute = await this.disputeRepository.create(dispute);
