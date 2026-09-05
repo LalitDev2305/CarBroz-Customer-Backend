@@ -42,7 +42,13 @@ describe('SDUI Registry application lifecycle', () => {
     templateType: 'auth',
     schemaVersion: '3.0.0',
     targetApp: 'CUSTOMER' as const,
-    template: { id: 't1', type: 'auth', components: [] },
+    template: {
+      id: 't1',
+      type: 'auth',
+      components: [
+        { id: 'c1', type: 'layout', elements: [{ id: 'e1', type: 'text', properties: {} }] },
+      ],
+    },
   };
 
   const screen = (overrides: Record<string, unknown> = {}) => new SduiScreenEntity({
