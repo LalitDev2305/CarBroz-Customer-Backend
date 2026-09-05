@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 const root = process.cwd();
 const apiSource = path.join(root, 'apps/api/src');
@@ -32,6 +33,21 @@ for (const workspaceRoot of requiredWorkspaceRoots) {
   }
 }
 if (/packages\/\*/.test(workspace)) throw new Error('pnpm workspace still includes transitional packages/*');
+
+// The final architecture policies are generated during the atomic transform. Parse/lint them now so
+// generator escaping defects fail before expensive Prisma/build validation.
+for (const policy of [
+  'tests/architecture/canonical-topology.policy.test.ts',
+  'tests/architecture/engineering-quality.policy.test.ts',
+]) {
+  if (!fs.existsSync(path.join(root, policy))) throw new Error(`Generated architecture policy missing: ${policy}`);
+}
+execFileSync('pnpm', [
+  'exec', 'eslint',
+  'tests/architecture/canonical-topology.policy.test.ts',
+  'tests/architecture/engineering-quality.policy.test.ts',
+], { cwd: root, stdio: 'inherit' });
+console.log('[architecture-closeout-finalize] emitted architecture policies parse and lint successfully');
 
 // The frozen API topology is transport/composition only. These legacy directories are evidence
 // that apps/api is still acting as a second application/infrastructure ownership layer.
