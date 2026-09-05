@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
-import { Review, ReviewStatus } from '@carbroz/common';
+import { Review } from '@carbroz/common';
 import { PrismaReviewRepository } from './PrismaReviewRepository.js';
 
 function record(overrides: Record<string, unknown> = {}) {
@@ -13,7 +13,7 @@ function record(overrides: Record<string, unknown> = {}) {
     serviceId: 51,
     rating: 5,
     comment: 'Excellent service',
-    status: ReviewStatus.PUBLISHED,
+    status: 'PUBLISHED' as const,
     moderationReason: null,
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     updatedAt: new Date('2026-01-02T00:00:00.000Z'),
@@ -51,7 +51,7 @@ describe('PrismaReviewRepository', () => {
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(null);
     review.findMany.mockResolvedValue([record(), record({ id: 12, publicId: 'review_public_12', rating: 4 })]);
-    review.update.mockResolvedValue(record({ status: ReviewStatus.HIDDEN, moderationReason: 'moderated' }));
+    review.update.mockResolvedValue(record({ status: 'FLAGGED', moderationReason: 'moderated' }));
 
     await expect(repository.create(source)).resolves.toMatchObject({ publicId: 'review_public_11', rating: 5 });
     await expect(repository.findById(11)).resolves.toMatchObject({ id: 11 });
@@ -70,10 +70,10 @@ describe('PrismaReviewRepository', () => {
       orderBy: { createdAt: 'desc' },
     });
 
-    source.status = ReviewStatus.HIDDEN;
+    source.status = 'FLAGGED';
     source.moderationReason = 'moderated';
     await expect(repository.update(source)).resolves.toMatchObject({
-      status: ReviewStatus.HIDDEN,
+      status: 'FLAGGED',
       moderationReason: 'moderated',
     });
   });
