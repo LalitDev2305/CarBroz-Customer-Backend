@@ -1,3 +1,4 @@
+import { Money } from '@carbroz/foundation-kernel';
 import { PayoutStatus } from './PayoutStatus.js';
 
 export interface PayoutCalculation {
@@ -51,15 +52,38 @@ export class PartnerPayout {
     if (!props.bookingId) throw new Error('Payout must be associated with a booking');
     if (!props.partnerId) throw new Error('Payout must be associated with a partner');
 
+    const gross = Money.fromMinor(props.grossAmountPaise);
+    const commission = Money.fromMinor(props.commissionPaise);
+    const tds = Money.fromMinor(props.tdsPaise);
+    const net = Money.fromMinor(props.netPayoutPaise);
+    const expectedNet = gross.subtract(commission.add(tds));
+
+    if (!expectedNet.equals(net)) {
+      throw new Error('Payout net amount must equal gross amount minus commission and TDS');
+    }
+
+    const calculationGross = Money.fromMinor(props.calculationJson.grossAmountPaise);
+    const calculationCommission = Money.fromMinor(props.calculationJson.commissionPaise);
+    const calculationTds = Money.fromMinor(props.calculationJson.tdsPaise);
+    const calculationNet = Money.fromMinor(props.calculationJson.netPayoutPaise);
+    if (
+      !gross.equals(calculationGross) ||
+      !commission.equals(calculationCommission) ||
+      !tds.equals(calculationTds) ||
+      !net.equals(calculationNet)
+    ) {
+      throw new Error('Payout amounts must match the persisted calculation snapshot');
+    }
+
     this.id = props.id;
     this.publicId = props.publicId;
     this.bookingId = props.bookingId;
     this.partnerId = props.partnerId;
     this.status = props.status ?? 'SCHEDULED';
-    this.grossAmountPaise = props.grossAmountPaise;
-    this.commissionPaise = props.commissionPaise;
-    this.tdsPaise = props.tdsPaise;
-    this.netPayoutPaise = props.netPayoutPaise;
+    this.grossAmountPaise = gross.amountMinor;
+    this.commissionPaise = commission.amountMinor;
+    this.tdsPaise = tds.amountMinor;
+    this.netPayoutPaise = net.amountMinor;
     this.calculationJson = props.calculationJson;
     this.scheduledAt = props.scheduledAt ?? new Date();
     this.paidAt = props.paidAt ?? null;
