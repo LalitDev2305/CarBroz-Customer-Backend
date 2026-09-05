@@ -123,7 +123,10 @@ jobs:
           retention-days: 7
 
       - name: Enforce final production coverage
-        run: pnpm test:freeze
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm test:freeze 2>&1 | tee closeout-coverage-output.txt
 
       - name: Upload coverage and transformed-candidate diagnostics
         if: failure()
@@ -131,14 +134,11 @@ jobs:
         with:
           name: closeout-coverage-diagnostics
           path: |
+            closeout-coverage-output.txt
             coverage/coverage-final.json
-            apps/
-            domains/
-            sdui/
-            platform/
-            foundation/
-            tests/
+            docs/FINAL-MODULE-TEST-EVIDENCE.json
             vitest.config.ts
+            package.json
             pnpm-workspace.yaml
           if-no-files-found: error
           retention-days: 7
