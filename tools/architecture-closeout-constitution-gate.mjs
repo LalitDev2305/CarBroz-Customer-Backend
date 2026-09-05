@@ -47,7 +47,11 @@ for (const directory of [
   'sdui/ui-sdk',
   'sdui/registry',
   'platform/database',
+  'platform/cache',
+  'platform/messaging',
+  'platform/storage',
   'platform/observability',
+  'platform/integrations',
 ]) required(directory, 'canonical constitution owner is missing');
 
 // Transitional and duplicate authorities are forbidden in the final candidate.
@@ -60,7 +64,6 @@ for (const directory of [
   'domains/catalog-pricing/app2',
   'domains/partner/app2',
   'domains/partner-core',
-  'platform/messaging',
 ]) forbidden(directory, 'legacy/transitional authority survived closeout');
 
 const workspaceFile = path.join(root, 'pnpm-workspace.yaml');
