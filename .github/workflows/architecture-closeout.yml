@@ -11,6 +11,12 @@ on:
       - tools/architecture-closeout-lastmile.mjs
       - tools/architecture-closeout-quality.mjs
       - tools/architecture-closeout-constitution-gate.mjs
+      - tools/architecture-closeout-coverage-tests.mjs
+      - tests/unit/**
+      - sdui/registry/tests/**
+      - sdui/ui-sdk/tests/**
+      - platform/*/tests/**
+      - domains/*/tests/**
       - tools/generate-module-readmes.mjs
       - tests/integration/database/**
       - .github/workflows/architecture-closeout.yml
