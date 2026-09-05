@@ -108,6 +108,8 @@ for (const evidence of [
   'tests/unit/foundation-kernel.behavior.test.ts',
   'tests/unit/observability.behavior.test.ts',
   'tests/unit/sdui-registry-domain.behavior.test.ts',
+  'sdui/registry/tests/PrismaSduiRegistryRepository.spec.ts',
+  'sdui/ui-sdk/tests/screen-serializer.test.ts',
 ]) required(evidence, 'required positive/negative/regression evidence layer is missing');
 
 const vitestConfigFile = path.join(root, 'vitest.config.ts');
