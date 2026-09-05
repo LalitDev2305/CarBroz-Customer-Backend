@@ -223,6 +223,21 @@ function enforcePermanentFreezeCi() {
   console.log('[closeout-orchestrator] permanent CI enforces frozen lockfile and production coverage freeze');
 }
 
+function enforceApiTransportCloseout() {
+  const rbac = path.join(root, 'apps/api/src/transport/auth/rbac.ts');
+  const customerDispute = path.join(root, 'apps/api/src/surfaces/customer/routes/dispute.routes.ts');
+  const adminDispute = path.join(root, 'apps/api/src/surfaces/admin/routes/dispute.routes.ts');
+  if (!fs.existsSync(rbac)) throw new Error('Transport-local RBAC policy was not produced');
+  if (!fs.existsSync(customerDispute) || !fs.existsSync(adminDispute)) throw new Error('Dispute product-surface split is incomplete');
+  if (/ListDisputesUseCase|GetDisputeUseCase/.test(fs.readFileSync(customerDispute, 'utf8'))) {
+    throw new Error('Customer dispute surface retains an unscoped read/list authority');
+  }
+  if (!/disputePublicId:\s*publicId/.test(fs.readFileSync(adminDispute, 'utf8'))) {
+    throw new Error('Admin dispute resolution is not mapped to the canonical command');
+  }
+  console.log('[closeout-orchestrator] API JWT/RBAC/Partner/Dispute transport contracts are classified and frozen');
+}
+
 function removeExecutedCloseoutHelpers() {
   for (const helper of [
     'architecture-closeout-self-imports.mjs',
@@ -244,6 +259,7 @@ try {
   execFileSync(process.execPath, [partnerConvergence], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [finopsConvergence], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [apiConvergence], { cwd: root, stdio: 'inherit' });
+  enforceApiTransportCloseout();
   normalizeObservabilityAdapter();
   normalizeCommunicationsApplication();
   enforcePermanentFreezeCi();
