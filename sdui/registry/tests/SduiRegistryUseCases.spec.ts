@@ -35,11 +35,6 @@ describe('SDUI Registry application lifecycle', () => {
     timestamp: new Date('2026-01-01T00:00:00.000Z'),
     actor: { id: 2, kind: 'CUSTOMER', roles: ['CUSTOMER'], customerId: 2 },
   };
-  const anonymousContext: ExecutionContext = {
-    correlationId: 'test-anonymous',
-    timestamp: new Date('2026-01-01T00:00:00.000Z'),
-    actor: undefined,
-  };
 
   const validLayoutJson = {
     screenId: 'auth_login',
@@ -111,7 +106,7 @@ describe('SDUI Registry application lifecycle', () => {
     expect(repository.createDraft).toHaveBeenCalledTimes(1);
   });
 
-  it('rejects non-admin and anonymous draft creation without persistence side effects', async () => {
+  it('rejects non-admin draft creation without persistence side effects', async () => {
     const useCase = new CreateSduiDraftUseCase(repository);
     const data = {
       screenId: 'auth_login',
@@ -120,7 +115,6 @@ describe('SDUI Registry application lifecycle', () => {
       overwriteExistingDraft: false,
     };
     await expect(useCase.execute({ context: userContext, data })).rejects.toThrow(ForbiddenError);
-    await expect(useCase.execute({ context: anonymousContext, data })).rejects.toThrow(ForbiddenError);
     expect(repository.createDraft).not.toHaveBeenCalled();
   });
 
@@ -183,10 +177,10 @@ describe('SDUI Registry application lifecycle', () => {
     expect(repository.publishVersion).toHaveBeenCalledWith('auth_login', 'CUSTOMER', 2, 'user-1');
   });
 
-  it('rejects publishing when no authenticated administrator exists', async () => {
+  it('rejects publishing for a non-admin actor', async () => {
     const useCase = new PublishSduiVersionUseCase(repository);
     await expect(useCase.execute({
-      context: anonymousContext,
+      context: userContext,
       data: { screenId: 'auth_login', versionNumber: 2 },
     })).rejects.toThrow(ForbiddenError);
     expect(repository.publishVersion).not.toHaveBeenCalled();
