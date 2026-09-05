@@ -67,18 +67,19 @@ export class CorporateAccount {
 
   get availableCredit(): Money {
     const available = this.creditLimitPaise - this.utilisedCreditPaise;
-    return Money.fromPaise(Number(available > 0n ? available : 0n));
+    return Money.fromMinor(Number(available > 0n ? available : 0n));
   }
 
   approve(initialCreditLimit: Money): void {
     if (this.status !== 'PENDING_APPROVAL') {
       throw new Error(`Cannot approve corporate account in status ${this.status}`);
     }
-    this.creditLimitPaise = BigInt(initialCreditLimit.amountPaise);
+    this.creditLimitPaise = BigInt(initialCreditLimit.amountMinor);
     this.status = 'ACTIVE';
   }
 
   suspend(reason: string): void {
+    void reason;
     if (this.status === 'CLOSED') {
       throw new Error('Cannot suspend a closed corporate account');
     }
@@ -89,12 +90,12 @@ export class CorporateAccount {
     if (this.status === 'CLOSED') {
       throw new Error('Cannot adjust credit limit of a closed corporate account');
     }
-    this.creditLimitPaise = BigInt(newLimit.amountPaise);
+    this.creditLimitPaise = BigInt(newLimit.amountMinor);
   }
 
   canCoverAmount(amount: Money): boolean {
     if (this.status !== 'ACTIVE') return false;
-    const required = BigInt(amount.amountPaise);
+    const required = BigInt(amount.amountMinor);
     return (this.utilisedCreditPaise + required) <= this.creditLimitPaise;
   }
 }
