@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Coupon, DiscountType, type ICouponRepository } from '@carbroz/common';
+import { Coupon, type ICouponRepository } from '@carbroz/common';
 import { UpdateCouponUseCase } from './UpdateCouponUseCase.js';
 
 class InMemoryCouponRepository implements ICouponRepository {
@@ -42,7 +42,7 @@ function existingCoupon(): Coupon {
     publicId: 'coupon_public_1',
     code: 'SAVE10',
     description: 'Original description',
-    discountType: DiscountType.PERCENTAGE,
+    discountType: 'PERCENTAGE',
     discountValue: 10,
     maxDiscountPaise: 5000,
     minBookingAmountPaise: 10000,
@@ -65,7 +65,7 @@ describe('UpdateCouponUseCase', () => {
     const updated = await useCase.execute({
       publicId: 'coupon_public_1',
       description: 'Updated description',
-      discountType: DiscountType.FIXED,
+      discountType: 'FIXED_AMOUNT',
       discountValue: 2500,
       maxDiscountPaise: null,
       minBookingAmountPaise: 0,
@@ -78,7 +78,7 @@ describe('UpdateCouponUseCase', () => {
 
     expect(updated).toMatchObject({
       description: 'Updated description',
-      discountType: DiscountType.FIXED,
+      discountType: 'FIXED_AMOUNT',
       discountValue: 2500,
       maxDiscountPaise: null,
       minBookingAmountPaise: 0,
