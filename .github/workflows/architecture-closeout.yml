@@ -119,12 +119,21 @@ jobs:
       - name: Enforce final production coverage
         run: pnpm test:freeze
 
-      - name: Upload coverage diagnostics
+      - name: Upload coverage and transformed-candidate diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: closeout-coverage-diagnostics
-          path: coverage/coverage-final.json
+          path: |
+            coverage/coverage-final.json
+            apps/
+            domains/
+            sdui/
+            platform/
+            foundation/
+            tests/
+            vitest.config.ts
+            pnpm-workspace.yaml
           if-no-files-found: error
           retention-days: 7
 
