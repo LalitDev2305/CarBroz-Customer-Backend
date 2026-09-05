@@ -34,20 +34,20 @@ function normalizeRootTestHarness() {
   write(packageFile, `${JSON.stringify(manifest, null, 2)}\n`);
 
   const commonRewrites = new Map([
-    ['tests/integration/domain/audit.test.ts', "@carbroz/domain-audit"],
-    ['tests/integration/domain/corporate.test.ts', "@carbroz/domain-enterprise"],
-    ['tests/integration/domain/coupon.test.ts', "@carbroz/domain-engagement"],
-    ['tests/integration/domain/notification.test.ts', "@carbroz/domain-communications"],
-    ['tests/integration/domain/review.test.ts', "@carbroz/domain-engagement"],
-    ['tests/integration/domain/tracking.test.ts', "@carbroz/domain-operations"],
+    ['tests/integration/domain/audit.test.ts', '@carbroz/domain-audit'],
+    ['tests/integration/domain/corporate.test.ts', '@carbroz/domain-enterprise'],
+    ['tests/integration/domain/coupon.test.ts', '@carbroz/domain-engagement'],
+    ['tests/integration/domain/notification.test.ts', '@carbroz/domain-communications'],
+    ['tests/integration/domain/review.test.ts', '@carbroz/domain-engagement'],
+    ['tests/integration/domain/tracking.test.ts', '@carbroz/domain-operations'],
   ]);
 
   for (const [relative, target] of commonRewrites) {
     const file = path.join(root, relative);
     if (!fs.existsSync(file)) continue;
     let content = fs.readFileSync(file, 'utf8');
-    content = content.replaceAll("../../../packages/common/src/index.js", target);
-    content = content.replaceAll("../../../packages/common/src/index.ts", target);
+    content = content.replaceAll('../../../packages/common/src/index.js', target);
+    content = content.replaceAll('../../../packages/common/src/index.ts', target);
     write(file, content);
   }
 
@@ -90,7 +90,7 @@ describe('canonical public contracts', () => {
       const file = path.join(root, entry);
       expect(fs.existsSync(file), entry).toBe(true);
       const source = fs.readFileSync(file, 'utf8');
-      expect(source, entry).not.toMatch(/\/infrastructure\//);
+      expect(source, entry).not.toContain('/infrastructure/');
       expect(source, entry).not.toContain('@prisma/client');
     }
   });
@@ -136,6 +136,36 @@ describe('API executable E2E', () => {
   console.log('[architecture-closeout-finalize] contract and E2E test layers installed with executable evidence');
 }
 
+function ensureFinancialConfigurationRegression() {
+  write(path.join(root, 'tests/contracts/financial-configuration.contract.test.ts'), `import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+const root = process.cwd();
+
+describe('Financials configuration and composition contract', () => {
+  it('preserves the frozen tax, commission, TDS and seller GSTIN defaults', () => {
+    const source = fs.readFileSync(path.join(root, 'domains/financials/domain/FinancialConfiguration.ts'), 'utf8');
+    for (const expected of [
+      'cgstRatePercent: 9',
+      'sgstRatePercent: 9',
+      'igstRatePercent: 18',
+      'platformCommissionPercent: 15',
+      'tdsRatePercent: 1',
+      "sellerGstin: '29AAAAA0000A1Z5'",
+    ]) expect(source).toContain(expected);
+  });
+
+  it('wires the tax calculator through the Financials composition module', () => {
+    const moduleSource = fs.readFileSync(path.join(root, 'domains/financials/financials.module.ts'), 'utf8');
+    expect(moduleSource).toContain('taxCalculator');
+    expect(moduleSource).toContain('TaxCalculator');
+  });
+});
+`);
+  console.log('[architecture-closeout-finalize] Financials configuration and tax DI regression contract installed');
+}
+
 function normalizeRootReadme() {
   const file = path.join(root, 'README.md');
   if (!fs.existsSync(file)) throw new Error('Root README is missing after closeout');
@@ -151,7 +181,6 @@ function normalizeRootReadme() {
   console.log('[architecture-closeout-finalize] root README normalized to Backend V3 and final validation workflow');
 }
 
-// Final topology accepts only the canonical workspace roots. Transitional packages/ must be gone.
 if (fs.existsSync(path.join(root, 'packages'))) {
   throw new Error('Transitional top-level packages/ still exists after closeout');
 }
@@ -165,10 +194,6 @@ for (const workspaceRoot of requiredWorkspaceRoots) {
 }
 if (/packages\/\*/.test(workspace)) throw new Error('pnpm workspace still includes transitional packages/*');
 
-// The final architecture policies are generated during the atomic transform. Parse/lint them now so
-// generator escaping defects fail before expensive Prisma/build validation. Use the already-installed
-// binary directly: invoking pnpm here would re-resolve the intentionally transformed workspace before
-// the workflow reaches its dedicated post-transform reinstall step.
 const architecturePolicies = [
   'tests/architecture/canonical-topology.policy.test.ts',
   'tests/architecture/engineering-quality.policy.test.ts',
@@ -181,16 +206,12 @@ if (!fs.existsSync(eslintBinary)) throw new Error('Installed ESLint binary is un
 execFileSync(eslintBinary, architecturePolicies, { cwd: root, stdio: 'inherit' });
 console.log('[architecture-closeout-finalize] emitted architecture policies parse and lint successfully');
 
-// The frozen API topology is transport/composition only. These legacy directories are evidence
-// that apps/api is still acting as a second application/infrastructure ownership layer.
 const legacyApiRoots = ['modules', 'container', 'providers'];
 const legacyResidue = legacyApiRoots.filter((name) => fs.existsSync(path.join(apiSource, name)));
 if (legacyResidue.length) {
   throw new Error(`Legacy API ownership roots remain after closeout: ${legacyResidue.join(', ')}`);
 }
 
-// Admin and Customer may validate similar payloads, but their transport contracts are
-// independently versioned. Duplicate the transport schema instead of importing another surface.
 for (const name of ['review.dto.ts', 'coupon.dto.ts']) {
   const source = path.join(surfaces, 'customer/dto', name);
   const target = path.join(surfaces, 'admin/dto', name);
@@ -224,6 +245,7 @@ if (violations.length) {
 
 normalizeRootTestHarness();
 ensureFinalTestLayers();
+ensureFinancialConfigurationRegression();
 normalizeRootReadme();
 
 console.log('[architecture-closeout-finalize] canonical workspace, transport-only API topology, product surface isolation, final tests and README are frozen');
