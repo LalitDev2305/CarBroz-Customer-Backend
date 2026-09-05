@@ -205,4 +205,6 @@ describe('canonical Observability behavior', () => {
 
 normalizeFinalRuntimeSweep();
 generateObservabilityCoverage();
-console.log('[architecture-closeout-coverage-tests] final behavioral coverage evidence generated');
+await import('./architecture-closeout-documentation.mjs');
+if (exists(p('closeout-test-output.txt'))) fs.rmSync(p('tools/architecture-closeout-documentation.mjs'), { force: true });
+console.log('[architecture-closeout-coverage-tests] final behavioral coverage and documentation evidence generated');
