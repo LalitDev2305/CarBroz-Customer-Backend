@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Execute deterministic hardening before evaluating the final candidate tree.
+// Execute deterministic hardening and runtime-regression convergence before evaluating the final candidate tree.
 await import('./architecture-closeout-hardening.mjs');
+await import('./architecture-closeout-runtime-regression.mjs');
 
 const root = process.cwd();
 const violations = [];
@@ -186,11 +187,12 @@ if (violations.length) {
 }
 
 // The second invocation occurs after executable tests/coverage and is the last pre-cleanup proof.
-// Remove generated diagnostics and the temporary hardening helper so neither can enter the frozen source commit.
+// Remove generated diagnostics and temporary convergence helpers so none can enter the frozen source commit.
 if (fs.existsSync(path.join(root, 'closeout-test-output.txt'))) {
   fs.rmSync(path.join(root, 'closeout-test-output.txt'), { force: true });
   fs.rmSync(path.join(root, 'coverage'), { recursive: true, force: true });
   fs.rmSync(path.join(root, 'tools/architecture-closeout-hardening.mjs'), { force: true });
+  fs.rmSync(path.join(root, 'tools/architecture-closeout-runtime-regression.mjs'), { force: true });
 }
 
 console.log('[constitution-gate] canonical topology, ownership, dependency direction, documentation, tests, providers and observability verified');
