@@ -38,6 +38,20 @@ const write = (file, content) => {
   fs.writeFileSync(file, content.endsWith('\n') ? content : `${content}\n`);
 };
 
+function normalizePostpatchSelfImportStage() {
+  const postpatch = path.join(root, 'tools/architecture-closeout-postpatch.mjs');
+  if (!fs.existsSync(postpatch)) return;
+  const marker = 'const violations = [...selfImportResolutionErrors];';
+  let content = fs.readFileSync(postpatch, 'utf8');
+  if (!content.includes(marker)) throw new Error('Unable to locate post-closeout invariant marker');
+  content = content.replace(
+    marker,
+    "await import('./architecture-closeout-self-imports.mjs');\nselfImportResolutionErrors.length = 0;\nconst violations = [];",
+  );
+  write(postpatch, content);
+  console.log('[closeout-orchestrator] deterministic self-import resolver installed before post-closeout invariants');
+}
+
 function normalizeObservabilityAdapter() {
   const loggerAdapter = path.join(root, 'platform/observability/src/adapters/LoggerProvider.ts');
   if (!fs.existsSync(loggerAdapter)) return;
@@ -183,6 +197,7 @@ export class SendMultiChannelNotificationUseCase {
 }
 
 try {
+  normalizePostpatchSelfImportStage();
   execFileSync(process.execPath, ['--check', driver], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [driver], { cwd: root, stdio: 'inherit' });
   normalizeObservabilityAdapter();
