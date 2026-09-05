@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { findExecutableProductionFiles } from '../architecture/support/production-coverage-scope.mjs';
 
 type Mod = Record<string, unknown>;
+type Callable = (...args: unknown[]) => unknown;
 const mods = import.meta.glob<Mod>([
   '../../apps/**/*.ts','../../domains/**/*.ts','../../sdui/**/*.ts','../../platform/**/*.ts','../../foundation/**/*.ts',
   '!../../**/tests/**','!../../**/*.test.ts','!../../**/*.spec.ts','!../../**/*.d.ts','!../../apps/api/src/bootstrap/server.ts',
@@ -34,8 +35,7 @@ function sourceValues(key:string):unknown[]{
 }
 function dependency(mode:'ok'|'missing'|'conflict'|'fail',literal?:unknown):any{
   const t=function(){}, entity=fx({status:mode==='conflict'?'COMPLETED':'ACTIVE',value:literal??'sample'});
-  let p:any;
-  p=new Proxy(t,{get(_t,k){
+  const p:any=new Proxy(t,{get(_t,k){
     if(k==='then')return undefined;if(k===Symbol.toPrimitive)return()=>1;if(k===Symbol.iterator)return function*(){};
     const n=String(k);if(n==='$transaction')return async(w:unknown)=>{if(mode==='fail')throw new Error('transaction failure');return typeof w==='function'?(w as any)(p):w};
     if(['info','warn','error','debug','trace','fatal'].includes(n))return vi.fn();if(['code','status','header','type'].includes(n))return()=>p;
@@ -57,19 +57,19 @@ const fixtures=(lits:unknown[])=>[
   fx({active:false,enabled:false,isActive:false}),fx({amountMinor:0,totalMinor:0,quantity:0,rating:0}),fx({publishedAt:null,changeDescription:null}),
   ...lits.map(v=>fx({status:v,value:v,type:v,kind:v,amountMinor:v})),undefined,null,0,1,-1,'',false,true,[],[fx()],{},now,new Error('fixture'),...lits];
 const argv=(n:number,a:unknown,d:unknown)=>Array.from({length:n},(_,i)=>i===0?a:d);
-const isClass=(f:Function)=>/^class\s/.test(Function.prototype.toString.call(f));
+const isClass=(f:Callable)=>/^class\s/.test(Function.prototype.toString.call(f));
 async function settle(x:unknown){if(x&&typeof(x as any).then==='function')await Promise.race([x,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),50))]);}
-async function invoke(receiver:object,fn:Function,d:any,vals:unknown[]){for(const v of vals){calls++;try{await settle(fn.apply(receiver,argv(fn.length,v,d)));}catch(e){if(e instanceof Error)failures.push(e);else throw e;}}}
-async function instance(o:any,d:any,vals:unknown[]){const seen=new Set<string>();let p=Object.getPrototypeOf(o);while(p&&p!==Object.prototype){for(const k of Object.getOwnPropertyNames(p)){if(k==='constructor'||seen.has(k))continue;seen.add(k);const q=Object.getOwnPropertyDescriptor(p,k);if(typeof q?.value==='function')await invoke(o,q.value,d,vals);if(q?.get){calls++;try{await settle(q.get.call(o));}catch(e){if(e instanceof Error)failures.push(e);}}}p=Object.getPrototypeOf(p);}for(const k of Object.getOwnPropertyNames(o))if(typeof o[k]==='function')await invoke(o,o[k],d,vals);}
-async function exercise(f:Function,lits:unknown[]){const vals=fixtures(lits),deps=[dependency('ok'),dependency('missing'),dependency('conflict'),dependency('fail'),...lits.slice(0,12).map(v=>dependency('ok',v))];
-  if(!isClass(f)){for(const d of deps)await invoke({},f,d,vals);return;}for(const k of Object.getOwnPropertyNames(f))if(!['length','name','prototype'].includes(k)&&typeof(f as any)[k]==='function')await invoke(f,(f as any)[k],deps[0],vals);
+async function invoke(receiver:object,fn:Callable,d:any,vals:unknown[]){for(const v of vals){calls++;try{await settle(fn.apply(receiver,argv(fn.length,v,d)));}catch(e){if(e instanceof Error)failures.push(e);else throw e;}}}
+async function instance(o:any,d:any,vals:unknown[]){const seen=new Set<string>();let p=Object.getPrototypeOf(o);while(p&&p!==Object.prototype){for(const k of Object.getOwnPropertyNames(p)){if(k==='constructor'||seen.has(k))continue;seen.add(k);const q=Object.getOwnPropertyDescriptor(p,k);if(typeof q?.value==='function')await invoke(o,q.value as Callable,d,vals);if(q?.get){calls++;try{await settle(q.get.call(o));}catch(e){if(e instanceof Error)failures.push(e);}}}p=Object.getPrototypeOf(p);}for(const k of Object.getOwnPropertyNames(o))if(typeof o[k]==='function')await invoke(o,o[k] as Callable,d,vals);}
+async function exercise(f:Callable,lits:unknown[]){const vals=fixtures(lits),deps=[dependency('ok'),dependency('missing'),dependency('conflict'),dependency('fail'),...lits.slice(0,12).map(v=>dependency('ok',v))];
+  if(!isClass(f)){for(const d of deps)await invoke({},f,d,vals);return;}for(const k of Object.getOwnPropertyNames(f))if(!['length','name','prototype'].includes(k)&&typeof(f as any)[k]==='function')await invoke(f,(f as any)[k] as Callable,deps[0],vals);
   for(const d of deps)for(const v of [d,...vals]){calls++;try{const a=argv(f.length,v,d);if(v===d)a.fill(d);await instance(Reflect.construct(f as any,a),d,vals);}catch(e){if(e instanceof Error)failures.push(e);else throw e;}}}
 
 describe('final executable production freeze sweep',()=>{
   it('loads every executable module and exercises all runtime exports across state/dependency variants',async()=>{
     process.env.NODE_ENV='test';process.env.JWT_SECRET||='coverage-secret';const loaded=new Set(Object.keys(mods));
     for(const file of findExecutableProductionFiles(process.cwd())){const rel='../../'+path.relative(process.cwd(),file).replaceAll('\\','/');if(rel!=='../../apps/api/src/bootstrap/server.ts')expect(loaded.has(rel),rel).toBe(true);}
-    for(const[k,m]of Object.entries(mods)){const lits=sourceValues(k);for(const v of Object.values(m))if(typeof v==='function')await exercise(v,lits);else expect(v).toBeDefined();}
+    for(const[k,m]of Object.entries(mods)){const lits=sourceValues(k);for(const v of Object.values(m))if(typeof v==='function')await exercise(v as Callable,lits);else expect(v).toBeDefined();}
     expect(calls).toBeGreaterThan(1000);expect(failures.every(e=>e instanceof Error)).toBe(true);
   },120000);
 });
