@@ -106,6 +106,17 @@ for (const file of walk(apiRoot).filter(f => f.endsWith('.ts'))) {
   write(file,c);
 }
 
+// Deleted auth internals are normalized first. Transport-only JWT claims and guard policy are then
+// deliberately reclassified back into API transport below; Identity remains the business authority.
+for (const file of walk(apiRoot).filter(f => f.endsWith('.ts'))) {
+  let c = read(file);
+  c = c
+    .replace(/from\s+['"][^'"]*modules\/auth\/infrastructure\/jwt\.service\.interface\.js['"]/g, "from '@carbroz/domain-identity'")
+    .replace(/from\s+['"][^'"]*modules\/auth\/domain\/rbac\.js['"]/g, "from '@carbroz/domain-identity'")
+    .replace(/from\s+['"][^'"]*domain\/rbac\.js['"]/g, "from '@carbroz/domain-identity'");
+  write(file, c);
+}
+
 // JwtPayload describes @fastify/jwt transport claims and remains transport-local rather than becoming an Identity domain type.
 const jwtPlugin = path.join(apiRoot, 'bootstrap/plugins/jwt.plugin.ts');
 if (exists(jwtPlugin)) {
