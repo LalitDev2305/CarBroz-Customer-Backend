@@ -34,6 +34,7 @@ const canonicalRoots = [
 const isTest = (file) => /\.(?:spec|test)\.ts$/.test(file) || normalize(file).includes('/tests/');
 const isProductionTs = (file) => file.endsWith('.ts') && !file.endsWith('.d.ts') && !isTest(file);
 const ownerFor = (file) => canonicalRoots.find((candidate) => rel(file) === candidate || rel(file).startsWith(`${candidate}/`)) ?? 'unknown-owner';
+const isFunctionLikeInitializer = (initializer) => Boolean(initializer && (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)));
 
 function layerFor(file) {
   const value = normalize(file);
@@ -86,14 +87,14 @@ function isExported(node) {
 
 function isFunctionVariableStatement(node) {
   if (!ts.isVariableStatement(node) || !isExported(node)) return false;
-  return node.declarationList.declarations.some((declaration) => ts.isArrowFunction(declaration.initializer) || ts.isFunctionExpression(declaration.initializer));
+  return node.declarationList.declarations.some((declaration) => isFunctionLikeInitializer(declaration.initializer));
 }
 
 function shouldDocument(node) {
   if (ts.isClassDeclaration(node) || ts.isFunctionDeclaration(node)) return Boolean(node.name);
   if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node)) return isExported(node);
   if (ts.isMethodDeclaration(node) || ts.isConstructorDeclaration(node) || ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node)) return true;
-  if (ts.isPropertyDeclaration(node) && (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))) return true;
+  if (ts.isPropertyDeclaration(node) && isFunctionLikeInitializer(node.initializer)) return true;
   return isFunctionVariableStatement(node);
 }
 
@@ -284,8 +285,9 @@ const walk = (dir: string): string[] => fs.existsSync(dir) ? fs.readdirSync(dir,
 }) : [];
 const isTest = (file: string) => /\\.(?:spec|test)\\.ts$/.test(file) || file.replaceAll('\\\\', '/').includes('/tests/');
 const isExported = (node: ts.Node & { modifiers?: ts.NodeArray<ts.ModifierLike> }) => Boolean(node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword || modifier.kind === ts.SyntaxKind.DefaultKeyword));
-const functionVariable = (node: ts.Node) => ts.isVariableStatement(node) && isExported(node) && node.declarationList.declarations.some((declaration) => ts.isArrowFunction(declaration.initializer) || ts.isFunctionExpression(declaration.initializer));
-const required = (node: ts.Node) => (ts.isClassDeclaration(node) && Boolean(node.name)) || (ts.isFunctionDeclaration(node) && Boolean(node.name)) || ((ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node)) && isExported(node)) || ts.isMethodDeclaration(node) || ts.isConstructorDeclaration(node) || ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node) || (ts.isPropertyDeclaration(node) && (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))) || functionVariable(node);
+const functionInitializer = (initializer: ts.Expression | undefined) => Boolean(initializer && (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)));
+const functionVariable = (node: ts.Node) => ts.isVariableStatement(node) && isExported(node) && node.declarationList.declarations.some((declaration) => functionInitializer(declaration.initializer));
+const required = (node: ts.Node) => (ts.isClassDeclaration(node) && Boolean(node.name)) || (ts.isFunctionDeclaration(node) && Boolean(node.name)) || ((ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node)) && isExported(node)) || ts.isMethodDeclaration(node) || ts.isConstructorDeclaration(node) || ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node) || (ts.isPropertyDeclaration(node) && functionInitializer(node.initializer)) || functionVariable(node);
 const hasTsDoc = (text: string, node: ts.Node, sourceFile: ts.SourceFile) => /\\/\\*\\*[\\s\\S]*?\\*\\/\\s*$/.test(text.slice(Math.max(0, node.getStart(sourceFile) - 2000), node.getStart(sourceFile)));
 describe('production TSDoc policy', () => {
   for (const rootRel of roots) {
