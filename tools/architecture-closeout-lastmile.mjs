@@ -119,7 +119,7 @@ export class AuthorizationProvider {
 }
 
 function ensureExecutionContextImport(file, content) {
-  if (content.includes('toExecutionContext(request)') && !content.includes('/context/toExecutionContext.js')) {
+  if (content.includes('toExecutionContext(') && !content.includes('/context/toExecutionContext.js')) {
     let relative = path.relative(path.dirname(file), path.join(root, 'apps/api/src/context/toExecutionContext.ts'))
       .replaceAll('\\', '/')
       .replace(/\.ts$/, '.js');
@@ -171,9 +171,11 @@ export function toExecutionContext(request: FastifyRequest): ExecutionContext {
   const customerController = path.join(apiRoot, 'surfaces/customer/controllers/customer.customer.controller.ts');
   if (fs.existsSync(customerController)) {
     let content = fs.readFileSync(customerController, 'utf8');
+    const methodPattern = /  private getContext\(req: FastifyRequest\): ExecutionContext \{[\s\S]*?\n  \}\n\n  async getProfile/;
+    if (!methodPattern.test(content)) throw new Error('Customer controller context adapter shape changed; refusing a partial actor rewrite');
     content = content.replace(
-      /const\s+actor:\s*ActorContext(?:\s*\|\s*undefined)?\s*=\s*[\s\S]*?;(?=\r?\n)/m,
-      'const actor: ActorContext = toExecutionContext(request).actor;',
+      methodPattern,
+      `  private getContext(req: FastifyRequest): ExecutionContext {\n    return toExecutionContext(req);\n  }\n\n  async getProfile`,
     );
     content = content
       .replace(/\bActorContext\s*\|\s*undefined\b/g, 'ActorContext')
@@ -190,8 +192,8 @@ export function toExecutionContext(request: FastifyRequest): ExecutionContext {
   if (fs.existsSync(customerController)) {
     const customerSource = fs.readFileSync(customerController, 'utf8');
     if (customerSource.includes('ActorContext | undefined')) throw new Error('Customer transport still permits an optional application actor');
-    if (/const\s+actor:\s*ActorContext\s*=\s*request\.user/.test(customerSource)) throw new Error('Customer transport still conditionally constructs its application actor');
-    if (customerSource.includes('request.user.id')) throw new Error('Customer transport bypasses canonical numeric actor normalization');
+    if (/let\s+actor\s*:\s*ActorContext/.test(customerSource)) throw new Error('Customer transport still conditionally assigns its application actor');
+    if (!customerSource.includes('return toExecutionContext(req);')) throw new Error('Customer controller does not delegate to the canonical execution-context adapter');
   }
 }
 
@@ -272,4 +274,4 @@ describe('canonical public contracts', () => {
 fs.rmSync(path.join(root, 'tools/architecture-closeout-finalize.mjs'), { force: true });
 fs.rmSync(path.join(root, 'tools/architecture-closeout-postfinal.mjs'), { force: true });
 
-console.log('[architecture-closeout-lastmile] Identity authorization, strict numeric API actors, Booking dispatch ownership, public-contract test and temporary finalizer cleanup completed');
+console.log('[architecture-closeout-lastmile] Identity authorization, canonical API execution context, Booking dispatch ownership, public-contract test and temporary finalizer cleanup completed');
