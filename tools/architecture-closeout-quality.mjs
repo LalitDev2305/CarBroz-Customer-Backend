@@ -7,7 +7,7 @@ const write = (file, content) => {
   fs.writeFileSync(file, content.endsWith('\n') ? content : `${content}\n`);
 };
 
-write(path.join(root, 'tests/architecture/canonical-topology.policy.test.ts'), `import fs from 'node:fs';
+write(path.join(root, 'tests/architecture/canonical-topology.policy.test.ts'), String.raw`import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -22,8 +22,8 @@ const canonicalWorkspaces = [
   'platform/observability', 'platform/integrations',
   'foundation/kernel',
 ] as const;
-
 const ignored = new Set(['node_modules', 'dist', 'coverage', 'generated', '.git']);
+
 function walk(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -31,6 +31,10 @@ function walk(dir: string): string[] {
     const absolute = path.join(dir, entry.name);
     return entry.isDirectory() ? walk(absolute) : [absolute];
   });
+}
+
+function relative(file: string): string {
+  return path.relative(root, file).split(path.sep).join('/');
 }
 
 function packageDirectories(base: string): string[] {
@@ -68,7 +72,7 @@ describe('canonical Backend V3 topology', () => {
     const businessImplementations = walk(api)
       .filter((file) => file.endsWith('.ts'))
       .filter((file) => /class\s+\w+UseCase\b/.test(fs.readFileSync(file, 'utf8')))
-      .map((file) => path.relative(root, file).replaceAll('\\\\', '/'));
+      .map(relative);
     expect(businessImplementations).toEqual([]);
   });
 
@@ -77,25 +81,26 @@ describe('canonical Backend V3 topology', () => {
     const legacy = walk(path.join(root, 'sdui'))
       .filter((file) => file.endsWith('.ts'))
       .filter((file) => /\b(?:Subcomponent|SubComponent|ChildrenData)\b/.test(fs.readFileSync(file, 'utf8')))
-      .map((file) => path.relative(root, file).replaceAll('\\\\', '/'));
+      .map(relative);
     expect(legacy).toEqual([]);
   });
 
   it('does not retain generated build output inside canonical workspaces', () => {
     const residue = canonicalWorkspaces.flatMap((workspace) => walk(path.join(root, workspace)))
-      .map((file) => path.relative(root, file).replaceAll('\\\\', '/'))
+      .map(relative)
       .filter((file) => /(?:^|\/)(?:dist|coverage|generated)\/|\.tsbuildinfo$/.test(file));
     expect(residue).toEqual([]);
   });
 });
 `);
 
-write(path.join(root, 'tests/architecture/engineering-quality.policy.test.ts'), `import fs from 'node:fs';
+write(path.join(root, 'tests/architecture/engineering-quality.policy.test.ts'), String.raw`import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const root = process.cwd();
 const ignored = new Set(['node_modules', 'dist', 'coverage', 'generated', '.git']);
+
 function walk(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -104,35 +109,54 @@ function walk(dir: string): string[] {
     return entry.isDirectory() ? walk(absolute) : [absolute];
   });
 }
+
+function relative(file: string): string {
+  return path.relative(root, file).split(path.sep).join('/');
+}
+
 const production = ['apps', 'domains', 'sdui', 'platform', 'foundation']
   .flatMap((dir) => walk(path.join(root, dir)))
   .filter((file) => file.endsWith('.ts') && !/\.(?:test|spec)\.ts$/.test(file));
-const relative = (file: string) => path.relative(root, file).replaceAll('\\\\', '/');
 
 describe('Backend V3 engineering quality boundaries', () => {
   it('forbids the transitional common package from production imports', () => {
-    const offenders = production.filter((file) => /from\s+['"]@carbroz\/common['"]/.test(fs.readFileSync(file, 'utf8'))).map(relative);
+    const offenders = production
+      .filter((file) => /from\s+['"]@carbroz\/common['"]/.test(fs.readFileSync(file, 'utf8')))
+      .map(relative);
     expect(offenders).toEqual([]);
   });
 
-  it('forbids framework, persistence, DI and process environment access from domain layers', () => {
-    const domainFiles = production.filter((file) => /\/domains\/[^/]+\/(?:domain|application)\//.test(file.replaceAll('\\\\', '/')));
-    const forbidden = /from\s+['"](?:fastify|@prisma\/client|prisma|redis|ioredis|awilix|@aws-sdk\/|razorpay|firebase-admin|twilio)[^'"]*['"]|\bprocess\.env\b|from\s+['"]node:fs['"]/;
-    const offenders = domainFiles.filter((file) => forbidden.test(fs.readFileSync(file, 'utf8'))).map(relative);
+  it('forbids framework, persistence, DI and process environment access from domain/application layers', () => {
+    const domainFiles = production.filter((file) => {
+      const parts = relative(file).split('/');
+      return parts[0] === 'domains' && (parts.includes('domain') || parts.includes('application'));
+    });
+    const forbiddenImport = /from\s+['"](?:fastify|@prisma\/client|prisma|redis|ioredis|awilix|@aws-sdk\/|razorpay|firebase-admin|twilio)[^'"]*['"]/;
+    const offenders = domainFiles.filter((file) => {
+      const content = fs.readFileSync(file, 'utf8');
+      return forbiddenImport.test(content) || content.includes('process.env') || content.includes("from 'node:fs'") || content.includes('from "node:fs"');
+    }).map(relative);
     expect(offenders).toEqual([]);
   });
 
-  it('forbids deep cross-domain imports', () => {
+  it('forbids deep package imports and relative imports into another bounded context', () => {
     const offenders: string[] = [];
     for (const file of production.filter((candidate) => relative(candidate).startsWith('domains/'))) {
-      const owner = relative(file).split('/')[1];
+      const sourceParts = relative(file).split('/');
+      const sourceDomain = sourceParts[1];
       const content = fs.readFileSync(file, 'utf8');
-      for (const match of content.matchAll(/from\s+['"](?:\.\.\/)+(?:\.\.\/)*([^'"]+)['"]/g)) {
-        const specifier = match[1];
-        if (specifier.includes('domains/') && !specifier.includes('domains/' + owner + '/')) offenders.push(relative(file));
-      }
+
       for (const match of content.matchAll(/from\s+['"](@carbroz\/domain-[^'"]+)\/[^'"]+['"]/g)) {
-        offenders.push(relative(file) + ' -> ' + match[1]);
+        offenders.push(relative(file) + ' -> deep ' + match[1]);
+      }
+
+      for (const match of content.matchAll(/from\s+['"](\.\.?\/[^'"]+)['"]/g)) {
+        const target = path.resolve(path.dirname(file), match[1]);
+        const targetRelative = relative(target);
+        const targetParts = targetRelative.split('/');
+        if (targetParts[0] === 'domains' && targetParts[1] !== sourceDomain) {
+          offenders.push(relative(file) + ' -> ' + match[1]);
+        }
       }
     }
     expect([...new Set(offenders)]).toEqual([]);
@@ -140,7 +164,8 @@ describe('Backend V3 engineering quality boundaries', () => {
 
   it('keeps platform/database free of business repository ownership', () => {
     const files = walk(path.join(root, 'platform/database')).filter((file) => file.endsWith('.ts'));
-    const offenders = files.filter((file) => /(?:Booking|Partner|Customer|Payment|Invoice|Payout|Review|Coupon|Dispute|Corporate|Notification).*Repository/.test(fs.readFileSync(file, 'utf8'))).map(relative);
+    const businessRepository = /(?:Booking|Partner|Customer|Payment|Invoice|Payout|Review|Coupon|Dispute|Corporate|Notification).*Repository/;
+    const offenders = files.filter((file) => businessRepository.test(fs.readFileSync(file, 'utf8'))).map(relative);
     expect(offenders).toEqual([]);
   });
 
@@ -152,4 +177,4 @@ describe('Backend V3 engineering quality boundaries', () => {
 });
 `);
 
-console.log('[architecture-closeout-quality] canonical topology and engineering quality policy tests normalized');
+console.log('[architecture-closeout-quality] parse-safe canonical topology and engineering quality policies normalized');
