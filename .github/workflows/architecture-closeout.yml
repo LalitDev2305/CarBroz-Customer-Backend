@@ -9,6 +9,7 @@ on:
       - tools/architecture-closeout-residue.mjs
       - tools/architecture-closeout-finalize.mjs
       - tools/generate-module-readmes.mjs
+      - tests/integration/database/**
       - .github/workflows/architecture-closeout.yml
   workflow_dispatch:
 
@@ -22,6 +23,24 @@ concurrency:
 jobs:
   closeout:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://carbroz_ci:carbroz_ci@127.0.0.1:5432/carbroz_ci
+      JWT_SECRET: carbroz-ci-validation-only-secret-not-for-runtime
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: carbroz_ci
+          POSTGRES_PASSWORD: carbroz_ci
+          POSTGRES_DB: carbroz_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U carbroz_ci -d carbroz_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout architecture branch
         uses: actions/checkout@v4
@@ -60,6 +79,9 @@ jobs:
 
       - name: Generate Prisma client
         run: pnpm exec prisma generate
+
+      - name: Apply PostgreSQL migrations
+        run: pnpm exec prisma migrate deploy
 
       - name: Build final monorepo
         run: pnpm -r build
