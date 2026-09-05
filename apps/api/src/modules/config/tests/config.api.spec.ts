@@ -46,10 +46,10 @@ describe('Config API', () => {
     if (app) await app.close();
   });
 
-  it('returns the complete frontend bootstrap snapshot', async () => {
+  it('returns the complete frontend bootstrap snapshot from the canonical API namespace', async () => {
     const response = await app!.inject({
       method: 'GET',
-      url: '/v1/config/init',
+      url: '/api/v1/config/init',
     });
 
     expect(response.statusCode).toBe(200);
@@ -57,5 +57,14 @@ describe('Config API', () => {
       success: true,
       data: bootstrapSnapshot,
     });
+  });
+
+  it('does not expose the obsolete /v1 config namespace', async () => {
+    const response = await app!.inject({
+      method: 'GET',
+      url: '/v1/config/init',
+    });
+
+    expect(response.statusCode).toBe(404);
   });
 });
