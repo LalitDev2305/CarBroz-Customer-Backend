@@ -3,11 +3,10 @@ export type ActorKind = 'GUEST' | 'CUSTOMER' | 'PARTNER' | 'ADMIN' | 'SYSTEM';
 
 /**
  * Minimal authenticated actor identity that application services may use for authorization.
- *
  * HTTP requests, headers, tokens and framework-specific user objects are intentionally excluded.
  */
-export interface ActorIdentity {
-  readonly id: string | number;
+export interface ActorContext {
+  readonly id: number;
   readonly kind: ActorKind;
   readonly roles: readonly string[];
   readonly customerId?: number;
@@ -17,11 +16,12 @@ export interface ActorIdentity {
 
 /**
  * Transport-neutral execution metadata propagated across application boundaries.
- * Correlation IDs connect logs/traces without leaking transport objects into business code.
+ * Every application execution has a concrete actor; transport adapters must resolve identity before
+ * crossing the application boundary. Correlation IDs connect logs/traces without leaking transport state.
  */
 export interface ExecutionContext {
   readonly correlationId: string;
-  readonly actor?: ActorIdentity;
+  readonly actor: ActorContext;
   readonly timestamp: Date;
 }
 
