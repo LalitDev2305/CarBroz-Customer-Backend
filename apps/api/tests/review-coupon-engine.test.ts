@@ -211,26 +211,24 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     const coupon = await createUseCase.execute({
       code: 'FESTIVE500',
       discountType: 'FIXED_AMOUNT',
-      discountValue: 50000, // ₹500 discount
-      minBookingAmountPaise: 80000, // min ₹800
+      discountValue: 50000,
+      minBookingAmountPaise: 80000,
       validFrom: new Date(validityAnchor.getTime() - 24 * 60 * 60 * 1000),
       validUntil: new Date(validityAnchor.getTime() + 24 * 60 * 60 * 1000),
     });
 
     expect(coupon.code).toBe('FESTIVE500');
 
-    // Validation (should NOT increment usage count)
     const validationResult = await validateUseCase.execute({
       code: 'FESTIVE500',
       userId: 5,
-      bookingAmountPaise: 100000, // ₹1000
+      bookingAmountPaise: 100000,
     });
 
     expect(validationResult.isValid).toBe(true);
-    expect(validationResult.discountMoney.amountPaise).toBe(50000);
+    expect(validationResult.discountMoney.amountMinor).toBe(50000);
     expect(coupon.currentUsageCount).toBe(0);
 
-    // Apply (MUST record usage & increment count)
     const usage = await applyUseCase.execute({
       code: 'FESTIVE500',
       userId: 5,
