@@ -40,11 +40,15 @@ describe('Financials architecture policy', () => {
     ).toEqual([]);
   });
 
-  it('keeps persistence-shaped paise naming out of the canonical Money API', () => {
+  it('keeps one canonical Money implementation owned by Foundation', () => {
     const money = read('foundation/kernel/src/domain/Money.ts');
     expect(money).toContain('amountMinor');
     expect(money).toContain('fromMinor');
     expect(money).not.toContain('amountPaise');
     expect(money).not.toContain('fromPaise');
+
+    const compatibilityMoney = read('packages/common/src/domain/value-objects/Money.ts');
+    expect(compatibilityMoney).toContain("export { Money } from '@carbroz/foundation-kernel'");
+    expect(compatibilityMoney).not.toContain('export class Money');
   });
 });
