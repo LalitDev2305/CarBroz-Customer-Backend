@@ -24,7 +24,7 @@ export class ValidateCouponUseCase {
         isValid: false,
         reason: `Invalid coupon code: ${input.code.toUpperCase()}`,
         discountMoney: Money.zero(),
-        finalPriceMoney: Money.fromPaise(input.bookingAmountPaise),
+        finalPriceMoney: Money.fromMinor(input.bookingAmountPaise),
       };
     }
 
