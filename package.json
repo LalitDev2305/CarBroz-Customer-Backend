@@ -15,7 +15,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "freeze:preflight": "node tools/production-freeze/preflight.mjs"
   },
   "type": "module",
   "devDependencies": {
