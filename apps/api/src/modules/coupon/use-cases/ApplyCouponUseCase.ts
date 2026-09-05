@@ -50,7 +50,7 @@ export class ApplyCouponUseCase {
       couponId: coupon.id!,
       userId: input.userId,
       bookingId: booking.id!,
-      discountAmountPaise: calculation.discountMoney.amountPaise,
+      discountAmountPaise: calculation.discountMoney.amountMinor,
     });
 
     const createdUsage = await this.couponUsageRepository.create(usage);
