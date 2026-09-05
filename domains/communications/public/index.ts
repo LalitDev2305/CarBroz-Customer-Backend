@@ -2,8 +2,6 @@ export * from '../domain/NotificationLog.js';
 export * from '../domain/DeviceToken.js';
 export * from '../domain/NotificationChannel.js';
 export * from '../domain/NotificationStatus.js';
-export * from '../infrastructure/repositories/PrismaNotificationLogRepository.js';
-export * from '../infrastructure/repositories/PrismaDeviceTokenRepository.js';
 export * from '../application/UnregisterDeviceTokenUseCase.js';
 export * from '../application/ListNotificationsUseCase.js';
 export * from '../application/MarkNotificationReadUseCase.js';
