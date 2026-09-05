@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import type { ActorIdentity, ExecutionContext } from '@carbroz/foundation-kernel';
+import type { ActorContext, ExecutionContext } from '@carbroz/foundation-kernel';
 import { ResponseHelper } from '@carbroz/common';
 import { updateProfileSchema, addAddressSchema, updateAddressSchema } from '../dtos/customer.dto.js';
 import { GetCustomerProfileUseCase } from '../use-cases/GetCustomerProfileUseCase.js';
@@ -43,18 +43,20 @@ export class CustomerController {
 
     if (user.isAdmin && !roles.includes('ADMIN')) roles.push('ADMIN');
     const isAdmin = user.isAdmin === true || roles.includes('ADMIN');
+    const actorId = typeof user.id === 'number' ? user.id : Number(user.id);
 
-    let actor: ActorIdentity | undefined;
-    if (user.id !== undefined) {
-      actor = {
-        id: user.id,
-        kind: isAdmin ? 'ADMIN' : 'CUSTOMER',
-        roles,
-        customerId: user.customerId ?? (typeof user.id === 'number' ? user.id : undefined),
-        partnerId: user.partnerId,
-        tenantId: user.tenantId,
-      };
+    if (!Number.isInteger(actorId) || actorId <= 0) {
+      throw new Error('UNAUTHENTICATED: customer execution context requires a valid actor id');
     }
+
+    const actor: ActorContext = {
+      id: actorId,
+      kind: isAdmin ? 'ADMIN' : 'CUSTOMER',
+      roles,
+      customerId: user.customerId ?? actorId,
+      partnerId: user.partnerId,
+      tenantId: user.tenantId,
+    };
 
     return {
       correlationId: req.traceId ?? req.id,
