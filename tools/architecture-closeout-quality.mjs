@@ -75,6 +75,23 @@ function normalizeCorporateMoneyFixture() {
   if (moneyImports.length !== 1) throw new Error(`Corporate fixture must have exactly one Foundation Money import; found ${moneyImports.length}`);
 }
 
+function printTrackingFixtureInputDiagnostics() {
+  const file = path.join(root, 'tests/integration/application/tracking-notification-engine.test.ts');
+  if (!fs.existsSync(file)) return;
+  const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
+  const hits = [];
+  for (let i = 0; i < lines.length; i += 1) {
+    if (/StartTrackingSessionUseCase|\.execute\s*\(|bookingId|partnerId|customerId|bookingPublicId|partnerPublicId|customerPublicId/.test(lines[i])) {
+      const start = Math.max(0, i - 3);
+      const end = Math.min(lines.length, i + 7);
+      const snippet = lines.slice(start, end).map((line, offset) => `${start + offset + 1}: ${line}`).join('\n');
+      if (!hits.includes(snippet)) hits.push(snippet);
+      if (hits.length >= 8) break;
+    }
+  }
+  console.log('[architecture-closeout-quality][tracking-fixture-diagnostic]\n' + hits.join('\n---\n'));
+}
+
 function normalizeTrackingFixtureRuntimePort() {
   const file = path.join(root, 'tests/integration/application/tracking-notification-engine.test.ts');
   if (!fs.existsSync(file)) return;
@@ -97,6 +114,7 @@ function normalizeTrackingFixtureRuntimePort() {
 
 try {
   await import('./architecture-closeout-quality-core.mjs');
+  printTrackingFixtureInputDiagnostics();
   canonicalizeTrackingRepositoryImports();
   normalizeAllCanonicalPublicBoundaries();
   normalizeCorporateMoneyFixture();
