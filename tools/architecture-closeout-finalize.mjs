@@ -64,7 +64,7 @@ for (const owner of names) {
     const content = fs.readFileSync(file, 'utf8');
     for (const other of names) {
       if (other === owner) continue;
-      const marker = new RegExp(`from\\s+['\"][^'\"]*(?:\\.\\./)+${other}/`);
+      const marker = new RegExp(`from\\s+['"][^'"]*(?:\\.\\./)+${other}/`);
       if (marker.test(content)) violations.push(`${path.relative(root, file)} imports ${other} surface internals`);
     }
   }
