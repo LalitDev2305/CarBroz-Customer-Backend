@@ -1,5 +1,5 @@
 import type { FastifyRequest } from 'fastify';
-import type { ActorIdentity, ActorKind, ExecutionContext } from '@carbroz/foundation-kernel';
+import type { ActorContext, ActorKind, ExecutionContext } from '@carbroz/foundation-kernel';
 
 function actorKindFromRoles(roles: readonly string[]): ActorKind {
   if (roles.includes('ADMIN')) return 'ADMIN';
@@ -16,13 +16,15 @@ function actorKindFromRoles(roles: readonly string[]): ActorKind {
  */
 export function toExecutionContext(request: FastifyRequest): ExecutionContext {
   const jwtUser = request.user;
-  const actor: ActorIdentity | undefined = jwtUser
-    ? {
-        id: jwtUser.id,
-        kind: actorKindFromRoles(jwtUser.roles),
-        roles: jwtUser.roles,
-      }
-    : undefined;
+  if (!jwtUser) {
+    throw new Error('UNAUTHENTICATED: execution context requires an authenticated actor');
+  }
+
+  const actor: ActorContext = {
+    id: jwtUser.id,
+    kind: actorKindFromRoles(jwtUser.roles),
+    roles: jwtUser.roles,
+  };
 
   return {
     correlationId: request.traceId || request.id,
