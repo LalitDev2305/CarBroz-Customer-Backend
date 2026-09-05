@@ -20,11 +20,10 @@ export class ApproveCorporateAccountUseCase {
       throw new Error(`Corporate account not found with publicId: ${dto.accountPublicId}`);
     }
 
-    const limitMoney = Money.fromPaise(dto.initialCreditLimitPaise);
+    const limitMoney = Money.fromMinor(dto.initialCreditLimitPaise);
     account.approve(limitMoney);
     const updatedAccount = await this.corporateAccountRepo.update(account);
 
-    // Record initial ledger entry
     const ledgerEntry = new CorporateCreditLedger({
       corporateAccountId: updatedAccount.id!,
       entryType: 'CREDIT_GRANTED',
