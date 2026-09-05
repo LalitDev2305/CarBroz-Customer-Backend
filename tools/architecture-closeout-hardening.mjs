@@ -147,11 +147,19 @@ export class AuditFailureObserver {
   const observerImport = "import { AuditFailureObserver } from '@carbroz/platform-observability';";
   if (!containerSource.includes('AuditFailureObserver')) containerSource = `${observerImport}\n${containerSource}`;
   if (!containerSource.includes('auditFailureObserver:')) {
-    const marker = 'container.register({';
+    const marker = 'diContainer.register({';
     const markerIndex = containerSource.indexOf(marker);
-    if (markerIndex < 0) throw new Error('Unable to locate API composition registration for Audit failure observer');
+    if (markerIndex < 0) throw new Error('Unable to locate canonical diContainer registration for Audit failure observer');
     const insertAt = markerIndex + marker.length;
-    containerSource = `${containerSource.slice(0, insertAt)}\n    auditFailureObserver: asClass(AuditFailureObserver).singleton(),${containerSource.slice(insertAt)}`;
+    containerSource = `${containerSource.slice(0, insertAt)}\n      auditFailureObserver: asClass(AuditFailureObserver).classic().singleton(),${containerSource.slice(insertAt)}`;
+  }
+  if (!containerSource.includes('registerAuditModule(diContainer)')) {
+    throw new Error('Audit module is not composed through the canonical API container');
+  }
+  const registrationIndex = containerSource.indexOf('auditFailureObserver:');
+  const auditModuleIndex = containerSource.indexOf('registerAuditModule(diContainer)');
+  if (registrationIndex < 0 || auditModuleIndex < 0 || registrationIndex > auditModuleIndex) {
+    throw new Error('Audit failure observer must be registered before the Audit module is composed');
   }
   write(apiContainer, containerSource);
   console.log('[architecture-closeout-hardening] Audit failures remain non-blocking and are reported through canonical Observability');
