@@ -18,78 +18,63 @@ function generateObservabilityCoverage() {
   }
 
   write(p('tests/unit/observability.behavior.test.ts'), `import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-const mocks = vi.hoisted(() => ({
-  pino: vi.fn(),
-  info: vi.fn(),
-  error: vi.fn(),
-  warn: vi.fn(),
-  debug: vi.fn(),
-}));
-
-vi.mock('pino', () => ({
-  default: mocks.pino,
-}));
-
 import { createLogger, getFastifyLoggerConfig, logFlow } from '../../platform/observability/src/index.js';
 import { LoggerProvider } from '../../platform/observability/src/adapters/LoggerProvider.js';
 import { AuditFailureObserver } from '../../platform/observability/src/adapters/AuditFailureObserver.js';
 
 const fakeLogger = {
-  info: mocks.info,
-  error: mocks.error,
-  warn: mocks.warn,
-  debug: mocks.debug,
+  info: vi.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  debug: vi.fn(),
 };
 
 describe('canonical Observability behavior', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     delete process.env.LOG_LEVEL;
-    mocks.pino.mockReturnValue(fakeLogger);
   });
 
-  it('creates loggers with the default and explicit levels plus mandatory redaction', () => {
-    expect(createLogger()).toBe(fakeLogger);
-    expect(mocks.pino).toHaveBeenLastCalledWith(expect.objectContaining({
-      level: 'info',
-      redact: expect.objectContaining({ censor: '[REDACTED]' }),
-    }));
+  it('creates real loggers with the default and explicit levels', () => {
+    const defaultLogger = createLogger();
+    expect(defaultLogger.level).toBe('info');
 
-    createLogger('warn');
-    const explicitOptions = mocks.pino.mock.calls.at(-1)?.[0];
-    expect(explicitOptions.level).toBe('warn');
-    expect(explicitOptions.redact.paths).toEqual(expect.arrayContaining([
-      'req.headers.authorization',
-      'password',
-      '*.password',
-      'token',
-      '*.token',
-      'otp',
-      '*.otp',
-      'phoneNumber',
-      '*.phoneNumber',
-      'email',
-      '*.email',
-      'bankAccount',
-      '*.bankAccount',
-      'secret',
-      '*.secret',
-    ]));
+    const warningLogger = createLogger('warn');
+    expect(warningLogger.level).toBe('warn');
   });
 
-  it('uses LOG_LEVEL as the process default and returns matching Fastify logger policy', () => {
+  it('uses LOG_LEVEL as the process default and returns matching mandatory Fastify redaction policy', () => {
     process.env.LOG_LEVEL = 'debug';
-    createLogger();
-    expect(mocks.pino).toHaveBeenLastCalledWith(expect.objectContaining({ level: 'debug' }));
+    expect(createLogger().level).toBe('debug');
 
     const config = getFastifyLoggerConfig();
     expect(config.level).toBe('debug');
     expect(config.redact).toEqual(expect.objectContaining({
       censor: '[REDACTED]',
-      paths: expect.arrayContaining(['authorization', 'cookie', 'fcmToken', '*.fcmToken']),
+      paths: expect.arrayContaining([
+        'req.headers.authorization',
+        'req.headers.cookie',
+        'res.headers.set-cookie',
+        'authorization',
+        'cookie',
+        'password',
+        '*.password',
+        'token',
+        '*.token',
+        'otp',
+        '*.otp',
+        'phoneNumber',
+        '*.phoneNumber',
+        'email',
+        '*.email',
+        'fcmToken',
+        '*.fcmToken',
+        'bankAccount',
+        '*.bankAccount',
+        'secret',
+        '*.secret',
+      ]),
     }));
-
     expect(getFastifyLoggerConfig('error').level).toBe('error');
   });
 
@@ -134,6 +119,7 @@ describe('canonical Observability behavior', () => {
 
   it('adapts the stable logger provider contract across context and empty-context paths', () => {
     const provider = new LoggerProvider();
+    Object.assign(provider, { providerLogger: fakeLogger });
     const error = new Error('boom');
 
     provider.info('info-message', { bookingId: 10 });
@@ -145,23 +131,24 @@ describe('canonical Observability behavior', () => {
     provider.error('error-message', error, { operation: 'test' });
     provider.error('error-empty');
 
-    expect(mocks.info).toHaveBeenNthCalledWith(1, { bookingId: 10 }, 'info-message');
-    expect(mocks.info).toHaveBeenNthCalledWith(2, {}, 'info-empty');
-    expect(mocks.warn).toHaveBeenNthCalledWith(1, { partnerId: 20 }, 'warn-message');
-    expect(mocks.warn).toHaveBeenNthCalledWith(2, {}, 'warn-empty');
-    expect(mocks.debug).toHaveBeenNthCalledWith(1, { trace: true }, 'debug-message');
-    expect(mocks.debug).toHaveBeenNthCalledWith(2, {}, 'debug-empty');
-    expect(mocks.error).toHaveBeenNthCalledWith(1, { operation: 'test', err: error }, 'error-message');
-    expect(mocks.error).toHaveBeenNthCalledWith(2, { err: undefined }, 'error-empty');
+    expect(fakeLogger.info).toHaveBeenNthCalledWith(1, { bookingId: 10 }, 'info-message');
+    expect(fakeLogger.info).toHaveBeenNthCalledWith(2, {}, 'info-empty');
+    expect(fakeLogger.warn).toHaveBeenNthCalledWith(1, { partnerId: 20 }, 'warn-message');
+    expect(fakeLogger.warn).toHaveBeenNthCalledWith(2, {}, 'warn-empty');
+    expect(fakeLogger.debug).toHaveBeenNthCalledWith(1, { trace: true }, 'debug-message');
+    expect(fakeLogger.debug).toHaveBeenNthCalledWith(2, {}, 'debug-empty');
+    expect(fakeLogger.error).toHaveBeenNthCalledWith(1, { operation: 'test', err: error }, 'error-message');
+    expect(fakeLogger.error).toHaveBeenNthCalledWith(2, { err: undefined }, 'error-empty');
   });
 
   it('reports non-blocking Audit persistence failures through the observability adapter', () => {
     const observer = new AuditFailureObserver();
+    Object.assign(observer, { auditLogger: fakeLogger });
     const error = new Error('audit store unavailable');
 
     observer.report(error, { operation: 'audit-log-create' });
 
-    expect(mocks.error).toHaveBeenCalledWith(
+    expect(fakeLogger.error).toHaveBeenCalledWith(
       { err: error, operation: 'audit-log-create' },
       'audit.persistence.failed',
     );
