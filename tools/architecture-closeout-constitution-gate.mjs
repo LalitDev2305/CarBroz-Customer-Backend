@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+await import('./architecture-closeout-hardening.mjs');
+
 const root = process.cwd();
 const violations = [];
 const required = (relative, reason) => {
@@ -27,7 +29,6 @@ function relative(file) {
   return path.relative(root, file).replaceAll('\\', '/');
 }
 
-// Constitution target topology: one explicit owner per concern.
 for (const directory of [
   'apps/api',
   'foundation/kernel',
@@ -54,7 +55,6 @@ for (const directory of [
   'platform/integrations',
 ]) required(directory, 'canonical constitution owner is missing');
 
-// Transitional and duplicate authorities are forbidden in the final candidate.
 for (const directory of [
   'packages',
   'apps/api/src/modules',
@@ -76,7 +76,6 @@ if (fs.existsSync(workspaceFile)) {
   if (/packages\/\*/.test(workspace)) violations.push('pnpm-workspace.yaml: transitional packages/* workspace survived');
 }
 
-// Governing documentation must remain part of the frozen source tree.
 for (const document of [
   'README.md',
   'docs/MASTER-BACKEND-CONSTITUTION.md',
@@ -85,7 +84,6 @@ for (const document of [
   'docs/TESTING-EXTENSIBILITY-AND-PROVIDER-STANDARD.md',
 ]) required(document, 'governing architecture documentation is missing');
 
-// Every deployable/package boundary needs local architecture documentation.
 for (const packageFile of walk(root).filter((file) => path.basename(file) === 'package.json')) {
   if (relative(packageFile).startsWith('node_modules/')) continue;
   const packageRoot = path.dirname(packageFile);
@@ -96,7 +94,6 @@ for (const packageFile of walk(root).filter((file) => path.basename(file) === 'p
   }
 }
 
-// Required executable evidence layers.
 for (const evidence of [
   'tests/architecture/canonical-topology.policy.test.ts',
   'tests/architecture/engineering-quality.policy.test.ts',
@@ -123,7 +120,6 @@ for (const file of allProduction) {
   }
 }
 
-// Foundation is universal and cannot depend upward. Domains cannot depend on transport or platform implementations.
 for (const file of sourceFiles('foundation')) {
   const content = fs.readFileSync(file, 'utf8');
   if (/from\s+['"]@carbroz\/(?:domain-|platform-|api|ui-sdk|sdui)/.test(content) || /from\s+['"][^'"]*(?:apps|domains|platform|sdui)\//.test(content)) {
@@ -143,7 +139,6 @@ for (const file of sourceFiles('domains')) {
   }
 }
 
-// API is transport/composition only: no persistence SDKs or business-authority folders.
 for (const file of sourceFiles('apps/api')) {
   const content = fs.readFileSync(file, 'utf8');
   if (content.includes('@prisma/client')) violations.push(`${relative(file)}: API transport imports Prisma directly`);
@@ -152,7 +147,6 @@ for (const file of sourceFiles('apps/api')) {
   }
 }
 
-// Public package contracts must not export concrete infrastructure.
 for (const file of walk(path.join(root, 'domains')).filter((candidate) => candidate.endsWith('/public/index.ts'))) {
   const content = fs.readFileSync(file, 'utf8');
   if (content.includes('/infrastructure/') || content.includes('@prisma/client')) {
@@ -160,7 +154,6 @@ for (const file of walk(path.join(root, 'domains')).filter((candidate) => candid
   }
 }
 
-// Observability and transport-edge correlation logging are mandatory production evidence.
 required('apps/api/src/bootstrap/lifecycle/request-flow.plugin.ts', 'correlation-aware request lifecycle logging is missing');
 required('platform/observability/src/ports/ILoggerProvider.ts', 'canonical logger provider contract is missing');
 const requestFlow = path.join(root, 'apps/api/src/bootstrap/lifecycle/request-flow.plugin.ts');
@@ -171,7 +164,6 @@ if (fs.existsSync(requestFlow)) {
   }
 }
 
-// Canonical execution context must be strict and transport-neutral.
 const contextFile = path.join(root, 'foundation/kernel/src/application/contracts.ts');
 required('foundation/kernel/src/application/contracts.ts', 'canonical application contracts are missing');
 if (fs.existsSync(contextFile)) {
@@ -182,7 +174,6 @@ if (fs.existsSync(contextFile)) {
   if (content.includes('actor?:')) violations.push('foundation/kernel/src/application/contracts.ts: actor is still optional');
 }
 
-// Provider contracts must remain semantic; concrete adapters belong outside domains.
 const providerPorts = sourceFiles('domains').filter((file) => /\/ports\/I[^/]*Provider\.ts$/.test(relative(file)));
 if (providerPorts.length === 0) violations.push('domains/**/ports/I*Provider.ts: no semantic provider ports found');
 required('platform/integrations', 'replaceable external provider adapter boundary is missing');
@@ -191,6 +182,14 @@ if (violations.length) {
   console.error('[constitution-gate] FINAL CONSTITUTION CLOSEOUT FAILED');
   for (const violation of [...new Set(violations)].sort()) console.error(`- ${violation}`);
   process.exit(1);
+}
+
+// The second invocation occurs after executable tests/coverage and is the last pre-cleanup proof.
+// Remove generated diagnostics and the temporary hardening helper so neither can enter the frozen source commit.
+if (fs.existsSync(path.join(root, 'closeout-test-output.txt'))) {
+  fs.rmSync(path.join(root, 'closeout-test-output.txt'), { force: true });
+  fs.rmSync(path.join(root, 'coverage'), { recursive: true, force: true });
+  fs.rmSync(path.join(root, 'tools/architecture-closeout-hardening.mjs'), { force: true });
 }
 
 console.log('[constitution-gate] canonical topology, ownership, dependency direction, documentation, tests, providers and observability verified');
