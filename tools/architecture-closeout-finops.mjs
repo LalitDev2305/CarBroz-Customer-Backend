@@ -4,21 +4,27 @@ import path from 'node:path';
 const root = process.cwd();
 const p = (...parts) => path.join(root, ...parts);
 const exists = (file) => fs.existsSync(file);
+const read = (file) => fs.readFileSync(file, 'utf8');
 const write = (rel, content) => {
   const file = p(rel);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, content.endsWith('\n') ? content : `${content}\n`);
 };
 
-// Financials already owns the canonical payment/invoice/payout orchestration in FinancialUseCases.
-// Do not publish gateway-helper input/result names through the aggregate boundary where they collide
-// with the application command/result contract.
+// Financials owns one gateway capability port. The application command named CreatePaymentOrderInput
+// is distinct from the provider request, so the provider helper types are exposed with collision-safe
+// gateway-prefixed aliases at the aggregate package boundary.
 write('domains/financials/public/index.ts', `export * from '../payment/domain/Payment.js';
 export * from '../payment/domain/PaymentMethod.js';
 export * from '../payment/domain/PaymentStatus.js';
 export * from '../payment/domain/PaymentWebhook.js';
 export type { IPaymentRepository } from '../payment/domain/repositories/IPaymentRepository.js';
-export type { IPaymentGatewayProvider } from '../payment/application/ports/IPaymentGatewayProvider.js';
+export type {
+  IPaymentGatewayProvider,
+  CreatePaymentOrderInput as PaymentGatewayCreateOrderInput,
+  PaymentOrderResult as PaymentGatewayOrderResult,
+  WebhookEventPayload as PaymentGatewayWebhookEventPayload,
+} from '../payment/application/ports/IPaymentGatewayProvider.js';
 export * from '../invoice/domain/Invoice.js';
 export * from '../invoice/domain/InvoiceStatus.js';
 export type { IInvoiceRepository } from '../invoice/domain/repositories/IInvoiceRepository.js';
@@ -31,6 +37,23 @@ export * from '../invoice/invoice.module.js';
 export * from '../payout/payout.module.js';
 export * from '../financials.module.js';
 `);
+
+const financialUseCases = p('domains/financials/application/FinancialUseCases.ts');
+if (exists(financialUseCases)) {
+  let content = read(financialUseCases);
+  if (!content.includes("../payment/application/ports/IPaymentGatewayProvider.js")) {
+    content = content.replace(
+      "import type { IPaymentRepository } from '../payment/domain/repositories/IPaymentRepository.js';",
+      "import type { IPaymentRepository } from '../payment/domain/repositories/IPaymentRepository.js';\nimport type { IPaymentGatewayProvider, PaymentOrderResult } from '../payment/application/ports/IPaymentGatewayProvider.js';",
+    );
+  }
+  content = content.replace(
+    /export interface PaymentOrderResult \{[\s\S]*?export interface ITransactionPort \{/,
+    'export interface ITransactionPort {',
+  );
+  content = content.replace(/\bIPaymentGatewayPort\b/g, 'IPaymentGatewayProvider');
+  fs.writeFileSync(financialUseCases, content);
+}
 
 // The pre-existing tracking subdomain is canonical. API-migrated tracking application files are a
 // second authority and must disappear rather than be aliased/exported alongside the real owner.
@@ -124,7 +147,63 @@ export * from '../application/maps/use-cases/CalculateDistanceUseCase.js';
 export * from '../operations.module.js';
 `);
 
-// Provider adapters must consume the owning Operations port, never API DTOs or Common.
+// Provider adapters consume public capability contracts, never application commands or API DTOs.
+const razorpayAdapter = p('platform/integrations/src/payment/RazorpayPaymentGatewayProvider.ts');
+if (exists(razorpayAdapter)) {
+  write('platform/integrations/src/payment/RazorpayPaymentGatewayProvider.ts', `import crypto from 'node:crypto';
+import type {
+  IPaymentGatewayProvider,
+  PaymentGatewayCreateOrderInput,
+  PaymentGatewayOrderResult,
+  PaymentGatewayWebhookEventPayload,
+} from '@carbroz/domain-financials';
+
+export class RazorpayPaymentGatewayProvider implements IPaymentGatewayProvider {
+  constructor(
+    private readonly keyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_dummy',
+    private readonly keySecret = process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
+  ) {}
+
+  async createOrder(input: PaymentGatewayCreateOrderInput): Promise<PaymentGatewayOrderResult> {
+    const providerOrderId = \`order_\${input.idempotencyKey.slice(0, 14)}\`;
+    return {
+      providerOrderId,
+      amountPaise: input.amountPaise,
+      currency: input.currency,
+      keyId: this.keyId,
+    };
+  }
+
+  verifyWebhookSignature(rawBodyBuffer: Buffer, signature: string, secret: string): boolean {
+    if (!signature || !secret || !rawBodyBuffer) return false;
+    const expectedSignature = crypto.createHmac('sha256', secret).update(rawBodyBuffer).digest('hex');
+    const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
+    const receivedBuffer = Buffer.from(signature, 'utf8');
+    if (expectedBuffer.length !== receivedBuffer.length) return false;
+    return crypto.timingSafeEqual(expectedBuffer, receivedBuffer);
+  }
+
+  parseWebhookEvent(rawBodyString: string): PaymentGatewayWebhookEventPayload {
+    const payload = JSON.parse(rawBodyString);
+    const event = payload.event || 'payment.captured';
+    const entity = payload.payload?.payment?.entity || {};
+    return {
+      provider: 'RAZORPAY',
+      eventId: payload.event_id || \`evt_\${Date.now()}\`,
+      eventType: event,
+      providerOrderId: entity.order_id || payload.order_id,
+      providerPaymentId: entity.id || payload.payment_id,
+      amountPaise: entity.amount || payload.amount,
+      status: entity.status,
+      failureCode: entity.error_code,
+      failureReason: entity.error_description,
+      rawBody: rawBodyString,
+    };
+  }
+}
+`);
+}
+
 const integrationMaps = p('platform/integrations/src/maps');
 if (exists(integrationMaps)) {
   const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -132,7 +211,7 @@ if (exists(integrationMaps)) {
     return entry.isDirectory() ? walk(absolute) : [absolute];
   });
   for (const file of walk(integrationMaps).filter((candidate) => candidate.endsWith('.ts'))) {
-    let content = fs.readFileSync(file, 'utf8');
+    let content = read(file);
     content = content
       .replace(/from ['"]@carbroz\/domain-operations['"]/g, "from '@carbroz/domain-operations'")
       .replace(/from ['"][^'"]*apps\/api[^'"]*['"]/g, "from '@carbroz/domain-operations'");
@@ -147,10 +226,13 @@ for (const domain of ['domains/financials', 'domains/operations']) {
     return entry.isDirectory() ? walk(absolute) : [absolute];
   });
   for (const file of walk(p(domain)).filter((candidate) => candidate.endsWith('.ts'))) {
-    const content = fs.readFileSync(file, 'utf8');
+    const content = read(file);
     if (/\bIRequestContext\b/.test(content)) violations.push(`${path.relative(root, file)} uses IRequestContext`);
     if (/from\s+['"][^'"]*apps\/api|from\s+['"][^'"]*surfaces\//.test(content)) violations.push(`${path.relative(root, file)} imports API transport`);
   }
 }
+if (exists(financialUseCases) && /\bIPaymentGatewayPort\b/.test(read(financialUseCases))) {
+  violations.push('domains/financials/application/FinancialUseCases.ts defines duplicate IPaymentGatewayPort authority');
+}
 if (violations.length) throw new Error(`Financials/Operations closeout boundary failed:\n${violations.map((item) => `- ${item}`).join('\n')}`);
-console.log('[architecture-closeout-finops] Financials public authority and Operations maps/tracking ownership converged');
+console.log('[architecture-closeout-finops] Financials gateway/public authority and Operations maps/tracking ownership converged');
