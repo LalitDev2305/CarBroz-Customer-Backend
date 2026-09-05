@@ -262,7 +262,7 @@ function augmentReadme(readmeFile) {
   content = appendOrReplaceSection(content, '## How to test this module', commands);
   content = appendOrReplaceSection(content, '## Specific functionality verification', verification);
   write(readmeFile, content);
-  return { moduleRel, tests: tests.map(rel), symbols: symbols.map((symbol) => ({ ...symbol, file: rel(symbol.file) })) };
+  return { moduleRel, tests: tests.map((file) => rel(file)), symbols: symbols.map((symbol) => ({ ...symbol, file: rel(symbol.file) })) };
 }
 
 let insertedDocs = 0;
