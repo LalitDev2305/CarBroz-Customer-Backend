@@ -26,51 +26,50 @@ export class TaxCalculator {
 
   calculateInvoiceTax(subtotalMoney: Money, isInterstate = false): TaxCalculationResult {
     const currency = subtotalMoney.currency;
-    const subtotalPaise = subtotalMoney.amountPaise;
+    const subtotalMinor = subtotalMoney.amountMinor;
 
     if (isInterstate) {
-      const igstPaise = Math.round((subtotalPaise * this.config.igstRatePercent) / 100);
-      const totalTaxPaise = igstPaise;
+      const igstMinor = Math.round((subtotalMinor * this.config.igstRatePercent) / 100);
+      const totalTaxMinor = igstMinor;
       return {
         basePrice: subtotalMoney,
         subtotal: subtotalMoney,
         cgst: Money.zero(currency),
         sgst: Money.zero(currency),
-        igst: Money.fromPaise(igstPaise, currency),
-        totalTax: Money.fromPaise(totalTaxPaise, currency),
-        totalPrice: Money.fromPaise(subtotalPaise + totalTaxPaise, currency),
-      };
-    } else {
-      const cgstPaise = Math.round((subtotalPaise * this.config.cgstRatePercent) / 100);
-      const sgstPaise = Math.round((subtotalPaise * this.config.sgstRatePercent) / 100);
-      const totalTaxPaise = cgstPaise + sgstPaise;
-      return {
-        basePrice: subtotalMoney,
-        subtotal: subtotalMoney,
-        cgst: Money.fromPaise(cgstPaise, currency),
-        sgst: Money.fromPaise(sgstPaise, currency),
-        igst: Money.zero(currency),
-        totalTax: Money.fromPaise(totalTaxPaise, currency),
-        totalPrice: Money.fromPaise(subtotalPaise + totalTaxPaise, currency),
+        igst: Money.fromMinor(igstMinor, currency),
+        totalTax: Money.fromMinor(totalTaxMinor, currency),
+        totalPrice: Money.fromMinor(subtotalMinor + totalTaxMinor, currency),
       };
     }
+
+    const cgstMinor = Math.round((subtotalMinor * this.config.cgstRatePercent) / 100);
+    const sgstMinor = Math.round((subtotalMinor * this.config.sgstRatePercent) / 100);
+    const totalTaxMinor = cgstMinor + sgstMinor;
+    return {
+      basePrice: subtotalMoney,
+      subtotal: subtotalMoney,
+      cgst: Money.fromMinor(cgstMinor, currency),
+      sgst: Money.fromMinor(sgstMinor, currency),
+      igst: Money.zero(currency),
+      totalTax: Money.fromMinor(totalTaxMinor, currency),
+      totalPrice: Money.fromMinor(subtotalMinor + totalTaxMinor, currency),
+    };
   }
 
   calculatePartnerPayout(grossMoney: Money): PayoutCalculationResult {
     const currency = grossMoney.currency;
-    const grossPaise = grossMoney.amountPaise;
-
-    const commissionPaise = Math.round((grossPaise * this.config.platformCommissionPercent) / 100);
-    const tdsPaise = Math.round((grossPaise * this.config.tdsRatePercent) / 100);
-    const netPayoutPaise = grossPaise - commissionPaise - tdsPaise;
+    const grossMinor = grossMoney.amountMinor;
+    const commissionMinor = Math.round((grossMinor * this.config.platformCommissionPercent) / 100);
+    const tdsMinor = Math.round((grossMinor * this.config.tdsRatePercent) / 100);
+    const netPayoutMinor = grossMinor - commissionMinor - tdsMinor;
 
     return {
       grossAmount: grossMoney,
       commissionPercentage: this.config.platformCommissionPercent,
-      commission: Money.fromPaise(commissionPaise, currency),
+      commission: Money.fromMinor(commissionMinor, currency),
       tdsPercentage: this.config.tdsRatePercent,
-      tds: Money.fromPaise(tdsPaise, currency),
-      netPayout: Money.fromPaise(netPayoutPaise, currency),
+      tds: Money.fromMinor(tdsMinor, currency),
+      netPayout: Money.fromMinor(netPayoutMinor, currency),
       appliedRules: [
         `Platform Commission: ${this.config.platformCommissionPercent}%`,
         `TDS u/s 194O: ${this.config.tdsRatePercent}%`,
