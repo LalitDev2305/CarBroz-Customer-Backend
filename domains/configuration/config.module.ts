@@ -1,4 +1,4 @@
-import { asFunction, type AwilixContainer } from 'awilix';
+import { asClass, asFunction, type AwilixContainer } from 'awilix';
 import type { PrismaClient } from '@prisma/client';
 import type { IConfigRepository } from './domain/repositories/IConfigRepository.js';
 import type { IFeatureFlagRepository } from './domain/repositories/IFeatureFlagRepository.js';
@@ -18,6 +18,7 @@ interface ConfigurationCradle {
   featureFlagProvider: FeatureFlagProvider;
 }
 
+/** Registers Configuration persistence, providers and application orchestration as one bounded context. */
 export function registerConfigModule(container: AwilixContainer): void {
   container.register({
     configRepository: asFunction(
@@ -32,8 +33,8 @@ export function registerConfigModule(container: AwilixContainer): void {
     featureFlagProvider: asFunction(
       (cradle: ConfigurationCradle) => new FeatureFlagProvider(cradle.featureFlagRepository),
     ).singleton(),
-    getInitConfigUseCase: asFunction(
-      (cradle: ConfigurationCradle) => new GetInitConfigUseCase(cradle.configProvider, cradle.featureFlagProvider),
-    ).singleton(),
+    // Constructor parameter names intentionally match the stable provider registrations so this
+    // remains compatible with the API composition root's CLASSIC Awilix injection mode.
+    getInitConfigUseCase: asClass(GetInitConfigUseCase).singleton(),
   });
 }
