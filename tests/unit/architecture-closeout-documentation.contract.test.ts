@@ -10,6 +10,11 @@ describe('architecture closeout documentation hardener contract', () => {
     expect(source).toContain('isFunctionLikeInitializer(node.initializer)');
   });
 
+  it('preserves the README test-path mapping callback contract', () => {
+    expect(source).toContain('tests: tests.map((file) => rel(file))');
+    expect(source).not.toContain('tests: tests.map(rel)');
+  });
+
   it('generates permanent TSDoc and module-test documentation policies', () => {
     expect(source).toContain('tests/architecture/tsdoc-documentation.policy.test.ts');
     expect(source).toContain('tests/architecture/module-test-documentation.policy.test.ts');
