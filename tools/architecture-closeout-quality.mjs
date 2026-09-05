@@ -35,8 +35,42 @@ for (const [before, after] of replacements) {
 fs.writeFileSync(core, source);
 console.log('[architecture-closeout-quality] tracking repository fixture detector accepts property and method syntax');
 
+function canonicalizeTrackingRepositoryImports() {
+  const repository = path.join(
+    root,
+    'domains/operations/tracking/infrastructure/repositories/PrismaTrackingSessionRepository.ts',
+  );
+  if (!fs.existsSync(repository)) return;
+
+  const body = fs.readFileSync(repository, 'utf8')
+    .split(/\r?\n/)
+    .filter((line) => {
+      if (!/^import\b/.test(line.trim())) return true;
+      return !/\b(?:ITrackingSessionRepository|TrackingSession|TrackingStatus)\b/.test(line);
+    })
+    .join('\n')
+    .replace(/^\s+/, '');
+
+  const header = [
+    "import type { ITrackingSessionRepository } from '../../domain/ITrackingSessionRepository.js';",
+    "import { TrackingSession } from '../../domain/TrackingSession.js';",
+    "import type { TrackingStatus } from '../../domain/TrackingStatus.js';",
+    '',
+  ].join('\n');
+
+  fs.writeFileSync(repository, `${header}${body.endsWith('\n') ? body : `${body}\n`}`);
+
+  const finalSource = fs.readFileSync(repository, 'utf8');
+  const matches = finalSource.match(/\bITrackingSessionRepository\b/g) ?? [];
+  if (matches.length !== 2) {
+    throw new Error(`Tracking repository interface authority is not canonical after import convergence: ${matches.length} references`);
+  }
+}
+
 try {
   await import('./architecture-closeout-quality-core.mjs');
+  canonicalizeTrackingRepositoryImports();
+  console.log('[architecture-closeout-quality] tracking repository imports canonicalized');
 } finally {
   fs.rmSync(core, { force: true });
 }
