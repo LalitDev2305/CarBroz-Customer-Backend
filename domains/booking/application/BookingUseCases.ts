@@ -1,4 +1,5 @@
-import { Booking, type BookingSnapshots } from '../domain/Booking.js';
+import { Booking } from '../domain/Booking.js';
+import type { BookingSnapshots } from '../domain/BookingSnapshots.js';
 import type { BookingStatus } from '../domain/BookingStatus.js';
 import type { IBookingRepository } from '../domain/repositories/IBookingRepository.js';
 import type { IAddressRepository, ICustomerProfileRepository, IVehicleRepository } from '@carbroz/domain-customer';
