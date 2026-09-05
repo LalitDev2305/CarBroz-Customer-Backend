@@ -8,8 +8,9 @@ import { PartnerType } from '../../../domains/partner/domain/PartnerType.js';
 
 /**
  * Real PostgreSQL evidence for the Constitution transaction law.
- * If the repository ignores the transaction client and writes through the root Prisma client,
- * the created Partner survives the forced failure and this test fails.
+ * The suite proves both sides of transaction propagation: committed work is visible through the
+ * root client, while work performed through the same supplied transaction client is rolled back
+ * when the unit of work fails.
  */
 describe('real PostgreSQL transaction propagation', () => {
   const prismaProvider = new PrismaProvider();
@@ -22,6 +23,27 @@ describe('real PostgreSQL transaction propagation', () => {
 
   afterAll(async () => {
     await prismaProvider.disconnect();
+  });
+
+  it('commits a Partner repository write performed through the supplied transaction client', async () => {
+    const repository = new PrismaPartnerRepository(rootClient);
+    const created = await transactionProvider.runInTransaction(async (transaction) => {
+      repository.setUnitOfWork(transaction as PrismaClient);
+      return repository.create({
+        businessName: `Commit Probe ${Date.now()}`,
+        type: PartnerType.INDIVIDUAL,
+        status: PartnerStatus.PENDING,
+      });
+    });
+
+    repository.setUnitOfWork(rootClient);
+    const persisted = await repository.findByPublicId(created.publicId);
+    expect(persisted).not.toBeNull();
+    expect(persisted?.id).toBe(created.id);
+    expect(persisted?.status).toBe(PartnerStatus.PENDING);
+
+    expect(await repository.delete(created.id)).toBe(true);
+    expect(await repository.findByPublicId(created.publicId)).toBeNull();
   });
 
   it('rolls back a Partner repository write performed through the supplied transaction client', async () => {
