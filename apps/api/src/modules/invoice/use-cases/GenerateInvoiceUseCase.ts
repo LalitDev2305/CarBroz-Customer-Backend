@@ -18,7 +18,7 @@ export class GenerateInvoiceUseCase {
   async execute(bookingId: number): Promise<Invoice> {
     const existing = await this.invoiceRepository.findByBookingId(bookingId);
     if (existing) {
-      return existing; // Idempotent
+      return existing;
     }
 
     const booking = await this.bookingRepository.findById(bookingId);
@@ -28,8 +28,7 @@ export class GenerateInvoiceUseCase {
 
     const invoiceNumber = await this.invoiceRepository.generateNextInvoiceNumber();
     const snapshots = booking.snapshots;
-
-    const subtotalMoney = Money.fromPaise(snapshots.pricing.subtotalPaise, 'INR');
+    const subtotalMoney = Money.fromMinor(snapshots.pricing.subtotalPaise, 'INR');
     const taxResult = this.taxCalculator.calculateInvoiceTax(subtotalMoney);
 
     const documentJson: InvoiceDocument = {
@@ -41,12 +40,12 @@ export class GenerateInvoiceUseCase {
       serviceName: snapshots.service.name,
       basePricePaise: snapshots.pricing.basePricePaise,
       addonsTotalPaise: snapshots.pricing.addonsTotalPaise,
-      subtotalPaise: subtotalMoney.amountPaise,
-      cgstPaise: taxResult.cgst.amountPaise,
-      sgstPaise: taxResult.sgst.amountPaise,
-      igstPaise: taxResult.igst.amountPaise,
-      totalTaxPaise: taxResult.totalTax.amountPaise,
-      totalPricePaise: taxResult.totalPrice.amountPaise,
+      subtotalPaise: subtotalMoney.amountMinor,
+      cgstPaise: taxResult.cgst.amountMinor,
+      sgstPaise: taxResult.sgst.amountMinor,
+      igstPaise: taxResult.igst.amountMinor,
+      totalTaxPaise: taxResult.totalTax.amountMinor,
+      totalPricePaise: taxResult.totalPrice.amountMinor,
       currency: 'INR',
       issuedAt: new Date(),
     };
@@ -54,7 +53,7 @@ export class GenerateInvoiceUseCase {
     const invoice = new Invoice({
       bookingId,
       invoiceNumber,
-      amountPaise: taxResult.totalPrice.amountPaise,
+      amountPaise: taxResult.totalPrice.amountMinor,
       currency: 'INR',
       status: 'ISSUED',
       documentJson,
