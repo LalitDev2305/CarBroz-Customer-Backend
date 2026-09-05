@@ -1,7 +1,6 @@
 export * from '../domain/TrackingSession.js';
 export * from '../domain/TrackingStatus.js';
 export * from '../domain/LocationPing.js';
-export * from '../infrastructure/repositories/PrismaTrackingSessionRepository.js';
 export * from '../application/StartTrackingSessionUseCase.js';
 export * from '../application/UpdateLiveGpsLocationUseCase.js';
 export * from '../application/GetLiveTrackingTimelineUseCase.js';
