@@ -99,10 +99,32 @@ for (const packageFile of walk(root).filter((file) => path.basename(file) === 'p
 for (const evidence of [
   'tests/architecture/canonical-topology.policy.test.ts',
   'tests/architecture/engineering-quality.policy.test.ts',
+  'tests/architecture/production-coverage-scope.policy.test.ts',
+  'tests/architecture/support/production-coverage-scope.mjs',
   'tests/contracts/canonical-public-contracts.contract.test.ts',
   'tests/e2e/api-health.e2e.test.ts',
   'tests/integration',
 ]) required(evidence, 'required positive/negative/regression evidence layer is missing');
+
+const vitestConfigFile = path.join(root, 'vitest.config.ts');
+required('vitest.config.ts', 'production test/coverage configuration is missing');
+if (fs.existsSync(vitestConfigFile)) {
+  const config = fs.readFileSync(vitestConfigFile, 'utf8');
+  for (const marker of ['findExecutableProductionFiles', 'coverage:', 'include: executableProductionFiles']) {
+    if (!config.includes(marker)) violations.push(`vitest.config.ts: missing Constitution §49 coverage scope marker ${marker}`);
+  }
+  for (const threshold of ['lines: 100', 'functions: 100', 'branches: 100', 'statements: 100']) {
+    if (!config.includes(threshold)) violations.push(`vitest.config.ts: final freeze threshold missing ${threshold}`);
+  }
+}
+
+const coverageScopeFile = path.join(root, 'tests/architecture/support/production-coverage-scope.mjs');
+if (fs.existsSync(coverageScopeFile)) {
+  const scope = fs.readFileSync(coverageScopeFile, 'utf8');
+  for (const marker of ['PRODUCTION_ROOTS', 'sourceTextIsExecutable', 'findExecutableProductionFiles', 'findStructuralProductionFiles']) {
+    if (!scope.includes(marker)) violations.push(`tests/architecture/support/production-coverage-scope.mjs: missing deterministic coverage marker ${marker}`);
+  }
+}
 
 const productionRoots = ['apps', 'domains', 'sdui', 'platform', 'foundation'];
 const allProduction = productionRoots.flatMap(sourceFiles);
@@ -195,4 +217,4 @@ if (fs.existsSync(path.join(root, 'closeout-test-output.txt'))) {
   fs.rmSync(path.join(root, 'tools/architecture-closeout-runtime-regression.mjs'), { force: true });
 }
 
-console.log('[constitution-gate] canonical topology, ownership, dependency direction, documentation, tests, providers and observability verified');
+console.log('[constitution-gate] canonical topology, ownership, dependency direction, documentation, tests, providers, observability and executable-production coverage scope verified');
