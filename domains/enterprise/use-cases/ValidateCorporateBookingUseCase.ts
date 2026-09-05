@@ -56,7 +56,7 @@ export class ValidateCorporateBookingUseCase {
       return { eligible: false, reason: 'Vehicle is not enrolled in active corporate fleet' };
     }
 
-    const bookingMoney = Money.fromPaise(dto.bookingAmountPaise);
+    const bookingMoney = Money.fromMinor(dto.bookingAmountPaise);
     if (!account.canCoverAmount(bookingMoney)) {
       return { eligible: false, reason: 'Corporate account credit limit exceeded' };
     }
