@@ -142,12 +142,21 @@ export class Payment {
     if (this.status !== 'SUCCESS') {
       throw new Error('Only successful payments can be refunded');
     }
+
+    const refund = Money.fromMinor(amountPaise, this.currency);
+    if (refund.amountMinor <= 0) {
+      throw new Error('Refund amount must be a positive integer in minor units');
+    }
+    if (refund.greaterThan(this.money)) {
+      throw new Error('Refund amount cannot exceed the payment amount');
+    }
+
     this.status = 'REFUNDED';
     this.refundedAt = new Date();
     this.refundsJson.push({
       refundId: `ref_${Date.now()}`,
       providerRefundId,
-      amountPaise,
+      amountPaise: refund.amountMinor,
       reason,
       timestamp: new Date(),
       status: 'REFUNDED',
