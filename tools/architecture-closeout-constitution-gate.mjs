@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// The gate executes deterministic hardening before evaluating the final candidate tree.
+// Execute deterministic hardening before evaluating the final candidate tree.
 await import('./architecture-closeout-hardening.mjs');
 
 const root = process.cwd();
