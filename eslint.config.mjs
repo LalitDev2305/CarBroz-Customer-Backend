@@ -28,8 +28,20 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         console: 'readonly',
-        process: 'readonly'
+        process: 'readonly',
+        URL: 'readonly'
       }
+    }
+  },
+  {
+    // These two temporary migration generators intentionally contain regex/string escaping
+    // that is consumed as generated source. They are removed before the frozen candidate lint.
+    files: [
+      'tools/architecture-closeout-api.mjs',
+      'tools/architecture-closeout-finalize.mjs'
+    ],
+    rules: {
+      'no-useless-escape': 'off'
     }
   }
 );
