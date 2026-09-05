@@ -167,10 +167,26 @@ function dependency(mode: Mode, callbacks: Callable[], literal?: unknown): any {
       if (['code', 'status', 'header', 'type'].includes(name)) return () => proxy;
       if (['send', 'redirect'].includes(name)) return vi.fn(() => proxy);
       if (name === 'jwtVerify') return async () => entity.actor;
+      if (name === 'getClient') return () => proxy;
+      if (['post', 'put', 'patch', 'delete', 'options', 'head', 'route', 'register', 'addHook'].includes(name)) {
+        return (...args: unknown[]) => {
+          calls += 1;
+          args.forEach((arg) => collectCallbacks(arg, callbacks));
+          return proxy;
+        };
+      }
       if (name === 'get') {
-        return async (configKey: string) => /URL|HOST|PORT|SECRET|KEY|TOKEN|ENDPOINT|SSL|MINIO|RAZORPAY|TWILIO|FIREBASE|GOOGLE/i.test(configKey)
-          ? undefined
-          : proxy;
+        return (...args: unknown[]) => {
+          calls += 1;
+          if (args.length > 1) {
+            args.forEach((arg) => collectCallbacks(arg, callbacks));
+            return proxy;
+          }
+          const configKey = String(args[0] ?? '');
+          return /URL|HOST|PORT|SECRET|KEY|TOKEN|ENDPOINT|SSL|MINIO|RAZORPAY|TWILIO|FIREBASE|GOOGLE/i.test(configKey)
+            ? undefined
+            : proxy;
+        };
       }
       if (['body', 'params', 'query', 'headers', 'user'].includes(name)) return entity;
       if (name === 'context') return entity.context;
@@ -402,7 +418,7 @@ describe('final API server bootstrap', () => {
     const listen = vi.fn(async () => undefined);
     const error = vi.fn();
     vi.doMock('../../apps/api/src/bootstrap/app.js', () => ({
-      buildApplication: vi.fn(async () => ({ listen, log: { error } })),
+      buildApp: vi.fn(async () => ({ listen, log: { error } })),
     }));
     process.env.HOST = '127.0.0.1';
     process.env.PORT = '8080';
@@ -414,7 +430,7 @@ describe('final API server bootstrap', () => {
   finalIt('logs and terminates on startup failure', async () => {
     const error = vi.fn();
     vi.doMock('../../apps/api/src/bootstrap/app.js', () => ({
-      buildApplication: vi.fn(async () => ({
+      buildApp: vi.fn(async () => ({
         listen: vi.fn(async () => { throw new Error('listen failed'); }),
         log: { error },
       })),
