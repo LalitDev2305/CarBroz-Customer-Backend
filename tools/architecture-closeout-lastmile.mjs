@@ -64,7 +64,7 @@ export class AuthorizationProvider {
 
   async getRoles(userId: number): Promise<string[]> {
     const roleIds = await this.adminRoleRepository.findRolesForUser(userId);
-    const roles = [];
+    const roles: string[] = [];
     for (const roleId of roleIds) {
       const role = await this.roleRepository.findById(roleId);
       if (role) roles.push(role.name);
@@ -122,6 +122,17 @@ export class AuthorizationProvider {
   fs.writeFileSync(apiContainerFile, apiContainer);
 }
 
+function ensureExecutionContextImport(file, content) {
+  if (content.includes('toExecutionContext(request)') && !content.includes('/context/toExecutionContext.js')) {
+    let relative = path.relative(path.dirname(file), path.join(root, 'apps/api/src/context/toExecutionContext.ts'))
+      .replaceAll('\\', '/')
+      .replace(/\.ts$/, '.js');
+    if (!relative.startsWith('.')) relative = `./${relative}`;
+    return `import { toExecutionContext } from '${relative}';\n${content}`;
+  }
+  return content;
+}
+
 function normalizeApiActorContext() {
   const apiRoot = path.join(root, 'apps/api/src');
   for (const file of walk(apiRoot).filter((candidate) => candidate.endsWith('.ts'))) {
@@ -129,10 +140,74 @@ function normalizeApiActorContext() {
     if (!content.includes('ActorIdentity')) continue;
     fs.writeFileSync(file, content.replace(/\bActorIdentity\b/g, 'ActorContext'));
   }
-  const residue = walk(apiRoot)
+
+  write('apps/api/src/context/toExecutionContext.ts', `import type { FastifyRequest } from 'fastify';
+import type { ActorContext, ActorKind, ExecutionContext } from '@carbroz/foundation-kernel';
+
+function actorKindFromRoles(roles: readonly string[]): ActorKind {
+  if (roles.includes('ADMIN')) return 'ADMIN';
+  if (roles.includes('PARTNER')) return 'PARTNER';
+  if (roles.includes('GUEST')) return 'GUEST';
+  return 'CUSTOMER';
+}
+
+function requireNumericActorId(value: string | number): number {
+  const id = Number(value);
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    throw new Error('AUTHENTICATED_ACTOR_ID_INVALID');
+  }
+  return id;
+}
+
+/**
+ * Converts authenticated Fastify/JWT metadata into Foundation's strict transport-neutral context.
+ * Missing or malformed identities are rejected at the transport boundary rather than propagated into domains.
+ */
+export function toExecutionContext(request: FastifyRequest): ExecutionContext {
+  const jwtUser = request.user;
+  if (!jwtUser) throw new Error('AUTHENTICATED_ACTOR_REQUIRED');
+
+  const actor: ActorContext = {
+    id: requireNumericActorId(jwtUser.id),
+    kind: actorKindFromRoles(jwtUser.roles),
+    roles: jwtUser.roles,
+  };
+
+  return {
+    correlationId: request.traceId || request.id,
+    actor,
+    timestamp: new Date(),
+  };
+}
+`);
+
+  // Some legacy Customer handlers constructed their own optional actor. Converge those to the same
+  // transport adapter so Foundation's required actor and numeric-id invariants have one authority.
+  const customerController = path.join(apiRoot, 'surfaces/customer/controllers/customer.customer.controller.ts');
+  if (fs.existsSync(customerController)) {
+    let content = fs.readFileSync(customerController, 'utf8');
+    content = content.replace(
+      /const\s+actor:\s*ActorContext\s*\|\s*undefined\s*=\s*request\.user\s*\?[\s\S]*?\n\s*:\s*undefined;/m,
+      'const actor: ActorContext = toExecutionContext(request).actor;',
+    );
+    content = content.replace(/id:\s*request\.user\.id/g, 'id: Number(request.user.id)');
+    content = ensureExecutionContextImport(customerController, content);
+    fs.writeFileSync(customerController, content);
+  }
+
+  const actorIdentityResidue = walk(apiRoot)
     .filter((candidate) => candidate.endsWith('.ts'))
     .filter((file) => fs.readFileSync(file, 'utf8').includes('ActorIdentity'));
-  if (residue.length) throw new Error(`Non-canonical ActorIdentity survived API convergence: ${residue.join(', ')}`);
+  if (actorIdentityResidue.length) {
+    throw new Error(`Non-canonical ActorIdentity survived API convergence: ${actorIdentityResidue.join(', ')}`);
+  }
+
+  if (fs.existsSync(customerController)) {
+    const customerSource = fs.readFileSync(customerController, 'utf8');
+    if (customerSource.includes('ActorContext | undefined')) {
+      throw new Error('Customer transport still permits an optional application actor');
+    }
+  }
 }
 
 function normalizeConstitutionReferences() {
@@ -231,4 +306,4 @@ describe('canonical public contracts', () => {
 fs.rmSync(path.join(root, 'tools/architecture-closeout-finalize.mjs'), { force: true });
 fs.rmSync(path.join(root, 'tools/architecture-closeout-postfinal.mjs'), { force: true });
 
-console.log('[architecture-closeout-lastmile] Identity authorization ownership, API actor context, Booking dispatch ownership, public-contract test and temporary finalizer cleanup completed');
+console.log('[architecture-closeout-lastmile] Identity authorization, strict numeric API actors, Booking dispatch ownership, public-contract test and temporary finalizer cleanup completed');
