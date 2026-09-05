@@ -202,6 +202,19 @@ export class SendMultiChannelNotificationUseCase {
   console.log('[closeout-orchestrator] Communications application authorities converged on repository ports');
 }
 
+function removeExecutedCloseoutHelpers() {
+  for (const helper of [
+    'architecture-closeout-self-imports.mjs',
+    'architecture-closeout-postpatch.mjs',
+    'architecture-closeout-partner.mjs',
+    'architecture-closeout-finops.mjs',
+    'architecture-closeout-residue.mjs',
+  ]) {
+    fs.rmSync(path.join(root, 'tools', helper), { force: true });
+  }
+  console.log('[closeout-orchestrator] executed convergence helpers removed from final candidate tree');
+}
+
 try {
   normalizePostpatchSelfImportStage();
   execFileSync(process.execPath, ['--check', driver], { cwd: root, stdio: 'inherit' });
@@ -210,7 +223,7 @@ try {
   execFileSync(process.execPath, [finopsConvergence], { cwd: root, stdio: 'inherit' });
   normalizeObservabilityAdapter();
   normalizeCommunicationsApplication();
-  fs.rmSync(path.join(root, 'tools/architecture-closeout-residue.mjs'), { force: true });
+  removeExecutedCloseoutHelpers();
 } finally {
   fs.rmSync(driver, { force: true });
 }
