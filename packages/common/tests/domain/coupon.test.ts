@@ -31,16 +31,14 @@ describe('Phase 19 — Coupon Domain Model & CouponDiscountCalculator', () => {
       id: 1,
       code: 'SAVE20',
       discountType: 'PERCENTAGE',
-      discountValue: 20, // 20%
-      maxDiscountPaise: 10000, // max ₹100
-      minBookingAmountPaise: 10000, // min ₹100
+      discountValue: 20,
+      maxDiscountPaise: 10000,
+      minBookingAmountPaise: 10000,
       validFrom,
       validUntil,
     });
 
     const calculator = new CouponDiscountCalculator(mockUsageRepo);
-
-    // Booking amount ₹1000 (100,000 paise). 20% = ₹200 (20,000 paise), capped to max ₹100 (10,000 paise)
     const result = await calculator.calculateDiscount({
       coupon,
       userId: 5,
@@ -49,8 +47,8 @@ describe('Phase 19 — Coupon Domain Model & CouponDiscountCalculator', () => {
     });
 
     expect(result.isValid).toBe(true);
-    expect(result.discountMoney.amountPaise).toBe(10000); // ₹100
-    expect(result.finalPriceMoney.amountPaise).toBe(90000); // ₹900
+    expect(result.discountMoney.amountMinor).toBe(10000);
+    expect(result.finalPriceMoney.amountMinor).toBe(90000);
   });
 
   it('should calculate fixed amount discount correctly', async () => {
@@ -58,8 +56,8 @@ describe('Phase 19 — Coupon Domain Model & CouponDiscountCalculator', () => {
       id: 2,
       code: 'FLAT150',
       discountType: 'FIXED_AMOUNT',
-      discountValue: 15000, // ₹150 flat discount in paise
-      minBookingAmountPaise: 50000, // min ₹500
+      discountValue: 15000,
+      minBookingAmountPaise: 50000,
       validFrom,
       validUntil,
     });
@@ -68,13 +66,13 @@ describe('Phase 19 — Coupon Domain Model & CouponDiscountCalculator', () => {
     const result = await calculator.calculateDiscount({
       coupon,
       userId: 5,
-      bookingAmountPaise: 60000, // ₹600
+      bookingAmountPaise: 60000,
       now,
     });
 
     expect(result.isValid).toBe(true);
-    expect(result.discountMoney.amountPaise).toBe(15000); // ₹150
-    expect(result.finalPriceMoney.amountPaise).toBe(45000); // ₹450
+    expect(result.discountMoney.amountMinor).toBe(15000);
+    expect(result.finalPriceMoney.amountMinor).toBe(45000);
   });
 
   it('should reject coupon if booking amount is below minBookingAmountPaise', async () => {
@@ -83,7 +81,7 @@ describe('Phase 19 — Coupon Domain Model & CouponDiscountCalculator', () => {
       code: 'BIGDISCOUNT',
       discountType: 'FIXED_AMOUNT',
       discountValue: 10000,
-      minBookingAmountPaise: 50000, // min ₹500
+      minBookingAmountPaise: 50000,
       validFrom,
       validUntil,
     });
@@ -92,13 +90,13 @@ describe('Phase 19 — Coupon Domain Model & CouponDiscountCalculator', () => {
     const result = await calculator.calculateDiscount({
       coupon,
       userId: 5,
-      bookingAmountPaise: 30000, // ₹300 < ₹500
+      bookingAmountPaise: 30000,
       now,
     });
 
     expect(result.isValid).toBe(false);
     expect(result.reason).toContain('Minimum booking amount required');
-    expect(result.discountMoney.amountPaise).toBe(0);
+    expect(result.discountMoney.amountMinor).toBe(0);
   });
 
   it('should reject coupon if per-user usage limit is exceeded', async () => {
@@ -114,7 +112,7 @@ describe('Phase 19 — Coupon Domain Model & CouponDiscountCalculator', () => {
 
     const mockExceededRepo: ICouponUsageRepository = {
       async create(u) { return u; },
-      async countByUserAndCoupon() { return 1; }, // User already used it 1 time
+      async countByUserAndCoupon() { return 1; },
       async findByCouponAndBooking() { return null; },
     };
 
