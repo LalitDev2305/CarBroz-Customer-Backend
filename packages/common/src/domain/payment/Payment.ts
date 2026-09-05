@@ -75,8 +75,8 @@ export class Payment {
     if (!props.customerId) throw new Error('Payment must be associated with a customer');
     if (!props.idempotencyKey) throw new Error('Payment idempotency key is required');
 
-    const validatedMoney = Money.fromPaise(props.amountPaise, props.currency ?? 'INR');
-    if (validatedMoney.amountPaise <= 0) {
+    const validatedMoney = Money.fromMinor(props.amountPaise, props.currency ?? 'INR');
+    if (validatedMoney.amountMinor <= 0) {
       throw new Error('Payment amount must be a positive integer in paise');
     }
 
@@ -87,7 +87,7 @@ export class Payment {
     this.provider = props.provider ?? 'RAZORPAY';
     this.providerOrderId = props.providerOrderId ?? null;
     this.providerPaymentId = props.providerPaymentId ?? null;
-    this.amountPaise = validatedMoney.amountPaise;
+    this.amountPaise = validatedMoney.amountMinor;
     this.currency = validatedMoney.currency;
     this.method = props.method ?? 'UPI';
     this.status = props.status ?? 'PENDING';
@@ -105,11 +105,11 @@ export class Payment {
   }
 
   get money(): Money {
-    return Money.fromPaise(this.amountPaise, this.currency);
+    return Money.fromMinor(this.amountPaise, this.currency);
   }
 
   markSuccess(providerPaymentId: string, method?: PaymentMethod): void {
-    if (this.status === 'SUCCESS') return; // Idempotent
+    if (this.status === 'SUCCESS') return;
     this.status = 'SUCCESS';
     this.providerPaymentId = providerPaymentId;
     if (method) this.method = method;
@@ -142,6 +142,7 @@ export class Payment {
     if (this.status !== 'SUCCESS') {
       throw new Error('Only successful payments can be refunded');
     }
+    Money.fromMinor(amountPaise, this.currency);
     this.status = 'REFUNDED';
     this.refundedAt = new Date();
     this.refundsJson.push({
