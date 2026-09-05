@@ -16,23 +16,41 @@ function normalizeRuntimeLoggerConsumer() {
   let source = read(file);
   source = source
     .replace(
-      /import\s+\{\s*createLogger\s*\}\s+from\s+['"]@carbroz\/platform-observability['"];?\r?\n?/,
-      "import { logger as runtimeConfigLogger } from '@carbroz/platform-observability';\n",
+      /import\s+\{\s*logger\s+as\s+runtimeConfigLogger\s*\}\s+from\s+['"]@carbroz\/platform-observability['"];?\r?\n?/,
+      "import { createLogger } from '@carbroz/platform-observability';\n",
     )
-    .replace(/\r?\nconst runtimeConfigLogger = createLogger\([^\n]+\);\r?\n?/, '\n');
-  if (!source.includes('runtimeConfigLogger')) throw new Error('Runtime configuration logger consumer disappeared during convergence');
-  if (source.includes('createLogger(')) throw new Error('Runtime configuration still constructs a logger with ambiguous factory arguments');
+    .replace(
+      /import\s+\{\s*createLogger\s*\}\s+from\s+['"]@carbroz\/platform-observability['"];?\r?\n?/,
+      "import { createLogger } from '@carbroz/platform-observability';\n",
+    )
+    .replace(/\r?\nconst runtimeConfigLogger = createLogger\([^\n]*\);\r?\n?/, '\n');
+  const importEnd = [...source.matchAll(/^import[^\n]*;\s*$/gm)].at(-1);
+  if (!source.includes('const runtimeConfigLogger = createLogger();')) {
+    const declaration = "\nconst runtimeConfigLogger = createLogger();\n";
+    if (importEnd) {
+      const index = importEnd.index + importEnd[0].length;
+      source = source.slice(0, index) + declaration + source.slice(index);
+    } else {
+      source = declaration.trimStart() + source;
+    }
+  }
+  if (!source.includes("import { createLogger } from '@carbroz/platform-observability';")) {
+    throw new Error('Runtime configuration no longer consumes the canonical Observability factory');
+  }
+  if (/createLogger\(\s*['"]carbroz-/.test(source)) {
+    throw new Error('Runtime configuration passes a logger name into the canonical level-only createLogger contract');
+  }
   write(file, source);
 }
 
 function normalizeObservabilityAdapters() {
   const auditObserver = p('platform/observability/src/adapters/AuditFailureObserver.ts');
   if (exists(auditObserver)) {
-    write(auditObserver, `import { logger } from '../index.js';
+    write(auditObserver, `import { createLogger } from '../index.js';
 
 /** Observability adapter for the Audit bounded context's non-blocking persistence failure port. */
 export class AuditFailureObserver {
-  private readonly auditLogger = logger.child({ component: 'audit' });
+  private readonly auditLogger = createLogger();
 
   report(error: unknown, context: Readonly<{ operation: 'audit-log-create' }>): void {
     this.auditLogger.error({ err: error, operation: context.operation }, 'audit.persistence.failed');
@@ -44,14 +62,14 @@ export class AuditFailureObserver {
   const loggerProvider = p('platform/observability/src/adapters/LoggerProvider.ts');
   if (exists(loggerProvider)) {
     write(loggerProvider, `import type { ILoggerProvider } from '../ports/ILoggerProvider.js';
-import { logger } from '../index.js';
+import { createLogger } from '../index.js';
 
 /**
- * Adapts the canonical observability logger to the stable ILoggerProvider contract.
- * Redaction and logger configuration remain owned by the Observability package.
+ * Adapts the canonical observability logger factory to the stable ILoggerProvider contract.
+ * Redaction and log-level policy remain owned by the Observability package.
  */
 export class LoggerProvider implements ILoggerProvider {
-  private readonly providerLogger = logger.child({ component: 'provider' });
+  private readonly providerLogger = createLogger();
 
   info(message: string, context?: Record<string, unknown>): void {
     this.providerLogger.info(context ?? {}, message);
