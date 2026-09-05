@@ -96,8 +96,8 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   });
 
   await app.register(healthRoutes, { prefix: '/health' });
-  await app.register(authRoutes, { prefix: '/v1/auth' });
-  await app.register(configRoutes, { prefix: '/v1/config' });
+  await app.register(authRoutes, { prefix: '/api/v1/auth' });
+  await app.register(configRoutes, { prefix: '/api/v1/config' });
   await app.register(appRoutes, { prefix: '/api/v1/app' });
   await app.register(partnerRoutes, { prefix: '/api/v1/partners' });
   await app.register(adminPartnerRoutes, { prefix: '/api/v1/admin/partners' });
