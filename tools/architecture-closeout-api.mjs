@@ -13,6 +13,16 @@ const resolveTs = (fromFile, spec) => {
   const raw = path.resolve(path.dirname(fromFile), spec);
   return [raw, raw.replace(/\.js$/, '.ts'), `${raw}.ts`, path.join(raw, 'index.ts')].find(exists);
 };
+const ensureNamedImport = (content, packageName, symbol) => {
+  const escaped = packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`import\\s+(?:type\\s+)?\\{([^}]*)\\}\\s+from\\s+['\"]${escaped}['\"];?`);
+  const match = content.match(pattern);
+  if (!match) return `import { ${symbol} } from '${packageName}';\n${content}`;
+  const names = match[1].split(',').map((part) => part.trim()).filter(Boolean);
+  if (names.some((name) => name.split(/\s+as\s+/)[0] === symbol)) return content;
+  const next = [...names, symbol].join(', ');
+  return content.replace(pattern, `import { ${next} } from '${packageName}';`);
+};
 
 const workspaceRoots = [];
 for (const base of ['domains','platform','sdui','foundation']) {
@@ -146,11 +156,18 @@ for (const file of walk(apiRoot).filter(f => f.endsWith('.ts') && f !== transpor
   write(file,c);
 }
 
+// JWT claim ids are strings at the transport boundary. Convert explicitly where application inputs require numeric actor ids.
+for (const file of walk(path.join(apiRoot, 'surfaces')).filter(f => f.endsWith('.ts'))) {
+  let c = read(file);
+  c = c.replace(/\(request\.user\s+as\s+\{\s*id:\s*number;?\s*\}\)\.id/g, 'Number(request.user.id)');
+  write(file, c);
+}
+
 // Partner status is a domain enum; transport schema strings are explicitly converted at the boundary.
 const adminPartner = path.join(apiRoot,'surfaces/admin/controllers/admin-partner.controller.ts');
 if (exists(adminPartner)) {
   let c=read(adminPartner);
-  if (!c.includes("@carbroz/domain-partner")) c=`import { PartnerStatus } from '@carbroz/domain-partner';\n${c}`;
+  c=ensureNamedImport(c, '@carbroz/domain-partner', 'PartnerStatus');
   c=c.replace(/status:\s*input\.status(?!\s+as\s+PartnerStatus)/g, 'status: input.status as PartnerStatus');
   write(adminPartner,c);
 }
@@ -178,11 +195,16 @@ for (const file of walk(apiRoot).filter(f=>f.endsWith('.ts'))) {
   const c=read(file);
   if (/\bIRequestContext\b/.test(c)) violations.push(`${path.relative(root,file)} retains IRequestContext`);
   if (/apps\/api\/src\/modules|\/modules\//.test(c)) violations.push(`${path.relative(root,file)} references legacy modules`);
+  if (/request\.user\s+as\s+\{\s*id:\s*number/.test(c)) violations.push(`${path.relative(root,file)} treats string JWT claim id as a numeric id without explicit conversion`);
+  if (/\bPartnerStatus\b/.test(c) && c !== read(adminPartner) && !/import\s+\{[^}]*\bPartnerStatus\b[^}]*\}\s+from\s+['"]@carbroz\/domain-partner['"]/.test(c)) {
+    violations.push(`${path.relative(root,file)} references PartnerStatus without the canonical Partner public contract`);
+  }
   for (const m of c.matchAll(/from\s+['"](\.\.?\/[^'"]+)['"]/g)) {
     const target=resolveTs(file,m[1]);
     if (target && !target.startsWith(`${apiRoot}${path.sep}`)) violations.push(`${path.relative(root,file)} imports workspace source ${m[1]}`);
   }
 }
+if (exists(adminPartner) && /\bPartnerStatus\b/.test(read(adminPartner)) && !/import\s+\{[^}]*\bPartnerStatus\b[^}]*\}\s+from\s+['"]@carbroz\/domain-partner['"]/.test(read(adminPartner))) violations.push('Admin Partner transport references PartnerStatus without importing the canonical Partner enum');
 if (exists(customerDispute) && /ListDisputesUseCase|GetDisputeUseCase/.test(read(customerDispute))) violations.push('Customer dispute surface exposes an unscoped read/list authority');
 if (violations.length) throw new Error(`API closeout boundary failed:\n${[...new Set(violations)].map(v=>`- ${v}`).join('\n')}`);
-console.log('[architecture-closeout-api] API public contracts, transport auth policy, and dispute surface authority converged');
+console.log('[architecture-closeout-api] API public contracts, transport auth policy, JWT actor ids, Partner status, and dispute surface authority converged');
