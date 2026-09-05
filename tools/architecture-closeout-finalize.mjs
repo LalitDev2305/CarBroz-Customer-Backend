@@ -19,6 +19,20 @@ const walk = (dir) => {
   });
 };
 
+// Final topology accepts only the canonical workspace roots. Transitional packages/ must be gone.
+if (fs.existsSync(path.join(root, 'packages'))) {
+  throw new Error('Transitional top-level packages/ still exists after closeout');
+}
+const workspaceFile = path.join(root, 'pnpm-workspace.yaml');
+const workspace = fs.existsSync(workspaceFile) ? fs.readFileSync(workspaceFile, 'utf8') : '';
+const requiredWorkspaceRoots = ['apps/*', 'domains/*', 'sdui/*', 'platform/*', 'foundation/*'];
+for (const workspaceRoot of requiredWorkspaceRoots) {
+  if (!workspace.includes(`"${workspaceRoot}"`) && !workspace.includes(`'${workspaceRoot}'`) && !workspace.includes(`- ${workspaceRoot}`)) {
+    throw new Error(`Canonical workspace root missing after closeout: ${workspaceRoot}`);
+  }
+}
+if (/packages\/\*/.test(workspace)) throw new Error('pnpm workspace still includes transitional packages/*');
+
 // The frozen API topology is transport/composition only. These legacy directories are evidence
 // that apps/api is still acting as a second application/infrastructure ownership layer.
 const legacyApiRoots = ['modules', 'container', 'providers'];
@@ -60,4 +74,4 @@ if (violations.length) {
   throw new Error(`Product surface isolation failed:\n${violations.map((v) => `- ${v}`).join('\n')}`);
 }
 
-console.log('[architecture-closeout-finalize] API topology is transport/composition only and product surfaces are physically independent');
+console.log('[architecture-closeout-finalize] canonical workspace, transport-only API topology, and product surface isolation are frozen');
