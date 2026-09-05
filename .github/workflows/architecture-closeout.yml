@@ -8,6 +8,7 @@ on:
       - tools/architecture-closeout.mjs
       - tools/architecture-closeout-residue.mjs
       - tools/architecture-closeout-finalize.mjs
+      - tools/architecture-closeout-lastmile.mjs
       - tools/generate-module-readmes.mjs
       - tests/integration/database/**
       - .github/workflows/architecture-closeout.yml
@@ -68,6 +69,9 @@ jobs:
       - name: Finalize product-surface isolation
         run: node tools/architecture-closeout-finalize.mjs
 
+      - name: Finalize last-mile ownership convergence
+        run: node tools/architecture-closeout-lastmile.mjs
+
       - name: Generate final module architecture documentation
         run: node tools/generate-module-readmes.mjs
 
@@ -112,6 +116,7 @@ jobs:
           rm -f tools/architecture-closeout.mjs
           rm -f tools/architecture-closeout-residue.mjs
           rm -f tools/architecture-closeout-finalize.mjs
+          rm -f tools/architecture-closeout-lastmile.mjs
           rm -f tools/generate-module-readmes.mjs
           rm -f .github/workflows/architecture-closeout.yml
           rmdir tools 2>/dev/null || true
