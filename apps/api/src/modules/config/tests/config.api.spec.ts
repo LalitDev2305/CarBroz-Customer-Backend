@@ -1,55 +1,61 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { buildApp } from '../../../app.js';
-import { FastifyInstance } from 'fastify';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import type { FastifyInstance } from 'fastify';
 import { asValue } from 'awilix';
+import type { InitConfigSnapshot } from '@carbroz/domain-configuration';
+import { buildApp } from '../../../app.js';
 import { getContainer } from '../../../container/index.js';
 
+const bootstrapSnapshot: InitConfigSnapshot = {
+  maintenance: {
+    enabled: true,
+    message: 'Testing config API',
+  },
+  forceUpdate: {
+    android: { minVersion: '1.0.0', latestVersion: '1.2.0' },
+    ios: { minVersion: '2.0.0', latestVersion: '2.2.0' },
+  },
+  featureFlags: {
+    'new-ui': true,
+    'beta-feature': false,
+    testFlag: true,
+  },
+  startupRouting: {
+    guest: { destination: 'auth_template', api: 'auth/auth_login' },
+    authenticated: { destination: 'dashboard_template', api: 'dashboard/home' },
+  },
+};
+
 describe('Config API', () => {
-  let app: FastifyInstance;
+  let app: FastifyInstance | undefined;
 
   beforeAll(async () => {
     const container = getContainer();
+    // The HTTP surface is tested against the Configuration application contract rather than
+    // replacing its persistence/providers, keeping the transport test independent of internals.
     container.register({
-      configProvider: asValue({
-        get: async (key: string) => {
-          if (key === 'maintenance.enabled') return 'true';
-          if (key === 'maintenance.message') return 'Testing config API';
-          if (key === 'android.minVersion') return '1.0.0';
-          if (key === 'android.latestVersion') return '1.0.0';
-          if (key === 'ios.minVersion') return '1.0.0';
-          if (key === 'ios.latestVersion') return '1.0.0';
-          return null;
-        }
+      getInitConfigUseCase: asValue({
+        execute: async () => bootstrapSnapshot,
       }),
-      featureFlagProvider: asValue({
-        getAllFlags: async () => ({
-          'new-ui': true,
-          'beta-feature': false,
-          'testFlag': true
-        })
-      })
     });
-    
+
     app = await buildApp();
     await app.ready();
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
-  it('should return init config successfully', async () => {
-    const response = await app.inject({
+  it('returns the complete frontend bootstrap snapshot', async () => {
+    const response = await app!.inject({
       method: 'GET',
-      url: '/v1/config/init'
+      url: '/v1/config/init',
     });
 
     expect(response.statusCode).toBe(200);
-    const body = JSON.parse(response.payload);
-    
-    expect(body.success).toBe(true);
-    expect(body.data.maintenance.enabled).toBe(true);
-    expect(body.data.maintenance.message).toBe('Testing config API');
-    expect(body.data.featureFlags.testFlag).toBe(true);
+    expect(response.json()).toEqual({
+      success: true,
+      data: bootstrapSnapshot,
+    });
   });
 });
