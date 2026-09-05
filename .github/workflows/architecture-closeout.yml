@@ -119,6 +119,15 @@ jobs:
       - name: Enforce final production coverage
         run: pnpm test:freeze
 
+      - name: Upload coverage diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: closeout-coverage-diagnostics
+          path: coverage/coverage-final.json
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Re-run constitution gate after executable validation
         run: node tools/architecture-closeout-constitution-gate.mjs
 
