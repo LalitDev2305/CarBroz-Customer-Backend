@@ -4,6 +4,7 @@ import type { IConfigRepository } from './domain/repositories/IConfigRepository.
 import type { IFeatureFlagRepository } from './domain/repositories/IFeatureFlagRepository.js';
 import { ConfigProvider } from './application/ConfigProvider.js';
 import { FeatureFlagProvider } from './application/FeatureFlagProvider.js';
+import { GetInitConfigUseCase } from './application/use-cases/GetInitConfigUseCase.js';
 import { PrismaConfigRepository } from './infrastructure/repositories/PrismaConfigRepository.js';
 import { PrismaFeatureFlagRepository } from './infrastructure/repositories/PrismaFeatureFlagRepository.js';
 
@@ -13,6 +14,8 @@ interface ConfigurationCradle {
   };
   configRepository: IConfigRepository;
   featureFlagRepository: IFeatureFlagRepository;
+  configProvider: ConfigProvider;
+  featureFlagProvider: FeatureFlagProvider;
 }
 
 export function registerConfigModule(container: AwilixContainer): void {
@@ -28,6 +31,9 @@ export function registerConfigModule(container: AwilixContainer): void {
     ).singleton(),
     featureFlagProvider: asFunction(
       (cradle: ConfigurationCradle) => new FeatureFlagProvider(cradle.featureFlagRepository),
+    ).singleton(),
+    getInitConfigUseCase: asFunction(
+      (cradle: ConfigurationCradle) => new GetInitConfigUseCase(cradle.configProvider, cradle.featureFlagProvider),
     ).singleton(),
   });
 }
