@@ -7,7 +7,6 @@ export * from '../application/IFeatureFlagProvider.js';
 export * from '../application/ConfigProvider.js';
 export * from '../application/FeatureFlagProvider.js';
 export * from '../application/contracts/init-config.js';
-export * from '../infrastructure/repositories/PrismaConfigRepository.js';
-export * from '../infrastructure/repositories/PrismaFeatureFlagRepository.js';
+export * from '../application/use-cases/GetInitConfigUseCase.js';
 export * from '../config.module.js';
 export * from '../module.manifest.js';
