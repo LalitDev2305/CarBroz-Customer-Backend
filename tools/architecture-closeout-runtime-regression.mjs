@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import ts from 'typescript';
 
 const root = process.cwd();
 const p = (...parts) => path.join(root, ...parts);
@@ -154,8 +155,75 @@ function normalizeTrackingBehavioralFixture() {
   write(file, source);
 }
 
+function walkProduction(dir) {
+  if (!exists(dir)) return [];
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    if (['node_modules', 'dist', 'generated', 'coverage', '.git'].includes(entry.name)) return [];
+    const absolute = path.join(dir, entry.name);
+    return entry.isDirectory() ? walkProduction(absolute) : [absolute];
+  });
+}
+
+function hasModifier(node, kind) {
+  return node.modifiers?.some((modifier) => modifier.kind === kind) ?? false;
+}
+
+function isNonExecutableStatement(statement) {
+  if (ts.isImportDeclaration(statement) || ts.isExportDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEmptyStatement(statement)) return true;
+  if (ts.isImportEqualsDeclaration(statement)) return statement.isTypeOnly === true;
+  if (ts.isModuleDeclaration(statement)) return hasModifier(statement, ts.SyntaxKind.DeclareKeyword) || (statement.flags & ts.NodeFlags.Ambient) !== 0;
+  if (ts.isVariableStatement(statement) || ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) {
+    return hasModifier(statement, ts.SyntaxKind.DeclareKeyword);
+  }
+  return false;
+}
+
+function isConstitutionNonExecutable(file) {
+  if (file.endsWith('.d.ts')) return true;
+  const source = read(file);
+  const parsed = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  return parsed.statements.every(isNonExecutableStatement);
+}
+
+function normalizeCoverageScope() {
+  const configFile = p('vitest.config.ts');
+  if (!exists(configFile)) throw new Error('vitest.config.ts is required for architecture freeze coverage');
+
+  const productionFiles = ['apps', 'domains', 'sdui', 'platform', 'foundation']
+    .flatMap((directory) => walkProduction(p(directory)))
+    .filter((file) => file.endsWith('.ts') && !/\.(?:test|spec)\.ts$/.test(file));
+  const nonExecutable = productionFiles
+    .filter(isConstitutionNonExecutable)
+    .map((file) => path.relative(root, file).split(path.sep).join('/'))
+    .sort();
+
+  let config = read(configFile);
+  config = config.replace(/\n\s*\/\/ constitution-non-executable-start[\s\S]*?\/\/ constitution-non-executable-end\n/g, '\n');
+  const marker = '    coverage: {\n';
+  if (!config.includes(marker)) throw new Error('Vitest coverage configuration marker is missing');
+  const exclusionLines = [
+    '      // constitution-non-executable-start',
+    '      // Generated/type-only/barrel files are build/architecture evidence, not executable coverage targets.',
+    '      exclude: [',
+    "        '**/node_modules/**',",
+    "        '**/dist/**',",
+    "        '**/generated/**',",
+    "        '**/*.d.ts',",
+    ...nonExecutable.map((file) => `        '${file}',`),
+    '      ],',
+    '      // constitution-non-executable-end',
+  ].join('\n') + '\n';
+  config = config.replace(marker, marker + exclusionLines);
+  write(configFile, config);
+
+  const executableCount = productionFiles.length - nonExecutable.length;
+  if (executableCount <= 0) throw new Error('Coverage classification produced no executable production files');
+  console.log(`[architecture-closeout-runtime-regression] coverage scope classified ${nonExecutable.length} non-executable and ${executableCount} executable production TypeScript files`);
+}
+
 normalizeRuntimeLoggerConsumer();
 normalizeObservabilityAdapters();
 normalizeAuditBehavioralFixture();
 normalizeTrackingBehavioralFixture();
-console.log('[architecture-closeout-runtime-regression] runtime logging, Audit fixture and canonical Tracking behavior converged');
+normalizeCoverageScope();
+console.log('[architecture-closeout-runtime-regression] runtime logging, Audit fixture, canonical Tracking behavior and constitution coverage scope converged');
