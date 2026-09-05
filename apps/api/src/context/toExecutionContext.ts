@@ -20,8 +20,13 @@ export function toExecutionContext(request: FastifyRequest): ExecutionContext {
     throw new Error('UNAUTHENTICATED: execution context requires an authenticated actor');
   }
 
+  const actorId = Number(jwtUser.id);
+  if (!Number.isInteger(actorId) || actorId <= 0) {
+    throw new Error('UNAUTHENTICATED: execution context requires a valid actor id');
+  }
+
   const actor: ActorContext = {
-    id: jwtUser.id,
+    id: actorId,
     kind: actorKindFromRoles(jwtUser.roles),
     roles: jwtUser.roles,
   };
