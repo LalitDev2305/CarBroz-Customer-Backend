@@ -10,6 +10,7 @@ on:
       - tools/architecture-closeout-finalize.mjs
       - tools/architecture-closeout-lastmile.mjs
       - tools/architecture-closeout-quality.mjs
+      - tools/architecture-closeout-constitution-gate.mjs
       - tools/generate-module-readmes.mjs
       - tests/integration/database/**
       - .github/workflows/architecture-closeout.yml
@@ -76,8 +77,14 @@ jobs:
       - name: Generate final module architecture documentation
         run: node tools/generate-module-readmes.mjs
 
-      - name: Reinstall final workspace
+      - name: Enforce final constitution topology and ownership
+        run: node tools/architecture-closeout-constitution-gate.mjs
+
+      - name: Reinstall final workspace and refresh lockfile
         run: pnpm install --no-frozen-lockfile
+
+      - name: Prove frozen dependency graph
+        run: pnpm install --frozen-lockfile
 
       - name: Validate Prisma
         run: pnpm exec prisma validate
@@ -112,12 +119,16 @@ jobs:
       - name: Enforce final production coverage
         run: pnpm test:freeze
 
+      - name: Re-run constitution gate after executable validation
+        run: node tools/architecture-closeout-constitution-gate.mjs
+
       - name: Remove one-time migration tooling
         run: |
           rm -f tools/architecture-closeout.mjs
           rm -f tools/architecture-closeout-residue.mjs
           rm -f tools/architecture-closeout-finalize.mjs
           rm -f tools/architecture-closeout-lastmile.mjs
+          rm -f tools/architecture-closeout-constitution-gate.mjs
           rm -f tools/generate-module-readmes.mjs
           rm -f .github/workflows/architecture-closeout.yml
           rmdir tools 2>/dev/null || true
