@@ -10,9 +10,11 @@ const baselineCommit = 'fbd7e0d38ba58136c7cc0be596314d62f20dcb6c';
 const selfImportResolver = path.join(root, 'tools/architecture-closeout-self-imports.mjs');
 const partnerConvergence = path.join(root, 'tools/architecture-closeout-partner.mjs');
 const finopsConvergence = path.join(root, 'tools/architecture-closeout-finops.mjs');
+const apiConvergence = path.join(root, 'tools/architecture-closeout-api.mjs');
 if (!fs.existsSync(selfImportResolver)) throw new Error('Required architecture self-import resolver is missing');
 if (!fs.existsSync(partnerConvergence)) throw new Error('Required Partner application closeout helper is missing');
 if (!fs.existsSync(finopsConvergence)) throw new Error('Required Financials/Operations closeout helper is missing');
+if (!fs.existsSync(apiConvergence)) throw new Error('Required API public-boundary closeout helper is missing');
 let driverSource = execFileSync('git', ['show', `${baselineCommit}:tools/architecture-closeout.mjs`], {
   cwd: root,
   encoding: 'utf8',
@@ -227,6 +229,7 @@ function removeExecutedCloseoutHelpers() {
     'architecture-closeout-postpatch.mjs',
     'architecture-closeout-partner.mjs',
     'architecture-closeout-finops.mjs',
+    'architecture-closeout-api.mjs',
     'architecture-closeout-residue.mjs',
   ]) {
     fs.rmSync(path.join(root, 'tools', helper), { force: true });
@@ -240,6 +243,7 @@ try {
   execFileSync(process.execPath, [driver], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [partnerConvergence], { cwd: root, stdio: 'inherit' });
   execFileSync(process.execPath, [finopsConvergence], { cwd: root, stdio: 'inherit' });
+  execFileSync(process.execPath, [apiConvergence], { cwd: root, stdio: 'inherit' });
   normalizeObservabilityAdapter();
   normalizeCommunicationsApplication();
   enforcePermanentFreezeCi();
