@@ -77,10 +77,90 @@ function canonicalizeTrackingRepositoryImports() {
   }
 }
 
+function normalizePublicBoundary(relativePath, label) {
+  const file = path.join(root, relativePath);
+  if (!fs.existsSync(file)) return;
+  const cleaned = fs.readFileSync(file, 'utf8')
+    .split(/\r?\n/)
+    .filter((line) => !line.includes('/infrastructure/') && !line.includes('@prisma/client'))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n');
+  fs.writeFileSync(file, cleaned.endsWith('\n') ? cleaned : `${cleaned}\n`);
+  const finalSource = fs.readFileSync(file, 'utf8');
+  if (finalSource.includes('/infrastructure/') || finalSource.includes('@prisma/client')) {
+    throw new Error(`${label} public boundary still leaks concrete infrastructure`);
+  }
+}
+
+function normalizeCorporateMoneyFixture() {
+  const file = path.join(root, 'tests/integration/domain/corporate.test.ts');
+  if (!fs.existsSync(file)) return;
+
+  let body = fs.readFileSync(file, 'utf8');
+  body = body.replace(
+    /import\s+\{([^}]*)\}\s+from\s+['"]([^'"]+)['"];?/g,
+    (full, names, moduleName) => {
+      if (moduleName === '@carbroz/foundation-kernel') return full;
+      const kept = names
+        .split(',')
+        .map((name) => name.trim())
+        .filter((name) => name && name !== 'Money');
+      return kept.length ? `import { ${kept.join(', ')} } from '${moduleName}';` : '';
+    },
+  );
+
+  body = body.replace(/import\s+\{[^}]*\bMoney\b[^}]*\}\s+from\s+['"]@carbroz\/foundation-kernel['"];?\r?\n?/g, '');
+  body = `import { Money } from '@carbroz/foundation-kernel';\n${body.replace(/^\s+/, '')}`;
+  fs.writeFileSync(file, body.endsWith('\n') ? body : `${body}\n`);
+
+  const finalSource = fs.readFileSync(file, 'utf8');
+  const moneyImports = finalSource.match(/import\s+\{[^}]*\bMoney\b[^}]*\}\s+from\s+['"]@carbroz\/foundation-kernel['"]/g) ?? [];
+  if (moneyImports.length !== 1) {
+    throw new Error(`Corporate fixture must have exactly one Foundation Money import; found ${moneyImports.length}`);
+  }
+}
+
+function normalizeTrackingFixtureRuntimePort() {
+  const file = path.join(root, 'tests/integration/application/tracking-notification-engine.test.ts');
+  if (!fs.existsSync(file)) return;
+
+  let body = fs.readFileSync(file, 'utf8');
+  const bookingMethod = /\b(?:async\s+)?findByBookingId\s*(?::|\()/;
+  if (!bookingMethod.test(body)) {
+    const publicIdMethodLine = /^(\s*)(async\s+findByPublicId\s*\([^\n]*\)\s*\{[^\n]*\},?)\s*$/m;
+    if (publicIdMethodLine.test(body)) {
+      body = body.replace(publicIdMethodLine, (_full, indent, line) =>
+        `${indent}${line}\n${indent}async findByBookingId(_bookingId: number) { return null; },`,
+      );
+    } else {
+      const publicIdPropertyLine = /^(\s*)(findByPublicId\s*:\s*async\s*\([^\n]*\)\s*=>[^\n]*,?)\s*$/m;
+      if (publicIdPropertyLine.test(body)) {
+        body = body.replace(publicIdPropertyLine, (_full, indent, line) =>
+          `${indent}${line}\n${indent}findByBookingId: async (_bookingId: number) => null,`,
+        );
+      }
+    }
+  }
+
+  fs.writeFileSync(file, body.endsWith('\n') ? body : `${body}\n`);
+  const finalSource = fs.readFileSync(file, 'utf8');
+  if (!bookingMethod.test(finalSource)) {
+    const diagnostic = finalSource
+      .split(/\r?\n/)
+      .filter((line) => /findBy|mockTracking|trackingRepo/i.test(line))
+      .slice(0, 30)
+      .join(' | ');
+    throw new Error(`Tracking runtime repository mock still lacks findByBookingId: ${diagnostic}`);
+  }
+}
+
 try {
   await import('./architecture-closeout-quality-core.mjs');
   canonicalizeTrackingRepositoryImports();
-  console.log('[architecture-closeout-quality] tracking repository imports canonicalized');
+  normalizePublicBoundary('domains/customer/public/index.ts', 'Customer');
+  normalizeCorporateMoneyFixture();
+  normalizeTrackingFixtureRuntimePort();
+  console.log('[architecture-closeout-quality] tracking repository imports, Customer public boundary, corporate Money fixture and tracking runtime mock canonicalized');
 } finally {
   fs.rmSync(core, { force: true });
 }
