@@ -8,6 +8,7 @@ import { Booking } from "../domain/Booking.js";
 import type { BookingSnapshots } from "../domain/BookingSnapshots.js";
 import type { BookingStatus } from "../domain/BookingStatus.js";
 import type { IBookingRepository } from "../domain/repositories/IBookingRepository.js";
+import type { BookingAccessPolicy } from "./security/BookingAccessPolicy.js";
 import type {
   IAddressRepository,
   ICustomerProfileRepository,
@@ -113,7 +114,7 @@ export class CreateBookingUseCase {
     }
 
     const address = await this.addressRepository.findById(input.addressId);
-    if (!address)
+    if (!address || address.userId !== context.actor.id)
       throw new DomainError("Address not found", "BOOKING_ADDRESS_NOT_FOUND");
 
     const service = await this.catalogRepository.findServiceById(
@@ -263,6 +264,7 @@ export interface TransitionBookingStatusInput {
 export class TransitionBookingStatusUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
+    private readonly bookingAccessPolicy: BookingAccessPolicy,
     private readonly createPayoutEligibilityUseCase?: IPayoutEligibilityPort,
   ) {}
 
@@ -276,16 +278,16 @@ export class TransitionBookingStatusUseCase {
     if (!booking)
       throw new DomainError("Booking not found", "BOOKING_NOT_FOUND");
     if (context.actor.kind !== "ADMIN") {
-      if (
-        context.actor.kind !== "PARTNER" ||
-        !context.actor.partnerId ||
-        context.actor.partnerId !== booking.partnerId
-      ) {
+      if (context.actor.kind !== "PARTNER") {
         throw new DomainError(
           "Assigned partner authority is required",
           "BOOKING_FORBIDDEN",
         );
       }
+      await this.bookingAccessPolicy.assertPartnerAccess(
+        booking,
+        context.actor.id,
+      );
     }
     if (input.targetStatus === "IN_PROGRESS")
       booking.startService(context.actor.id);

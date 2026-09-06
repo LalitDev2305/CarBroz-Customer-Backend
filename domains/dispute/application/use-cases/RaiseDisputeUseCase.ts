@@ -3,8 +3,8 @@ import { AuditLogService } from "@carbroz/domain-audit";
 import { Dispute } from "../../domain/Dispute.js";
 import { DisputeReason } from "../../domain/DisputeReason.js";
 import { IDisputeRepository } from "../../domain/repositories/IDisputeRepository.js";
-import { ErrorCode, Money } from "@carbroz/foundation-kernel";
-import { IBookingRepository } from "@carbroz/domain-booking";
+import { Money } from "@carbroz/foundation-kernel";
+import { BookingAccessPolicy } from "@carbroz/domain-booking";
 import { NotificationService } from "@carbroz/domain-communications";
 /** RaiseDisputeCommand is an exported domains/dispute contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface RaiseDisputeCommand {
@@ -20,35 +20,23 @@ export interface RaiseDisputeCommand {
 export class RaiseDisputeUseCase {
   constructor(
     private readonly disputeRepository: IDisputeRepository,
-    private readonly bookingRepository: IBookingRepository,
+    private readonly bookingAccessPolicy: BookingAccessPolicy,
     private readonly notificationService: NotificationService,
     private readonly auditLogService: AuditLogService,
   ) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(command: RaiseDisputeCommand): Promise<Dispute> {
-    const booking = await this.bookingRepository.findByPublicId(
-      command.bookingPublicId,
-    );
-    if (!booking) {
-      throw new DomainError(ErrorCode.BOOKING_NOT_FOUND);
-    }
+    const booking = command.actorType === "CUSTOMER"
+      ? await this.bookingAccessPolicy.requireCustomerBooking(
+          command.bookingPublicId,
+          command.actorId,
+        )
+      : await this.bookingAccessPolicy.requirePartnerBooking(
+          command.bookingPublicId,
+          command.actorId,
+        );
 
-    // Ownership check: actor must be booking's customer or assigned partner
-    if (
-      command.actorType === "CUSTOMER" &&
-      booking.customerId !== command.actorId
-    ) {
-      throw new DomainError(ErrorCode.FORBIDDEN);
-    }
-    if (
-      command.actorType === "PARTNER" &&
-      booking.partnerId !== command.actorId
-    ) {
-      throw new DomainError(ErrorCode.FORBIDDEN);
-    }
-
-    // Check duplicate active dispute
     const activeDispute = await this.disputeRepository.findActiveByBookingId(
       booking.id!,
     );
@@ -69,7 +57,6 @@ export class RaiseDisputeUseCase {
 
     const savedDispute = await this.disputeRepository.create(dispute);
 
-    // Audit Logging
     await this.auditLogService.log({
       actorId: command.actorId,
       actorType: command.actorType,
@@ -83,7 +70,6 @@ export class RaiseDisputeUseCase {
       },
     });
 
-    // Send Notification
     await this.notificationService.send({
       bookingId: booking.id ?? null,
       recipientId: command.actorId,

@@ -3,7 +3,7 @@ import { CouponDiscountCalculator } from "../../domain/services/CouponDiscountCa
 import { CouponUsage } from "../../domain/CouponUsage.js";
 import { ICouponRepository } from "../../domain/repositories/ICouponRepository.js";
 import { ICouponUsageRepository } from "../../domain/repositories/ICouponUsageRepository.js";
-import { IBookingRepository } from "@carbroz/domain-booking";
+import { BookingAccessPolicy } from "@carbroz/domain-booking";
 /** ApplyCouponInput is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ApplyCouponInput {
   code: string;
@@ -16,18 +16,16 @@ export class ApplyCouponUseCase {
   constructor(
     private readonly couponRepository: ICouponRepository,
     private readonly couponUsageRepository: ICouponUsageRepository,
-    private readonly bookingRepository: IBookingRepository,
+    private readonly bookingAccessPolicy: BookingAccessPolicy,
     private readonly discountCalculator: CouponDiscountCalculator,
   ) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: ApplyCouponInput): Promise<CouponUsage> {
-    const booking = await this.bookingRepository.findByPublicId(
+    const booking = await this.bookingAccessPolicy.requireCustomerBooking(
       input.bookingPublicId,
+      input.userId,
     );
-    if (!booking) {
-      throw new DomainError(`Booking not found: ${input.bookingPublicId}`);
-    }
 
     const coupon = await this.couponRepository.findByCode(input.code);
     if (!coupon) {

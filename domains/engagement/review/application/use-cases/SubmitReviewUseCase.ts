@@ -1,5 +1,5 @@
 import { DomainError } from "@carbroz/foundation-kernel";
-import { IBookingRepository } from "@carbroz/domain-booking";
+import { BookingAccessPolicy } from "@carbroz/domain-booking";
 import { IReviewRepository } from "../../domain/repositories/IReviewRepository.js";
 import { PartnerRatingCalculator } from "../../domain/services/PartnerRatingCalculator.js";
 import { Review } from "../../domain/Review.js";
@@ -15,22 +15,16 @@ export interface SubmitReviewInput {
 export class SubmitReviewUseCase {
   constructor(
     private readonly reviewRepository: IReviewRepository,
-    private readonly bookingRepository: IBookingRepository,
+    private readonly bookingAccessPolicy: BookingAccessPolicy,
     private readonly partnerRatingCalculator: PartnerRatingCalculator,
   ) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: SubmitReviewInput): Promise<Review> {
-    const booking = await this.bookingRepository.findByPublicId(
+    const booking = await this.bookingAccessPolicy.requireCustomerBooking(
       input.bookingPublicId,
+      input.customerUserId,
     );
-    if (!booking) {
-      throw new DomainError(`Booking not found: ${input.bookingPublicId}`);
-    }
-
-    if (booking.customerId !== input.customerUserId) {
-      throw new DomainError("You can only review your own booking");
-    }
 
     if (booking.status !== "COMPLETED") {
       throw new DomainError(
@@ -59,7 +53,6 @@ export class SubmitReviewUseCase {
 
     const createdReview = await this.reviewRepository.create(review);
 
-    // Atomically recalculate partner average rating and review counts
     await this.partnerRatingCalculator.recalculatePartnerRating(
       booking.partnerId!,
     );
