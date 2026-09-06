@@ -19,9 +19,9 @@ For the first unfinished task in the live execution ledger:
 11. Confirm CI/closeout at the appropriate boundary.
 12. Continue to the next unfinished task unless a real stop condition exists.
 
-## 2. Validation layers after CW2
+## 2. Validation layers after CW3
 
-CW2 established the checked-in canonical physical tree. Permanent validation is read-only and has three distinct levels:
+CW2 established the checked-in canonical physical tree and CW3 established the checked-in business ownership/dependency graph. Permanent validation is read-only and has four distinct levels:
 
 1. **CW2 physical verifier** — `node tools/architecture-closeout.mjs`
    - exact 23 production workspaces;
@@ -30,15 +30,21 @@ CW2 established the checked-in canonical physical tree. Permanent validation is 
    - no transitional source roots;
    - permanent immutable CI wiring.
 2. **CW1/CW2 Constitution regression gate** — `node tools/architecture-closeout-constitution-gate.mjs --regression`
-   - protects all already-closed invariants;
+   - protects already-closed Constitution invariants;
    - permits only the explicitly recorded later-workstream blocker baseline;
    - fails if that baseline expands.
-3. **Full Constitution gate** — `node tools/architecture-closeout-constitution-gate.mjs`
+3. **CW3 bounded-context/dependency gate** — `node tools/cw3-boundary-gate.mjs`
+   - protects Enterprise/Financials ownership;
+   - protects Booking/Operations ownership;
+   - protects Partner/Profile/KYC consolidation;
+   - rejects deep cross-domain/internal coupling and stale dependency direction;
+   - protects API-surface isolation and SDUI product neutrality.
+4. **Full Constitution gate** — `node tools/architecture-closeout-constitution-gate.mjs`
    - has no later-workstream exceptions;
-   - is expected to expose genuine unfinished CW3-CW6 blockers until those workstreams resolve them;
+   - is expected to expose genuine unfinished CW4-CW6 blockers until those workstreams resolve them;
    - must be green for final freeze.
 
-Never treat level 2 as evidence that level 3 is green.
+Never treat levels 1–3 as evidence that level 4 is green.
 
 ## 3. Local-first validation
 
@@ -51,17 +57,31 @@ Prefer this validation order where applicable:
 3. relevant integration/contract tests;
 4. CW2 physical verifier when topology/CI changes;
 5. CW1/CW2 regression gate;
-6. repository build;
-7. lint;
-8. complete normal test suite;
-9. full Constitution gate when closing a later-workstream blocker;
-10. strict freeze/coverage suite when applicable.
+6. CW3 boundary gate when ownership/dependency/public-boundary-sensitive code changes;
+7. repository build;
+8. lint;
+9. complete normal test suite;
+10. repeat closed-workstream gates after validation when the workflow requires clean-tree proof;
+11. full Constitution gate when closing a later-workstream blocker;
+12. strict freeze/coverage suite when applicable.
 
-`pnpm freeze:preflight` is a non-mutating convenience gate for the permanent baseline. It does not replace the full Constitution gate or strict coverage required by CW6.
+`pnpm freeze:preflight` is the non-mutating convenience gate for the permanent closed-workstream baseline. It executes the CW2 verifier, CW1/CW2 regression gate and CW3 boundary gate before/after the broader validation sequence. It does not replace the default/full Constitution gate or strict coverage required by CW6.
 
 Do not claim a command ran locally when the current agent has no repository shell/runtime. In that case use the strongest available repository/CI evidence and record the limitation honestly.
 
-## 4. Architecture residual workflow
+## 4. Closed-workstream discipline
+
+CW1-CW3 are closed.
+
+For any suspected regression in those areas:
+
+- verify the claim against current checked-in source;
+- run/read the applicable permanent gate;
+- reopen a closed workstream only when current executable evidence proves the invariant is violated;
+- do not reinterpret later CW4/CW5 semantic/security work as a reason to redo CW2 topology or CW3 ownership;
+- if a genuine regression is proven, fix the smallest root cause and strengthen the relevant existing gate rather than creating a parallel architecture authority.
+
+## 5. Architecture residual workflow
 
 For each suspected architecture issue:
 
@@ -75,7 +95,7 @@ For each suspected architecture issue:
 
 If a full-gate blocker belongs to a later workstream, keep it visible and assign it there. Do not make an earlier workstream red merely because later work is intentionally unfinished, and do not weaken the full gate to make it green.
 
-## 5. Later-workstream baseline discipline
+## 6. Later-workstream baseline discipline
 
 The regression gate may contain exact-path baseline exceptions only when all of the following are true:
 
@@ -85,9 +105,9 @@ The regression gate may contain exact-path baseline exceptions only when all of 
 - the full gate retains the original rule with no exception;
 - removing the blocker requires deleting its regression-baseline exception in the same coherent change.
 
-Baseline exceptions are technical debt markers, not waivers of the Constitution.
+Baseline exceptions are technical debt markers, not waivers of the Constitution. CW3 removed its former Enterprise-accounting exception set; the current baseline contains only explicitly recorded CW5 blockers.
 
-## 6. Coverage convergence workflow
+## 7. Coverage convergence workflow
 
 For each coverage miss:
 
@@ -103,7 +123,7 @@ For each coverage miss:
 
 Never add an impossible `ExecutionContext`, anonymous actor, invalid DTO, unsafe cast or fake adapter just to execute a branch.
 
-## 7. Commit and CI discipline
+## 8. Commit and CI discipline
 
 - Keep commits coherent and root-cause focused.
 - Do not create safety/backup branches for ordinary work.
@@ -113,18 +133,19 @@ Never add an impossible `ExecutionContext`, anonymous actor, invalid DTO, unsafe
 - A newer production/tooling SHA requires its own relevant validation; do not cite an older green run as proof of new executable behavior.
 - Documentation evidence commits may cite the immediately preceding validated executable SHA, but must never imply that docs themselves changed the validated production behavior.
 
-## 8. Current-source discipline
+## 9. Current-source discipline
 
-The checked-in repository is the canonical source after CW2. Permanent CI does not materialize a separate final architecture candidate.
+The checked-in repository is canonical source after CW2/CW3. Permanent CI does not materialize a separate final architecture candidate.
 
 Before changing a path:
 
 - determine its current constitutional owner;
 - confirm the path is canonical checked-in source rather than generated build output;
+- preserve the closed bounded-context owner unless current evidence proves a CW3 regression;
 - if a historical convergence script also mentions the path, do not assume that script remains an active producer;
 - never run a dormant source-rewriting closeout script as a substitute for implementing the current owner correctly.
 
-## 9. Ledger update format
+## 10. Ledger update format
 
 Every completed implementation batch records:
 
@@ -140,7 +161,7 @@ Every completed implementation batch records:
 
 The first unfinished task is the only default continuation point.
 
-## 10. Stop conditions
+## 11. Stop conditions
 
 Stop only for:
 
