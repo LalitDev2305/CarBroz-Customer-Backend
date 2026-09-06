@@ -63,10 +63,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      # Stage A diagnostic only. Final architecture-freeze gate restores --frozen-lockfile
-      # after the canonical workspace migration regenerates and commits pnpm-lock.yaml.
-      - name: Install dependencies (Stage A migration diagnostic)
-        run: pnpm install --no-frozen-lockfile
+      - name: Install dependencies with frozen lockfile
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify CW2 physical architecture
+        run: node tools/architecture-closeout.mjs
 
       - name: Prisma validate
         run: pnpm prisma validate
@@ -98,7 +99,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          pnpm test 2>&1 | tee vitest-output.txt
+          pnpm exec vitest run 2>&1 | tee vitest-output.txt
 
       - name: Upload Vitest diagnostic
         if: failure()
@@ -107,3 +108,8 @@ jobs:
           name: vitest-diagnostic
           path: vitest-output.txt
           if-no-files-found: error
+
+      - name: Prove validation is non-mutating
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain --untracked-files=no)"

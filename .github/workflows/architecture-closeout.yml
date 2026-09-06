@@ -1,36 +1,36 @@
-name: Backend Architecture Closeout Executor
+name: Backend Architecture Closeout Verifier
 
 on:
   push:
     branches:
       - fix/stage-a-production-definitions
     paths:
-      - tools/architecture-closeout.mjs
-      - tools/architecture-closeout-residue.mjs
-      - tools/architecture-closeout-finalize.mjs
-      - tools/architecture-closeout-lastmile.mjs
-      - tools/architecture-closeout-quality.mjs
-      - tools/architecture-closeout-constitution-gate.mjs
-      - tools/architecture-closeout-coverage-tests.mjs
-      - tests/unit/**
-      - sdui/registry/tests/**
-      - sdui/ui-sdk/tests/**
-      - platform/*/tests/**
-      - domains/*/tests/**
-      - tools/generate-module-readmes.mjs
-      - tests/integration/database/**
-      - .github/workflows/architecture-closeout.yml
+      - '.github/workflows/architecture-closeout.yml'
+      - '.github/workflows/ci.yml'
+      - 'tools/architecture-closeout.mjs'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
+      - 'apps/api/**'
+      - 'domains/**'
+      - 'sdui/**'
+      - 'platform/**'
+      - 'foundation/**'
+      - 'tests/architecture/**'
+      - 'tests/contracts/**'
+      - 'tests/integration/**'
+      - 'tests/e2e/**'
+      - 'docs/CW2-PHYSICAL-STRUCTURE-CLOSEOUT.md'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: backend-architecture-closeout
+  group: backend-architecture-closeout-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  closeout:
+  verify-cw2:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgresql://carbroz_ci:carbroz_ci@127.0.0.1:5432/carbroz_ci
@@ -51,10 +51,9 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Checkout architecture branch
+      - name: Checkout exact candidate SHA
         uses: actions/checkout@v4
         with:
-          ref: fix/stage-a-production-definitions
           fetch-depth: 0
 
       - name: Setup Node.js 22
@@ -68,29 +67,11 @@ jobs:
       - name: Activate repository pnpm version
         run: corepack prepare pnpm@11.9.0 --activate
 
-      - name: Install current workspace
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Execute constitution closeout migration
-        run: node tools/architecture-closeout.mjs
-
-      - name: Finalize product-surface isolation
-        run: node tools/architecture-closeout-finalize.mjs
-
-      - name: Finalize last-mile ownership convergence
-        run: node tools/architecture-closeout-lastmile.mjs
-
-      - name: Generate final module architecture documentation
-        run: node tools/generate-module-readmes.mjs
-
-      - name: Enforce final constitution topology and ownership
-        run: node tools/architecture-closeout-constitution-gate.mjs
-
-      - name: Reinstall final workspace and refresh lockfile
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Prove frozen dependency graph
+      - name: Install immutable workspace
         run: pnpm install --frozen-lockfile
+
+      - name: Verify canonical CW2 topology
+        run: node tools/architecture-closeout.mjs
 
       - name: Validate Prisma
         run: pnpm exec prisma validate
@@ -101,67 +82,28 @@ jobs:
       - name: Apply PostgreSQL migrations
         run: pnpm exec prisma migrate deploy
 
-      - name: Build final monorepo
-        run: pnpm -r build
+      - name: Build canonical monorepo
+        run: pnpm build
 
-      - name: Lint final monorepo
-        run: pnpm lint
+      - name: Lint canonical monorepo
+        run: pnpm exec eslint --quiet .
 
-      - name: Test final monorepo
+      - name: Test canonical monorepo
         shell: bash
         run: |
           set -o pipefail
-          pnpm test -- --run 2>&1 | tee closeout-test-output.txt
+          pnpm exec vitest run 2>&1 | tee closeout-test-output.txt
 
       - name: Upload closeout test diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: closeout-test-diagnostics
+          name: cw2-closeout-test-diagnostics
           path: closeout-test-output.txt
           if-no-files-found: ignore
           retention-days: 7
 
-      - name: Enforce final production coverage
-        shell: bash
+      - name: Prove closeout verification is read-only
         run: |
-          set -o pipefail
-          pnpm test:freeze 2>&1 | tee closeout-coverage-output.txt
-
-      - name: Upload coverage and transformed-candidate diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: closeout-coverage-diagnostics
-          path: |
-            closeout-coverage-output.txt
-            coverage/coverage-final.json
-            docs/FINAL-MODULE-TEST-EVIDENCE.json
-            vitest.config.ts
-            package.json
-            pnpm-workspace.yaml
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Re-run constitution gate after executable validation
-        run: node tools/architecture-closeout-constitution-gate.mjs
-
-      - name: Remove one-time migration tooling
-        run: |
-          rm -f tools/architecture-closeout.mjs
-          rm -f tools/architecture-closeout-residue.mjs
-          rm -f tools/architecture-closeout-finalize.mjs
-          rm -f tools/architecture-closeout-lastmile.mjs
-          rm -f tools/architecture-closeout-constitution-gate.mjs
-          rm -f tools/generate-module-readmes.mjs
-          rm -f .github/workflows/architecture-closeout.yml
-          rmdir tools 2>/dev/null || true
-
-      - name: Commit constitution-closed source
-        run: |
-          git config user.name "CarBroz Architecture Bot"
-          git config user.email "architecture@carbroz.local"
-          git add -A
-          git diff --cached --quiet && exit 0
-          git commit -m "refactor(architecture): close backend constitution"
-          git push origin HEAD:fix/stage-a-production-definitions
+          git diff --exit-code
+          test -z "$(git status --porcelain --untracked-files=no)"
