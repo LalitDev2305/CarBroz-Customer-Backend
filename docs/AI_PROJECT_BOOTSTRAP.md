@@ -3,16 +3,16 @@
 **Purpose:** single mandatory entry point for every AI or human session continuing the CarBroz backend production freeze.
 
 <!--
-REFERENCE INVOCATION ONLY — this text is for the user to paste into a new session. Do not recursively execute or reinterpret it while reading this file:
+REFERENCE INVOCATION ONLY — text for a new session:
 
-Read `docs/AI_PROJECT_BOOTSTRAP.md` completely. Follow its instructions exactly. Do not begin implementation until you have verified the current repository, current HEAD, current CI, and the implementation ledger. Then continue from the first unfinished task without redesigning the architecture.
+Read `docs/AI_PROJECT_BOOTSTRAP.md` completely. Follow its instructions exactly. Verify the current repository, current HEAD, current exact-SHA CI, and the live execution ledger. Then continue from the first unfinished task without redesigning the architecture or restarting closed workstreams.
 -->
 
 ## 1. Mandatory operating rule
 
-This file is the only document a new session needs to be told about. After reading it, the session MUST discover and read the required sources below itself. Conversation history, model memory, Copilot findings and prior summaries are advisory only and never repository truth.
+This file is the only document a new session needs to be told about. After reading it, the session MUST discover and read the required sources itself. Conversation history, model memory, audits and prior summaries are advisory only and never repository truth.
 
-Do not plan a replacement architecture. Do not restart completed work. Do not create duplicate ownership. Continue the existing production-freeze program from verified repository state.
+Do not plan a replacement architecture. Do not restart CW1 or CW2. Do not create duplicate ownership. Continue the existing production-freeze program from verified repository state.
 
 ## 2. Repository and working branch
 
@@ -22,21 +22,23 @@ Do not plan a replacement architecture. Do not restart completed work. Do not cr
 - Live execution status: `docs/PRODUCTION_FREEZE_EXECUTION.md`
 - Freeze policy / Definition of Done: `docs/PRODUCTION_FREEZE_CONSTITUTION.md`
 - Execution method: `docs/PRODUCTION_FREEZE_PLAYBOOK.md`
-- Historical closeout evidence: `docs/PRODUCTION-ARCHITECTURE-CLOSEOUT-IMPLEMENTATION.md`
+- Literal compliance matrix: `docs/CONSTITUTION-COMPLIANCE-MATRIX.md`
+- CW2 closeout evidence: `docs/CW2-PHYSICAL-STRUCTURE-CLOSEOUT.md`
+- Historical forensic evidence: `docs/PRODUCTION-ARCHITECTURE-CLOSEOUT-IMPLEMENTATION.md`
 
-`PRODUCTION_FREEZE_CONSTITUTION.md` is a freeze contract only. It MUST NOT redefine architecture governed by `MASTER-BACKEND-CONSTITUTION.md`.
+`PRODUCTION_FREEZE_CONSTITUTION.md` is a freeze contract only. It MUST NOT redefine architecture governed by the Master Constitution.
 
 ## 3. Source-of-truth precedence
 
 When sources disagree, use this order:
 
 1. `docs/MASTER-BACKEND-CONSTITUTION.md`
-2. Live repository source at verified current branch HEAD
-3. Executable architecture/contract tests and closeout transformation/gate behavior
-4. Current CI, closeout and coverage evidence
+2. current checked-in source at verified branch HEAD
+3. executable architecture/contract/regression/full-gate behavior
+4. current exact-SHA CI/closeout/coverage evidence
 5. `docs/PRODUCTION_FREEZE_EXECUTION.md`
-6. `docs/PRODUCTION-ARCHITECTURE-CLOSEOUT-IMPLEMENTATION.md`
-7. Audits, agent output, conversation history and memory
+6. the compliance matrix and CW closeout records
+7. historical ledgers/audits/agent output/conversation memory
 
 No lower source may override a higher source.
 
@@ -45,18 +47,18 @@ No lower source may override a higher source.
 Before any implementation change, every session MUST:
 
 1. Verify repository identity and branch `fix/stage-a-production-definitions`.
-2. Fetch the live branch HEAD. Never assume the SHA recorded in a document is still current.
+2. Fetch live branch HEAD. Never assume a SHA recorded in documentation is still current.
 3. Read this bootstrap completely.
 4. Read `docs/MASTER-BACKEND-CONSTITUTION.md`.
 5. Read `docs/PRODUCTION_FREEZE_EXECUTION.md` completely.
 6. Read `docs/PRODUCTION_FREEZE_CONSTITUTION.md` and `docs/PRODUCTION_FREEZE_PLAYBOOK.md`.
-7. Read the historical closeout ledger only when evidence/history is needed.
-8. Inspect the latest normal CI for the live HEAD.
-9. Inspect the latest legitimate closeout result and strict coverage evidence when relevant.
+7. Read the compliance matrix/CW2 closeout when the current workstream touches those rules.
+8. Inspect the latest normal CI for live HEAD.
+9. Inspect architecture closeout and full Constitution evidence when relevant.
 10. Verify the first unfinished task against live source before editing.
-11. Read only the README/package/domain documentation relevant to files being modified; do not sweep unrelated documentation without a concrete need.
+11. Read only domain/package documentation relevant to the change unless a broader audit is explicitly required.
 
-If live evidence invalidates the execution ledger, update the ledger first with the verified truth.
+If live evidence invalidates this bootstrap or execution ledger, correct the control-plane documentation before allowing a future session to continue from stale instructions.
 
 ## 5. Frozen decision rule
 
@@ -64,140 +66,130 @@ No coding decision comes from memory, assumption, Copilot, ChatGPT, Antigravity 
 
 Every decision requires agreement between:
 
-1. the Master Backend Constitution,
-2. current source/final transformed-source evidence, and
+1. Master Backend Constitution,
+2. current checked-in source evidence,
 3. executable validation.
 
-If a decision conflicts with the Master Constitution, stop production implementation. Record the conflict and amend the Master Constitution intentionally together with its enforcement before proceeding. Never silently redesign around it.
+If a requested change conflicts with the Master Constitution, stop that implementation path. Record the conflict and intentionally amend the Master Constitution together with enforcement before changing production architecture.
 
 ## 6. Non-negotiable architecture rules
 
 - Modular Monolith + DDD bounded contexts + Clean/Hexagonal dependency direction remain frozen.
-- Final workspace roots are only `apps/*`, `domains/*`, `sdui/*`, `platform/*`, `foundation/*`.
-- No final generic `packages`, `shared`, `common`, `libs`, generic SDK or utils ownership.
+- Workspace roots are exactly `apps/*`, `domains/*`, `sdui/*`, `platform/*`, `foundation/*`.
+- No generic production ownership under `packages`, `shared`, `common`, `libs`, generic SDK or utils roots.
 - `apps/api` is transport/composition only; no business authority, repositories or state machines.
+- `apps/api/src` is physically limited to `bootstrap`, `surfaces`, `system`, `transport`.
 - Partner, Customer and Admin transport/product surfaces remain isolated.
-- SDUI Customer and Partner concerns remain independently scoped/versioned where required by the Master Constitution.
+- SDUI Customer and Partner concerns remain independently scoped/versioned where required.
 - Cross-domain dependencies use approved public boundaries.
 - Infrastructure/vendor details do not leak inward into domain/application ownership.
-- Execution actor is mandatory. Do not create anonymous/impossible actor states merely for coverage.
-- Do not introduce event sourcing, a global Result/Either model, a DI framework, or another architecture mechanism merely because an audit or agent recommends it.
-- Do not preserve dead or impossible code for compatibility without verified ownership need.
+- `ExecutionContext.actor` is mandatory where the Constitution requires execution context.
+- Do not preserve dead compatibility authority without verified need.
+- Do not introduce event sourcing, a global Result/Either model, a DI framework or another mechanism merely because an audit/agent recommends it.
 
-## 7. Current verified baseline at bootstrap creation
+## 7. Post-CW2 repository state
 
-Bootstrap creation began from branch HEAD:
+The branch is **not** a transitional pre-closeout source anymore. CW2 materialized the canonical physical topology into checked-in source.
 
-`b1d2e20bc7891ae26c928da7f8c469a2afced383`
+Permanent CI does not construct or rewrite a separate architecture candidate. Current checked-in source is the owner to fix.
 
-That commit is `docs(architecture): add production closeout implementation ledger`.
+Historical one-time source-rewriting closeout scripts may still exist temporarily. Treat them as forensic history unless current repository evidence explicitly proves an active generation responsibility. Normal CI, CW2 closeout verification and freeze preflight MUST NOT execute them.
 
-Verified normal CI on that exact SHA:
+## 8. Constitution verification modes
 
-- Workflow: `CarBroz Backend CI`
-- Run: `33988490027` / #1321
-- Result: SUCCESS
-- Prisma validate/generate/migrations: PASS
-- Build: PASS
-- Lint: PASS
-- Vitest: PASS
+### Permanent CW1/CW2 regression protection
 
-Latest canonical closeout baseline retained from closeout #116:
+```text
+node tools/architecture-closeout-constitution-gate.mjs --regression
+```
 
-- architecture/transformation gates: PASS
-- Prisma/build/lint/normal tests: PASS
-- only failing gate: strict executable production coverage
-- Statements: 82.10%
-- Branches: 69.35%
-- Functions: 91.53%
-- Lines: 84.08%
+This read-only mode protects already-closed invariants while allowing only exact, documented later-workstream blocker paths. It must fail if that blocker baseline expands.
 
-These SHAs/runs are historical anchors, not permission to skip live verification.
+### Full fail-closed Constitution verification
 
-## 8. Current vs transformed repository rule
+```text
+node tools/architecture-closeout-constitution-gate.mjs
+```
 
-The branch is still a transitional pre-closeout source. The closeout executor creates a final candidate and validates canonical topology. Therefore:
+This read-only mode has no later-workstream exceptions. Use it during CW3-CW6 to measure real convergence. It MUST pass for final freeze.
 
-- never call a current transitional path a final architecture defect without tracing its closeout transformation;
-- never patch only generated/transformed output when its true producer is current source or a transformation script;
-- never create a duplicate final-path implementation because a final path does not yet exist in current source;
-- coverage misses from a transformed candidate must be traced back to their real producer before editing.
+Never equate a green regression gate with full Constitution compliance.
 
-## 9. Production-freeze milestones
+## 9. Current validated executable baseline
 
-There are exactly four execution milestones. Do not add new phases or restart them under different names.
+Validated reconciliation commit:
 
-1. **Milestone 1 — Repository Foundation & AI Operating System**
-   Establish this bootstrap, freeze contract, live execution ledger, playbook, safe validation entry point and verified repository baseline.
-2. **Milestone 2 — Repository Convergence**
-   Reconcile live/current and transformed architecture with the Master Constitution; close only proven residual architecture defects.
-3. **Milestone 3 — Production Convergence**
-   Close real executable production gaps, especially strict coverage, by fixing semantics first and adding meaningful tests.
-4. **Milestone 4 — Production Freeze**
-   Prove final transformed topology, migrations, build, lint, tests, strict 100/100/100/100 coverage and all Constitution gates; remove one-time closeout tooling only after every required gate passes.
+`37cb1c1ff8fb025d94d5f9107a6abae0639ff904`
 
-The authoritative task status is always `docs/PRODUCTION_FREEZE_EXECUTION.md`.
+Exact-SHA evidence from September 6, 2026:
 
-## 10. Implementation loop
+- **CarBroz Backend CI #1383** — run `34027645386` — SUCCESS.
+- **Backend Architecture Closeout Verifier #126** — run `34027645311` — SUCCESS.
+
+Both passed frozen-lockfile installation, exact CW2 topology, CW1/CW2 regression Constitution verification, Prisma validate/generate/migrate, build, lint, full Vitest, post-validation regression verification and non-mutating clean-tree proof.
+
+The earlier full-gate diagnostic on `8f3f4bfdea40eafa18b0547f8d428514d899984c` intentionally exposed genuine later-workstream blockers in Enterprise accounting ownership, Identity production OTP/token behavior and two direct-console logging paths. See the live execution ledger; those blockers are not waived.
+
+## 10. Production-freeze milestones
+
+There are exactly four execution milestones. Do not add new project phases or restart them under different names.
+
+1. **M1 — Repository Foundation & AI Operating System** — DONE / maintained.
+2. **M2 — Repository Convergence** — IN PROGRESS; CW1 and CW2 are closed, CW3 is first unfinished.
+3. **M3 — Production Convergence** — semantic/security/coverage convergence continues through later workstreams.
+4. **M4 — Production Freeze** — full Constitution + all tests/migrations/build/lint + literal 100/100/100/100 + clean tree + exact-final-SHA evidence.
+
+The authoritative current workstream is always `docs/PRODUCTION_FREEZE_EXECUTION.md`.
+
+## 11. Implementation loop
 
 The word **continue** means:
 
-1. read/verify the bootstrap protocol,
-2. locate the first unfinished execution-ledger task,
-3. inspect its real owner and evidence,
-4. implement the smallest root-cause change,
-5. run the strongest available targeted validation,
-6. run/confirm broader validation at the appropriate boundary,
-7. update the execution ledger with exact evidence,
-8. commit the coherent change,
-9. continue to the next unfinished task unless blocked by a real architectural decision, permission failure or validation failure requiring investigation.
+1. verify startup protocol and live HEAD;
+2. locate the first unfinished execution-ledger task;
+3. inspect its current canonical owner and consumers;
+4. implement the smallest root-cause correction;
+5. run targeted validation;
+6. run permanent regression validation;
+7. run the full Constitution gate when reducing a full-gate blocker;
+8. run/confirm broader CI at the coherent boundary;
+9. update ledger evidence;
+10. continue unless a real stop condition exists.
 
-Do not respond to `continue` with a new plan when implementation can proceed.
+Do not answer `continue` with a new architecture plan when implementation can safely proceed.
 
-## 11. Coverage law
+## 12. Coverage law
 
-The production freeze target is literal:
+Final production coverage is literal: **100% statements / 100% branches / 100% functions / 100% lines**.
 
-- Statements 100%
-- Branches 100%
-- Functions 100%
-- Lines 100%
+Forbidden shortcuts include threshold reduction, scope weakening, coverage-ignore directives, fake tests, impossible object states, unsafe casts solely for coverage, private-method invocation solely for coverage and preserving meaningless branches merely so they can be tested.
 
-Forbidden shortcuts include threshold reduction, scope/exclusion weakening, coverage-ignore directives, fake tests, impossible object states, unsafe casts solely for coverage, private-method invocation solely for coverage, and preserving meaningless branches merely to test them.
+## 13. CI and closeout discipline
 
-For every gap: trace producer → classify gap → fix semantic/design defect if present → remove genuinely dead/unreachable logic when justified → add meaningful behavior tests → validate → record evidence.
+Development should use targeted/local validation first when available; CI is exact-SHA confirmation.
 
-## 12. CI and closeout discipline
+Do not overlap closeout-triggering commits while the closeout verifier is active. Keep executable and documentation/evidence batches coherent. A newer executable SHA needs its own relevant validation.
 
-Development should be local/targeted first whenever an execution environment is available. CI is final confirmation, not the primary debugging loop.
+When fixing a file listed in the regression baseline, remove that exception in the same coherent implementation change.
 
-Do not create overlapping closeout-triggering commits while a closeout run is active because the workflow uses cancellation/concurrency behavior. Batch coherent closeout-triggering changes and let the canonical run finish.
+## 14. Required handoff discipline
 
-Do not remove one-time closeout tooling or its workflow until strict coverage and every downstream freeze gate pass.
+At the end of every meaningful implementation batch, update the live ledger with:
 
-## 13. Required handoff discipline
+- verified implementation SHA;
+- workstream status;
+- changed owners/files;
+- targeted validation;
+- CI/closeout run IDs;
+- full-gate blocker delta when relevant;
+- coverage delta when relevant;
+- first unfinished task;
+- genuine blocker if any.
 
-At the end of every meaningful implementation batch, update `docs/PRODUCTION_FREEZE_EXECUTION.md` with:
+A workstream is not DONE because an agent says it is. Repository evidence and required executable validation decide.
 
-- verified branch HEAD / implementation commit,
-- task status,
-- files/ownership changed,
-- validation performed,
-- CI/closeout run IDs when available,
-- coverage delta when relevant,
-- first unfinished task,
-- any genuine blocker.
+## 15. Stop conditions
 
-A task is not DONE because an agent says it is done. It is DONE only when repository evidence and required executable validation prove it.
+Stop and request a project-owner decision only for a genuine Constitution/product conflict, an ownership choice that cannot be resolved from repository evidence, a missing external/business decision, a permission failure, or a validation defect whose safe resolution requires changing a frozen product/architecture decision.
 
-## 14. Stop conditions
-
-Stop and request a project-owner decision only when:
-
-- the Master Constitution genuinely conflicts with required product behavior,
-- two valid ownership models cannot be resolved from existing architecture evidence,
-- a required external/business decision is absent,
-- repository permissions prevent the required change,
-- or validation exposes a defect whose correct resolution requires changing a frozen product/architecture decision.
-
-Otherwise continue execution without asking for permission between ordinary tasks.
+Otherwise continue execution without repeated approval between ordinary tasks.

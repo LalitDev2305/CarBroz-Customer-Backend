@@ -6,89 +6,128 @@
 **Freeze contract:** `docs/PRODUCTION_FREEZE_CONSTITUTION.md`  
 **Playbook:** `docs/PRODUCTION_FREEZE_PLAYBOOK.md`  
 **Literal compliance matrix:** `docs/CONSTITUTION-COMPLIANCE-MATRIX.md`  
+**CW2 closeout:** `docs/CW2-PHYSICAL-STRUCTURE-CLOSEOUT.md`  
 **Historical forensic ledger:** `docs/PRODUCTION-ARCHITECTURE-CLOSEOUT-IMPLEMENTATION.md`
 
-This is the concise live handoff. Historical investigation and the original audit reconciliation remain in the historical ledger; do not duplicate that history here.
+This is the concise live handoff. Historical investigation remains in the historical ledger; do not restart completed convergence from old paths or old transformed-candidate assumptions.
 
-## 1. Verified baseline
+## 1. Verified current baseline
 
 Repository: `LalitDev2305/CarBroz-Customer-Backend`  
 Branch: `fix/stage-a-production-definitions`
 
-The Master Constitution remains the only normative architecture authority. Earlier closeout runs are evidence, not authority. A closeout gate passing is not sufficient if the gate fails to encode a mandatory Constitution rule.
+Latest validated executable reconciliation commit:
 
-Latest authoritative transformed strict coverage measurement before the literal-compliance audit was closeout #118:
+`37cb1c1ff8fb025d94d5f9107a6abae0639ff904` — `fix(cw1-cw2): separate regression and full constitution gates`
 
-- Statements: 85.62%
-- Branches: 74.98%
-- Functions: 92.98%
-- Lines: 86.92%
+Exact-SHA validation on September 6, 2026:
 
-Those numbers are diagnostic only. Literal freeze remains 100/100/100/100 plus every Constitution and exact-SHA validation gate.
+- **CarBroz Backend CI #1383** — run `34027645386` — **SUCCESS**.
+- **Backend Architecture Closeout Verifier #126** — run `34027645311` — **SUCCESS**.
+
+Both independently passed immutable dependency installation, exact CW2 topology verification, the CW1/CW2 read-only Constitution regression gate, Prisma validate/generate/migrate, build, lint, full Vitest, post-test regression verification, and tracked-source clean-tree proof.
+
+The Master Constitution remains the only normative architecture authority. A green CW1/CW2 regression gate is evidence only for already-closed invariants; it is not a claim that CW3-CW6 are complete.
 
 ## 2. Frozen milestone ledger
 
 The bootstrap defines exactly four milestones. Compliance workstreams below subdivide those milestones; they do not create replacement phases.
 
-| Milestone | Status | Exit evidence |
+| Milestone | Status | Current evidence |
 |---|---|---|
-| M1 — Repository Foundation & AI Operating System | DONE | Bootstrap/freeze contract/live ledger/playbook and safe preflight exist. |
-| M2 — Repository Convergence | IN PROGRESS — CW2 | Literal enforcement is established; checked-in physical topology is now being converged to the frozen taxonomy. |
-| M3 — Production Convergence | IN PROGRESS | Existing semantic/coverage work is retained; literal structure/ownership/security convergence must also complete before freeze. |
-| M4 — Production Freeze | NOT STARTED | Requires every mandatory Constitution rule, 100/100/100/100, final validation, cleanup and exact-final-SHA CI. |
+| M1 — Repository Foundation & AI Operating System | DONE / MAINTAINED | Bootstrap, freeze contract, live ledger, playbook and non-mutating preflight exist and are reconciled to the post-CW2 model. |
+| M2 — Repository Convergence | IN PROGRESS — CW3 | CW1 enforcement and CW2 physical convergence are closed; bounded-context/dependency convergence is next. |
+| M3 — Production Convergence | IN PROGRESS | Existing semantic/security/coverage work is retained; completion remains gated by CW3-CW6 evidence. |
+| M4 — Production Freeze | NOT STARTED | Requires full Constitution gate green, every mandatory matrix row closed, 100/100/100/100, cleanup and exact-final-SHA validation. |
 
-## 3. Compliance workstreams inside M2/M3/M4
+## 3. Compliance workstreams
 
 | Workstream | Status | Exit rule |
 |---|---|---|
-| CW1 — Constitution Gap Map & Enforcement | COMPLETE | §§1–56 mapped; governing docs cross-compared twice; classification/enforcement defects corrected; exact implementation SHA normal CI green; strengthened closeout gate reports only genuine later-workstream blockers. |
-| CW2 — Physical Structure Convergence | IN PROGRESS | Checked-in repository physically uses canonical taxonomy/workspace/API/domain structure without transitional authorities. |
-| CW3 — Bounded-Context & Dependency Convergence | PENDING | Every business capability has one constitutional owner and cross-context access uses public boundaries. |
+| CW1 — Constitution Gap Map & Enforcement | **COMPLETE** | §§1–56 mapped; permanent read-only regression enforcement protects closed invariants; full fail-closed gate remains available for later convergence/final freeze. |
+| CW2 — Physical Structure Convergence | **COMPLETE** | Checked-in repository physically uses the exact canonical workspace/API topology and permanent read-only verification is green. |
+| CW3 — Bounded-Context & Dependency Convergence | **ACTIVE — FIRST UNFINISHED** | Every business capability has one constitutional owner and cross-context access uses public boundaries. |
 | CW4 — Domain/Application Contract Convergence | PENDING | Domain invariants, application orchestration, ExecutionContext, transactions/Clock/idempotency/state ownership converge semantically. |
-| CW5 — Security/Infrastructure Production Hardening | PENDING | §37–45 production/security/config/PII/provider/financial/concurrency requirements proven. |
-| CW6 — Proof, 100% Coverage & Production Freeze | PENDING | Every mandatory matrix row PASS; REVIEW items dispositioned; Prisma/build/lint/tests/coverage/Constitution/final-SHA CI green; one-time tooling removed. |
+| CW5 — Security/Infrastructure Production Hardening | PENDING | §§37–45 production/security/config/PII/provider/financial/concurrency requirements proven. |
+| CW6 — Proof, 100% Coverage & Production Freeze | PENDING | Every mandatory matrix row PASS; REVIEW items dispositioned; full Constitution/Prisma/build/lint/tests/coverage/final-SHA evidence green. |
 
-## 4. CW1 — user's Phase 1 double cross-check — CLOSED
+## 4. CW1 closure — permanent enforcement model
 
-CW1 established the literal compliance matrix and executable Constitution enforcement, then cross-checked both twice against the Master Constitution, bootstrap, freeze contract, playbook, workspace and API topology.
+CW1 originally established the literal compliance matrix and high-risk Constitution checks. The post-CW2 audit found that its old Constitution gate still combined verification with source-rewriting convergence producers and was no longer invoked by permanent CI.
 
-Implementation SHA `13daef1fc653516208cd524e1a0b4fd19a87b318` passed normal CI #1357 / run `34019978147` / job `101450638321`: dependency installation, Prisma validate/generate/migrations, build, ESLint and full Vitest all succeeded.
+That seam is now corrected:
 
-Closeout #121 then intentionally stopped on genuine later-workstream blockers: transitional API context placement, Enterprise/Financials ownership, and insecure production Identity behavior. The earlier test-fixture auth false positive had been removed.
+- `tools/architecture-closeout-constitution-gate.mjs` is read-only in all modes.
+- `--regression` is the permanent CI mode for CW1/CW2 invariants.
+- default/full mode has no later-workstream exceptions and remains the CW3-CW6/final-freeze diagnostic gate.
+- normal CI, CW2 closeout verification and `freeze:preflight` use `--regression` rather than silently running mutating producers.
+- any new offender outside the explicitly recorded later-workstream baseline fails regression CI.
 
-**CW1 is CLOSED.**
+**CW1 is CLOSED and permanently enforced.**
 
-## 5. CW2 — Physical Structure Convergence — ACTIVE
+## 5. CW2 closure — checked-in canonical topology
 
-CW2 started from direct comparison of Constitution §§5–9 with the checked-in branch.
+CW2 is physically complete. Current source is no longer a transitional pre-closeout tree.
 
-Initial physical evidence:
+Proven physical state:
 
-- `pnpm-workspace.yaml` still contains the forbidden transitional `packages/*` workspace root.
-- checked-in `apps/api/src` still contains legacy root authorities including `app.ts`, `app.routes.ts`, `server.ts`, `config`, `container`, `context`, `controllers`, `middlewares`, `modules`, `plugins` and `providers`.
-- the existing closeout transformer already produces much of the canonical `bootstrap/surfaces/transport/system` candidate, so CW2 must promote/fix that real convergence path rather than create a second architecture.
+- exactly **23** canonical production workspaces;
+- `pnpm-workspace.yaml` contains exactly `apps/*`, `domains/*`, `sdui/*`, `platform/*`, `foundation/*`;
+- `packages/`, `shared/`, `libs/`, `common/` production roots are absent;
+- `apps/api/src` contains exactly `bootstrap`, `surfaces`, `system`, `transport`;
+- legacy API roots/entry points are absent;
+- each canonical workspace is documented;
+- SDUI has exactly `sdui/ui-sdk` and `sdui/registry`;
+- permanent CI uses `pnpm install --frozen-lockfile`;
+- CW2 and CW1/CW2 regression verification are read-only and end with clean-tree proofs.
 
-First physical convergence slice implemented:
+Dormant historical source-rewriting closeout scripts may still exist for forensic traceability. They are not permanent validation entry points and MUST NOT be run by normal CI/CW2/preflight.
 
-1. Canonical request-to-`ExecutionContext` ownership is now established at `apps/api/src/bootstrap/lifecycle/toExecutionContext.ts`, matching the Constitution's bootstrap/lifecycle placement.
-2. `apps/api/src/context/toExecutionContext.ts` no longer owns implementation; it is a temporary compatibility-only re-export to preserve checked-in consumers while they are migrated.
-3. The legacy `context` root is therefore no longer a duplicate implementation authority. Its shim remains explicitly temporary and must be deleted in CW2 after consumer import migration.
+**CW2 is CLOSED.**
 
-CW2 is not complete. Next physical slices are consumer migration/removal of the context shim, canonical bootstrap entrypoint promotion, legacy API-root evacuation, and removal of `packages/*` after its remaining authorities/tests are moved to constitutional owners.
+## 6. Full Constitution diagnostic — known later-workstream blockers
 
-## 6. Frozen execution rules
+The first attempt to re-enable the full fail-closed Constitution gate in permanent CW2 CI, commit `8f3f4bfdea40eafa18b0547f8d428514d899984c`, correctly failed in Architecture Closeout #125 / run `34027399905`. That failure proved the full gate was exposing genuine later-workstream work rather than CW2 defects.
+
+After removing one stale evidence-path assertion, the known real blocker baseline is:
+
+### CW3 — ownership
+
+Enterprise still contains accounting responsibility that the Constitution assigns to Financials:
+
+- `domains/enterprise/domain/CorporateInvoice.ts`
+- `domains/enterprise/domain/CorporateInvoiceLine.ts`
+- `domains/enterprise/use-cases/GenerateCorporateInvoiceUseCase.ts`
+- `domains/enterprise/use-cases/ReconcileCorporatePaymentUseCase.ts`
+
+### CW5 — production security / observability
+
+Identity production auth still contains development/security blockers in:
+
+- `domains/identity/application/AuthUseCases.ts` — mock/hardcoded OTP behavior and weak timestamp-derived refresh/session token material.
+
+Direct console logging remains in:
+
+- `apps/api/src/bootstrap/config/runtime-config.ts`
+- `domains/audit/application/AuditLogService.ts`
+
+These are **not waived**. Regression mode permits only these exact-path known blockers so already-closed CW1/CW2 can remain permanently protected while their owning later workstreams remove them. The default/full Constitution gate retains the rules without exceptions.
+
+## 7. Frozen execution rules
 
 1. Read the Master Constitution before architecture-sensitive work.
-2. Constitution + current source evidence + executable validation must agree.
-3. Keep exactly the four bootstrap milestones; compliance workstreams may subdivide work but never replace milestone authority.
+2. Constitution + current checked-in source + executable evidence must agree.
+3. Keep exactly the four bootstrap milestones; CW1-CW6 subdivide them but never replace them.
 4. Do not redesign the frozen architecture.
-5. Do not weaken a Constitution rule, architecture gate, coverage scope or threshold to accommodate current code.
-6. Do not create empty ceremonial folders merely to resemble diagrams.
-7. Do not manufacture impossible states or casts solely for coverage.
-8. Fix the true producer of generated/transformed defects.
-9. Continue through CW2 → CW6 inside M2/M3/M4; CI confirms meaningful boundaries rather than replacing implementation/debugging.
-10. Architecture freeze is declared only after the actual checked-in final repository satisfies §54 and exact-final-SHA CI.
+5. Do not weaken the full Constitution gate, architecture tests, coverage scope or thresholds to accommodate current code.
+6. Do not add new files to the later-blocker regression baseline; new offenders are regressions.
+7. When an existing baseline blocker is fixed, remove its exception in the same coherent change.
+8. Do not run dormant source-rewriting closeout scripts as permanent validation.
+9. Do not manufacture impossible states or casts solely for coverage.
+10. Production freeze is declared only after §54 and all exact-final-SHA gates pass, including the **full** Constitution gate and 100/100/100/100.
 
-## 7. First unfinished task
+## 8. First unfinished task
 
-**CW2 consumer migration:** update every checked-in API consumer to import the canonical bootstrap/lifecycle execution-context adapter, then delete the legacy `apps/api/src/context` shim. Continue with canonical bootstrap entrypoints and remaining legacy API roots before removing `packages/*`.
+**CW3 — Enterprise/Financials ownership convergence.**
+
+Start by tracing the four Enterprise corporate invoice/payment-accounting artifacts above, their public consumers, persistence/schema ownership and tests. Move accounting authority to Financials without duplicating it, preserve Enterprise ownership only for corporate account/member/fleet/eligibility policy, then run targeted ownership/contract tests, the regression gate, the full gate to measure blocker reduction, and exact-SHA CI/closeout at the coherent boundary.

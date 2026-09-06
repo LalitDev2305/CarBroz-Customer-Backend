@@ -3,12 +3,6 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const root = process.cwd();
-// The source branch remains intentionally transitional until the one-shot closeout removes packages/.
-// During the atomic workflow the canonical candidate has no packages/ even though the orchestrator itself
-// is deleted only after tests, so packages/ is the reliable switch for final-tree assertions.
-const transitional = fs.existsSync(path.join(root, 'packages'));
-const finalDescribe = transitional ? describe.skip : describe;
-
 const canonicalWorkspaces = [
   'apps/api',
   'domains/identity', 'domains/partner', 'domains/customer', 'domains/catalog-pricing',
@@ -34,7 +28,7 @@ const normalize = (value: string) => value.replaceAll('\\', '/');
 const isTest = (file: string) => /\.(?:test|spec)\.[cm]?[jt]sx?$/.test(file);
 const isProductionTs = (file: string) => /\.[cm]?tsx?$/.test(file) && !isTest(file) && !file.endsWith('.d.ts');
 
-finalDescribe('final module completeness policy', () => {
+describe('final module completeness policy', () => {
   it('has exactly the canonical production workspaces and no legacy workspace roots', () => {
     for (const workspace of canonicalWorkspaces) expect(fs.existsSync(path.join(root, workspace, 'package.json')), workspace).toBe(true);
     for (const forbidden of ['packages', 'shared', 'libs']) expect(fs.existsSync(path.join(root, forbidden)), forbidden).toBe(false);

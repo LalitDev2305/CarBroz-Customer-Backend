@@ -1,6 +1,6 @@
 # Production Freeze Tooling
 
-`preflight.mjs` is the permanent, non-destructive local validation entry point for ordinary convergence work.
+`preflight.mjs` is the permanent, non-destructive local validation entry point for ordinary convergence work after CW2.
 
 Run from repository root:
 
@@ -8,13 +8,22 @@ Run from repository root:
 pnpm freeze:preflight
 ```
 
-It runs, in fail-fast order:
+It runs, fail-fast:
 
-1. monorepo build;
-2. lint;
-3. architecture tests;
-4. complete Vitest suite.
+1. exact CW2 physical verifier;
+2. CW1/CW2 read-only Constitution regression gate;
+3. monorepo build;
+4. lint;
+5. architecture tests;
+6. complete Vitest suite;
+7. CW1/CW2 regression gate again after executable validation.
 
-It deliberately does **not** invoke any `architecture-closeout-*.mjs` transformation/finalization script. Those scripts mutate the candidate tree and remain owned by the canonical closeout executor until final freeze.
+The preflight does not rewrite source, materialize a transformed candidate, generate migration code or invoke dormant source-rewriting closeout producers.
 
-Strict transformed production coverage remains a closeout/freeze gate. Do not weaken or replace that gate with this preflight.
+The regression gate is intentionally **not** the final Constitution gate. Later workstreams and final freeze must also run:
+
+```bash
+node tools/architecture-closeout-constitution-gate.mjs
+```
+
+without `--regression`, and CW6 must prove strict executable production coverage at 100% statements / branches / functions / lines together with all remaining freeze gates.
