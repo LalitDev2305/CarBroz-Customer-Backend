@@ -592,18 +592,9 @@ importers:
       '@carbroz/domain-audit':
         specifier: workspace:*
         version: link:../audit
-      '@carbroz/domain-booking':
-        specifier: workspace:*
-        version: link:../booking
-      '@carbroz/domain-communications':
-        specifier: workspace:*
-        version: link:../communications
       '@carbroz/domain-customer':
         specifier: workspace:*
         version: link:../customer
-      '@carbroz/domain-financials':
-        specifier: workspace:*
-        version: link:../financials
       '@carbroz/domain-identity':
         specifier: workspace:*
         version: link:../identity
