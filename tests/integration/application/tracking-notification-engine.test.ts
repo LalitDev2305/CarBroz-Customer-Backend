@@ -8,12 +8,12 @@ import {
   NotificationService,
   SendNotificationUseCase,
   type INotificationLogRepository,
+  type ISmsProvider,
 } from '@carbroz/domain-communications';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { MultiChannelNotificationProvider } from '@carbroz/platform-integrations';
 import { FirebasePushProvider } from '../../../platform/integrations/src/communications/FirebasePushProvider.js';
-import { Msg91SmsProvider } from '../../../platform/integrations/src/communications/Msg91SmsProvider.js';
 import { ResendEmailProvider } from '../../../platform/integrations/src/communications/ResendEmailProvider.js';
 
 describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
@@ -102,7 +102,11 @@ describe('Phase 18 — Tracking & Notification Engine Use Cases', () => {
 
   it('should dispatch multi-channel push, sms and email notifications', async () => {
     const pushProvider = new FirebasePushProvider();
-    const smsProvider = new Msg91SmsProvider();
+    const smsProvider: ISmsProvider = {
+      async sendSms() {
+        return { success: true, providerReference: 'test-sms-reference' };
+      },
+    };
     const emailProvider = new ResendEmailProvider();
     const multiProvider = new MultiChannelNotificationProvider(pushProvider, smsProvider, emailProvider);
 

@@ -218,9 +218,12 @@ describe('Identity authentication use cases', () => {
 
     expect(result.user).toBe(guest);
     expect(userRepository.upsert).toHaveBeenCalledWith(expect.stringMatching(/^guest_/), { isGuest: true, role: 'GUEST' });
-    expect(sessionRepository.upsert).toHaveBeenCalledWith(8, 'guest-device', {
-      deviceModel: 'Web', osVersion: '1', fcmToken: 'guest-fcm',
-    });
+    expect(sessionRepository.upsert).toHaveBeenCalledWith(8, 'guest-device', expect.objectContaining({
+      deviceModel: 'Web',
+      osVersion: '1',
+      fcmToken: 'guest-fcm',
+      lastActiveAt: expect.any(Date),
+    }));
   });
 
   it('rejects missing refresh-token records', async () => {
