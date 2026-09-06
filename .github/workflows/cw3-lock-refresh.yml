@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - tmp/cw3-lock-refresh-worker
+    paths:
+      - domains/enterprise/package.json
+      - .github/workflows/cw3-lock-refresh.yml
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   refresh-lockfile:
@@ -27,7 +30,15 @@ jobs:
       - name: Upload regenerated lockfile
         uses: actions/upload-artifact@v4
         with:
-          name: cw3-regenerated-lockfile
+          name: cw3-regenerated-lockfile-committed
           path: pnpm-lock.yaml
           if-no-files-found: error
           retention-days: 1
+      - name: Commit regenerated lockfile on temporary branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          git diff --cached --quiet && exit 0
+          git commit -m "chore(cw3): regenerate lockfile for dependency convergence"
+          git push origin HEAD:tmp/cw3-lock-refresh-worker
