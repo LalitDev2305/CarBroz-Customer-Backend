@@ -67,6 +67,7 @@ function vehicle(overrides: Record<string, unknown> = {}) {
 function address() {
   return {
     id: 3,
+    userId: 70,
     addressLine1: "A-1",
     addressLine2: "Floor 2",
     city: "Pune",
@@ -102,6 +103,15 @@ function txProvider() {
 }
 function customerRepo() {
   return { findByUserId: vi.fn().mockResolvedValue({ id: 7 }) };
+}
+function partnerAccessPolicy() {
+  return {
+    assertPartnerAccess: vi.fn(async (booking: any, userId: number) => {
+      if (booking.partnerId !== 22 || userId !== 220) {
+        throw new Error("Assigned partner authority is required");
+      }
+    }),
+  };
 }
 function createDeps(overrides: Record<string, unknown> = {}) {
   return {
@@ -238,22 +248,24 @@ describe("Booking application CW4 behavior", () => {
       id: 10,
     };
     const repo = bookingRepo({ findByPublicId: vi.fn().mockResolvedValue(b) });
-    await new TransitionBookingStatusUseCase(repo as any).execute(
+    const accessPolicy = partnerAccessPolicy();
+    await new TransitionBookingStatusUseCase(repo as any, accessPolicy as any).execute(
       { bookingPublicId: "x", targetStatus: "IN_PROGRESS" },
       partnerContext,
     );
     expect(b.startService).toHaveBeenCalledWith(220);
+    expect(accessPolicy.assertPartnerAccess).toHaveBeenCalledWith(b, 220);
     await expect(
-      new TransitionBookingStatusUseCase(repo as any).execute(
+      new TransitionBookingStatusUseCase(repo as any, accessPolicy as any).execute(
         { bookingPublicId: "x", targetStatus: "COMPLETED" },
         {
           ...partnerContext,
-          actor: { ...partnerContext.actor, partnerId: 23 },
+          actor: { ...partnerContext.actor, id: 221 },
         },
       ),
     ).rejects.toThrow("Assigned partner authority is required");
     await expect(
-      new TransitionBookingStatusUseCase(repo as any).execute(
+      new TransitionBookingStatusUseCase(repo as any, accessPolicy as any).execute(
         { bookingPublicId: "x", targetStatus: "CANCELLED" as any },
         adminContext,
       ),
@@ -264,7 +276,12 @@ describe("Booking application CW4 behavior", () => {
     const b = { partnerId: 22, completeService: vi.fn(), id: 10 };
     const repo = bookingRepo({ findByPublicId: vi.fn().mockResolvedValue(b) });
     const payout = { execute: vi.fn().mockResolvedValue({}) };
-    await new TransitionBookingStatusUseCase(repo as any, payout).execute(
+    const accessPolicy = partnerAccessPolicy();
+    await new TransitionBookingStatusUseCase(
+      repo as any,
+      accessPolicy as any,
+      payout,
+    ).execute(
       { bookingPublicId: "x", targetStatus: "COMPLETED" },
       partnerContext,
     );
