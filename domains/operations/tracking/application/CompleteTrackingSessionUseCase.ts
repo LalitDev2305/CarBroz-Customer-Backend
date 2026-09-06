@@ -1,5 +1,5 @@
 import { TrackingSession } from '../domain/TrackingSession.js';
-import type { ITrackingSessionRepository } from '../domain/ITrackingSessionRepository.js';
+import type { ITrackingSessionRepository } from '../domain/repositories/ITrackingSessionRepository.js';
 
 /** CompleteTrackingSessionUseCase is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CompleteTrackingSessionUseCase {

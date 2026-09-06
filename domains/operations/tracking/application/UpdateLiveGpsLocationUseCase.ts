@@ -1,6 +1,6 @@
 import { TrackingSession } from '../domain/TrackingSession.js';
 import { LocationPing } from '../domain/LocationPing.js';
-import type { ITrackingSessionRepository } from '../domain/ITrackingSessionRepository.js';
+import type { ITrackingSessionRepository } from '../domain/repositories/ITrackingSessionRepository.js';
 
 /** UpdateGpsInput is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface UpdateGpsInput {
