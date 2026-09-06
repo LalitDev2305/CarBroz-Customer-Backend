@@ -8,9 +8,9 @@ import { PartnerType } from '../../../domains/partner/domain/PartnerType.js';
 
 /**
  * Real PostgreSQL evidence for the Constitution transaction law.
- * The suite proves both sides of transaction propagation: committed work is visible through the
- * root client, while work performed through the same supplied transaction client is rolled back
- * when the unit of work fails.
+ * The universal TransactionContext intentionally wraps the technology resource;
+ * infrastructure tests unwrap that resource before binding a legacy repository
+ * unit-of-work hook to the exact Prisma transaction client.
  */
 describe('real PostgreSQL transaction propagation', () => {
   const prismaProvider = new PrismaProvider();
@@ -25,10 +25,10 @@ describe('real PostgreSQL transaction propagation', () => {
     await prismaProvider.disconnect();
   });
 
-  it('commits a Partner repository write performed through the supplied transaction client', async () => {
+  it('commits a Partner repository write performed through the supplied transaction resource', async () => {
     const repository = new PrismaPartnerRepository(rootClient);
     const created = await transactionProvider.runInTransaction(async (transaction) => {
-      repository.setUnitOfWork(transaction as PrismaClient);
+      repository.setUnitOfWork(transaction.resource as PrismaClient);
       return repository.create({
         businessName: `Commit Probe ${Date.now()}`,
         type: PartnerType.INDIVIDUAL,
@@ -46,13 +46,13 @@ describe('real PostgreSQL transaction propagation', () => {
     expect(await repository.findByPublicId(created.publicId)).toBeNull();
   });
 
-  it('rolls back a Partner repository write performed through the supplied transaction client', async () => {
+  it('rolls back a Partner repository write performed through the supplied transaction resource', async () => {
     const repository = new PrismaPartnerRepository(rootClient);
     let createdPublicId: string | undefined;
 
     await expect(
       transactionProvider.runInTransaction(async (transaction) => {
-        repository.setUnitOfWork(transaction as PrismaClient);
+        repository.setUnitOfWork(transaction.resource as PrismaClient);
         const created = await repository.create({
           businessName: `Rollback Probe ${Date.now()}`,
           type: PartnerType.INDIVIDUAL,
