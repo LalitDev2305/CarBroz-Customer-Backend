@@ -4,15 +4,11 @@ on:
   push:
     branches:
       - main
-      - architecture-v2
-      - architecture/backend-v3-clean
-      - 'feature/**'
-      - 'fix/**'
+      - development
   pull_request:
     branches:
       - main
-      - architecture-v2
-      - architecture/backend-v3-clean
+      - development
 
 jobs:
   build-and-test:
