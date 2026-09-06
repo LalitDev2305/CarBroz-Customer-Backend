@@ -95,7 +95,7 @@ jobs:
           set -o pipefail
           pnpm prisma migrate diff \
             --from-url "$DATABASE_URL" \
-            --to-schema prisma/schema.prisma \
+            --to-schema-datamodel prisma/schema.prisma \
             --script \
             --exit-code 2>&1 | tee prisma-schema-drift.sql
 
