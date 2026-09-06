@@ -6,6 +6,33 @@ import { PrismaBookingRepository } from './PrismaBookingRepository.js';
 const start = new Date('2026-09-07T10:00:00.000Z');
 const end = new Date('2026-09-07T11:00:00.000Z');
 
+const snapshots = {
+  service: { serviceId: 4, name: 'Basic wash', basePricePaise: 49900, estimatedDurationMinutes: 60 },
+  addons: [],
+  pricing: {
+    basePricePaise: 49900,
+    addonsTotalPaise: 0,
+    vehicleMultiplier: 1,
+    subtotalPaise: 49900,
+    taxesPaise: 0,
+    totalPricePaise: 49900,
+  },
+  address: {
+    addressLine1: 'Test address',
+    city: 'Pune',
+    state: 'Maharashtra',
+    postalCode: '411001',
+    country: 'India',
+  },
+  vehicle: {
+    make: 'Test',
+    model: 'Vehicle',
+    year: 2026,
+    registrationNumber: 'MH00TEST',
+    fuelType: 'PETROL',
+  },
+};
+
 const record = (overrides: Partial<BookingPersistenceRecord> = {}): BookingPersistenceRecord => ({
   id: 10,
   publicId: 'booking_10',
@@ -20,7 +47,7 @@ const record = (overrides: Partial<BookingPersistenceRecord> = {}): BookingPersi
   expiryAt: null,
   totalPricePaise: 49900,
   cancellationReason: null,
-  snapshotsJson: { serviceName: 'Basic wash' },
+  snapshotsJson: snapshots,
   statusHistoryJson: [],
   createdAt: new Date('2026-09-06T00:00:00.000Z'),
   updatedAt: new Date('2026-09-06T00:00:00.000Z'),
@@ -50,7 +77,7 @@ function domainBooking(overrides: Partial<ConstructorParameters<typeof Booking>[
     slotStartTime: start,
     slotEndTime: end,
     totalPricePaise: 49900,
-    snapshots: { serviceName: 'Basic wash' },
+    snapshots,
     statusHistory: [],
     ...overrides,
   });
