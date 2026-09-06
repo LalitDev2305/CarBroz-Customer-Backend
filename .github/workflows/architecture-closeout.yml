@@ -10,6 +10,7 @@ on:
       - 'tools/architecture-closeout.mjs'
       - 'tools/architecture-closeout-constitution-gate.mjs'
       - 'tools/cw3-boundary-gate.mjs'
+      - 'tools/production-freeze/preflight.mjs'
       - 'pnpm-workspace.yaml'
       - 'pnpm-lock.yaml'
       - 'apps/api/**'
@@ -24,6 +25,7 @@ on:
       - 'docs/CW2-PHYSICAL-STRUCTURE-CLOSEOUT.md'
       - 'docs/CW3-BOUNDED-CONTEXT-DEPENDENCY-CLOSEOUT.md'
       - 'docs/PRODUCTION_FREEZE_EXECUTION.md'
+      - 'docs/PRODUCTION_FREEZE_PLAYBOOK.md'
       - 'docs/CONSTITUTION-COMPLIANCE-MATRIX.md'
   workflow_dispatch:
 

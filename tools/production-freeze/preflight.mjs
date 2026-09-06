@@ -3,11 +3,13 @@ import { spawnSync } from 'node:child_process';
 const checks = [
   ['cw2-architecture', 'node', ['tools/architecture-closeout.mjs']],
   ['cw1-cw2-constitution-regression', 'node', ['tools/architecture-closeout-constitution-gate.mjs', '--regression']],
+  ['cw3-bounded-context-dependency', 'node', ['tools/cw3-boundary-gate.mjs']],
   ['build', 'pnpm', ['build']],
   ['lint', 'pnpm', ['lint']],
   ['architecture-tests', 'pnpm', ['exec', 'vitest', 'run', 'tests/architecture']],
   ['tests', 'pnpm', ['exec', 'vitest', 'run']],
   ['cw1-cw2-constitution-regression-post-validation', 'node', ['tools/architecture-closeout-constitution-gate.mjs', '--regression']],
+  ['cw3-bounded-context-dependency-post-validation', 'node', ['tools/cw3-boundary-gate.mjs']],
 ];
 
 for (const [name, command, args] of checks) {
