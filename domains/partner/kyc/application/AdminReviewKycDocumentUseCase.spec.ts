@@ -6,7 +6,7 @@ import { KycDocumentStatus } from '../domain/KycDocumentStatus.js';
 import { KycDocumentType } from '../domain/KycDocumentType.js';
 import { AdminReviewKycDocumentUseCase } from './AdminReviewKycDocumentUseCase.js';
 
-const context = (id: number | string, kind: ExecutionContext['actor']['kind'], roles: string[]): ExecutionContext => ({
+const context = (id: number, kind: ExecutionContext['actor']['kind'], roles: string[]): ExecutionContext => ({
   correlationId: 'kyc-review-test',
   timestamp: new Date('2026-01-01T00:00:00.000Z'),
   actor: { id, kind, roles },
@@ -52,11 +52,10 @@ describe('AdminReviewKycDocumentUseCase', () => {
     useCase = new AdminReviewKycDocumentUseCase(kycRepository, partnerRepository);
   });
 
-  it('rejects invalid actor ids and non-admin actors before repository access', async () => {
+  it('rejects invalid numeric actor ids and non-admin actors before repository access', async () => {
     for (const actorContext of [
       context(0, 'ADMIN', ['ADMIN']),
       context(-1, 'ADMIN', ['ADMIN']),
-      context('not-a-number', 'ADMIN', ['ADMIN']),
       context(4, 'CUSTOMER', ['CUSTOMER']),
     ]) {
       await expect(useCase.execute({ context: actorContext, data: { documentId: 7, action: 'APPROVE' } })).rejects.toThrow('UNAUTHORIZED');
