@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   apply:
+    if: ${{ startsWith(github.event.head_commit.message, 'chore(cw4-worker):') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout worker branch
@@ -41,13 +42,16 @@ jobs:
       - name: Verify CW4 candidate gate before commit
         run: node tools/cw4-contract-gate.mjs
 
-      - name: Remove worker-only producer tooling
+      - name: Defer permanent workflow edits to connector
+        run: |
+          git restore .github/workflows/ci.yml .github/workflows/architecture-closeout.yml
+
+      - name: Remove worker-only producer scripts
         run: |
           git rm tools/cw4-one-pass-codemod.mjs
           git rm tools/cw4-worker-bootstrap.mjs
-          git rm .github/workflows/cw4-worker-apply.yml
 
-      - name: Commit generated CW4 candidate
+      - name: Commit generated non-workflow CW4 candidate
         shell: bash
         run: |
           set -euo pipefail
