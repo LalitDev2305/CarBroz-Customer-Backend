@@ -2,22 +2,19 @@ name: CW4 Worker Apply
 
 on:
   push:
-    branches:
-      - fix/cw4-one-pass-worker
+    branches: [fix/cw4-one-pass-worker]
 
 permissions:
   contents: write
 
 jobs:
   apply:
-    if: github.event.head_commit.message == 'chore(cw4-worker): add apply runner'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout worker branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: fix/cw4-one-pass-worker
 
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
@@ -54,8 +51,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name 'Lalit Naiya'
-          git config user.email 'developer.lalit.naiya@gmail.com'
+          git config user.name "Lalit Naiya"
+          git config user.email "developer.lalit.naiya@gmail.com"
           git add -A
-          git commit -m 'fix(cw4): converge semantic contracts in one pass'
+          git commit -m "fix(cw4): converge semantic contracts in one pass"
           git push origin HEAD:fix/cw4-one-pass-worker
