@@ -1,4 +1,4 @@
-/** CorporateInvoiceLineProps is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** CorporateInvoiceLineProps is a Financials-owned corporate invoice line contract. */
 export interface CorporateInvoiceLineProps {
   id?: number;
   publicId?: string;
@@ -10,7 +10,7 @@ export interface CorporateInvoiceLineProps {
   createdAt?: Date;
 }
 
-/** CorporateInvoiceLine is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** CorporateInvoiceLine is the Financials-owned line item for a corporate invoice. */
 export class CorporateInvoiceLine {
   id?: number;
   publicId?: string;

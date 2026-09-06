@@ -129,7 +129,7 @@ describe('PrismaBookingRepository', () => {
     await expect(repository.findByPublicId('booking_public')).resolves.toMatchObject({ publicId: 'booking_public' });
   });
 
-  it('lists customer, partner and admin bookings with and without status filters', async () => {
+  it('lists customer, partner, corporate-account and admin bookings with and without status filters', async () => {
     const { repository, booking } = fixture();
     booking.findMany.mockResolvedValue([record()]);
 
@@ -143,10 +143,21 @@ describe('PrismaBookingRepository', () => {
     await repository.listByPartnerId(9, 'ASSIGNED');
     expect(booking.findMany).toHaveBeenNthCalledWith(4, expect.objectContaining({ where: { partnerId: 9, status: 'ASSIGNED' } }));
 
+    await repository.listByCorporateAccountId(321);
+    expect(booking.findMany).toHaveBeenNthCalledWith(5, {
+      where: { corporateAccountId: 321, status: undefined },
+      orderBy: { createdAt: 'asc' },
+    });
+    await repository.listByCorporateAccountId(321, 'COMPLETED');
+    expect(booking.findMany).toHaveBeenNthCalledWith(6, {
+      where: { corporateAccountId: 321, status: 'COMPLETED' },
+      orderBy: { createdAt: 'asc' },
+    });
+
     await repository.listAll();
-    expect(booking.findMany).toHaveBeenNthCalledWith(5, expect.objectContaining({ where: { status: undefined }, take: 50, skip: 0 }));
+    expect(booking.findMany).toHaveBeenNthCalledWith(7, expect.objectContaining({ where: { status: undefined }, take: 50, skip: 0 }));
     await repository.listAll('COMPLETED', 10, 20);
-    expect(booking.findMany).toHaveBeenNthCalledWith(6, expect.objectContaining({ where: { status: 'COMPLETED' }, take: 10, skip: 20 }));
+    expect(booking.findMany).toHaveBeenNthCalledWith(8, expect.objectContaining({ where: { status: 'COMPLETED' }, take: 10, skip: 20 }));
   });
 
   it('finds partner conflicts with and without an excluded booking', async () => {

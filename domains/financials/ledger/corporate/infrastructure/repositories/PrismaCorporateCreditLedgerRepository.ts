@@ -1,9 +1,8 @@
-import { ICorporateCreditLedgerRepository } from '../../domain/repositories/ICorporateCreditLedgerRepository.js';
-import { CorporateCreditLedger, CorporateLedgerEntryType } from '../../domain/CorporateCreditLedger.js';
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
+import { CorporateCreditLedger, type CorporateLedgerEntryType } from '../../domain/CorporateCreditLedger.js';
+import type { ICorporateCreditLedgerRepository } from '../../domain/repositories/ICorporateCreditLedgerRepository.js';
 
-
-/** PrismaCorporateCreditLedgerRepository is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Prisma persistence adapter for the Financials-owned corporate credit ledger. */
 export class PrismaCorporateCreditLedgerRepository implements ICorporateCreditLedgerRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -54,7 +53,7 @@ export class PrismaCorporateCreditLedgerRepository implements ICorporateCreditLe
       skip: offset,
       orderBy: { createdAt: 'desc' },
     });
-    return records.map((r: any) => this.mapToDomain(r));
+    return records.map((record: any) => this.mapToDomain(record));
   }
 
   async getLatestEntry(corporateAccountId: number): Promise<CorporateCreditLedger | null> {

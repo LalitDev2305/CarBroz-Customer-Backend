@@ -1,14 +1,11 @@
-import { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
-import { ICorporateMemberRepository } from '../domain/repositories/ICorporateMemberRepository.js';
-import { ICorporateFleetVehicleRepository } from '../domain/repositories/ICorporateFleetVehicleRepository.js';
-import { ICorporateCreditLedgerRepository } from '../domain/repositories/ICorporateCreditLedgerRepository.js';
-import { CorporateCreditLedger } from '../domain/CorporateCreditLedger.js';
+import type { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
+import type { ICorporateMemberRepository } from '../domain/repositories/ICorporateMemberRepository.js';
+import type { ICorporateFleetVehicleRepository } from '../domain/repositories/ICorporateFleetVehicleRepository.js';
 import { IUserRepository } from '@carbroz/domain-identity';
 import { IVehicleRepository } from '@carbroz/domain-customer';
 import { Money } from '@carbroz/foundation-kernel';
 import { ValidateCorporateBookingDto } from '../dtos/corporate.dto.js';
 
-/** CorporateBookingValidationResult is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CorporateBookingValidationResult {
   eligible: boolean;
   reason?: string;
@@ -16,26 +13,22 @@ export interface CorporateBookingValidationResult {
   corporateFleetVehicleId?: number;
 }
 
-/** ValidateCorporateBookingUseCase is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Enterprise-owned corporate membership, fleet and credit-eligibility policy. */
 export class ValidateCorporateBookingUseCase {
   constructor(
     private readonly corporateAccountRepo: ICorporateAccountRepository,
     private readonly corporateMemberRepo: ICorporateMemberRepository,
     private readonly fleetVehicleRepo: ICorporateFleetVehicleRepository,
-    private readonly creditLedgerRepo: ICorporateCreditLedgerRepository,
     private readonly userRepository: IUserRepository,
-    private readonly vehicleRepository: IVehicleRepository
+    private readonly vehicleRepository: IVehicleRepository,
   ) {}
 
-  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(dto: ValidateCorporateBookingDto): Promise<CorporateBookingValidationResult> {
     const user = await (this.userRepository as any).findByPublicId
       ? await (this.userRepository as any).findByPublicId(dto.userPublicId)
       : null;
 
-    if (!user) {
-      return { eligible: false, reason: 'User not found' };
-    }
+    if (!user) return { eligible: false, reason: 'User not found' };
 
     const member = await this.corporateMemberRepo.findByUserId(user.id!);
     if (!member || member.status !== 'ACTIVE') {
@@ -48,17 +41,14 @@ export class ValidateCorporateBookingUseCase {
     }
 
     const vehicle = await this.vehicleRepository.findByPublicId(dto.vehiclePublicId);
-    if (!vehicle) {
-      return { eligible: false, reason: 'Vehicle not found' };
-    }
+    if (!vehicle) return { eligible: false, reason: 'Vehicle not found' };
 
     const fleetVehicle = await this.fleetVehicleRepo.findByAccountAndVehicle(account.id!, vehicle.id!);
     if (!fleetVehicle || fleetVehicle.status !== 'ACTIVE') {
       return { eligible: false, reason: 'Vehicle is not enrolled in active corporate fleet' };
     }
 
-    const bookingMoney = Money.fromMinor(dto.bookingAmountPaise);
-    if (!account.canCoverAmount(bookingMoney)) {
+    if (!account.canCoverAmount(Money.fromMinor(dto.bookingAmountPaise))) {
       return { eligible: false, reason: 'Corporate account credit limit exceeded' };
     }
 
@@ -67,23 +57,5 @@ export class ValidateCorporateBookingUseCase {
       corporateAccountId: account.id!,
       corporateFleetVehicleId: fleetVehicle.id!,
     };
-  }
-
-  async processBookingDebit(corporateAccountId: number, bookingId: number, amountPaise: number): Promise<void> {
-    const account = await this.corporateAccountRepo.findById(corporateAccountId);
-    if (!account) throw new Error('Corporate account not found');
-
-    const amountBigInt = BigInt(amountPaise);
-    const updatedAccount = await this.corporateAccountRepo.updateUtilisedCredit(corporateAccountId, amountBigInt);
-
-    const ledgerEntry = new CorporateCreditLedger({
-      corporateAccountId,
-      bookingId,
-      entryType: 'BOOKING_DEBIT',
-      amountPaise: amountBigInt,
-      balanceAfterPaise: updatedAccount.creditLimitPaise - updatedAccount.utilisedCreditPaise,
-      referenceNotes: `Booking ID ${bookingId} credit debit`,
-    });
-    await this.creditLedgerRepo.create(ledgerEntry);
   }
 }

@@ -3,8 +3,6 @@ import type { PrismaClient } from '@prisma/client';
 import { PrismaCorporateAccountRepository } from './infrastructure/repositories/PrismaCorporateAccountRepository.js';
 import { PrismaCorporateMemberRepository } from './infrastructure/repositories/PrismaCorporateMemberRepository.js';
 import { PrismaCorporateFleetVehicleRepository } from './infrastructure/repositories/PrismaCorporateFleetVehicleRepository.js';
-import { PrismaCorporateCreditLedgerRepository } from './infrastructure/repositories/PrismaCorporateCreditLedgerRepository.js';
-import { PrismaCorporateInvoiceRepository } from './infrastructure/repositories/PrismaCorporateInvoiceRepository.js';
 import { RegisterCorporateAccountUseCase } from './use-cases/RegisterCorporateAccountUseCase.js';
 import { ApproveCorporateAccountUseCase } from './use-cases/ApproveCorporateAccountUseCase.js';
 import { AdjustCreditLimitUseCase } from './use-cases/AdjustCreditLimitUseCase.js';
@@ -13,8 +11,6 @@ import { RemoveCorporateMemberUseCase } from './use-cases/RemoveCorporateMemberU
 import { EnrollFleetVehicleUseCase } from './use-cases/EnrollFleetVehicleUseCase.js';
 import { RemoveFleetVehicleUseCase } from './use-cases/RemoveFleetVehicleUseCase.js';
 import { ValidateCorporateBookingUseCase } from './use-cases/ValidateCorporateBookingUseCase.js';
-import { GenerateCorporateInvoiceUseCase } from './use-cases/GenerateCorporateInvoiceUseCase.js';
-import { ReconcileCorporatePaymentUseCase } from './use-cases/ReconcileCorporatePaymentUseCase.js';
 
 interface EnterpriseCradle {
   prismaProvider: {
@@ -22,7 +18,7 @@ interface EnterpriseCradle {
   };
 }
 
-/** registerEnterpriseModule is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Registers Enterprise-owned corporate account, membership, fleet and eligibility capabilities. */
 export function registerEnterpriseModule(container: AwilixContainer): void {
   container.register({
     corporateAccountRepo: asFunction(
@@ -34,12 +30,6 @@ export function registerEnterpriseModule(container: AwilixContainer): void {
     fleetVehicleRepo: asFunction(
       (cradle: EnterpriseCradle) => new PrismaCorporateFleetVehicleRepository(cradle.prismaProvider.getClient()),
     ).singleton(),
-    creditLedgerRepo: asFunction(
-      (cradle: EnterpriseCradle) => new PrismaCorporateCreditLedgerRepository(cradle.prismaProvider.getClient()),
-    ).singleton(),
-    corporateInvoiceRepo: asFunction(
-      (cradle: EnterpriseCradle) => new PrismaCorporateInvoiceRepository(cradle.prismaProvider.getClient()),
-    ).singleton(),
     registerAccountUseCase: asClass(RegisterCorporateAccountUseCase).classic().scoped(),
     approveAccountUseCase: asClass(ApproveCorporateAccountUseCase).classic().scoped(),
     adjustCreditLimitUseCase: asClass(AdjustCreditLimitUseCase).classic().scoped(),
@@ -48,7 +38,5 @@ export function registerEnterpriseModule(container: AwilixContainer): void {
     enrollFleetVehicleUseCase: asClass(EnrollFleetVehicleUseCase).classic().scoped(),
     removeFleetVehicleUseCase: asClass(RemoveFleetVehicleUseCase).classic().scoped(),
     validateCorporateBookingUseCase: asClass(ValidateCorporateBookingUseCase).classic().scoped(),
-    generateCorporateInvoiceUseCase: asClass(GenerateCorporateInvoiceUseCase).classic().scoped(),
-    reconcilePaymentUseCase: asClass(ReconcileCorporatePaymentUseCase).classic().scoped(),
   });
 }

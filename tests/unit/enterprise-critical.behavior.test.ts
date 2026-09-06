@@ -147,7 +147,6 @@ describe('Enterprise critical application decisions', () => {
     (overrides.corporateAccountRepo ?? { findById: vi.fn(async () => account()) }) as any,
     (overrides.corporateMemberRepo ?? { findByUserId: vi.fn(async () => ({ corporateAccountId: 10, status: 'ACTIVE' })) }) as any,
     (overrides.fleetVehicleRepo ?? { findByAccountAndVehicle: vi.fn(async () => ({ id: 41, status: 'ACTIVE' })) }) as any,
-    (overrides.creditLedgerRepo ?? { create: vi.fn(async (entry: any) => entry) }) as any,
     (overrides.userRepository ?? { findByPublicId: vi.fn(async () => ({ id: 21 })) }) as any,
     (overrides.vehicleRepository ?? { findByPublicId: vi.fn(async () => ({ id: 31 })) }) as any,
   );
@@ -169,29 +168,5 @@ describe('Enterprise critical application decisions', () => {
     await expect(validationCase({ fleetVehicleRepo: { findByAccountAndVehicle: vi.fn(async () => null) } }).execute(dto)).resolves.toEqual({ eligible: false, reason: 'Vehicle is not enrolled in active corporate fleet' });
     await expect(validationCase({ fleetVehicleRepo: { findByAccountAndVehicle: vi.fn(async () => ({ id: 41, status: 'SUSPENDED' })) } }).execute(dto)).resolves.toEqual({ eligible: false, reason: 'Vehicle is not enrolled in active corporate fleet' });
     await expect(validationCase({ corporateAccountRepo: { findById: vi.fn(async () => account({ canCoverAmount: vi.fn(() => false) })) } }).execute(dto)).resolves.toEqual({ eligible: false, reason: 'Corporate account credit limit exceeded' });
-  });
-
-  it('debits corporate credit and writes a booking ledger entry', async () => {
-    const updated = account({ utilisedCreditPaise: 30_000n });
-    const corporateAccountRepo = {
-      findById: vi.fn(async () => account()),
-      updateUtilisedCredit: vi.fn(async () => updated),
-    };
-    const creditLedgerRepo = { create: vi.fn(async (entry: any) => entry) };
-    const useCase = validationCase({ corporateAccountRepo, creditLedgerRepo });
-    await useCase.processBookingDebit(10, 501, 20_000);
-    expect(corporateAccountRepo.updateUtilisedCredit).toHaveBeenCalledWith(10, 20_000n);
-    expect(creditLedgerRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      corporateAccountId: 10,
-      bookingId: 501,
-      entryType: 'BOOKING_DEBIT',
-      amountPaise: 20_000n,
-      balanceAfterPaise: 70_000n,
-    }));
-  });
-
-  it('rejects a debit for a missing corporate account', async () => {
-    await expect(validationCase({ corporateAccountRepo: { findById: vi.fn(async () => null) } }).processBookingDebit(10, 501, 20_000))
-      .rejects.toThrow('Corporate account not found');
   });
 });

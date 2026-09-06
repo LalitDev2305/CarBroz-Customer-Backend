@@ -1,19 +1,17 @@
-import { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
-import { ICorporateCreditLedgerRepository } from '../domain/repositories/ICorporateCreditLedgerRepository.js';
-import { CorporateCreditLedger } from '../domain/CorporateCreditLedger.js';
+import type { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
+import type { ICorporateCreditAccountingPort } from '../application/ports/ICorporateCreditAccountingPort.js';
 import { AuditLogService } from '@carbroz/domain-audit';
 import { Money } from '@carbroz/foundation-kernel';
 import { ApproveCorporateAccountDto } from '../dtos/corporate.dto.js';
 
-/** ApproveCorporateAccountUseCase is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Approves Enterprise account policy while delegating the accounting record to Financials. */
 export class ApproveCorporateAccountUseCase {
   constructor(
     private readonly corporateAccountRepo: ICorporateAccountRepository,
-    private readonly creditLedgerRepo: ICorporateCreditLedgerRepository,
-    private readonly auditLogService: AuditLogService
+    private readonly corporateCreditAccounting: ICorporateCreditAccountingPort,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
-  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(dto: ApproveCorporateAccountDto, adminUserId: number) {
     const account = await this.corporateAccountRepo.findByPublicId(dto.accountPublicId);
     if (!account) {
@@ -24,14 +22,12 @@ export class ApproveCorporateAccountUseCase {
     account.approve(limitMoney);
     const updatedAccount = await this.corporateAccountRepo.update(account);
 
-    const ledgerEntry = new CorporateCreditLedger({
+    await this.corporateCreditAccounting.recordCreditGrant({
       corporateAccountId: updatedAccount.id!,
-      entryType: 'CREDIT_GRANTED',
-      amountPaise: dto.initialCreditLimitPaise,
-      balanceAfterPaise: dto.initialCreditLimitPaise,
+      amountPaise: BigInt(dto.initialCreditLimitPaise),
+      balanceAfterPaise: updatedAccount.creditLimitPaise - updatedAccount.utilisedCreditPaise,
       referenceNotes: `Initial credit limit granted on approval by Admin ID ${adminUserId}`,
     });
-    await this.creditLedgerRepo.create(ledgerEntry);
 
     await this.auditLogService.log({
       actorId: adminUserId,

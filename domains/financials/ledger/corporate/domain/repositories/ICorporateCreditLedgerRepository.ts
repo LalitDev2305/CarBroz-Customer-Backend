@@ -1,6 +1,6 @@
-import { CorporateCreditLedger } from '../CorporateCreditLedger.js';
+import type { CorporateCreditLedger } from '../CorporateCreditLedger.js';
 
-/** ICorporateCreditLedgerRepository is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Persistence contract for the Financials-owned corporate credit ledger. */
 export interface ICorporateCreditLedgerRepository {
   create(entry: CorporateCreditLedger): Promise<CorporateCreditLedger>;
   findById(id: number): Promise<CorporateCreditLedger | null>;

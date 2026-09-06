@@ -1,12 +1,9 @@
-/** CorporateLedgerEntryType is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export type CorporateLedgerEntryType =
   | 'CREDIT_GRANTED'
   | 'BOOKING_DEBIT'
-  | 'BOOKING_REFUND_CREDIT'
   | 'PAYMENT_CREDIT'
   | 'ADJUSTMENT';
 
-/** CorporateCreditLedgerProps is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CorporateCreditLedgerProps {
   id?: number;
   publicId?: string;
@@ -20,7 +17,7 @@ export interface CorporateCreditLedgerProps {
   createdAt?: Date;
 }
 
-/** CorporateCreditLedger is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Financials-owned corporate credit accounting entry. */
 export class CorporateCreditLedger {
   id?: number;
   publicId?: string;
@@ -34,9 +31,6 @@ export class CorporateCreditLedger {
   createdAt?: Date;
 
   constructor(props: CorporateCreditLedgerProps) {
-    if (!props.corporateAccountId) throw new Error('Ledger entry requires corporateAccountId');
-    if (!props.entryType) throw new Error('Ledger entry requires entryType');
-
     this.id = props.id;
     this.publicId = props.publicId;
     this.corporateAccountId = props.corporateAccountId;

@@ -1,9 +1,9 @@
 import { CorporateInvoiceLine, CorporateInvoiceLineProps } from './CorporateInvoiceLine.js';
 
-/** CorporateInvoiceStatus is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** CorporateInvoiceStatus is the Financials-owned lifecycle for corporate invoices. */
 export type CorporateInvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIALLY_PAID' | 'PAID' | 'OVERDUE';
 
-/** CorporateInvoiceProps is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** CorporateInvoiceProps describes the Financials-owned corporate invoice aggregate. */
 export interface CorporateInvoiceProps {
   id?: number;
   publicId?: string;
@@ -24,7 +24,7 @@ export interface CorporateInvoiceProps {
   updatedAt?: Date;
 }
 
-/** CorporateInvoice is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** CorporateInvoice is the Financials-owned aggregate for B2B invoicing and payment state. */
 export class CorporateInvoice {
   id?: number;
   publicId?: string;
@@ -62,7 +62,7 @@ export class CorporateInvoice {
     this.paidAmountPaise = BigInt(props.paidAmountPaise ?? 0);
     this.dueDate = props.dueDate;
     this.status = props.status ?? 'DRAFT';
-    this.lines = (props.lines ?? []).map((l) => new CorporateInvoiceLine(l));
+    this.lines = (props.lines ?? []).map((line) => new CorporateInvoiceLine(line));
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }

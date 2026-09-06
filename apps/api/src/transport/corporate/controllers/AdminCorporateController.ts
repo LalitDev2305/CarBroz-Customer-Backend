@@ -2,9 +2,11 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import {
   AdjustCreditLimitUseCase,
   ApproveCorporateAccountUseCase,
+} from '@carbroz/domain-enterprise';
+import {
   GenerateCorporateInvoiceUseCase,
   ReconcileCorporatePaymentUseCase,
-} from '@carbroz/domain-enterprise';
+} from '@carbroz/domain-financials';
 
 /** AdminCorporateController is an exported apps/api contract/implementation; see the owning README for lifecycle and extension rules. */
 export class AdminCorporateController {

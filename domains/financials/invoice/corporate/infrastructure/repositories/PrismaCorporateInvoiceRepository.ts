@@ -1,9 +1,8 @@
-import { ICorporateInvoiceRepository } from '../../domain/repositories/ICorporateInvoiceRepository.js';
-import { CorporateInvoice, CorporateInvoiceStatus } from '../../domain/CorporateInvoice.js';
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
+import { CorporateInvoice, type CorporateInvoiceStatus } from '../../domain/CorporateInvoice.js';
+import type { ICorporateInvoiceRepository } from '../../domain/repositories/ICorporateInvoiceRepository.js';
 
-
-/** PrismaCorporateInvoiceRepository is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Prisma persistence adapter for Financials-owned corporate invoices. */
 export class PrismaCorporateInvoiceRepository implements ICorporateInvoiceRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -23,15 +22,15 @@ export class PrismaCorporateInvoiceRepository implements ICorporateInvoiceReposi
       paidAmountPaise: record.paidAmountPaise,
       dueDate: record.dueDate,
       status: record.status as CorporateInvoiceStatus,
-      lines: (record.lines ?? []).map((l: any) => ({
-        id: l.id,
-        publicId: l.publicId,
-        corporateInvoiceId: l.corporateInvoiceId,
-        bookingId: l.bookingId,
-        description: l.description,
-        amountPaise: l.amountPaise,
-        taxRateBasis: Number(l.taxRateBasis),
-        createdAt: l.createdAt,
+      lines: (record.lines ?? []).map((line: any) => ({
+        id: line.id,
+        publicId: line.publicId,
+        corporateInvoiceId: line.corporateInvoiceId,
+        bookingId: line.bookingId,
+        description: line.description,
+        amountPaise: line.amountPaise,
+        taxRateBasis: Number(line.taxRateBasis),
+        createdAt: line.createdAt,
       })),
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
@@ -54,11 +53,11 @@ export class PrismaCorporateInvoiceRepository implements ICorporateInvoiceReposi
         dueDate: invoice.dueDate,
         status: invoice.status,
         lines: {
-          create: invoice.lines.map((l) => ({
-            bookingId: l.bookingId,
-            description: l.description,
-            amountPaise: l.amountPaise,
-            taxRateBasis: l.taxRateBasis,
+          create: invoice.lines.map((line) => ({
+            bookingId: line.bookingId,
+            description: line.description,
+            amountPaise: line.amountPaise,
+            taxRateBasis: line.taxRateBasis,
           })),
         },
       },
@@ -112,13 +111,13 @@ export class PrismaCorporateInvoiceRepository implements ICorporateInvoiceReposi
     const records = await (this.prisma as any).corporateInvoice.findMany({
       where: {
         corporateAccountId,
-        status: status ? status : undefined,
+        status: status || undefined,
       },
       take: limit,
       skip: offset,
       orderBy: { createdAt: 'desc' },
       include: { lines: true },
     });
-    return records.map((r: any) => this.mapToDomain(r));
+    return records.map((record: any) => this.mapToDomain(record));
   }
 }

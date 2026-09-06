@@ -18,14 +18,14 @@ import { registerCatalogPricingModule } from '@carbroz/domain-catalog-pricing';
 import { ArchiveVehicleUseCase, CreateVehicleUseCase, ListCustomerVehiclesUseCase, SetDefaultVehicleUseCase, registerCustomerModule } from '@carbroz/domain-customer';
 import { registerPartnerModule } from '@carbroz/domain-partner';
 import { registerTrackingModule } from '@carbroz/domain-operations';
-import { registerPaymentModule, registerInvoiceModule, registerPayoutModule } from '@carbroz/domain-financials';
+import { registerPaymentModule, registerInvoiceModule, registerLedgerModule, registerPayoutModule, GenerateCorporateInvoiceUseCase, ReconcileCorporatePaymentUseCase } from '@carbroz/domain-financials';
 import { registerNotificationModule } from '@carbroz/domain-communications';
 import { registerReviewModule, registerCouponModule } from '@carbroz/domain-engagement';
 import { registerDisputeModule } from '@carbroz/domain-dispute';
 import { registerSduiRegistryModule } from '@carbroz/sdui-registry';
 import { registerAuditModule } from '@carbroz/domain-audit';
 import { ConfigProvider, FeatureFlagProvider, registerConfigModule } from '@carbroz/domain-configuration';
-import { RegisterCorporateAccountUseCase, ApproveCorporateAccountUseCase, AdjustCreditLimitUseCase, AddCorporateMemberUseCase, RemoveCorporateMemberUseCase, EnrollFleetVehicleUseCase, RemoveFleetVehicleUseCase, ValidateCorporateBookingUseCase, GenerateCorporateInvoiceUseCase, ReconcileCorporatePaymentUseCase, registerEnterpriseModule } from '@carbroz/domain-enterprise';
+import { RegisterCorporateAccountUseCase, ApproveCorporateAccountUseCase, AdjustCreditLimitUseCase, AddCorporateMemberUseCase, RemoveCorporateMemberUseCase, EnrollFleetVehicleUseCase, RemoveFleetVehicleUseCase, ValidateCorporateBookingUseCase, registerEnterpriseModule } from '@carbroz/domain-enterprise';
 
 import { RegisterIndividualPartnerUseCase } from '@carbroz/domain-partner';
 import { RegisterOrganizationPartnerUseCase } from '@carbroz/domain-partner';
@@ -249,8 +249,9 @@ export interface Cradle {
   corporateAccountRepo: import('@carbroz/domain-enterprise').ICorporateAccountRepository;
   corporateMemberRepo: import('@carbroz/domain-enterprise').ICorporateMemberRepository;
   fleetVehicleRepo: import('@carbroz/domain-enterprise').ICorporateFleetVehicleRepository;
-  creditLedgerRepo: import('@carbroz/domain-enterprise').ICorporateCreditLedgerRepository;
-  corporateInvoiceRepo: import('@carbroz/domain-enterprise').ICorporateInvoiceRepository;
+  creditLedgerRepo: import('@carbroz/domain-financials').ICorporateCreditLedgerRepository;
+  corporateCreditAccounting: import('@carbroz/domain-financials').ICorporateCreditAccounting;
+  corporateInvoiceRepo: import('@carbroz/domain-financials').ICorporateInvoiceRepository;
   registerAccountUseCase: RegisterCorporateAccountUseCase;
   approveAccountUseCase: ApproveCorporateAccountUseCase;
   adjustCreditLimitUseCase: AdjustCreditLimitUseCase;
@@ -378,6 +379,7 @@ export function getContainer(): AwilixContainer<Cradle> {
     registerTrackingModule(diContainer);
     registerPaymentModule(diContainer);
     registerInvoiceModule(diContainer);
+    registerLedgerModule(diContainer);
     registerPayoutModule(diContainer);
     registerNotificationModule(diContainer);
     registerReviewModule(diContainer);

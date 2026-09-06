@@ -6,9 +6,9 @@ import { execFileSync } from 'node:child_process';
  * Backend V3 Constitution verifier.
  *
  * Default mode is the full fail-closed Constitution gate used for CW3-CW6 convergence and final
- * freeze. `--regression` is the permanent CI mode for already-closed CW1/CW2 invariants: it keeps
- * today's explicitly known later-workstream blockers from making ordinary CI unusable while still
- * rejecting any expansion of those blockers. Both modes are strictly read-only.
+ * freeze. `--regression` is the permanent CI mode for already-closed invariants: it keeps only
+ * explicitly known later-workstream blockers from making ordinary CI unusable while rejecting any
+ * regression in closed workstreams. Both modes are strictly read-only.
  */
 const root = process.cwd();
 const regressionMode = process.argv.includes('--regression');
@@ -26,18 +26,11 @@ const canonicalWorkspaces = [
 const canonicalWorkspaceRoots = ['apps/*', 'domains/*', 'sdui/*', 'platform/*', 'foundation/*'];
 const canonicalApiRoots = ['bootstrap', 'surfaces', 'system', 'transport'];
 
-// Known blockers belong to later workstreams. Regression mode permits only these exact current
-// offenders so CI protects the baseline without misclassifying unfinished CW3/CW5 work as CW2.
+// Only blockers owned by later workstreams may remain in regression mode after CW3 closeout.
 const knownLaterBlockers = Object.freeze({
   consoleLogging: new Set([
     'apps/api/src/bootstrap/config/runtime-config.ts',
     'domains/audit/application/AuditLogService.ts',
-  ]),
-  enterpriseAccounting: new Set([
-    'domains/enterprise/domain/CorporateInvoice.ts',
-    'domains/enterprise/domain/CorporateInvoiceLine.ts',
-    'domains/enterprise/use-cases/GenerateCorporateInvoiceUseCase.ts',
-    'domains/enterprise/use-cases/ReconcileCorporatePaymentUseCase.ts',
   ]),
   insecureIdentity: new Set([
     'domains/identity/application/AuthUseCases.ts',
@@ -230,12 +223,14 @@ for (const file of walk(path.join(root, 'domains')).filter((candidate) => candid
   if (content.includes('/infrastructure/') || content.includes('@prisma/client')) violations.push(`${relative(file)}: public boundary exposes concrete infrastructure`);
 }
 
-// Constitution §§14–16/21: explicit bounded-context ownership checks.
+// Constitution §§14–16/21: Enterprise owns corporate policy; Financials owns every accounting authority.
 for (const file of sourceFiles('domains/enterprise')) {
   const rel = relative(file);
-  const accountingLeak = /(?:^|\/)(?:Corporate)?(?:Invoice|Payment|Settlement|Ledger)(?:[A-Z./-]|$)/.test(rel) || /ReconcileCorporatePayment|GenerateCorporateInvoice/.test(rel);
-  if (accountingLeak && !laterBlockerAllowed('enterpriseAccounting', rel)) {
-    violations.push(`${rel}: Enterprise owns corporate identity/fleet/eligibility; invoice/payment accounting belongs to Financials`);
+  const content = fs.readFileSync(file, 'utf8');
+  const accountingLeak = /(?:Invoice|Payment|Settlement|Ledger)/.test(rel)
+    || /\b(?:CorporateCreditLedger|CorporateInvoice|ReconcileCorporatePayment|GenerateCorporateInvoice)\b/.test(content);
+  if (accountingLeak) {
+    violations.push(`${rel}: Enterprise owns corporate account/member/fleet/eligibility policy; ledger/invoice/payment/settlement accounting belongs to Financials`);
   }
 }
 for (const file of sourceFiles('domains/booking')) {
@@ -305,9 +300,9 @@ try {
 }
 
 if (violations.length) {
-  console.error(`[constitution-gate] ${regressionMode ? 'CW1/CW2 REGRESSION' : 'FULL'} CONSTITUTION VERIFICATION FAILED`);
+  console.error(`[constitution-gate] ${regressionMode ? 'CLOSED-WORKSTREAM REGRESSION' : 'FULL'} CONSTITUTION VERIFICATION FAILED`);
   for (const violation of [...new Set(violations)].sort()) console.error(`- ${violation}`);
   process.exit(1);
 }
 
-console.log(`[constitution-gate] PASS (${regressionMode ? 'cw1-cw2-regression' : 'full'}): read-only topology, ownership, isolation, dependency, SDUI, auth-security, generated-output and coverage-scope rules verified`);
+console.log(`[constitution-gate] PASS (${regressionMode ? 'closed-workstream-regression' : 'full'}): read-only topology, ownership, isolation, dependency, SDUI, auth-security, generated-output and coverage-scope rules verified`);

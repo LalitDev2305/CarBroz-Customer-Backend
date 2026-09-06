@@ -1,13 +1,14 @@
 import type { Booking } from '../Booking.js';
 import type { BookingStatus } from '../BookingStatus.js';
 
-/** IBookingRepository is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Canonical Booking persistence contract exposed through the Booking public boundary. */
 export interface IBookingRepository {
   create(booking: Booking): Promise<Booking>;
   findById(id: number): Promise<Booking | null>;
   findByPublicId(publicId: string): Promise<Booking | null>;
   listByCustomerId(customerId: number, status?: BookingStatus): Promise<Booking[]>;
   listByPartnerId(partnerId: number, status?: BookingStatus): Promise<Booking[]>;
+  listByCorporateAccountId(corporateAccountId: number, status?: BookingStatus): Promise<Booking[]>;
   listAll(status?: BookingStatus, limit?: number, offset?: number): Promise<Booking[]>;
   findConflictingPartnerBooking(
     partnerId: number,

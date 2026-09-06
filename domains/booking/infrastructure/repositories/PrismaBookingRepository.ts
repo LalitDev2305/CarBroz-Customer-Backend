@@ -6,7 +6,7 @@ import type {
   BookingPersistenceRecord,
 } from '../persistence/BookingPersistenceClient.js';
 
-/** PrismaBookingRepository is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
+/** PrismaBookingRepository is the Booking-owned persistence adapter. */
 export class PrismaBookingRepository implements IBookingRepository {
   constructor(private readonly prisma: BookingPersistenceClient) {}
 
@@ -75,6 +75,17 @@ export class PrismaBookingRepository implements IBookingRepository {
     const records = await this.prisma.booking.findMany({
       where: { partnerId, status: status || undefined },
       orderBy: { slotStartTime: 'asc' },
+    });
+    return records.map((record) => this.mapToDomain(record));
+  }
+
+  async listByCorporateAccountId(
+    corporateAccountId: number,
+    status?: BookingStatus,
+  ): Promise<Booking[]> {
+    const records = await this.prisma.booking.findMany({
+      where: { corporateAccountId, status: status || undefined },
+      orderBy: { createdAt: 'asc' },
     });
     return records.map((record) => this.mapToDomain(record));
   }
