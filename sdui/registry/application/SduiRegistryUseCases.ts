@@ -19,14 +19,14 @@ import type {
 
 function assertAdmin(context: ExecutionContext): void {
   const actor = context.actor;
-  if (!actor || (actor.kind !== 'ADMIN' && !actor.roles.includes('ADMIN'))) {
+  if (actor.kind !== 'ADMIN' && !actor.roles.includes('ADMIN')) {
     throw new ForbiddenError('Administrator privileges are required for this SDUI operation');
   }
 }
 
 function publisherIdentity(context: ExecutionContext): string {
   assertAdmin(context);
-  return `user-${String(context.actor!.id)}`;
+  return `user-${String(context.actor.id)}`;
 }
 
 export interface RegistryNodeCommandInput {
