@@ -1,10 +1,14 @@
-import type { IBookingRepository } from '@carbroz/domain-booking';
-import { Money } from '@carbroz/foundation-kernel';
-import { TaxCalculator } from '../../../../domain/TaxCalculator.js';
-import { CorporateInvoice } from '../../domain/CorporateInvoice.js';
-import type { ICorporateInvoiceRepository } from '../../domain/repositories/ICorporateInvoiceRepository.js';
-import type { GenerateCorporateInvoiceDto } from '../dto/corporate-invoice.dto.js';
-import type { CorporateAccountBillingPort, FinancialAuditLogPort } from '../ports/CorporateBillingPorts.js';
+import { DomainError } from "@carbroz/foundation-kernel";
+import type { IBookingRepository } from "@carbroz/domain-booking";
+import { Money } from "@carbroz/foundation-kernel";
+import { TaxCalculator } from "../../../../domain/TaxCalculator.js";
+import { CorporateInvoice } from "../../domain/CorporateInvoice.js";
+import type { ICorporateInvoiceRepository } from "../../domain/repositories/ICorporateInvoiceRepository.js";
+import type { GenerateCorporateInvoiceDto } from "../dto/corporate-invoice.dto.js";
+import type {
+  CorporateAccountBillingPort,
+  FinancialAuditLogPort,
+} from "../ports/CorporateBillingPorts.js";
 
 /** Generates Financials-owned B2B invoices from completed corporate bookings. */
 export class GenerateCorporateInvoiceUseCase {
@@ -12,23 +16,33 @@ export class GenerateCorporateInvoiceUseCase {
     private readonly corporateAccountRepo: CorporateAccountBillingPort,
     private readonly corporateInvoiceRepo: ICorporateInvoiceRepository,
     private readonly bookingRepository: IBookingRepository,
-    private readonly auditLogService: FinancialAuditLogPort
+    private readonly auditLogService: FinancialAuditLogPort,
   ) {}
 
   async execute(dto: GenerateCorporateInvoiceDto, adminUserId: number) {
-    const account = await this.corporateAccountRepo.findByPublicId(dto.accountPublicId);
+    const account = await this.corporateAccountRepo.findByPublicId(
+      dto.accountPublicId,
+    );
     if (!account) {
-      throw new Error(`Corporate account not found with publicId: ${dto.accountPublicId}`);
+      throw new DomainError(
+        `Corporate account not found with publicId: ${dto.accountPublicId}`,
+      );
     }
 
     const startDate = new Date(dto.billingPeriodStart);
     const endDate = new Date(dto.billingPeriodEnd);
     const dueDate = new Date(dto.dueDate);
 
-    const allBookings = await this.bookingRepository.listByCorporateAccountId(account.id!);
+    const allBookings = await this.bookingRepository.listByCorporateAccountId(
+      account.id!,
+    );
     const periodBookings = allBookings.filter((booking) => {
       const bookingDate = new Date(booking.createdAt ?? booking.slotStartTime);
-      return bookingDate >= startDate && bookingDate <= endDate && booking.status === 'COMPLETED';
+      return (
+        bookingDate >= startDate &&
+        bookingDate <= endDate &&
+        booking.status === "COMPLETED"
+      );
     });
 
     let subtotalPaise = 0n;
@@ -44,10 +58,13 @@ export class GenerateCorporateInvoiceUseCase {
     });
 
     const subtotalMoney = Money.fromMinor(Number(subtotalPaise));
-    const isInterstate = !account.gstin.startsWith('27');
-    const taxResult = new TaxCalculator().calculateInvoiceTax(subtotalMoney, isInterstate);
+    const isInterstate = !account.gstin.startsWith("27");
+    const taxResult = new TaxCalculator().calculateInvoiceTax(
+      subtotalMoney,
+      isInterstate,
+    );
 
-    const yearMonth = startDate.toISOString().slice(0, 7).replace('-', '');
+    const yearMonth = startDate.toISOString().slice(0, 7).replace("-", "");
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const invoiceNumber = `INV-CORP-${yearMonth}-${randomSuffix}`;
 
@@ -62,7 +79,7 @@ export class GenerateCorporateInvoiceUseCase {
       igstPaise: taxResult.igst.amountMinor,
       totalAmountPaise: taxResult.totalPrice.amountMinor,
       dueDate,
-      status: 'ISSUED',
+      status: "ISSUED",
       lines,
     });
 
@@ -70,9 +87,9 @@ export class GenerateCorporateInvoiceUseCase {
 
     await this.auditLogService.log({
       actorId: adminUserId,
-      actorType: 'ADMIN',
-      action: 'CORPORATE_INVOICE_GENERATE',
-      resource: 'CorporateInvoice',
+      actorType: "ADMIN",
+      action: "CORPORATE_INVOICE_GENERATE",
+      resource: "CorporateInvoice",
       resourcePublicId: savedInvoice.publicId,
       newValue: {
         invoiceNumber: savedInvoice.invoiceNumber,

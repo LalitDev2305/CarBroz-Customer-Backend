@@ -1,10 +1,11 @@
+import { DomainError, systemClock } from "@carbroz/foundation-kernel";
 /** DeviceTokenProps is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface DeviceTokenProps {
   id?: number;
   publicId?: string;
   userId: number;
   deviceId: string;
-  platform: 'ANDROID' | 'IOS' | 'WEB';
+  platform: "ANDROID" | "IOS" | "WEB";
   token: string;
   appVersion?: string | null;
   lastSeenAt?: Date;
@@ -19,7 +20,7 @@ export class DeviceToken {
   publicId?: string;
   userId: number;
   deviceId: string;
-  platform: 'ANDROID' | 'IOS' | 'WEB';
+  platform: "ANDROID" | "IOS" | "WEB";
   token: string;
   appVersion: string | null;
   lastSeenAt: Date;
@@ -28,9 +29,12 @@ export class DeviceToken {
   updatedAt?: Date;
 
   constructor(props: DeviceTokenProps) {
-    if (!props.userId) throw new Error('DeviceToken must be associated with a userId');
-    if (!props.deviceId) throw new Error('DeviceToken deviceId is required');
-    if (!props.token) throw new Error('DeviceToken token payload is required');
+    if (!props.userId)
+      throw new DomainError("DeviceToken must be associated with a userId");
+    if (!props.deviceId)
+      throw new DomainError("DeviceToken deviceId is required");
+    if (!props.token)
+      throw new DomainError("DeviceToken token payload is required");
 
     this.id = props.id;
     this.publicId = props.publicId;
@@ -39,14 +43,14 @@ export class DeviceToken {
     this.platform = props.platform;
     this.token = props.token;
     this.appVersion = props.appVersion ?? null;
-    this.lastSeenAt = props.lastSeenAt ?? new Date();
+    this.lastSeenAt = props.lastSeenAt ?? systemClock.now();
     this.isActive = props.isActive ?? true;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
 
   touch(appVersion?: string): void {
-    this.lastSeenAt = new Date();
+    this.lastSeenAt = systemClock.now();
     this.isActive = true;
     if (appVersion) this.appVersion = appVersion;
   }

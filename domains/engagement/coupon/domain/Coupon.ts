@@ -1,4 +1,5 @@
-import { DiscountType } from './DiscountType.js';
+import { DomainError, systemClock } from "@carbroz/foundation-kernel";
+import { DiscountType } from "./DiscountType.js";
 
 /** CouponProps is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CouponProps {
@@ -40,15 +41,21 @@ export class Coupon {
   updatedAt?: Date;
 
   constructor(props: CouponProps) {
-    if (!props.code) throw new Error('Coupon code is required');
+    if (!props.code) throw new DomainError("Coupon code is required");
     if (props.discountValue <= 0 || !Number.isInteger(props.discountValue)) {
-      throw new Error(`Discount value must be a positive integer (got ${props.discountValue})`);
+      throw new DomainError(
+        `Discount value must be a positive integer (got ${props.discountValue})`,
+      );
     }
-    if (props.discountType === 'PERCENTAGE' && props.discountValue > 100) {
-      throw new Error(`Percentage discount cannot exceed 100% (got ${props.discountValue})`);
+    if (props.discountType === "PERCENTAGE" && props.discountValue > 100) {
+      throw new DomainError(
+        `Percentage discount cannot exceed 100% (got ${props.discountValue})`,
+      );
     }
     if (props.validFrom >= props.validUntil) {
-      throw new Error('validFrom date must be earlier than validUntil date');
+      throw new DomainError(
+        "validFrom date must be earlier than validUntil date",
+      );
     }
 
     this.id = props.id;
@@ -69,10 +76,11 @@ export class Coupon {
     this.updatedAt = props.updatedAt;
   }
 
-  isValidAt(now = new Date()): boolean {
+  isValidAt(now = systemClock.now()): boolean {
     if (!this.isActive) return false;
     if (now < this.validFrom || now > this.validUntil) return false;
-    if (this.usageLimit !== null && this.currentUsageCount >= this.usageLimit) return false;
+    if (this.usageLimit !== null && this.currentUsageCount >= this.usageLimit)
+      return false;
     return true;
   }
 

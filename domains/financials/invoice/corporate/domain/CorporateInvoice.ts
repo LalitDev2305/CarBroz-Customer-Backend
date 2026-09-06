@@ -1,7 +1,12 @@
-import { CorporateInvoiceLine, CorporateInvoiceLineProps } from './CorporateInvoiceLine.js';
+import { DomainError, systemClock } from "@carbroz/foundation-kernel";
+import {
+  CorporateInvoiceLine,
+  CorporateInvoiceLineProps,
+} from "./CorporateInvoiceLine.js";
 
 /** CorporateInvoiceStatus is the Financials-owned lifecycle for corporate invoices. */
-export type CorporateInvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIALLY_PAID' | 'PAID' | 'OVERDUE';
+export type CorporateInvoiceStatus =
+  "DRAFT" | "ISSUED" | "PARTIALLY_PAID" | "PAID" | "OVERDUE";
 
 /** CorporateInvoiceProps describes the Financials-owned corporate invoice aggregate. */
 export interface CorporateInvoiceProps {
@@ -45,8 +50,10 @@ export class CorporateInvoice {
   updatedAt?: Date;
 
   constructor(props: CorporateInvoiceProps) {
-    if (!props.invoiceNumber) throw new Error('Corporate invoice requires invoiceNumber');
-    if (!props.corporateAccountId) throw new Error('Corporate invoice requires corporateAccountId');
+    if (!props.invoiceNumber)
+      throw new DomainError("Corporate invoice requires invoiceNumber");
+    if (!props.corporateAccountId)
+      throw new DomainError("Corporate invoice requires corporateAccountId");
 
     this.id = props.id;
     this.publicId = props.publicId;
@@ -61,17 +68,19 @@ export class CorporateInvoice {
     this.totalAmountPaise = BigInt(props.totalAmountPaise);
     this.paidAmountPaise = BigInt(props.paidAmountPaise ?? 0);
     this.dueDate = props.dueDate;
-    this.status = props.status ?? 'DRAFT';
-    this.lines = (props.lines ?? []).map((line) => new CorporateInvoiceLine(line));
+    this.status = props.status ?? "DRAFT";
+    this.lines = (props.lines ?? []).map(
+      (line) => new CorporateInvoiceLine(line),
+    );
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
 
   issue(): void {
-    if (this.status !== 'DRAFT') {
-      throw new Error(`Cannot issue invoice in status ${this.status}`);
+    if (this.status !== "DRAFT") {
+      throw new DomainError(`Cannot issue invoice in status ${this.status}`);
     }
-    this.status = 'ISSUED';
+    this.status = "ISSUED";
   }
 
   recordPayment(amountPaise: bigint | number): void {
@@ -79,16 +88,16 @@ export class CorporateInvoice {
     this.paidAmountPaise += payment;
 
     if (this.paidAmountPaise >= this.totalAmountPaise) {
-      this.status = 'PAID';
+      this.status = "PAID";
     } else if (this.paidAmountPaise > 0n) {
-      this.status = 'PARTIALLY_PAID';
+      this.status = "PARTIALLY_PAID";
     }
   }
 
   markOverdue(): void {
-    if (this.status === 'ISSUED' || this.status === 'PARTIALLY_PAID') {
-      if (new Date() > this.dueDate) {
-        this.status = 'OVERDUE';
+    if (this.status === "ISSUED" || this.status === "PARTIALLY_PAID") {
+      if (systemClock.now() > this.dueDate) {
+        this.status = "OVERDUE";
       }
     }
   }

@@ -1,5 +1,5 @@
 /** Stable actor kinds understood across bounded contexts. */
-export type ActorKind = 'GUEST' | 'CUSTOMER' | 'PARTNER' | 'ADMIN' | 'SYSTEM';
+export type ActorKind = "GUEST" | "CUSTOMER" | "PARTNER" | "ADMIN" | "SYSTEM";
 
 /** Transport-neutral authenticated actor identity. */
 export interface ActorContext {
@@ -19,11 +19,23 @@ export interface ExecutionContext {
 }
 
 export interface IUseCase<TInput, TOutput> {
-  execute(input: TInput, context?: ExecutionContext): Promise<TOutput>;
+  execute(input: TInput, context: ExecutionContext): Promise<TOutput>;
 }
-export type TransactionContext = unknown;
+
+/** Opaque transaction-bound resource. Only infrastructure adapters may unwrap resource. */
+export interface TransactionContext {
+  readonly resource: object;
+}
+
 export interface ITransactionProvider {
-  runInTransaction<T>(work: (transaction?: TransactionContext) => Promise<T>): Promise<T>;
+  runInTransaction<T>(
+    work: (transaction: TransactionContext) => Promise<T>,
+  ): Promise<T>;
 }
-export interface IClockProvider { now(): Date }
-export interface IIdGeneratorProvider { generate(): string }
+
+export interface IClockProvider {
+  now(): Date;
+}
+export interface IIdGeneratorProvider {
+  generate(): string;
+}

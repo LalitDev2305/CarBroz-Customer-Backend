@@ -1,14 +1,21 @@
-import { Booking } from '../../domain/Booking.js';
-import type { BookingStatus } from '../../domain/BookingStatus.js';
-import type { IBookingRepository } from '../../domain/repositories/IBookingRepository.js';
+import type { TransactionContext } from "@carbroz/foundation-kernel";
+import { Booking } from "../../domain/Booking.js";
+import type { BookingStatus } from "../../domain/BookingStatus.js";
+import type { IBookingRepository } from "../../domain/repositories/IBookingRepository.js";
 import type {
   BookingPersistenceClient,
   BookingPersistenceRecord,
-} from '../persistence/BookingPersistenceClient.js';
+} from "../persistence/BookingPersistenceClient.js";
 
 /** PrismaBookingRepository is the Booking-owned persistence adapter. */
 export class PrismaBookingRepository implements IBookingRepository {
   constructor(private readonly prisma: BookingPersistenceClient) {}
+
+  private client(transaction?: TransactionContext): BookingPersistenceClient {
+    return transaction
+      ? (transaction.resource as BookingPersistenceClient)
+      : this.prisma;
+  }
 
   private mapToDomain(record: BookingPersistenceRecord): Booking {
     return new Booking({
@@ -25,15 +32,18 @@ export class PrismaBookingRepository implements IBookingRepository {
       expiryAt: record.expiryAt ?? undefined,
       totalPricePaise: record.totalPricePaise,
       cancellationReason: record.cancellationReason ?? undefined,
-      snapshots: record.snapshotsJson as Booking['snapshots'],
-      statusHistory: record.statusHistoryJson as Booking['statusHistory'],
+      snapshots: record.snapshotsJson as Booking["snapshots"],
+      statusHistory: record.statusHistoryJson as Booking["statusHistory"],
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     });
   }
 
-  async create(booking: Booking): Promise<Booking> {
-    const record = await this.prisma.booking.create({
+  async create(
+    booking: Booking,
+    transaction?: TransactionContext,
+  ): Promise<Booking> {
+    const record = await this.client(transaction).booking.create({
       data: {
         customerId: booking.customerId,
         partnerId: booking.partnerId,
@@ -53,28 +63,46 @@ export class PrismaBookingRepository implements IBookingRepository {
     return this.mapToDomain(record);
   }
 
-  async findById(id: number): Promise<Booking | null> {
-    const record = await this.prisma.booking.findUnique({ where: { id } });
+  async findById(
+    id: number,
+    transaction?: TransactionContext,
+  ): Promise<Booking | null> {
+    const record = await this.client(transaction).booking.findUnique({
+      where: { id },
+    });
     return record ? this.mapToDomain(record) : null;
   }
 
-  async findByPublicId(publicId: string): Promise<Booking | null> {
-    const record = await this.prisma.booking.findUnique({ where: { publicId } });
+  async findByPublicId(
+    publicId: string,
+    transaction?: TransactionContext,
+  ): Promise<Booking | null> {
+    const record = await this.client(transaction).booking.findUnique({
+      where: { publicId },
+    });
     return record ? this.mapToDomain(record) : null;
   }
 
-  async listByCustomerId(customerId: number, status?: BookingStatus): Promise<Booking[]> {
-    const records = await this.prisma.booking.findMany({
+  async listByCustomerId(
+    customerId: number,
+    status?: BookingStatus,
+    transaction?: TransactionContext,
+  ): Promise<Booking[]> {
+    const records = await this.client(transaction).booking.findMany({
       where: { customerId, status: status || undefined },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
     return records.map((record) => this.mapToDomain(record));
   }
 
-  async listByPartnerId(partnerId: number, status?: BookingStatus): Promise<Booking[]> {
-    const records = await this.prisma.booking.findMany({
+  async listByPartnerId(
+    partnerId: number,
+    status?: BookingStatus,
+    transaction?: TransactionContext,
+  ): Promise<Booking[]> {
+    const records = await this.client(transaction).booking.findMany({
       where: { partnerId, status: status || undefined },
-      orderBy: { slotStartTime: 'asc' },
+      orderBy: { slotStartTime: "asc" },
     });
     return records.map((record) => this.mapToDomain(record));
   }
@@ -82,20 +110,26 @@ export class PrismaBookingRepository implements IBookingRepository {
   async listByCorporateAccountId(
     corporateAccountId: number,
     status?: BookingStatus,
+    transaction?: TransactionContext,
   ): Promise<Booking[]> {
-    const records = await this.prisma.booking.findMany({
+    const records = await this.client(transaction).booking.findMany({
       where: { corporateAccountId, status: status || undefined },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
     return records.map((record) => this.mapToDomain(record));
   }
 
-  async listAll(status?: BookingStatus, limit = 50, offset = 0): Promise<Booking[]> {
-    const records = await this.prisma.booking.findMany({
+  async listAll(
+    status?: BookingStatus,
+    limit = 50,
+    offset = 0,
+    transaction?: TransactionContext,
+  ): Promise<Booking[]> {
+    const records = await this.client(transaction).booking.findMany({
       where: { status: status || undefined },
       take: limit,
       skip: offset,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
     return records.map((record) => this.mapToDomain(record));
   }
@@ -105,12 +139,13 @@ export class PrismaBookingRepository implements IBookingRepository {
     startTime: Date,
     endTime: Date,
     excludeBookingId?: number,
+    transaction?: TransactionContext,
   ): Promise<Booking | null> {
-    const record = await this.prisma.booking.findFirst({
+    const record = await this.client(transaction).booking.findFirst({
       where: {
         partnerId,
         id: excludeBookingId ? { not: excludeBookingId } : undefined,
-        status: { in: ['ASSIGNED', 'IN_PROGRESS'] },
+        status: { in: ["ASSIGNED", "IN_PROGRESS"] },
         OR: [
           { slotStartTime: { lte: startTime }, slotEndTime: { gt: startTime } },
           { slotStartTime: { lt: endTime }, slotEndTime: { gte: endTime } },
@@ -125,11 +160,12 @@ export class PrismaBookingRepository implements IBookingRepository {
     serviceId: number,
     startTime: Date,
     endTime: Date,
+    transaction?: TransactionContext,
   ): Promise<Booking | null> {
-    const record = await this.prisma.booking.findFirst({
+    const record = await this.client(transaction).booking.findFirst({
       where: {
         serviceId,
-        status: { in: ['CREATED', 'CONFIRMED', 'ASSIGNED', 'IN_PROGRESS'] },
+        status: { in: ["CREATED", "CONFIRMED", "ASSIGNED", "IN_PROGRESS"] },
         slotStartTime: startTime,
         slotEndTime: endTime,
       },
@@ -137,15 +173,21 @@ export class PrismaBookingRepository implements IBookingRepository {
     return record ? this.mapToDomain(record) : null;
   }
 
-  async findExpiredPendingBookings(now: Date): Promise<Booking[]> {
-    const records = await this.prisma.booking.findMany({
-      where: { status: 'CREATED', expiryAt: { lt: now } },
+  async findExpiredPendingBookings(
+    now: Date,
+    transaction?: TransactionContext,
+  ): Promise<Booking[]> {
+    const records = await this.client(transaction).booking.findMany({
+      where: { status: "CREATED", expiryAt: { lt: now } },
     });
     return records.map((record) => this.mapToDomain(record));
   }
 
-  async update(booking: Booking): Promise<Booking> {
-    const record = await this.prisma.booking.update({
+  async update(
+    booking: Booking,
+    transaction?: TransactionContext,
+  ): Promise<Booking> {
+    const record = await this.client(transaction).booking.update({
       where: { id: booking.id },
       data: {
         partnerId: booking.partnerId,

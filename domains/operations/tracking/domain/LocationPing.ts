@@ -1,3 +1,4 @@
+import { DomainError, systemClock } from "@carbroz/foundation-kernel";
 /** LocationPingProps is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface LocationPingProps {
   latitude: number;
@@ -17,20 +18,25 @@ export class LocationPing {
 
   constructor(props: LocationPingProps) {
     if (props.latitude < -90 || props.latitude > 90) {
-      throw new Error(`Invalid latitude coordinate: ${props.latitude}`);
+      throw new DomainError(`Invalid latitude coordinate: ${props.latitude}`);
     }
     if (props.longitude < -180 || props.longitude > 180) {
-      throw new Error(`Invalid longitude coordinate: ${props.longitude}`);
+      throw new DomainError(`Invalid longitude coordinate: ${props.longitude}`);
     }
 
     this.latitude = props.latitude;
     this.longitude = props.longitude;
     this.heading = props.heading ?? null;
     this.speed = props.speed ?? null;
-    this.timestamp = props.timestamp ?? new Date();
+    this.timestamp = props.timestamp ?? systemClock.now();
   }
 
-  static create(latitude: number, longitude: number, heading?: number, speed?: number): LocationPing {
+  static create(
+    latitude: number,
+    longitude: number,
+    heading?: number,
+    speed?: number,
+  ): LocationPing {
     return new LocationPing({ latitude, longitude, heading, speed });
   }
 

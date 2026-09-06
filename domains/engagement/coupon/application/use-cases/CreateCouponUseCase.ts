@@ -1,6 +1,7 @@
-import { Coupon } from '../../domain/Coupon.js';
-import { DiscountType } from '../../domain/DiscountType.js';
-import { ICouponRepository } from '../../domain/repositories/ICouponRepository.js';
+import { DomainError } from "@carbroz/foundation-kernel";
+import { Coupon } from "../../domain/Coupon.js";
+import { DiscountType } from "../../domain/DiscountType.js";
+import { ICouponRepository } from "../../domain/repositories/ICouponRepository.js";
 /** CreateCouponInput is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CreateCouponInput {
   code: string;
@@ -24,7 +25,7 @@ export class CreateCouponUseCase {
     const formattedCode = input.code.trim().toUpperCase();
     const existing = await this.couponRepository.findByCode(formattedCode);
     if (existing) {
-      throw new Error(`Coupon with code ${formattedCode} already exists`);
+      throw new DomainError(`Coupon with code ${formattedCode} already exists`);
     }
 
     const coupon = new Coupon({

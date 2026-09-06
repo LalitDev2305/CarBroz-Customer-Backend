@@ -1,8 +1,13 @@
-import { IUseCase, UnauthorizedError, ValidationError } from '@carbroz/foundation-kernel';
-import type { User } from '../domain/User.js';
-import type { UserSession } from '../domain/UserSession.js';
-import type { IUserRepository } from '../domain/repositories/IUserRepository.js';
-import type { IUserSessionRepository } from '../domain/repositories/IUserSessionRepository.js';
+import { systemClock } from "@carbroz/foundation-kernel";
+import {
+  IUseCase,
+  UnauthorizedError,
+  ValidationError,
+} from "@carbroz/foundation-kernel";
+import type { User } from "../domain/User.js";
+import type { UserSession } from "../domain/UserSession.js";
+import type { IUserRepository } from "../domain/repositories/IUserRepository.js";
+import type { IUserSessionRepository } from "../domain/repositories/IUserSessionRepository.js";
 
 /** Input for beginning the phone-number OTP flow. */
 export interface SendOtpInput {
@@ -35,12 +40,12 @@ export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResult> {
     const user = await this.userRepository.findByPhoneNumber(input.phoneNumber);
 
     return {
-      message: 'OTP sent successfully',
-      mockOtp: '123456',
+      message: "OTP sent successfully",
+      mockOtp: "123456",
       isNewUser: !user,
       nextScreen: {
-        template: 'form_template',
-        api: 'auth/auth_otp',
+        template: "form_template",
+        api: "auth/auth_otp",
       },
     };
   }
@@ -72,7 +77,10 @@ export interface VerifyOtpResult {
  * Result types deliberately expose Identity's public User/UserSession contracts rather than
  * `unknown`; transport must not reconstruct domain/application typing with casts.
  */
-export class VerifyOtpUseCase implements IUseCase<VerifyOtpInput, VerifyOtpResult> {
+export class VerifyOtpUseCase implements IUseCase<
+  VerifyOtpInput,
+  VerifyOtpResult
+> {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly userSessionRepository: IUserSessionRepository,
@@ -80,17 +88,18 @@ export class VerifyOtpUseCase implements IUseCase<VerifyOtpInput, VerifyOtpResul
 
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: VerifyOtpInput): Promise<VerifyOtpResult> {
-    const { phoneNumber, otp, deviceId, deviceModel, osVersion, fcmToken } = input;
+    const { phoneNumber, otp, deviceId, deviceModel, osVersion, fcmToken } =
+      input;
 
-    if (otp !== '123456' && otp !== '111111') {
-      throw new ValidationError('Invalid OTP');
+    if (otp !== "123456" && otp !== "111111") {
+      throw new ValidationError("Invalid OTP");
     }
 
     const user = await this.userRepository.upsert(phoneNumber, {
-      role: 'USER',
+      role: "USER",
       isGuest: false,
     });
-    const refreshToken = `rt_${Buffer.from(user.id + Date.now().toString()).toString('base64')}`;
+    const refreshToken = `rt_${Buffer.from(user.id + systemClock.now().getTime().toString()).toString("base64")}`;
     const session = await this.userSessionRepository.upsert(user.id, deviceId, {
       deviceModel,
       osVersion,
@@ -102,8 +111,8 @@ export class VerifyOtpUseCase implements IUseCase<VerifyOtpInput, VerifyOtpResul
       user,
       session,
       nextScreen: {
-        template: 'dashboard_template',
-        api: 'home',
+        template: "dashboard_template",
+        api: "home",
       },
     };
   }
@@ -124,7 +133,10 @@ export interface GuestLoginResult {
 }
 
 /** Creates a guest identity and device session through Identity-owned repositories. */
-export class GuestLoginUseCase implements IUseCase<GuestLoginInput, GuestLoginResult> {
+export class GuestLoginUseCase implements IUseCase<
+  GuestLoginInput,
+  GuestLoginResult
+> {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly userSessionRepository: IUserSessionRepository,
@@ -132,15 +144,22 @@ export class GuestLoginUseCase implements IUseCase<GuestLoginInput, GuestLoginRe
 
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: GuestLoginInput): Promise<GuestLoginResult> {
-    const guestUser = await this.userRepository.upsert(`guest_${Date.now()}`, {
-      isGuest: true,
-      role: 'GUEST',
-    });
-    const session = await this.userSessionRepository.upsert(guestUser.id, input.deviceId, {
-      deviceModel: input.deviceModel,
-      osVersion: input.osVersion,
-      fcmToken: input.fcmToken,
-    });
+    const guestUser = await this.userRepository.upsert(
+      `guest_${systemClock.now().getTime()}`,
+      {
+        isGuest: true,
+        role: "GUEST",
+      },
+    );
+    const session = await this.userSessionRepository.upsert(
+      guestUser.id,
+      input.deviceId,
+      {
+        deviceModel: input.deviceModel,
+        osVersion: input.osVersion,
+        fcmToken: input.fcmToken,
+      },
+    );
 
     return { user: guestUser, session };
   }
@@ -159,23 +178,29 @@ export interface RefreshTokenResult {
 }
 
 /** Resolves and rotates an Identity refresh session through the session repository port. */
-export class RefreshTokenUseCase implements IUseCase<RefreshTokenInput, RefreshTokenResult> {
+export class RefreshTokenUseCase implements IUseCase<
+  RefreshTokenInput,
+  RefreshTokenResult
+> {
   constructor(private readonly userSessionRepository: IUserSessionRepository) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: RefreshTokenInput): Promise<RefreshTokenResult> {
-    const session = await this.userSessionRepository.findByRefreshToken(input.refreshToken, input.deviceId);
+    const session = await this.userSessionRepository.findByRefreshToken(
+      input.refreshToken,
+      input.deviceId,
+    );
     if (!session) {
-      throw new UnauthorizedError('Invalid or expired refresh token');
+      throw new UnauthorizedError("Invalid or expired refresh token");
     }
 
     const updatedSession = await this.userSessionRepository.save({
       ...session,
-      refreshToken: `rt_${Buffer.from(session.userId + Date.now().toString()).toString('base64')}`,
-      lastActiveAt: new Date(),
+      refreshToken: `rt_${Buffer.from(session.userId + systemClock.now().getTime().toString()).toString("base64")}`,
+      lastActiveAt: systemClock.now(),
     });
     if (!updatedSession.user) {
-      throw new UnauthorizedError('Refresh session is missing its owning user');
+      throw new UnauthorizedError("Refresh session is missing its owning user");
     }
 
     return { user: updatedSession.user, session: updatedSession };

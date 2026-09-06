@@ -1,8 +1,9 @@
-import { CouponDiscountCalculator } from '../../domain/services/CouponDiscountCalculator.js';
-import { CouponUsage } from '../../domain/CouponUsage.js';
-import { ICouponRepository } from '../../domain/repositories/ICouponRepository.js';
-import { ICouponUsageRepository } from '../../domain/repositories/ICouponUsageRepository.js';
-import { IBookingRepository } from '@carbroz/domain-booking';
+import { DomainError } from "@carbroz/foundation-kernel";
+import { CouponDiscountCalculator } from "../../domain/services/CouponDiscountCalculator.js";
+import { CouponUsage } from "../../domain/CouponUsage.js";
+import { ICouponRepository } from "../../domain/repositories/ICouponRepository.js";
+import { ICouponUsageRepository } from "../../domain/repositories/ICouponUsageRepository.js";
+import { IBookingRepository } from "@carbroz/domain-booking";
 /** ApplyCouponInput is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ApplyCouponInput {
   code: string;
@@ -16,22 +17,28 @@ export class ApplyCouponUseCase {
     private readonly couponRepository: ICouponRepository,
     private readonly couponUsageRepository: ICouponUsageRepository,
     private readonly bookingRepository: IBookingRepository,
-    private readonly discountCalculator: CouponDiscountCalculator
+    private readonly discountCalculator: CouponDiscountCalculator,
   ) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: ApplyCouponInput): Promise<CouponUsage> {
-    const booking = await this.bookingRepository.findByPublicId(input.bookingPublicId);
+    const booking = await this.bookingRepository.findByPublicId(
+      input.bookingPublicId,
+    );
     if (!booking) {
-      throw new Error(`Booking not found: ${input.bookingPublicId}`);
+      throw new DomainError(`Booking not found: ${input.bookingPublicId}`);
     }
 
     const coupon = await this.couponRepository.findByCode(input.code);
     if (!coupon) {
-      throw new Error(`Invalid coupon code: ${input.code.toUpperCase()}`);
+      throw new DomainError(`Invalid coupon code: ${input.code.toUpperCase()}`);
     }
 
-    const existingUsage = await this.couponUsageRepository.findByCouponAndBooking(coupon.id!, booking.id!);
+    const existingUsage =
+      await this.couponUsageRepository.findByCouponAndBooking(
+        coupon.id!,
+        booking.id!,
+      );
     if (existingUsage) {
       return existingUsage;
     }
@@ -43,7 +50,7 @@ export class ApplyCouponUseCase {
     });
 
     if (!calculation.isValid) {
-      throw new Error(`Cannot apply coupon: ${calculation.reason}`);
+      throw new DomainError(`Cannot apply coupon: ${calculation.reason}`);
     }
 
     const usage = new CouponUsage({

@@ -1,8 +1,9 @@
-import type { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
-import type { ICorporateCreditAccountingPort } from '../application/ports/ICorporateCreditAccountingPort.js';
-import { AuditLogService } from '@carbroz/domain-audit';
-import { Money } from '@carbroz/foundation-kernel';
-import { ApproveCorporateAccountDto } from '../dtos/corporate.dto.js';
+import { DomainError } from "@carbroz/foundation-kernel";
+import type { ICorporateAccountRepository } from "../domain/repositories/ICorporateAccountRepository.js";
+import type { ICorporateCreditAccountingPort } from "../application/ports/ICorporateCreditAccountingPort.js";
+import { AuditLogService } from "@carbroz/domain-audit";
+import { Money } from "@carbroz/foundation-kernel";
+import { ApproveCorporateAccountDto } from "../dtos/corporate.dto.js";
 
 /** Approves Enterprise account policy while delegating the accounting record to Financials. */
 export class ApproveCorporateAccountUseCase {
@@ -13,9 +14,13 @@ export class ApproveCorporateAccountUseCase {
   ) {}
 
   async execute(dto: ApproveCorporateAccountDto, adminUserId: number) {
-    const account = await this.corporateAccountRepo.findByPublicId(dto.accountPublicId);
+    const account = await this.corporateAccountRepo.findByPublicId(
+      dto.accountPublicId,
+    );
     if (!account) {
-      throw new Error(`Corporate account not found with publicId: ${dto.accountPublicId}`);
+      throw new DomainError(
+        `Corporate account not found with publicId: ${dto.accountPublicId}`,
+      );
     }
 
     const limitMoney = Money.fromMinor(dto.initialCreditLimitPaise);
@@ -25,18 +30,22 @@ export class ApproveCorporateAccountUseCase {
     await this.corporateCreditAccounting.recordCreditGrant({
       corporateAccountId: updatedAccount.id!,
       amountPaise: BigInt(dto.initialCreditLimitPaise),
-      balanceAfterPaise: updatedAccount.creditLimitPaise - updatedAccount.utilisedCreditPaise,
+      balanceAfterPaise:
+        updatedAccount.creditLimitPaise - updatedAccount.utilisedCreditPaise,
       referenceNotes: `Initial credit limit granted on approval by Admin ID ${adminUserId}`,
     });
 
     await this.auditLogService.log({
       actorId: adminUserId,
-      actorType: 'ADMIN',
-      action: 'CORPORATE_ACCOUNT_APPROVE',
-      resource: 'CorporateAccount',
+      actorType: "ADMIN",
+      action: "CORPORATE_ACCOUNT_APPROVE",
+      resource: "CorporateAccount",
       resourcePublicId: updatedAccount.publicId,
-      oldValue: { status: 'PENDING_APPROVAL', creditLimitPaise: 0 },
-      newValue: { status: 'ACTIVE', creditLimitPaise: dto.initialCreditLimitPaise },
+      oldValue: { status: "PENDING_APPROVAL", creditLimitPaise: 0 },
+      newValue: {
+        status: "ACTIVE",
+        creditLimitPaise: dto.initialCreditLimitPaise,
+      },
     });
 
     return updatedAccount;

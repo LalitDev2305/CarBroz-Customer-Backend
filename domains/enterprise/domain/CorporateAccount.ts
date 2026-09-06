@@ -1,7 +1,9 @@
-import { Money } from '@carbroz/foundation-kernel';
+import { DomainError } from "@carbroz/foundation-kernel";
+import { Money } from "@carbroz/foundation-kernel";
 
 /** CorporateAccountStatus is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
-export type CorporateAccountStatus = 'PENDING_APPROVAL' | 'ACTIVE' | 'SUSPENDED' | 'CLOSED';
+export type CorporateAccountStatus =
+  "PENDING_APPROVAL" | "ACTIVE" | "SUSPENDED" | "CLOSED";
 
 /** BillingAddressProps is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface BillingAddressProps {
@@ -47,11 +49,11 @@ export class CorporateAccount {
   updatedAt?: Date;
 
   constructor(props: CorporateAccountProps) {
-    if (!props.companyName || props.companyName.trim() === '') {
-      throw new Error('Company name is required');
+    if (!props.companyName || props.companyName.trim() === "") {
+      throw new DomainError("Company name is required");
     }
-    if (!props.gstin || props.gstin.trim() === '') {
-      throw new Error('GSTIN is required');
+    if (!props.gstin || props.gstin.trim() === "") {
+      throw new DomainError("GSTIN is required");
     }
 
     this.id = props.id;
@@ -63,7 +65,7 @@ export class CorporateAccount {
     this.billingAddress = props.billingAddress;
     this.creditLimitPaise = BigInt(props.creditLimitPaise ?? 0);
     this.utilisedCreditPaise = BigInt(props.utilisedCreditPaise ?? 0);
-    this.status = props.status ?? 'PENDING_APPROVAL';
+    this.status = props.status ?? "PENDING_APPROVAL";
     this.paymentTermsDays = props.paymentTermsDays ?? 30;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
@@ -75,31 +77,35 @@ export class CorporateAccount {
   }
 
   approve(initialCreditLimit: Money): void {
-    if (this.status !== 'PENDING_APPROVAL') {
-      throw new Error(`Cannot approve corporate account in status ${this.status}`);
+    if (this.status !== "PENDING_APPROVAL") {
+      throw new DomainError(
+        `Cannot approve corporate account in status ${this.status}`,
+      );
     }
     this.creditLimitPaise = BigInt(initialCreditLimit.amountMinor);
-    this.status = 'ACTIVE';
+    this.status = "ACTIVE";
   }
 
   suspend(reason: string): void {
     void reason;
-    if (this.status === 'CLOSED') {
-      throw new Error('Cannot suspend a closed corporate account');
+    if (this.status === "CLOSED") {
+      throw new DomainError("Cannot suspend a closed corporate account");
     }
-    this.status = 'SUSPENDED';
+    this.status = "SUSPENDED";
   }
 
   adjustCreditLimit(newLimit: Money): void {
-    if (this.status === 'CLOSED') {
-      throw new Error('Cannot adjust credit limit of a closed corporate account');
+    if (this.status === "CLOSED") {
+      throw new DomainError(
+        "Cannot adjust credit limit of a closed corporate account",
+      );
     }
     this.creditLimitPaise = BigInt(newLimit.amountMinor);
   }
 
   canCoverAmount(amount: Money): boolean {
-    if (this.status !== 'ACTIVE') return false;
+    if (this.status !== "ACTIVE") return false;
     const required = BigInt(amount.amountMinor);
-    return (this.utilisedCreditPaise + required) <= this.creditLimitPaise;
+    return this.utilisedCreditPaise + required <= this.creditLimitPaise;
   }
 }

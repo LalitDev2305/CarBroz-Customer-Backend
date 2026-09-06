@@ -1,3 +1,4 @@
+import { DomainError } from "@carbroz/foundation-kernel";
 /** CorporateInvoiceLineProps is a Financials-owned corporate invoice line contract. */
 export interface CorporateInvoiceLineProps {
   id?: number;
@@ -22,8 +23,10 @@ export class CorporateInvoiceLine {
   createdAt?: Date;
 
   constructor(props: CorporateInvoiceLineProps) {
-    if (!props.bookingId) throw new Error('Invoice line requires bookingId');
-    if (!props.description) throw new Error('Invoice line requires description');
+    if (!props.bookingId)
+      throw new DomainError("Invoice line requires bookingId");
+    if (!props.description)
+      throw new DomainError("Invoice line requires description");
 
     this.id = props.id;
     this.publicId = props.publicId;

@@ -1,4 +1,5 @@
-import type { IVehicleRepository } from '../../domain/repositories/IVehicleRepository.js';
+import { DomainError } from "@carbroz/foundation-kernel";
+import type { IVehicleRepository } from "../../domain/repositories/IVehicleRepository.js";
 
 /** ArchiveVehicleUseCase is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ArchiveVehicleUseCase {
@@ -8,7 +9,7 @@ export class ArchiveVehicleUseCase {
   async execute(publicId: string, customerId: number): Promise<void> {
     const vehicle = await this.vehicleRepository.findByPublicId(publicId);
     if (!vehicle || vehicle.customerId !== customerId) {
-      throw new Error('Vehicle not found or unauthorized');
+      throw new DomainError("Vehicle not found or unauthorized");
     }
 
     await this.vehicleRepository.softDelete(vehicle.id!);

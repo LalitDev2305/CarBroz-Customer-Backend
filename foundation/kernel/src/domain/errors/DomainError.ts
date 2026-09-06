@@ -1,8 +1,8 @@
 /** DomainError is an exported foundation/kernel contract/implementation; see the owning README for lifecycle and extension rules. */
-export abstract class DomainError extends Error {
+export class DomainError extends Error {
   public readonly code: string;
 
-  constructor(message: string, code = 'DOMAIN_ERROR') {
+  constructor(message: string, code = "DOMAIN_ERROR") {
     super(message);
     this.name = this.constructor.name;
     this.code = code;

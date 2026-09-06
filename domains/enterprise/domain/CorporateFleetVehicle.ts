@@ -1,3 +1,4 @@
+import { DomainError } from "@carbroz/foundation-kernel";
 /** CorporateFleetVehicleProps is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CorporateFleetVehicleProps {
   id?: number;
@@ -26,8 +27,10 @@ export class CorporateFleetVehicle {
   updatedAt?: Date;
 
   constructor(props: CorporateFleetVehicleProps) {
-    if (!props.corporateAccountId) throw new Error('Fleet vehicle requires a corporateAccountId');
-    if (!props.vehicleId) throw new Error('Fleet vehicle requires a vehicleId');
+    if (!props.corporateAccountId)
+      throw new DomainError("Fleet vehicle requires a corporateAccountId");
+    if (!props.vehicleId)
+      throw new DomainError("Fleet vehicle requires a vehicleId");
 
     this.id = props.id;
     this.publicId = props.publicId;
@@ -35,17 +38,18 @@ export class CorporateFleetVehicle {
     this.vehicleId = props.vehicleId;
     this.department = props.department ?? null;
     this.costCenter = props.costCenter ?? null;
-    this.monthlyCapPaise = props.monthlyCapPaise != null ? BigInt(props.monthlyCapPaise) : null;
-    this.status = props.status ?? 'ACTIVE';
+    this.monthlyCapPaise =
+      props.monthlyCapPaise != null ? BigInt(props.monthlyCapPaise) : null;
+    this.status = props.status ?? "ACTIVE";
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
 
   deactivate(): void {
-    this.status = 'INACTIVE';
+    this.status = "INACTIVE";
   }
 
   activate(): void {
-    this.status = 'ACTIVE';
+    this.status = "ACTIVE";
   }
 }

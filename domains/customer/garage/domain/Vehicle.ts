@@ -1,4 +1,5 @@
-import { VehicleStatus } from './VehicleStatus.js';
+import { DomainError, systemClock } from "@carbroz/foundation-kernel";
+import { VehicleStatus } from "./VehicleStatus.js";
 
 /** VehicleProps is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface VehicleProps {
@@ -40,9 +41,12 @@ export class Vehicle {
   deletedAt: Date | null;
 
   constructor(props: VehicleProps) {
-    if (!props.customerId) throw new Error('Vehicle must belong to a customer');
-    if (!props.make || !props.model) throw new Error('Vehicle make and model are required');
-    if (!props.registrationNumber) throw new Error('Vehicle registration number is required');
+    if (!props.customerId)
+      throw new DomainError("Vehicle must belong to a customer");
+    if (!props.make || !props.model)
+      throw new DomainError("Vehicle make and model are required");
+    if (!props.registrationNumber)
+      throw new DomainError("Vehicle registration number is required");
 
     this.id = props.id;
     this.publicId = props.publicId;
@@ -56,19 +60,19 @@ export class Vehicle {
     this.color = props.color ?? null;
     this.nickname = props.nickname ?? null;
     this.isDefault = props.isDefault ?? false;
-    this.status = props.status ?? 'ACTIVE';
+    this.status = props.status ?? "ACTIVE";
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
     this.deletedAt = props.deletedAt ?? null;
   }
 
   isBookable(): boolean {
-    return this.status === 'ACTIVE' && this.deletedAt === null;
+    return this.status === "ACTIVE" && this.deletedAt === null;
   }
 
   archive(): void {
-    this.status = 'ARCHIVED';
-    this.deletedAt = new Date();
+    this.status = "ARCHIVED";
+    this.deletedAt = systemClock.now();
   }
 
   setDefault(isDefault: boolean): void {

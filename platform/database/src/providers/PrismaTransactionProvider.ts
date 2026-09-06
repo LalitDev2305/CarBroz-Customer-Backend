@@ -1,18 +1,19 @@
-import { ITransactionProvider } from '@carbroz/foundation-kernel';
-import { PrismaProvider } from './PrismaProvider.js';
+import type {
+  ITransactionProvider,
+  TransactionContext,
+} from "@carbroz/foundation-kernel";
+import { PrismaProvider } from "./PrismaProvider.js";
 
-/** PrismaTransactionProvider is an exported platform/database contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Prisma transaction infrastructure with a single opaque transaction-bound resource. */
 export class PrismaTransactionProvider implements ITransactionProvider {
-  private prismaProvider: PrismaProvider;
+  constructor(private readonly prismaProvider: PrismaProvider) {}
 
-  constructor(prismaProvider: PrismaProvider) {
-    this.prismaProvider = prismaProvider;
-  }
-
-  public async runInTransaction<T>(operation: (transaction: unknown) => Promise<T>): Promise<T> {
+  public async runInTransaction<T>(
+    operation: (transaction: TransactionContext) => Promise<T>,
+  ): Promise<T> {
     const client = this.prismaProvider.getClient();
-    return client.$transaction(async (tx) => {
-      return operation(tx);
+    return client.$transaction(async (tx) => operation({ resource: tx }), {
+      isolationLevel: "Serializable",
     });
   }
 }

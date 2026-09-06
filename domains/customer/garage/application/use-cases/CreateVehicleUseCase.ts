@@ -1,5 +1,6 @@
-import { Vehicle } from '../../domain/Vehicle.js';
-import type { IVehicleRepository } from '../../domain/repositories/IVehicleRepository.js';
+import { DomainError } from "@carbroz/foundation-kernel";
+import { Vehicle } from "../../domain/Vehicle.js";
+import type { IVehicleRepository } from "../../domain/repositories/IVehicleRepository.js";
 
 /** CreateVehicleInput is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CreateVehicleInput {
@@ -26,11 +27,15 @@ export class CreateVehicleUseCase {
       input.registrationNumber,
     );
     if (existing) {
-      throw new Error(`Vehicle with registration ${input.registrationNumber} already registered for this customer`);
+      throw new DomainError(
+        `Vehicle with registration ${input.registrationNumber} already registered for this customer`,
+      );
     }
 
     if (input.isDefault) {
-      await this.vehicleRepository.unsetCustomerDefaultVehicles(input.customerId);
+      await this.vehicleRepository.unsetCustomerDefaultVehicles(
+        input.customerId,
+      );
     }
 
     const vehicle = new Vehicle({

@@ -1,5 +1,6 @@
-import { ActorType } from './AuditActor.js';
-import { AuditAction } from './AuditAction.js';
+import { DomainError } from "@carbroz/foundation-kernel";
+import { ActorType } from "./AuditActor.js";
+import { AuditAction } from "./AuditAction.js";
 
 /** AuditLogProps is an exported domains/audit contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface AuditLogProps {
@@ -35,13 +36,14 @@ export class AuditLog {
   createdAt?: Date;
 
   constructor(props: AuditLogProps) {
-    if (!props.action) throw new Error('AuditLog requires an action');
-    if (!props.resource) throw new Error('AuditLog requires a resource name');
+    if (!props.action) throw new DomainError("AuditLog requires an action");
+    if (!props.resource)
+      throw new DomainError("AuditLog requires a resource name");
 
     this.id = props.id;
     this.publicId = props.publicId;
     this.actorId = props.actorId ?? null;
-    this.actorType = props.actorType ?? 'SYSTEM';
+    this.actorType = props.actorType ?? "SYSTEM";
     this.action = props.action;
     this.resource = props.resource;
     this.resourcePublicId = props.resourcePublicId ?? null;

@@ -1,14 +1,16 @@
-import { AuditLogService } from '@carbroz/domain-audit';import { Dispute } from '../../domain/Dispute.js';
-import { DisputeReason } from '../../domain/DisputeReason.js';
-import { IDisputeRepository } from '../../domain/repositories/IDisputeRepository.js';
-import { ErrorCode, Money } from '@carbroz/foundation-kernel';
-import { IBookingRepository } from '@carbroz/domain-booking';
-import { NotificationService } from '@carbroz/domain-communications';
+import { DomainError } from "@carbroz/foundation-kernel";
+import { AuditLogService } from "@carbroz/domain-audit";
+import { Dispute } from "../../domain/Dispute.js";
+import { DisputeReason } from "../../domain/DisputeReason.js";
+import { IDisputeRepository } from "../../domain/repositories/IDisputeRepository.js";
+import { ErrorCode, Money } from "@carbroz/foundation-kernel";
+import { IBookingRepository } from "@carbroz/domain-booking";
+import { NotificationService } from "@carbroz/domain-communications";
 /** RaiseDisputeCommand is an exported domains/dispute contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface RaiseDisputeCommand {
   bookingPublicId: string;
   actorId: number;
-  actorType: 'CUSTOMER' | 'PARTNER';
+  actorType: "CUSTOMER" | "PARTNER";
   disputeReason: DisputeReason | string;
   description?: string;
   requestedRefundPaise: number;
@@ -20,28 +22,40 @@ export class RaiseDisputeUseCase {
     private readonly disputeRepository: IDisputeRepository,
     private readonly bookingRepository: IBookingRepository,
     private readonly notificationService: NotificationService,
-    private readonly auditLogService: AuditLogService
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(command: RaiseDisputeCommand): Promise<Dispute> {
-    const booking = await this.bookingRepository.findByPublicId(command.bookingPublicId);
+    const booking = await this.bookingRepository.findByPublicId(
+      command.bookingPublicId,
+    );
     if (!booking) {
-      throw new Error(ErrorCode.BOOKING_NOT_FOUND);
+      throw new DomainError(ErrorCode.BOOKING_NOT_FOUND);
     }
 
     // Ownership check: actor must be booking's customer or assigned partner
-    if (command.actorType === 'CUSTOMER' && booking.customerId !== command.actorId) {
-      throw new Error(ErrorCode.FORBIDDEN);
+    if (
+      command.actorType === "CUSTOMER" &&
+      booking.customerId !== command.actorId
+    ) {
+      throw new DomainError(ErrorCode.FORBIDDEN);
     }
-    if (command.actorType === 'PARTNER' && booking.partnerId !== command.actorId) {
-      throw new Error(ErrorCode.FORBIDDEN);
+    if (
+      command.actorType === "PARTNER" &&
+      booking.partnerId !== command.actorId
+    ) {
+      throw new DomainError(ErrorCode.FORBIDDEN);
     }
 
     // Check duplicate active dispute
-    const activeDispute = await this.disputeRepository.findActiveByBookingId(booking.id!);
+    const activeDispute = await this.disputeRepository.findActiveByBookingId(
+      booking.id!,
+    );
     if (activeDispute) {
-      throw new Error('An active dispute already exists for this booking');
+      throw new DomainError(
+        "An active dispute already exists for this booking",
+      );
     }
 
     const dispute = new Dispute({
@@ -59,8 +73,8 @@ export class RaiseDisputeUseCase {
     await this.auditLogService.log({
       actorId: command.actorId,
       actorType: command.actorType,
-      action: 'DISPUTE_RAISE',
-      resource: 'Dispute',
+      action: "DISPUTE_RAISE",
+      resource: "Dispute",
       resourcePublicId: savedDispute.publicId,
       newValue: {
         bookingPublicId: command.bookingPublicId,
@@ -73,10 +87,10 @@ export class RaiseDisputeUseCase {
     await this.notificationService.send({
       bookingId: booking.id ?? null,
       recipientId: command.actorId,
-      channel: 'PUSH',
+      channel: "PUSH",
       recipient: `user_${command.actorId}`,
-      templateId: 'DISPUTE_RAISED',
-      title: 'Dispute Registered',
+      templateId: "DISPUTE_RAISED",
+      title: "Dispute Registered",
       body: `Dispute registered for booking #${booking.publicId}`,
       data: { bookingPublicId: booking.publicId },
     });

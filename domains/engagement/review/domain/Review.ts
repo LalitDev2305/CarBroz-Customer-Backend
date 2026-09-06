@@ -1,4 +1,5 @@
-import { ReviewStatus } from './ReviewStatus.js';
+import { DomainError } from "@carbroz/foundation-kernel";
+import { ReviewStatus } from "./ReviewStatus.js";
 
 /** ReviewProps is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ReviewProps {
@@ -32,12 +33,22 @@ export class Review {
   updatedAt?: Date;
 
   constructor(props: ReviewProps) {
-    if (!props.bookingId) throw new Error('Review must be associated with a bookingId');
-    if (!props.customerId) throw new Error('Review must be associated with a customerId');
-    if (!props.partnerId) throw new Error('Review must be associated with a partnerId');
-    if (!props.serviceId) throw new Error('Review must be associated with a serviceId');
-    if (props.rating < 1 || props.rating > 5 || !Number.isInteger(props.rating)) {
-      throw new Error(`Review rating must be an integer between 1 and 5 (got ${props.rating})`);
+    if (!props.bookingId)
+      throw new DomainError("Review must be associated with a bookingId");
+    if (!props.customerId)
+      throw new DomainError("Review must be associated with a customerId");
+    if (!props.partnerId)
+      throw new DomainError("Review must be associated with a partnerId");
+    if (!props.serviceId)
+      throw new DomainError("Review must be associated with a serviceId");
+    if (
+      props.rating < 1 ||
+      props.rating > 5 ||
+      !Number.isInteger(props.rating)
+    ) {
+      throw new DomainError(
+        `Review rating must be an integer between 1 and 5 (got ${props.rating})`,
+      );
     }
 
     this.id = props.id;
@@ -48,7 +59,7 @@ export class Review {
     this.serviceId = props.serviceId;
     this.rating = props.rating;
     this.comment = props.comment ?? null;
-    this.status = props.status ?? 'PUBLISHED';
+    this.status = props.status ?? "PUBLISHED";
     this.moderationReason = props.moderationReason ?? null;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;

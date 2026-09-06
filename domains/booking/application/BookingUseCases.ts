@@ -1,23 +1,38 @@
-import { Booking } from '../domain/Booking.js';
-import type { BookingSnapshots } from '../domain/BookingSnapshots.js';
-import type { BookingStatus } from '../domain/BookingStatus.js';
-import type { IBookingRepository } from '../domain/repositories/IBookingRepository.js';
-import type { IAddressRepository, ICustomerProfileRepository, IVehicleRepository } from '@carbroz/domain-customer';
-import type { ICatalogRepository, IPricingRepository, ServiceAddon } from '@carbroz/domain-catalog-pricing';
+import {
+  DomainError,
+  type ExecutionContext,
+  type TransactionContext,
+  systemClock,
+} from "@carbroz/foundation-kernel";
+import { Booking } from "../domain/Booking.js";
+import type { BookingSnapshots } from "../domain/BookingSnapshots.js";
+import type { BookingStatus } from "../domain/BookingStatus.js";
+import type { IBookingRepository } from "../domain/repositories/IBookingRepository.js";
+import type {
+  IAddressRepository,
+  ICustomerProfileRepository,
+  IVehicleRepository,
+} from "@carbroz/domain-customer";
+import type {
+  ICatalogRepository,
+  IPricingRepository,
+  ServiceAddon,
+} from "@carbroz/domain-catalog-pricing";
 
-/** IBookingTransactionPort is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Booking-owned view of the universal transaction contract. */
 export interface IBookingTransactionPort {
-  runInTransaction<T>(work: () => Promise<T>): Promise<T>;
+  runInTransaction<T>(
+    work: (transaction: TransactionContext) => Promise<T>,
+  ): Promise<T>;
 }
 
-/** IPayoutEligibilityPort is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IPayoutEligibilityPort {
   execute(bookingId: number): Promise<unknown>;
 }
 
-/** CreateBookingInput is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CreateBookingInput {
-  customerId: number;
+  /** Compatibility assertion only; authenticated authority comes from ExecutionContext.actor. */
+  customerId?: number;
   vehicleId: number;
   addressId: number;
   serviceId: number;
@@ -26,7 +41,25 @@ export interface CreateBookingInput {
   slotEndTime: Date;
 }
 
-/** CreateBookingUseCase is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
+async function resolveCustomerId(
+  context: ExecutionContext,
+  customerRepository: ICustomerProfileRepository,
+): Promise<number> {
+  if (context.actor.kind !== "CUSTOMER")
+    throw new DomainError(
+      "Customer authority is required",
+      "BOOKING_FORBIDDEN",
+    );
+  if (context.actor.customerId) return context.actor.customerId;
+  const profile = await customerRepository.findByUserId(context.actor.id);
+  if (!profile?.id)
+    throw new DomainError(
+      "Customer profile not found",
+      "BOOKING_CUSTOMER_NOT_FOUND",
+    );
+  return profile.id;
+}
+
 export class CreateBookingUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
@@ -38,56 +71,97 @@ export class CreateBookingUseCase {
     private readonly transactionProvider: IBookingTransactionPort,
   ) {}
 
-  /** Executes this application operation through its declared ports and domain invariants. */
-  async execute(input: CreateBookingInput): Promise<Booking> {
-    void this.customerRepository;
-    const now = new Date();
-    if (new Date(input.slotStartTime) <= now) throw new Error('Slot start time must be in the future');
-    if (new Date(input.slotEndTime) <= new Date(input.slotStartTime)) {
-      throw new Error('Slot end time must be after slot start time');
+  async execute(
+    input: CreateBookingInput,
+    context: ExecutionContext,
+  ): Promise<Booking> {
+    const customerId = await resolveCustomerId(
+      context,
+      this.customerRepository,
+    );
+    if (input.customerId !== undefined && input.customerId !== customerId) {
+      throw new DomainError(
+        "Booking customer does not match authenticated customer",
+        "BOOKING_FORBIDDEN",
+      );
     }
 
+    const now = systemClock.now();
+    const slotStartTime = new Date(input.slotStartTime);
+    const slotEndTime = new Date(input.slotEndTime);
+    if (slotStartTime <= now)
+      throw new DomainError(
+        "Slot start time must be in the future",
+        "BOOKING_INVALID_SLOT",
+      );
+    if (slotEndTime <= slotStartTime)
+      throw new DomainError(
+        "Slot end time must be after slot start time",
+        "BOOKING_INVALID_SLOT",
+      );
+
     const vehicle = await this.vehicleRepository.findById(input.vehicleId);
-    if (!vehicle || vehicle.customerId !== input.customerId || !vehicle.isBookable()) {
-      throw new Error('Invalid or non-bookable vehicle');
+    if (
+      !vehicle ||
+      vehicle.customerId !== customerId ||
+      !vehicle.isBookable()
+    ) {
+      throw new DomainError(
+        "Invalid or non-bookable vehicle",
+        "BOOKING_INVALID_VEHICLE",
+      );
     }
 
     const address = await this.addressRepository.findById(input.addressId);
-    if (!address) throw new Error('Address not found');
+    if (!address)
+      throw new DomainError("Address not found", "BOOKING_ADDRESS_NOT_FOUND");
 
-    const service = await this.catalogRepository.findServiceById(input.serviceId);
-    if (!service || !service.isActive) throw new Error('Service not found or inactive');
-
-    const conflicting = await this.bookingRepository.findConflictingSlotBooking(
+    const service = await this.catalogRepository.findServiceById(
       input.serviceId,
-      new Date(input.slotStartTime),
-      new Date(input.slotEndTime),
     );
-    if (conflicting) throw new Error('Selected service slot is no longer available');
+    if (!service || !service.isActive)
+      throw new DomainError(
+        "Service not found or inactive",
+        "BOOKING_SERVICE_UNAVAILABLE",
+      );
 
     let basePricePaise = service.basePrice;
-    const defaultTier = await this.pricingRepository.findDefaultTierByServiceId(input.serviceId);
+    const defaultTier = await this.pricingRepository.findDefaultTierByServiceId(
+      input.serviceId,
+    );
     if (defaultTier) basePricePaise = defaultTier.flatPrice;
 
-    const vehicleMultiplier = await this.pricingRepository.findVehicleMultiplier(input.serviceId, vehicle.fuelType);
+    const vehicleMultiplier =
+      await this.pricingRepository.findVehicleMultiplier(
+        input.serviceId,
+        vehicle.fuelType,
+      );
     const multiplierValue = vehicleMultiplier?.multiplier ?? 1;
 
     let addonsTotalPaise = 0;
-    const addonSnapshots: BookingSnapshots['addons'] = [];
+    const addonSnapshots: BookingSnapshots["addons"] = [];
     if (input.addonIds?.length) {
-      const activeAddons = await this.catalogRepository.findAddonsByServiceId(input.serviceId);
+      const activeAddons = await this.catalogRepository.findAddonsByServiceId(
+        input.serviceId,
+      );
       for (const addonId of input.addonIds) {
-        const found = activeAddons.find((addon: ServiceAddon) => addon.id === addonId && addon.isActive);
+        const found = activeAddons.find(
+          (addon: ServiceAddon) => addon.id === addonId && addon.isActive,
+        );
         if (!found) continue;
         addonsTotalPaise += found.price;
-        addonSnapshots.push({ addonId: found.id!, name: found.name, pricePaise: found.price });
+        addonSnapshots.push({
+          addonId: found.id!,
+          name: found.name,
+          pricePaise: found.price,
+        });
       }
     }
 
-    const subtotalPaise = Math.round(basePricePaise * multiplierValue) + addonsTotalPaise;
+    const subtotalPaise =
+      Math.round(basePricePaise * multiplierValue) + addonsTotalPaise;
     const taxesPaise = Math.round(subtotalPaise * 0.18);
     const totalPricePaise = subtotalPaise + taxesPaise;
-
     const snapshots: BookingSnapshots = {
       service: {
         serviceId: service.id!,
@@ -125,30 +199,58 @@ export class CreateBookingUseCase {
     };
 
     const booking = new Booking({
-      customerId: input.customerId,
+      customerId,
       vehicleId: input.vehicleId,
       addressId: input.addressId,
       serviceId: input.serviceId,
-      status: 'CREATED',
-      slotStartTime: new Date(input.slotStartTime),
-      slotEndTime: new Date(input.slotEndTime),
+      status: "CREATED",
+      slotStartTime,
+      slotEndTime,
       expiryAt: new Date(now.getTime() + 15 * 60 * 1000),
       totalPricePaise,
       snapshots,
     });
 
-    return this.transactionProvider.runInTransaction(() => this.bookingRepository.create(booking));
+    return this.transactionProvider.runInTransaction(async (transaction) => {
+      const conflicting =
+        await this.bookingRepository.findConflictingSlotBooking(
+          input.serviceId,
+          slotStartTime,
+          slotEndTime,
+          transaction,
+        );
+      if (conflicting)
+        throw new DomainError(
+          "Selected service slot is no longer available",
+          "BOOKING_SLOT_CONFLICT",
+        );
+      return this.bookingRepository.create(booking, transaction);
+    });
   }
 }
 
-/** ConfirmBookingUseCase is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ConfirmBookingUseCase {
-  constructor(private readonly bookingRepository: IBookingRepository) {}
-  /** Executes this application operation through its declared ports and domain invariants. */
-  async execute(bookingPublicId: string, customerId: number): Promise<Booking> {
-    const booking = await this.bookingRepository.findByPublicId(bookingPublicId);
-    if (!booking || booking.customerId !== customerId) throw new Error('Booking not found or unauthorized');
-    booking.confirm(customerId);
+  constructor(
+    private readonly bookingRepository: IBookingRepository,
+    private readonly customerRepository: ICustomerProfileRepository,
+  ) {}
+
+  async execute(
+    bookingPublicId: string,
+    context: ExecutionContext,
+  ): Promise<Booking> {
+    const customerId = await resolveCustomerId(
+      context,
+      this.customerRepository,
+    );
+    const booking =
+      await this.bookingRepository.findByPublicId(bookingPublicId);
+    if (!booking || booking.customerId !== customerId)
+      throw new DomainError(
+        "Booking not found or unauthorized",
+        "BOOKING_NOT_FOUND",
+      );
+    booking.confirm(context.actor.id);
     return this.bookingRepository.update(booking);
   }
 }
@@ -156,64 +258,122 @@ export class ConfirmBookingUseCase {
 export interface TransitionBookingStatusInput {
   bookingPublicId: string;
   targetStatus: BookingStatus;
-  actorId: number;
 }
 
-/** TransitionBookingStatusUseCase is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class TransitionBookingStatusUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly createPayoutEligibilityUseCase?: IPayoutEligibilityPort,
   ) {}
 
-  /** Executes this application operation through its declared ports and domain invariants. */
-  async execute(input: TransitionBookingStatusInput): Promise<Booking> {
-    const booking = await this.bookingRepository.findByPublicId(input.bookingPublicId);
-    if (!booking) throw new Error('Booking not found');
-    if (input.targetStatus === 'IN_PROGRESS') booking.startService(input.actorId);
-    else if (input.targetStatus === 'COMPLETED') booking.completeService(input.actorId);
-    else throw new Error(`Unsupported direct transition to ${input.targetStatus}`);
+  async execute(
+    input: TransitionBookingStatusInput,
+    context: ExecutionContext,
+  ): Promise<Booking> {
+    const booking = await this.bookingRepository.findByPublicId(
+      input.bookingPublicId,
+    );
+    if (!booking)
+      throw new DomainError("Booking not found", "BOOKING_NOT_FOUND");
+    if (context.actor.kind !== "ADMIN") {
+      if (
+        context.actor.kind !== "PARTNER" ||
+        !context.actor.partnerId ||
+        context.actor.partnerId !== booking.partnerId
+      ) {
+        throw new DomainError(
+          "Assigned partner authority is required",
+          "BOOKING_FORBIDDEN",
+        );
+      }
+    }
+    if (input.targetStatus === "IN_PROGRESS")
+      booking.startService(context.actor.id);
+    else if (input.targetStatus === "COMPLETED")
+      booking.completeService(context.actor.id);
+    else
+      throw new DomainError(
+        "Unsupported direct transition to " + input.targetStatus,
+        "BOOKING_INVALID_TRANSITION",
+      );
 
     const updated = await this.bookingRepository.update(booking);
-    if (input.targetStatus === 'COMPLETED' && this.createPayoutEligibilityUseCase) {
+    if (
+      input.targetStatus === "COMPLETED" &&
+      this.createPayoutEligibilityUseCase
+    ) {
       await this.createPayoutEligibilityUseCase.execute(booking.id!);
     }
     return updated;
   }
 }
 
-/** CancelBookingInput is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CancelBookingInput {
   bookingPublicId: string;
-  actorId: number;
   reason: string;
-  isAdmin?: boolean;
 }
 
-/** CancelBookingUseCase is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CancelBookingUseCase {
-  constructor(private readonly bookingRepository: IBookingRepository) {}
-  /** Executes this application operation through its declared ports and domain invariants. */
-  async execute(input: CancelBookingInput): Promise<Booking> {
-    if (!input.reason?.trim()) throw new Error('Cancellation reason is required');
-    const booking = await this.bookingRepository.findByPublicId(input.bookingPublicId);
-    if (!booking) throw new Error('Booking not found');
-    if (!input.isAdmin && booking.customerId !== input.actorId) throw new Error('Unauthorized to cancel this booking');
-    booking.cancel(input.actorId, input.reason);
+  constructor(
+    private readonly bookingRepository: IBookingRepository,
+    private readonly customerRepository: ICustomerProfileRepository,
+  ) {}
+
+  async execute(
+    input: CancelBookingInput,
+    context: ExecutionContext,
+  ): Promise<Booking> {
+    if (!input.reason?.trim())
+      throw new DomainError(
+        "Cancellation reason is required",
+        "BOOKING_CANCELLATION_REASON_REQUIRED",
+      );
+    const booking = await this.bookingRepository.findByPublicId(
+      input.bookingPublicId,
+    );
+    if (!booking)
+      throw new DomainError("Booking not found", "BOOKING_NOT_FOUND");
+
+    if (context.actor.kind !== "ADMIN") {
+      const customerId = await resolveCustomerId(
+        context,
+        this.customerRepository,
+      );
+      if (booking.customerId !== customerId)
+        throw new DomainError(
+          "Unauthorized to cancel this booking",
+          "BOOKING_FORBIDDEN",
+        );
+    }
+    booking.cancel(context.actor.id, input.reason);
     return this.bookingRepository.update(booking);
   }
 }
 
-/** ExpirePendingBookingsUseCase is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ExpirePendingBookingsUseCase {
-  constructor(private readonly bookingRepository: IBookingRepository) {}
-  /** Executes this application operation through its declared ports and domain invariants. */
-  async execute(): Promise<number> {
-    const expired = await this.bookingRepository.findExpiredPendingBookings(new Date());
-    for (const booking of expired) {
-      booking.expire('SYSTEM');
-      await this.bookingRepository.update(booking);
+  constructor(
+    private readonly bookingRepository: IBookingRepository,
+    private readonly transactionProvider: IBookingTransactionPort,
+  ) {}
+
+  async execute(context: ExecutionContext): Promise<number> {
+    if (context.actor.kind !== "SYSTEM" && context.actor.kind !== "ADMIN") {
+      throw new DomainError(
+        "System authority is required to expire bookings",
+        "BOOKING_FORBIDDEN",
+      );
     }
-    return expired.length;
+    const now = systemClock.now();
+    return this.transactionProvider.runInTransaction(async (transaction) => {
+      const expired = await this.bookingRepository.findExpiredPendingBookings(
+        now,
+        transaction,
+      );
+      for (const booking of expired) {
+        booking.expire("SYSTEM");
+        await this.bookingRepository.update(booking, transaction);
+      }
+      return expired.length;
+    });
   }
 }

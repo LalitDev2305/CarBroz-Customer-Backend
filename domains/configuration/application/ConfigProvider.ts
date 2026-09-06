@@ -1,5 +1,6 @@
-import type { IConfigProvider } from './IConfigProvider.js';
-import type { IConfigRepository } from '../domain/repositories/IConfigRepository.js';
+import { DomainError } from "@carbroz/foundation-kernel";
+import type { IConfigProvider } from "./IConfigProvider.js";
+import type { IConfigRepository } from "../domain/repositories/IConfigRepository.js";
 
 /** ConfigProvider is an exported domains/configuration contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ConfigProvider implements IConfigProvider {
@@ -11,7 +12,7 @@ export class ConfigProvider implements IConfigProvider {
       if (defaultValue !== undefined) {
         return defaultValue;
       }
-      throw new Error(`Configuration key not found: ${key}`);
+      throw new DomainError(`Configuration key not found: ${key}`);
     }
 
     try {
@@ -27,6 +28,8 @@ export class ConfigProvider implements IConfigProvider {
 
   public async getAll(): Promise<Record<string, string>> {
     const configs = await this.configRepository.findAllConfig();
-    return Object.fromEntries(configs.map((config) => [config.key, config.value]));
+    return Object.fromEntries(
+      configs.map((config) => [config.key, config.value]),
+    );
   }
 }

@@ -1,6 +1,7 @@
-import { PaymentStatus } from './PaymentStatus.js';
-import { PaymentMethod } from './PaymentMethod.js';
-import { Money } from '@carbroz/foundation-kernel';
+import { DomainError, systemClock } from "@carbroz/foundation-kernel";
+import { PaymentStatus } from "./PaymentStatus.js";
+import { PaymentMethod } from "./PaymentMethod.js";
+import { Money } from "@carbroz/foundation-kernel";
 
 /** PaymentAttempt is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface PaymentAttempt {
@@ -75,26 +76,34 @@ export class Payment {
   lockVersion: number;
 
   constructor(props: PaymentProps) {
-    if (!props.bookingId) throw new Error('Payment must be associated with a booking');
-    if (!props.customerId) throw new Error('Payment must be associated with a customer');
-    if (!props.idempotencyKey) throw new Error('Payment idempotency key is required');
+    if (!props.bookingId)
+      throw new DomainError("Payment must be associated with a booking");
+    if (!props.customerId)
+      throw new DomainError("Payment must be associated with a customer");
+    if (!props.idempotencyKey)
+      throw new DomainError("Payment idempotency key is required");
 
-    const validatedMoney = Money.fromMinor(props.amountPaise, props.currency ?? 'INR');
+    const validatedMoney = Money.fromMinor(
+      props.amountPaise,
+      props.currency ?? "INR",
+    );
     if (validatedMoney.amountMinor <= 0) {
-      throw new Error('Payment amount must be a positive integer in minor units');
+      throw new DomainError(
+        "Payment amount must be a positive integer in minor units",
+      );
     }
 
     this.id = props.id;
     this.publicId = props.publicId;
     this.bookingId = props.bookingId;
     this.customerId = props.customerId;
-    this.provider = props.provider ?? 'RAZORPAY';
+    this.provider = props.provider ?? "RAZORPAY";
     this.providerOrderId = props.providerOrderId ?? null;
     this.providerPaymentId = props.providerPaymentId ?? null;
     this.amountPaise = validatedMoney.amountMinor;
     this.currency = validatedMoney.currency;
-    this.method = props.method ?? 'UPI';
-    this.status = props.status ?? 'PENDING';
+    this.method = props.method ?? "UPI";
+    this.status = props.status ?? "PENDING";
     this.idempotencyKey = props.idempotencyKey;
     this.attemptsJson = props.attemptsJson ?? [];
     this.refundsJson = props.refundsJson ?? [];
@@ -113,57 +122,63 @@ export class Payment {
   }
 
   markSuccess(providerPaymentId: string, method?: PaymentMethod): void {
-    if (this.status === 'SUCCESS') return;
-    this.status = 'SUCCESS';
+    if (this.status === "SUCCESS") return;
+    this.status = "SUCCESS";
     this.providerPaymentId = providerPaymentId;
     if (method) this.method = method;
-    this.paidAt = new Date();
+    this.paidAt = systemClock.now();
     this.attemptsJson.push({
-      attemptId: `att_${Date.now()}`,
+      attemptId: `att_${systemClock.now().getTime()}`,
       providerPaymentId,
       method: this.method,
-      timestamp: new Date(),
-      status: 'SUCCESS',
+      timestamp: systemClock.now(),
+      status: "SUCCESS",
     });
   }
 
   markFailed(code: string, reason: string): void {
-    if (this.status === 'SUCCESS' || this.status === 'REFUNDED') return;
-    this.status = 'FAILED';
+    if (this.status === "SUCCESS" || this.status === "REFUNDED") return;
+    this.status = "FAILED";
     this.failureCode = code;
     this.failureReason = reason;
-    this.failedAt = new Date();
+    this.failedAt = systemClock.now();
     this.attemptsJson.push({
-      attemptId: `att_${Date.now()}`,
-      timestamp: new Date(),
-      status: 'FAILED',
+      attemptId: `att_${systemClock.now().getTime()}`,
+      timestamp: systemClock.now(),
+      status: "FAILED",
       failureCode: code,
       failureReason: reason,
     });
   }
 
-  markRefunded(providerRefundId: string, amountPaise: number, reason: string): void {
-    if (this.status !== 'SUCCESS') {
-      throw new Error('Only successful payments can be refunded');
+  markRefunded(
+    providerRefundId: string,
+    amountPaise: number,
+    reason: string,
+  ): void {
+    if (this.status !== "SUCCESS") {
+      throw new DomainError("Only successful payments can be refunded");
     }
 
     const refund = Money.fromMinor(amountPaise, this.currency);
     if (refund.amountMinor <= 0) {
-      throw new Error('Refund amount must be a positive integer in minor units');
+      throw new DomainError(
+        "Refund amount must be a positive integer in minor units",
+      );
     }
     if (refund.greaterThan(this.money)) {
-      throw new Error('Refund amount cannot exceed the payment amount');
+      throw new DomainError("Refund amount cannot exceed the payment amount");
     }
 
-    this.status = 'REFUNDED';
-    this.refundedAt = new Date();
+    this.status = "REFUNDED";
+    this.refundedAt = systemClock.now();
     this.refundsJson.push({
-      refundId: `ref_${Date.now()}`,
+      refundId: `ref_${systemClock.now().getTime()}`,
       providerRefundId,
       amountPaise: refund.amountMinor,
       reason,
-      timestamp: new Date(),
-      status: 'REFUNDED',
+      timestamp: systemClock.now(),
+      status: "REFUNDED",
     });
   }
 }

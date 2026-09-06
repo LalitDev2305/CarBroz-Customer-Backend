@@ -1,15 +1,22 @@
-import crypto from 'node:crypto';
-import type { IBookingRepository } from '@carbroz/domain-booking';
-import { Money } from '@carbroz/foundation-kernel';
-import { Payment } from '../payment/domain/Payment.js';
-import { PaymentWebhook } from '../payment/domain/PaymentWebhook.js';
-import type { IPaymentRepository } from '../payment/domain/repositories/IPaymentRepository.js';
-import type { IPaymentGatewayProvider, PaymentOrderResult } from '../payment/application/ports/IPaymentGatewayProvider.js';
-import { Invoice, type InvoiceDocument } from '../invoice/domain/Invoice.js';
-import type { IInvoiceRepository } from '../invoice/domain/repositories/IInvoiceRepository.js';
-import { PartnerPayout, type PayoutCalculation } from '../payout/domain/PartnerPayout.js';
-import type { IPartnerPayoutRepository } from '../payout/domain/repositories/IPartnerPayoutRepository.js';
-import type { PayoutStatus } from '../payout/domain/PayoutStatus.js';
+import { DomainError, systemClock } from "@carbroz/foundation-kernel";
+import crypto from "node:crypto";
+import type { IBookingRepository } from "@carbroz/domain-booking";
+import { Money } from "@carbroz/foundation-kernel";
+import { Payment } from "../payment/domain/Payment.js";
+import { PaymentWebhook } from "../payment/domain/PaymentWebhook.js";
+import type { IPaymentRepository } from "../payment/domain/repositories/IPaymentRepository.js";
+import type {
+  IPaymentGatewayProvider,
+  PaymentOrderResult,
+} from "../payment/application/ports/IPaymentGatewayProvider.js";
+import { Invoice, type InvoiceDocument } from "../invoice/domain/Invoice.js";
+import type { IInvoiceRepository } from "../invoice/domain/repositories/IInvoiceRepository.js";
+import {
+  PartnerPayout,
+  type PayoutCalculation,
+} from "../payout/domain/PartnerPayout.js";
+import type { IPartnerPayoutRepository } from "../payout/domain/repositories/IPartnerPayoutRepository.js";
+import type { PayoutStatus } from "../payout/domain/PayoutStatus.js";
 
 /** PaymentOrderResult is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ITransactionPort {
@@ -51,33 +58,41 @@ export class CreatePaymentOrderUseCase {
   ) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
-  async execute(input: CreatePaymentOrderInput): Promise<{ payment: Payment; checkoutParams: PaymentOrderResult }> {
-    const booking = await this.bookingRepository.findByPublicId(input.bookingPublicId);
+  async execute(
+    input: CreatePaymentOrderInput,
+  ): Promise<{ payment: Payment; checkoutParams: PaymentOrderResult }> {
+    const booking = await this.bookingRepository.findByPublicId(
+      input.bookingPublicId,
+    );
     if (!booking || booking.customerId !== input.customerId) {
-      throw new Error('Booking not found or unauthorized');
+      throw new DomainError("Booking not found or unauthorized");
     }
-    if (['CANCELLED', 'EXPIRED', 'COMPLETED'].includes(booking.status)) {
-      throw new Error(`Cannot create payment for booking in status ${booking.status}`);
+    if (["CANCELLED", "EXPIRED", "COMPLETED"].includes(booking.status)) {
+      throw new DomainError(
+        `Cannot create payment for booking in status ${booking.status}`,
+      );
     }
-    if (booking.expiryAt && new Date() > booking.expiryAt) {
-      throw new Error('Booking slot hold has expired');
+    if (booking.expiryAt && systemClock.now() > booking.expiryAt) {
+      throw new DomainError("Booking slot hold has expired");
     }
 
-    const existingPayment = await this.paymentRepository.findByBookingId(booking.id!);
-    if (existingPayment?.status === 'SUCCESS') {
-      throw new Error('Booking has already been successfully paid');
+    const existingPayment = await this.paymentRepository.findByBookingId(
+      booking.id!,
+    );
+    if (existingPayment?.status === "SUCCESS") {
+      throw new DomainError("Booking has already been successfully paid");
     }
 
     const idempotencyKey = crypto
-      .createHash('sha256')
+      .createHash("sha256")
       .update(`bk_${booking.id}_${booking.totalPricePaise}`)
-      .digest('hex');
+      .digest("hex");
 
-    if (existingPayment?.status === 'PENDING') {
+    if (existingPayment?.status === "PENDING") {
       return {
         payment: existingPayment,
         checkoutParams: {
-          providerOrderId: existingPayment.providerOrderId ?? '',
+          providerOrderId: existingPayment.providerOrderId ?? "",
           amountPaise: existingPayment.amountPaise,
           currency: existingPayment.currency,
         },
@@ -87,20 +102,22 @@ export class CreatePaymentOrderUseCase {
     const orderResult = await this.paymentGatewayProvider.createOrder({
       bookingPublicId: booking.publicId!,
       amountPaise: booking.totalPricePaise,
-      currency: 'INR',
+      currency: "INR",
       idempotencyKey,
     });
 
-    const payment = await this.paymentRepository.create(new Payment({
-      bookingId: booking.id!,
-      customerId: input.customerId,
-      provider: 'RAZORPAY',
-      providerOrderId: orderResult.providerOrderId,
-      amountPaise: booking.totalPricePaise,
-      currency: 'INR',
-      status: 'PENDING',
-      idempotencyKey,
-    }));
+    const payment = await this.paymentRepository.create(
+      new Payment({
+        bookingId: booking.id!,
+        customerId: input.customerId,
+        provider: "RAZORPAY",
+        providerOrderId: orderResult.providerOrderId,
+        amountPaise: booking.totalPricePaise,
+        currency: "INR",
+        status: "PENDING",
+        idempotencyKey,
+      }),
+    );
 
     return { payment, checkoutParams: orderResult };
   }
@@ -114,7 +131,7 @@ export class GetPaymentUseCase {
   async execute(publicId: string, customerId: number): Promise<Payment> {
     const payment = await this.paymentRepository.findByPublicId(publicId);
     if (!payment || payment.customerId !== customerId) {
-      throw new Error('Payment record not found or unauthorized');
+      throw new DomainError("Payment record not found or unauthorized");
     }
     return payment;
   }
@@ -126,7 +143,7 @@ export class GenerateInvoiceUseCase {
     private readonly invoiceRepository: IInvoiceRepository,
     private readonly bookingRepository: IBookingRepository,
     private readonly taxCalculator: IFinancialTaxCalculator,
-    private readonly sellerGstin = '',
+    private readonly sellerGstin = "",
   ) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
@@ -135,11 +152,12 @@ export class GenerateInvoiceUseCase {
     if (existing) return existing;
 
     const booking = await this.bookingRepository.findById(bookingId);
-    if (!booking) throw new Error('Booking not found');
+    if (!booking) throw new DomainError("Booking not found");
 
-    const invoiceNumber = await this.invoiceRepository.generateNextInvoiceNumber();
+    const invoiceNumber =
+      await this.invoiceRepository.generateNextInvoiceNumber();
     const snapshots = booking.snapshots;
-    const subtotal = Money.fromMinor(snapshots.pricing.subtotalPaise, 'INR');
+    const subtotal = Money.fromMinor(snapshots.pricing.subtotalPaise, "INR");
     const tax = this.taxCalculator.calculateInvoiceTax(subtotal);
 
     const documentJson: InvoiceDocument = {
@@ -157,18 +175,20 @@ export class GenerateInvoiceUseCase {
       igstPaise: tax.igst.amountMinor,
       totalTaxPaise: tax.totalTax.amountMinor,
       totalPricePaise: tax.totalPrice.amountMinor,
-      currency: 'INR',
-      issuedAt: new Date(),
+      currency: "INR",
+      issuedAt: systemClock.now(),
     };
 
-    return this.invoiceRepository.create(new Invoice({
-      bookingId,
-      invoiceNumber,
-      amountPaise: tax.totalPrice.amountMinor,
-      currency: 'INR',
-      status: 'ISSUED',
-      documentJson,
-    }));
+    return this.invoiceRepository.create(
+      new Invoice({
+        bookingId,
+        invoiceNumber,
+        amountPaise: tax.totalPrice.amountMinor,
+        currency: "INR",
+        status: "ISSUED",
+        documentJson,
+      }),
+    );
   }
 }
 
@@ -178,7 +198,7 @@ export class GetInvoiceUseCase {
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(publicId: string): Promise<Invoice> {
     const invoice = await this.invoiceRepository.findByPublicId(publicId);
-    if (!invoice) throw new Error('Invoice not found');
+    if (!invoice) throw new DomainError("Invoice not found");
     return invoice;
   }
 }
@@ -201,52 +221,97 @@ export class ProcessPaymentWebhookUseCase {
   ) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
-  async execute(input: ProcessWebhookInput): Promise<{ processed: boolean; message: string }> {
-    if (!this.paymentGatewayProvider.verifyWebhookSignature(input.rawBodyBuffer, input.signature, input.webhookSecret)) {
-      throw new Error('Invalid webhook signature');
+  async execute(
+    input: ProcessWebhookInput,
+  ): Promise<{ processed: boolean; message: string }> {
+    if (
+      !this.paymentGatewayProvider.verifyWebhookSignature(
+        input.rawBodyBuffer,
+        input.signature,
+        input.webhookSecret,
+      )
+    ) {
+      throw new DomainError("Invalid webhook signature");
     }
 
-    const raw = input.rawBodyBuffer.toString('utf8');
+    const raw = input.rawBodyBuffer.toString("utf8");
     const event = this.paymentGatewayProvider.parseWebhookEvent(raw);
-    const payloadHash = crypto.createHash('sha256').update(raw).digest('hex');
-    const existing = await this.paymentRepository.findWebhookByEventId(event.provider, event.eventId);
-    if (existing?.processingStatus === 'PROCESSED') {
-      return { processed: true, message: 'Webhook event already processed (idempotent response)' };
+    const payloadHash = crypto.createHash("sha256").update(raw).digest("hex");
+    const existing = await this.paymentRepository.findWebhookByEventId(
+      event.provider,
+      event.eventId,
+    );
+    if (existing?.processingStatus === "PROCESSED") {
+      return {
+        processed: true,
+        message: "Webhook event already processed (idempotent response)",
+      };
     }
 
-    const webhook = existing ?? new PaymentWebhook({ provider: event.provider, eventId: event.eventId, eventType: event.eventType, payloadHash });
+    const webhook =
+      existing ??
+      new PaymentWebhook({
+        provider: event.provider,
+        eventId: event.eventId,
+        eventType: event.eventType,
+        payloadHash,
+      });
     if (!existing) await this.paymentRepository.saveWebhook(webhook);
 
     return this.transactionProvider.runInTransaction(async () => {
       try {
-        if (event.eventType === 'payment.captured' || event.eventType === 'order.paid') {
+        if (
+          event.eventType === "payment.captured" ||
+          event.eventType === "order.paid"
+        ) {
           const payment = event.providerOrderId
-            ? await this.paymentRepository.findByProviderOrderId(event.providerOrderId)
+            ? await this.paymentRepository.findByProviderOrderId(
+                event.providerOrderId,
+              )
             : event.providerPaymentId
-              ? await this.paymentRepository.findByProviderPaymentId(event.providerPaymentId)
+              ? await this.paymentRepository.findByProviderPaymentId(
+                  event.providerPaymentId,
+                )
               : null;
           if (payment) {
-            payment.markSuccess(event.providerPaymentId ?? `pay_${Date.now()}`);
+            payment.markSuccess(
+              event.providerPaymentId ?? `pay_${systemClock.now().getTime()}`,
+            );
             await this.paymentRepository.update(payment);
-            const booking = await this.bookingRepository.findById(payment.bookingId);
-            if (booking?.status === 'CREATED') {
+            const booking = await this.bookingRepository.findById(
+              payment.bookingId,
+            );
+            if (booking?.status === "CREATED") {
               booking.confirm(payment.customerId);
               await this.bookingRepository.update(booking);
             }
             await this.generateInvoiceUseCase.execute(payment.bookingId);
           }
-        } else if (event.eventType === 'payment.failed' && event.providerOrderId) {
-          const payment = await this.paymentRepository.findByProviderOrderId(event.providerOrderId);
+        } else if (
+          event.eventType === "payment.failed" &&
+          event.providerOrderId
+        ) {
+          const payment = await this.paymentRepository.findByProviderOrderId(
+            event.providerOrderId,
+          );
           if (payment) {
-            payment.markFailed(event.failureCode ?? 'PAYMENT_FAILED', event.failureReason ?? 'Payment failed at gateway');
+            payment.markFailed(
+              event.failureCode ?? "PAYMENT_FAILED",
+              event.failureReason ?? "Payment failed at gateway",
+            );
             await this.paymentRepository.update(payment);
           }
         }
         webhook.markProcessed();
         await this.paymentRepository.updateWebhook(webhook);
-        return { processed: true, message: 'Webhook event processed successfully' };
+        return {
+          processed: true,
+          message: "Webhook event processed successfully",
+        };
       } catch (error) {
-        webhook.markFailed(error instanceof Error ? error.message : 'Processing failed');
+        webhook.markFailed(
+          error instanceof Error ? error.message : "Processing failed",
+        );
         await this.paymentRepository.updateWebhook(webhook);
         throw error;
       }
@@ -267,11 +332,15 @@ export class CreatePayoutEligibilityUseCase {
     const existing = await this.payoutRepository.findByBookingId(bookingId);
     if (existing) return existing;
     const booking = await this.bookingRepository.findById(bookingId);
-    if (!booking || booking.status !== 'COMPLETED' || !booking.partnerId) {
-      throw new Error('Payout eligibility requires a COMPLETED booking with an assigned partner');
+    if (!booking || booking.status !== "COMPLETED" || !booking.partnerId) {
+      throw new DomainError(
+        "Payout eligibility requires a COMPLETED booking with an assigned partner",
+      );
     }
 
-    const calculation = this.taxCalculator.calculatePartnerPayout(Money.fromMinor(booking.totalPricePaise, 'INR'));
+    const calculation = this.taxCalculator.calculatePartnerPayout(
+      Money.fromMinor(booking.totalPricePaise, "INR"),
+    );
     const calculationJson: PayoutCalculation = {
       grossAmountPaise: calculation.grossAmount.amountMinor,
       commissionPercentage: calculation.commissionPercentage,
@@ -282,16 +351,18 @@ export class CreatePayoutEligibilityUseCase {
       appliedRules: calculation.appliedRules,
     };
 
-    return this.payoutRepository.create(new PartnerPayout({
-      bookingId,
-      partnerId: booking.partnerId,
-      status: 'SCHEDULED',
-      grossAmountPaise: calculation.grossAmount.amountMinor,
-      commissionPaise: calculation.commission.amountMinor,
-      tdsPaise: calculation.tds.amountMinor,
-      netPayoutPaise: calculation.netPayout.amountMinor,
-      calculationJson,
-    }));
+    return this.payoutRepository.create(
+      new PartnerPayout({
+        bookingId,
+        partnerId: booking.partnerId,
+        status: "SCHEDULED",
+        grossAmountPaise: calculation.grossAmount.amountMinor,
+        commissionPaise: calculation.commission.amountMinor,
+        tdsPaise: calculation.tds.amountMinor,
+        netPayoutPaise: calculation.netPayout.amountMinor,
+        calculationJson,
+      }),
+    );
   }
 }
 
@@ -304,15 +375,21 @@ export class ListPartnerPayoutsUseCase {
 }
 
 /** MarkPayoutPaidInput is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
-export interface MarkPayoutPaidInput { publicId: string; externalReference: string }
+export interface MarkPayoutPaidInput {
+  publicId: string;
+  externalReference: string;
+}
 /** MarkPayoutPaidUseCase is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class MarkPayoutPaidUseCase {
   constructor(private readonly payoutRepository: IPartnerPayoutRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: MarkPayoutPaidInput): Promise<PartnerPayout> {
-    if (!input.externalReference?.trim()) throw new Error('External reference is required to mark payout as paid');
+    if (!input.externalReference?.trim())
+      throw new DomainError(
+        "External reference is required to mark payout as paid",
+      );
     const payout = await this.payoutRepository.findByPublicId(input.publicId);
-    if (!payout) throw new Error('Partner payout record not found');
+    if (!payout) throw new DomainError("Partner payout record not found");
     payout.markPaid(input.externalReference);
     return this.payoutRepository.update(payout);
   }
@@ -323,7 +400,7 @@ export class ProcessPayoutBatchUseCase {
   constructor(private readonly payoutRepository: IPartnerPayoutRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(): Promise<number> {
-    const payouts = await this.payoutRepository.listByStatus('SCHEDULED', 100);
+    const payouts = await this.payoutRepository.listByStatus("SCHEDULED", 100);
     for (const payout of payouts) {
       payout.approve();
       payout.markProcessing();

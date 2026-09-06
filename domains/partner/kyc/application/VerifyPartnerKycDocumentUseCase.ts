@@ -1,6 +1,7 @@
-import { KycDocument } from '../domain/KycDocument.js';
-import { KycDocumentStatus } from '../domain/KycDocumentStatus.js';
-import type { IKycDocumentRepository } from '../domain/repositories/IKycDocumentRepository.js';
+import { DomainError } from "@carbroz/foundation-kernel";
+import { KycDocument } from "../domain/KycDocument.js";
+import { KycDocumentStatus } from "../domain/KycDocumentStatus.js";
+import type { IKycDocumentRepository } from "../domain/repositories/IKycDocumentRepository.js";
 
 /** VerifyKycInput is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface VerifyKycInput {
@@ -18,18 +19,22 @@ export class VerifyPartnerKycDocumentUseCase {
   public async execute(input: VerifyKycInput): Promise<KycDocument> {
     const document = await this.kycRepository.findById(input.documentId);
     if (!document) {
-      throw new Error(`KYC Document with ID ${input.documentId} not found`);
+      throw new DomainError(
+        `KYC Document with ID ${input.documentId} not found`,
+      );
     }
 
     const newStatus: KycDocumentStatus = input.approved
-      ? ('APPROVED' as KycDocumentStatus)
-      : ('REJECTED' as KycDocumentStatus);
+      ? ("APPROVED" as KycDocumentStatus)
+      : ("REJECTED" as KycDocumentStatus);
 
     return this.kycRepository.updateStatus(
       input.documentId,
       newStatus,
       input.adminUserId,
-      input.approved ? null : input.rejectionReason || 'Document verification failed',
+      input.approved
+        ? null
+        : input.rejectionReason || "Document verification failed",
     );
   }
 }

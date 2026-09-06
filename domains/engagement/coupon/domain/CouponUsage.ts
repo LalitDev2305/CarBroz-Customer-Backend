@@ -1,3 +1,4 @@
+import { DomainError, systemClock } from "@carbroz/foundation-kernel";
 /** CouponUsageProps is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CouponUsageProps {
   id?: number;
@@ -20,11 +21,19 @@ export class CouponUsage {
   usedAt: Date;
 
   constructor(props: CouponUsageProps) {
-    if (!props.couponId) throw new Error('CouponUsage must be associated with a couponId');
-    if (!props.userId) throw new Error('CouponUsage must be associated with a userId');
-    if (!props.bookingId) throw new Error('CouponUsage must be associated with a bookingId');
-    if (props.discountAmountPaise < 0 || !Number.isInteger(props.discountAmountPaise)) {
-      throw new Error(`Discount amount must be a non-negative integer in paise (got ${props.discountAmountPaise})`);
+    if (!props.couponId)
+      throw new DomainError("CouponUsage must be associated with a couponId");
+    if (!props.userId)
+      throw new DomainError("CouponUsage must be associated with a userId");
+    if (!props.bookingId)
+      throw new DomainError("CouponUsage must be associated with a bookingId");
+    if (
+      props.discountAmountPaise < 0 ||
+      !Number.isInteger(props.discountAmountPaise)
+    ) {
+      throw new DomainError(
+        `Discount amount must be a non-negative integer in paise (got ${props.discountAmountPaise})`,
+      );
     }
 
     this.id = props.id;
@@ -33,6 +42,6 @@ export class CouponUsage {
     this.userId = props.userId;
     this.bookingId = props.bookingId;
     this.discountAmountPaise = props.discountAmountPaise;
-    this.usedAt = props.usedAt ?? new Date();
+    this.usedAt = props.usedAt ?? systemClock.now();
   }
 }

@@ -1,13 +1,14 @@
-import { NotificationPayload } from '../NotificationPayload.js';
-import { NotificationLog } from '../NotificationLog.js';
-import { INotificationLogRepository } from '../repositories/INotificationLogRepository.js';
-import { INotificationProvider } from '../../application/ports/INotificationProvider.js';
+import { systemClock } from "@carbroz/foundation-kernel";
+import { NotificationPayload } from "../NotificationPayload.js";
+import { NotificationLog } from "../NotificationLog.js";
+import { INotificationLogRepository } from "../repositories/INotificationLogRepository.js";
+import { INotificationProvider } from "../../application/ports/INotificationProvider.js";
 
 /** NotificationService is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export class NotificationService {
   constructor(
     private readonly notificationLogRepository: INotificationLogRepository,
-    private readonly notificationProvider: INotificationProvider
+    private readonly notificationProvider: INotificationProvider,
   ) {}
 
   async send(payload: NotificationPayload): Promise<NotificationLog> {
@@ -21,9 +22,9 @@ export class NotificationService {
       templateId: payload.templateId,
       providerReference: dispatchResult.providerReference || null,
       recipient: payload.recipient,
-      status: dispatchResult.success ? 'SENT' : 'FAILED',
+      status: dispatchResult.success ? "SENT" : "FAILED",
       errorCode: dispatchResult.errorCode || null,
-      sentAt: new Date(),
+      sentAt: systemClock.now(),
     });
 
     return await this.notificationLogRepository.create(log);

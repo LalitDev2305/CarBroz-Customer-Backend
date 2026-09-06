@@ -1,6 +1,7 @@
-import { Money } from '@carbroz/foundation-kernel';
-import { DisputeStatus } from './DisputeStatus.js';
-import { DisputeReason } from './DisputeReason.js';
+import { DomainError, systemClock } from "@carbroz/foundation-kernel";
+import { Money } from "@carbroz/foundation-kernel";
+import { DisputeStatus } from "./DisputeStatus.js";
+import { DisputeReason } from "./DisputeReason.js";
 
 /** DisputeProps is an exported domains/dispute contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface DisputeProps {
@@ -8,7 +9,7 @@ export interface DisputeProps {
   publicId?: string;
   bookingId: number;
   raisedByActorId: number;
-  raisedByActorType: 'CUSTOMER' | 'PARTNER';
+  raisedByActorType: "CUSTOMER" | "PARTNER";
   disputeReason: DisputeReason | string;
   description?: string | null;
   requestedRefundAmount: Money;
@@ -26,7 +27,7 @@ export class Dispute {
   publicId?: string;
   bookingId: number;
   raisedByActorId: number;
-  raisedByActorType: 'CUSTOMER' | 'PARTNER';
+  raisedByActorType: "CUSTOMER" | "PARTNER";
   disputeReason: string;
   description: string | null;
   requestedRefundAmount: Money;
@@ -38,9 +39,11 @@ export class Dispute {
   updatedAt?: Date;
 
   constructor(props: DisputeProps) {
-    if (!props.bookingId) throw new Error('Dispute requires a bookingId');
-    if (!props.raisedByActorId) throw new Error('Dispute requires raisedByActorId');
-    if (!props.disputeReason) throw new Error('Dispute requires a disputeReason');
+    if (!props.bookingId) throw new DomainError("Dispute requires a bookingId");
+    if (!props.raisedByActorId)
+      throw new DomainError("Dispute requires raisedByActorId");
+    if (!props.disputeReason)
+      throw new DomainError("Dispute requires a disputeReason");
 
     this.id = props.id;
     this.publicId = props.publicId;
@@ -50,8 +53,9 @@ export class Dispute {
     this.disputeReason = props.disputeReason;
     this.description = props.description ?? null;
     this.requestedRefundAmount = props.requestedRefundAmount;
-    this.refundedAmount = props.refundedAmount ?? Money.zero(props.requestedRefundAmount.currency);
-    this.status = props.status ?? 'OPEN';
+    this.refundedAmount =
+      props.refundedAmount ?? Money.zero(props.requestedRefundAmount.currency);
+    this.status = props.status ?? "OPEN";
     this.resolutionNotes = props.resolutionNotes ?? null;
     this.resolvedAt = props.resolvedAt ?? null;
     this.createdAt = props.createdAt;
@@ -59,25 +63,27 @@ export class Dispute {
   }
 
   public resolveRefund(approvedRefundAmount: Money, notes: string): void {
-    if (this.status !== 'OPEN' && this.status !== 'UNDER_REVIEW') {
-      throw new Error(`Cannot resolve dispute in status ${this.status}`);
+    if (this.status !== "OPEN" && this.status !== "UNDER_REVIEW") {
+      throw new DomainError(`Cannot resolve dispute in status ${this.status}`);
     }
     if (approvedRefundAmount.greaterThan(this.requestedRefundAmount)) {
-      throw new Error('Approved refund cannot exceed requested refund amount');
+      throw new DomainError(
+        "Approved refund cannot exceed requested refund amount",
+      );
     }
     this.refundedAmount = approvedRefundAmount;
-    this.status = 'RESOLVED_REFUNDED';
+    this.status = "RESOLVED_REFUNDED";
     this.resolutionNotes = notes;
-    this.resolvedAt = new Date();
+    this.resolvedAt = systemClock.now();
   }
 
   public reject(notes: string): void {
-    if (this.status !== 'OPEN' && this.status !== 'UNDER_REVIEW') {
-      throw new Error(`Cannot reject dispute in status ${this.status}`);
+    if (this.status !== "OPEN" && this.status !== "UNDER_REVIEW") {
+      throw new DomainError(`Cannot reject dispute in status ${this.status}`);
     }
     this.refundedAmount = Money.zero(this.requestedRefundAmount.currency);
-    this.status = 'RESOLVED_REJECTED';
+    this.status = "RESOLVED_REJECTED";
     this.resolutionNotes = notes;
-    this.resolvedAt = new Date();
+    this.resolvedAt = systemClock.now();
   }
 }

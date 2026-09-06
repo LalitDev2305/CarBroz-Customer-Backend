@@ -1,4 +1,5 @@
-import { NotificationChannel } from './NotificationChannel.js';
+import { DomainError } from "@carbroz/foundation-kernel";
+import { NotificationChannel } from "./NotificationChannel.js";
 
 /** NotificationPayloadProps is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface NotificationPayloadProps {
@@ -24,17 +25,20 @@ export class NotificationPayload {
   readonly data: Record<string, any>;
 
   constructor(props: NotificationPayloadProps) {
-    if (!props.templateId) throw new Error('Notification templateId is required');
-    if (!props.recipient) throw new Error('Notification recipient destination is required');
-    if (!props.recipientId) throw new Error('Notification recipientId is required');
+    if (!props.templateId)
+      throw new DomainError("Notification templateId is required");
+    if (!props.recipient)
+      throw new DomainError("Notification recipient destination is required");
+    if (!props.recipientId)
+      throw new DomainError("Notification recipientId is required");
 
     this.channel = props.channel;
     this.templateId = props.templateId;
     this.recipient = props.recipient;
     this.recipientId = props.recipientId;
     this.bookingId = props.bookingId ?? null;
-    this.title = props.title ?? '';
-    this.body = props.body ?? '';
+    this.title = props.title ?? "";
+    this.body = props.body ?? "";
     this.data = props.data ?? {};
   }
 }

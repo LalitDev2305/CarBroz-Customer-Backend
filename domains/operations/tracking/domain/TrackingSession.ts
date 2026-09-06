@@ -1,5 +1,6 @@
-import { TrackingStatus } from './TrackingStatus.js';
-import { LocationPing } from './LocationPing.js';
+import { DomainError, systemClock } from "@carbroz/foundation-kernel";
+import { TrackingStatus } from "./TrackingStatus.js";
+import { LocationPing } from "./LocationPing.js";
 
 /** TrackingSessionProps is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface TrackingSessionProps {
@@ -39,9 +40,18 @@ export class TrackingSession {
   updatedAt?: Date;
 
   constructor(props: TrackingSessionProps) {
-    if (!props.bookingId) throw new Error('TrackingSession must be associated with a booking');
-    if (!props.partnerId) throw new Error('TrackingSession must be associated with a partner');
-    if (!props.customerId) throw new Error('TrackingSession must be associated with a customer');
+    if (!props.bookingId)
+      throw new DomainError(
+        "TrackingSession must be associated with a booking",
+      );
+    if (!props.partnerId)
+      throw new DomainError(
+        "TrackingSession must be associated with a partner",
+      );
+    if (!props.customerId)
+      throw new DomainError(
+        "TrackingSession must be associated with a customer",
+      );
 
     const ping = new LocationPing({
       latitude: props.currentLatitude,
@@ -58,16 +68,18 @@ export class TrackingSession {
     this.heading = props.heading ?? null;
     this.speed = props.speed ?? null;
     this.etaMinutes = props.etaMinutes ?? null;
-    this.status = props.status ?? 'ACTIVE';
-    this.startedAt = props.startedAt ?? new Date();
+    this.status = props.status ?? "ACTIVE";
+    this.startedAt = props.startedAt ?? systemClock.now();
     this.endedAt = props.endedAt ?? null;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
 
   updateLocation(ping: LocationPing, etaMinutes?: number | null): void {
-    if (this.status !== 'ACTIVE') {
-      throw new Error(`Cannot update location for non-active tracking session (${this.status})`);
+    if (this.status !== "ACTIVE") {
+      throw new DomainError(
+        `Cannot update location for non-active tracking session (${this.status})`,
+      );
     }
 
     this.currentLatitude = ping.latitude;
@@ -89,14 +101,14 @@ export class TrackingSession {
   }
 
   complete(): void {
-    if (this.status === 'COMPLETED') return;
-    this.status = 'COMPLETED';
-    this.endedAt = new Date();
+    if (this.status === "COMPLETED") return;
+    this.status = "COMPLETED";
+    this.endedAt = systemClock.now();
   }
 
   cancel(): void {
-    if (this.status === 'CANCELLED' || this.status === 'COMPLETED') return;
-    this.status = 'CANCELLED';
-    this.endedAt = new Date();
+    if (this.status === "CANCELLED" || this.status === "COMPLETED") return;
+    this.status = "CANCELLED";
+    this.endedAt = systemClock.now();
   }
 }

@@ -1,6 +1,7 @@
-import { Coupon } from '../Coupon.js';
-import { ICouponUsageRepository } from '../repositories/ICouponUsageRepository.js';
-import { Money } from '@carbroz/foundation-kernel';
+import { systemClock } from "@carbroz/foundation-kernel";
+import { Coupon } from "../Coupon.js";
+import { ICouponUsageRepository } from "../repositories/ICouponUsageRepository.js";
+import { Money } from "@carbroz/foundation-kernel";
 
 /** CalculateDiscountInput is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CalculateDiscountInput {
@@ -22,14 +23,21 @@ export interface CouponDiscountResult {
 export class CouponDiscountCalculator {
   constructor(private readonly couponUsageRepository: ICouponUsageRepository) {}
 
-  async calculateDiscount(input: CalculateDiscountInput): Promise<CouponDiscountResult> {
-    const { coupon, userId, bookingAmountPaise, now = new Date() } = input;
+  async calculateDiscount(
+    input: CalculateDiscountInput,
+  ): Promise<CouponDiscountResult> {
+    const {
+      coupon,
+      userId,
+      bookingAmountPaise,
+      now = systemClock.now(),
+    } = input;
     const bookingMoney = Money.fromMinor(bookingAmountPaise);
 
     if (!coupon.isActive) {
       return {
         isValid: false,
-        reason: 'Coupon is inactive',
+        reason: "Coupon is inactive",
         discountMoney: Money.zero(),
         finalPriceMoney: bookingMoney,
       };
@@ -38,7 +46,7 @@ export class CouponDiscountCalculator {
     if (now < coupon.validFrom || now > coupon.validUntil) {
       return {
         isValid: false,
-        reason: 'Coupon is expired or not yet valid',
+        reason: "Coupon is expired or not yet valid",
         discountMoney: Money.zero(),
         finalPriceMoney: bookingMoney,
       };
@@ -53,33 +61,42 @@ export class CouponDiscountCalculator {
       };
     }
 
-    if (coupon.usageLimit !== null && coupon.currentUsageCount >= coupon.usageLimit) {
+    if (
+      coupon.usageLimit !== null &&
+      coupon.currentUsageCount >= coupon.usageLimit
+    ) {
       return {
         isValid: false,
-        reason: 'Coupon total usage limit reached',
+        reason: "Coupon total usage limit reached",
         discountMoney: Money.zero(),
         finalPriceMoney: bookingMoney,
       };
     }
 
-    const userUsageCount = await this.couponUsageRepository.countByUserAndCoupon(userId, coupon.id!);
+    const userUsageCount =
+      await this.couponUsageRepository.countByUserAndCoupon(userId, coupon.id!);
     if (userUsageCount >= coupon.perUserLimit) {
       return {
         isValid: false,
-        reason: 'Per-user coupon usage limit exceeded',
+        reason: "Per-user coupon usage limit exceeded",
         discountMoney: Money.zero(),
         finalPriceMoney: bookingMoney,
       };
     }
 
     let rawDiscountPaise = 0;
-    if (coupon.discountType === 'FIXED_AMOUNT') {
+    if (coupon.discountType === "FIXED_AMOUNT") {
       rawDiscountPaise = coupon.discountValue;
-    } else if (coupon.discountType === 'PERCENTAGE') {
-      rawDiscountPaise = Math.floor((bookingAmountPaise * coupon.discountValue) / 100);
+    } else if (coupon.discountType === "PERCENTAGE") {
+      rawDiscountPaise = Math.floor(
+        (bookingAmountPaise * coupon.discountValue) / 100,
+      );
     }
 
-    if (coupon.maxDiscountPaise !== null && rawDiscountPaise > coupon.maxDiscountPaise) {
+    if (
+      coupon.maxDiscountPaise !== null &&
+      rawDiscountPaise > coupon.maxDiscountPaise
+    ) {
       rawDiscountPaise = coupon.maxDiscountPaise;
     }
 
