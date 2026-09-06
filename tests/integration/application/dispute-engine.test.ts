@@ -1,14 +1,9 @@
 import { AuditLogService } from '@carbroz/domain-audit';
-import { Dispute } from '@carbroz/domain-dispute';
+import { BookingAccessPolicy, type IBookingRepository } from '@carbroz/domain-booking';
 import { NotificationService } from '@carbroz/domain-communications';
-import { type IBookingRepository } from '@carbroz/domain-booking';
-import { type IDisputeRepository } from '@carbroz/domain-dispute';
+import { Dispute, type IDisputeRepository, RaiseDisputeUseCase, ResolveDisputeUseCase } from '@carbroz/domain-dispute';
 import { type IPaymentRepository } from '@carbroz/domain-financials';
 import { describe, expect, it } from 'vitest';
-
-
-import { RaiseDisputeUseCase } from '@carbroz/domain-dispute';
-import { ResolveDisputeUseCase } from '@carbroz/domain-dispute';
 
 describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
   const disputes: Dispute[] = [];
@@ -65,6 +60,16 @@ describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
     async findExpiredPendingBookings() { return []; },
   };
 
+  const bookingAccessPolicy = new BookingAccessPolicy(
+    mockBookingRepo,
+    {
+      findByUserId: async (userId: number) => ({ id: userId }) as any,
+    } as any,
+    {
+      findByUserIdAndPartnerId: async () => null,
+    },
+  );
+
   const mockPaymentRepo: IPaymentRepository = {
     async findByBookingId() {
       return { id: 1, externalTransactionId: 'pay_rzp_123', status: 'SUCCESS' } as any;
@@ -100,7 +105,7 @@ describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
   it('should raise dispute successfully for booking customer', async () => {
     const useCase = new RaiseDisputeUseCase(
       mockDisputeRepo,
-      mockBookingRepo,
+      bookingAccessPolicy,
       mockNotificationService,
       mockAuditLogService
     );
@@ -124,7 +129,7 @@ describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
   it('should prevent unauthorized non-owner from raising dispute', async () => {
     const useCase = new RaiseDisputeUseCase(
       mockDisputeRepo,
-      mockBookingRepo,
+      bookingAccessPolicy,
       mockNotificationService,
       mockAuditLogService
     );
@@ -137,7 +142,7 @@ describe('Phase 21 — Dispute Settlement Engine Use Cases', () => {
         disputeReason: 'WRONG_BILLING',
         requestedRefundPaise: 10000,
       })
-    ).rejects.toThrow('FORBIDDEN');
+    ).rejects.toThrow('Booking not found or unauthorized');
   });
 
   it('should resolve dispute as REFUNDED', async () => {
