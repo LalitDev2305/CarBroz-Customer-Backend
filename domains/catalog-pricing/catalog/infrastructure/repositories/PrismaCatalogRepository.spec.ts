@@ -135,7 +135,8 @@ describe('PrismaCatalogRepository', () => {
     serviceAddon.findUnique.mockResolvedValueOnce(addonRecord()).mockResolvedValueOnce(null);
 
     const services = await repository.findServicesByCategoryId(1);
-    expect(services[0].addons?.[0]).toMatchObject({ name: 'Tyre polish' });
+    expect(services).toHaveLength(1);
+    expect(services.at(0)?.addons?.at(0)).toMatchObject({ name: 'Tyre polish' });
     await expect(repository.findServiceBySlug('basic-wash')).resolves.toMatchObject({ slug: 'basic-wash' });
     await expect(repository.findServiceBySlug('missing')).resolves.toBeNull();
     await expect(repository.findServiceByPublicId('service_2')).resolves.toMatchObject({ publicId: 'service_2' });
