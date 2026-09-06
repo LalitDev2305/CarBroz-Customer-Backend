@@ -18,6 +18,13 @@ export class PrismaAddressRepository implements IAddressRepository {
     return model ? this.toDomain(model) : null;
   }
 
+  async findByPublicId(publicId: string): Promise<Address | null> {
+    const model = await this.prisma.address.findUnique({
+      where: { publicId, deletedAt: null },
+    });
+    return model ? this.toDomain(model) : null;
+  }
+
   async findByUserId(userId: number): Promise<Address[]> {
     const models = await this.prisma.address.findMany({
       where: { userId, deletedAt: null },

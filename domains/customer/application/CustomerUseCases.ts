@@ -7,15 +7,13 @@ import type { ICustomerProfileRepository } from "../profile/domain/repositories/
 
 function canAccessCustomer(
   context: ExecutionContext,
-  customerId: number,
+  userId: number,
 ): boolean {
   const actor = context.actor;
-  if (!actor) return false;
   return (
     actor.kind === "ADMIN" ||
     actor.roles.includes("ADMIN") ||
-    actor.customerId === customerId ||
-    String(actor.id) === String(customerId)
+    actor.id === userId
   );
 }
 
@@ -118,7 +116,7 @@ export type AddressAction =
 export interface ManageAddressRequest {
   userId: number;
   action: AddressAction;
-  addressId?: number;
+  addressPublicId?: string;
   payload?: Partial<Address>;
 }
 /** ManageAddressInput is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
@@ -143,7 +141,7 @@ export class ManageAddressUseCase implements IUseCase<
         "FORBIDDEN: You do not have permission to manage these addresses",
       );
     }
-    const { action, userId, addressId, payload } = request.data;
+    const { action, userId, addressPublicId, payload } = request.data;
     switch (action) {
       case "GET_ALL":
         return this.addressRepository.findByUserId(userId);
@@ -156,9 +154,12 @@ export class ManageAddressUseCase implements IUseCase<
           );
         return this.addressRepository.save(new Address({ ...payload, userId }));
       case "UPDATE": {
-        if (!addressId)
-          throw new DomainError("BAD_REQUEST: addressId required for update");
-        const existing = await this.addressRepository.findById(addressId);
+        if (!addressPublicId?.trim())
+          throw new DomainError(
+            "BAD_REQUEST: addressPublicId required for update",
+          );
+        const existing =
+          await this.addressRepository.findByPublicId(addressPublicId);
         if (!existing || existing.userId !== userId)
           throw new DomainError("NOT_FOUND: Address not found");
         if (payload?.label !== undefined) existing.label = payload.label;
@@ -181,12 +182,15 @@ export class ManageAddressUseCase implements IUseCase<
         return this.addressRepository.save(existing);
       }
       case "DELETE": {
-        if (!addressId)
-          throw new DomainError("BAD_REQUEST: addressId required for deletion");
-        const existing = await this.addressRepository.findById(addressId);
-        if (!existing || existing.userId !== userId)
+        if (!addressPublicId?.trim())
+          throw new DomainError(
+            "BAD_REQUEST: addressPublicId required for deletion",
+          );
+        const existing =
+          await this.addressRepository.findByPublicId(addressPublicId);
+        if (!existing?.id || existing.userId !== userId)
           throw new DomainError("NOT_FOUND: Address not found");
-        return this.addressRepository.delete(addressId);
+        return this.addressRepository.delete(existing.id);
       }
       default:
         throw new DomainError(`BAD_REQUEST: Unknown action ${String(action)}`);

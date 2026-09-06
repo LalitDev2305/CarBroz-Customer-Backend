@@ -1,77 +1,92 @@
 import { toExecutionContext } from '../../../bootstrap/lifecycle/toExecutionContext.js';
-import { ExecutionContext } from '@carbroz/foundation-kernel';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import { UploadKycDocumentUseCase } from '@carbroz/domain-partner';
 import { GetPartnerKycStatusUseCase } from '@carbroz/domain-partner';
 import { UploadKycDocumentSchema } from '../dto/partner.kyc.dto.js';
-
 import { diContainer } from '@fastify/awilix';
 
 /** KycController is an exported apps/api contract/implementation; see the owning README for lifecycle and extension rules. */
 export class KycController {
   async upload(request: FastifyRequest, reply: FastifyReply) {
-    // Requires @fastify/multipart plugin registered in app.ts
     const data = await request.file();
-    
+
     if (!data) {
       return reply.status(400).send({ message: 'File is required' });
     }
 
-    const partnerIdStr = (data.fields.partnerId as any)?.value;
+    const partnerPublicId = String(
+      (data.fields.partnerPublicId as any)?.value ?? '',
+    ).trim();
     const typeStr = (data.fields.type as any)?.value;
 
-    if (!partnerIdStr || !typeStr) {
-      return reply.status(400).send({ message: 'partnerId and type are required fields' });
+    if (!partnerPublicId || !typeStr) {
+      return reply.status(400).send({
+        message: 'partnerPublicId and type are required fields',
+      });
     }
 
-    const partnerId = parseInt(partnerIdStr, 10);
     const typeParseResult = UploadKycDocumentSchema.safeParse({ type: typeStr });
 
     if (!typeParseResult.success) {
-      return reply.status(400).send({ message: 'Invalid document type', errors: (typeParseResult.error as any).errors });
+      return reply.status(400).send({
+        message: 'Invalid document type',
+        errors: (typeParseResult.error as any).errors,
+      });
     }
 
     const fileBuffer = await data.toBuffer();
-
     const context = toExecutionContext(request);
 
     try {
-      const uploadKycDocumentUseCase = diContainer.resolve<UploadKycDocumentUseCase>('uploadKycDocumentUseCase');
+      const uploadKycDocumentUseCase =
+        diContainer.resolve<UploadKycDocumentUseCase>('uploadKycDocumentUseCase');
       await uploadKycDocumentUseCase.execute({
         context,
         data: {
-          partnerId,
+          partnerPublicId,
           type: typeParseResult.data.type,
+          fileName: data.filename,
           fileBuffer,
           mimeType: data.mimetype,
-        }
+        },
       });
 
       return reply.status(201).send({ message: 'Document uploaded successfully' });
     } catch (error: any) {
-      const status = error.message.startsWith('FORBIDDEN') ? 403 : 400;
+      const status = error.message.startsWith('FORBIDDEN')
+        ? 403
+        : error.message.startsWith('NOT_FOUND')
+          ? 404
+          : 400;
       return reply.status(status).send({ message: error.message });
     }
   }
 
-  async getStatus(request: FastifyRequest<{ Params: { partnerId: string } }>, reply: FastifyReply) {
-    const partnerId = parseInt(request.params.partnerId, 10);
-    
-    if (isNaN(partnerId)) {
-      return reply.status(400).send({ message: 'Invalid partnerId' });
+  async getStatus(
+    request: FastifyRequest<{ Params: { partnerPublicId: string } }>,
+    reply: FastifyReply,
+  ) {
+    const partnerPublicId = request.params.partnerPublicId.trim();
+    if (!partnerPublicId) {
+      return reply.status(400).send({ message: 'Invalid partnerPublicId' });
     }
 
     const context = toExecutionContext(request);
 
     try {
-      const getPartnerKycStatusUseCase = diContainer.resolve<GetPartnerKycStatusUseCase>('getPartnerKycStatusUseCase');
-      const documents = await getPartnerKycStatusUseCase.execute({ 
+      const getPartnerKycStatusUseCase =
+        diContainer.resolve<GetPartnerKycStatusUseCase>('getPartnerKycStatusUseCase');
+      const documents = await getPartnerKycStatusUseCase.execute({
         context,
-        data: { partnerId }
+        data: { partnerPublicId },
       });
       return reply.send({ documents });
     } catch (error: any) {
-      const status = error.message.startsWith('FORBIDDEN') ? 403 : 400;
+      const status = error.message.startsWith('FORBIDDEN')
+        ? 403
+        : error.message.startsWith('NOT_FOUND')
+          ? 404
+          : 400;
       return reply.status(status).send({ message: error.message });
     }
   }

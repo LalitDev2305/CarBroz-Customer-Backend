@@ -76,6 +76,9 @@ jobs:
       - name: Verify CW4 domain/application contract convergence
         run: node tools/cw4-contract-gate.mjs
 
+      - name: Verify CW5 resource ownership and public IDs
+        run: node tools/cw5-resource-ownership-gate.mjs
+
       - name: Prisma validate
         run: pnpm prisma validate
 
@@ -142,6 +145,9 @@ jobs:
 
       - name: Re-verify CW4 domain/application contract convergence
         run: node tools/cw4-contract-gate.mjs
+
+      - name: Re-verify CW5 resource ownership and public IDs
+        run: node tools/cw5-resource-ownership-gate.mjs
 
       - name: Prove validation is non-mutating
         run: |

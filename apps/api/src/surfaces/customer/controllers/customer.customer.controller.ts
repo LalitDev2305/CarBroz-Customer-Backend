@@ -2,7 +2,7 @@ import { toExecutionContext } from '../../../bootstrap/lifecycle/toExecutionCont
 import { ResponseHelper } from '../../../transport/response/ResponseHelper.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import type { ActorContext, ExecutionContext } from '@carbroz/foundation-kernel';
+import type { ExecutionContext } from '@carbroz/foundation-kernel';
 
 import { updateProfileSchema, addAddressSchema, updateAddressSchema } from '../dto/customer.customer.dto.js';
 import { GetCustomerProfileUseCase } from '@carbroz/domain-customer';
@@ -10,23 +10,7 @@ import { UpdateCustomerProfileUseCase } from '@carbroz/domain-customer';
 import { ManageAddressUseCase } from '@carbroz/domain-customer';
 import { ExtractCustomerDataUseCase } from '@carbroz/domain-customer';
 
-type AuthenticatedRequestUser = {
-  id?: string | number;
-  customerId?: number;
-  partnerId?: number;
-  tenantId?: string;
-  role?: string;
-  roles?: string[];
-  isAdmin?: boolean;
-};
-
-/**
- * Customer HTTP adapter.
- *
- * This controller owns parsing, HTTP status mapping and conversion from Fastify authentication
- * state into the transport-neutral Foundation ExecutionContext. Customer application services
- * never receive FastifyRequest, headers, JWT payloads or framework-specific user objects.
- */
+/** Customer HTTP adapter. */
 export class CustomerController {
   constructor(
     private readonly getCustomerProfileUseCase: GetCustomerProfileUseCase,
@@ -110,7 +94,10 @@ export class CustomerController {
     }
   }
 
-  async updateAddress(req: FastifyRequest<{ Params: { addressId: string } }>, reply: FastifyReply) {
+  async updateAddress(
+    req: FastifyRequest<{ Params: { addressPublicId: string } }>,
+    reply: FastifyReply,
+  ) {
     try {
       const parsedBody = updateAddressSchema.parse(req.body);
       const context = this.getContext(req);
@@ -119,7 +106,7 @@ export class CustomerController {
         data: {
           userId: (req.user as any).id,
           action: 'UPDATE',
-          addressId: parseInt(req.params.addressId, 10),
+          addressPublicId: req.params.addressPublicId,
           payload: parsedBody,
         },
       });
@@ -134,7 +121,10 @@ export class CustomerController {
     }
   }
 
-  async deleteAddress(req: FastifyRequest<{ Params: { addressId: string } }>, reply: FastifyReply) {
+  async deleteAddress(
+    req: FastifyRequest<{ Params: { addressPublicId: string } }>,
+    reply: FastifyReply,
+  ) {
     try {
       const context = this.getContext(req);
       await this.manageAddressUseCase.execute({
@@ -142,7 +132,7 @@ export class CustomerController {
         data: {
           userId: (req.user as any).id,
           action: 'DELETE',
-          addressId: parseInt(req.params.addressId, 10),
+          addressPublicId: req.params.addressPublicId,
         },
       });
       return reply.send(ResponseHelper.success(null, 'Address deleted'));

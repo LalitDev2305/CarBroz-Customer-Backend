@@ -12,6 +12,7 @@ on:
       - 'tools/architecture-closeout-constitution-gate.mjs'
       - 'tools/cw3-boundary-gate.mjs'
       - 'tools/cw4-contract-gate.mjs'
+      - 'tools/cw5-resource-ownership-gate.mjs'
       - 'tools/production-freeze/preflight.mjs'
       - 'pnpm-workspace.yaml'
       - 'pnpm-lock.yaml'
@@ -92,6 +93,9 @@ jobs:
       - name: Verify CW4 domain/application contract convergence
         run: node tools/cw4-contract-gate.mjs
 
+      - name: Verify CW5 resource ownership and public IDs
+        run: node tools/cw5-resource-ownership-gate.mjs
+
       - name: Validate Prisma
         run: pnpm exec prisma validate
 
@@ -117,7 +121,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: cw4-closeout-test-diagnostics
+          name: cw5-closeout-test-diagnostics
           path: closeout-test-output.txt
           if-no-files-found: ignore
           retention-days: 7
@@ -130,6 +134,9 @@ jobs:
 
       - name: Re-verify CW4 domain/application contract convergence
         run: node tools/cw4-contract-gate.mjs
+
+      - name: Re-verify CW5 resource ownership and public IDs
+        run: node tools/cw5-resource-ownership-gate.mjs
 
       - name: Prove closeout verification is read-only
         run: |

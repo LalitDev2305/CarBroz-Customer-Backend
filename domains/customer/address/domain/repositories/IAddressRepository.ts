@@ -3,6 +3,7 @@ import type { Address } from '../Address.js';
 /** IAddressRepository is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IAddressRepository {
   findById(id: number): Promise<Address | null>;
+  findByPublicId(publicId: string): Promise<Address | null>;
   findByUserId(userId: number): Promise<Address[]>;
   findDefaultByUserId(userId: number): Promise<Address | null>;
   findAll(): Promise<Address[]>;

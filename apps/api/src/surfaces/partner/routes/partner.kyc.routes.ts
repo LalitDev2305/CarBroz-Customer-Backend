@@ -8,8 +8,8 @@ export async function kycRoutes(fastify: FastifyInstance) {
   fastify.post('/kyc', {
     preValidation: [fastify.authenticate]
   }, kycController.upload.bind(kycController));
-  
-  fastify.get<{ Params: { partnerId: string } }>('/:partnerId/kyc', {
+
+  fastify.get<{ Params: { partnerPublicId: string } }>('/:partnerPublicId/kyc', {
     preValidation: [fastify.authenticate]
   }, kycController.getStatus.bind(kycController));
 }

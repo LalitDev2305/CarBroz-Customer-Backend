@@ -16,11 +16,11 @@ export default async function customerRoutes(fastify: FastifyInstance) {
   fastify.get('/profile', customerController.getProfile.bind(customerController));
   fastify.put('/profile', customerController.updateProfile.bind(customerController));
 
-  // Address Routes
+  // Address Routes use opaque public identifiers at the HTTP boundary.
   fastify.get('/addresses', customerController.getAddresses.bind(customerController));
   fastify.post('/addresses', customerController.addAddress.bind(customerController));
-  fastify.put('/addresses/:addressId', customerController.updateAddress.bind(customerController));
-  fastify.delete('/addresses/:addressId', customerController.deleteAddress.bind(customerController));
+  fastify.put('/addresses/:addressPublicId', customerController.updateAddress.bind(customerController));
+  fastify.delete('/addresses/:addressPublicId', customerController.deleteAddress.bind(customerController));
 
   // GDPR Data Extraction
   fastify.get('/gdpr', customerController.extractData.bind(customerController));
