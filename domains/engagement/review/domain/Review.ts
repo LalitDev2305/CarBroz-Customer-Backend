@@ -1,5 +1,6 @@
 import { ReviewStatus } from './ReviewStatus.js';
 
+/** ReviewProps is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ReviewProps {
   id?: number;
   publicId?: string;
@@ -15,6 +16,7 @@ export interface ReviewProps {
   updatedAt?: Date;
 }
 
+/** Review is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Review {
   id?: number;
   publicId?: string;

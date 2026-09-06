@@ -1,3 +1,4 @@
+/** CacheProvider is an exported platform/cache contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CacheProvider {
   initialize?(): Promise<void>;
   shutdown?(): Promise<void>;
@@ -7,6 +8,7 @@ export interface CacheProvider {
   clear(): Promise<void>;
 }
 
+/** InMemoryCacheProvider is an exported platform/cache contract/implementation; see the owning README for lifecycle and extension rules. */
 export class InMemoryCacheProvider implements CacheProvider {
   private cache = new Map<string, { value: any; expiresAt?: number }>();
 

@@ -2,6 +2,7 @@ import type { PrismaClient } from '@prisma/client';
 import type { UserSession } from '../../domain/UserSession.js';
 import type { IUserSessionRepository } from '../../domain/repositories/IUserSessionRepository.js';
 
+/** PrismaUserSessionRepository is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaUserSessionRepository implements IUserSessionRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

@@ -1,6 +1,10 @@
+import type { ITrackingSessionRepository } from '../../domain/ITrackingSessionRepository.js';
+import { TrackingSession } from '../../domain/TrackingSession.js';
+import type { TrackingStatus } from '../../domain/TrackingStatus.js';
 import { PrismaClient } from '@prisma/client';
-import { ITrackingSessionRepository, TrackingSession, TrackingStatus } from '@carbroz/common';
 
+
+/** PrismaTrackingSessionRepository is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaTrackingSessionRepository implements ITrackingSessionRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

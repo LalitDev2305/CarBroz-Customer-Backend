@@ -2,6 +2,7 @@ import type { AdminUserRole } from '../../domain/AdminUserRole.js';
 import type { IAdminRoleRepository } from '../../domain/repositories/IAdminRoleRepository.js';
 import { PrismaClient } from '@prisma/client';
 
+/** PrismaAdminRoleRepository is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaAdminRoleRepository implements IAdminRoleRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

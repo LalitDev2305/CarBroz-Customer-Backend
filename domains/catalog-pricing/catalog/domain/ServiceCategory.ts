@@ -1,3 +1,4 @@
+/** ServiceCategory is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ServiceCategory {
   id?: number;
   publicId?: string;

@@ -1,15 +1,14 @@
-import {
-  ICorporateAccountRepository,
-  ICorporateMemberRepository,
-  ICorporateFleetVehicleRepository,
-  ICorporateCreditLedgerRepository,
-  IUserRepository,
-  IVehicleRepository,
-  CorporateCreditLedger,
-  Money,
-} from '@carbroz/common';
+import { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
+import { ICorporateMemberRepository } from '../domain/repositories/ICorporateMemberRepository.js';
+import { ICorporateFleetVehicleRepository } from '../domain/repositories/ICorporateFleetVehicleRepository.js';
+import { ICorporateCreditLedgerRepository } from '../domain/repositories/ICorporateCreditLedgerRepository.js';
+import { CorporateCreditLedger } from '../domain/CorporateCreditLedger.js';
+import { IUserRepository } from '@carbroz/domain-identity';
+import { IVehicleRepository } from '@carbroz/domain-customer';
+import { Money } from '@carbroz/foundation-kernel';
 import { ValidateCorporateBookingDto } from '../dtos/corporate.dto.js';
 
+/** CorporateBookingValidationResult is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CorporateBookingValidationResult {
   eligible: boolean;
   reason?: string;
@@ -17,6 +16,7 @@ export interface CorporateBookingValidationResult {
   corporateFleetVehicleId?: number;
 }
 
+/** ValidateCorporateBookingUseCase is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ValidateCorporateBookingUseCase {
   constructor(
     private readonly corporateAccountRepo: ICorporateAccountRepository,
@@ -27,6 +27,7 @@ export class ValidateCorporateBookingUseCase {
     private readonly vehicleRepository: IVehicleRepository
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(dto: ValidateCorporateBookingDto): Promise<CorporateBookingValidationResult> {
     const user = await (this.userRepository as any).findByPublicId
       ? await (this.userRepository as any).findByPublicId(dto.userPublicId)

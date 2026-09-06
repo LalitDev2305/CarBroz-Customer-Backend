@@ -18,9 +18,8 @@ export class AdminReviewKycDocumentUseCase implements IUseCase<AdminReviewKycDoc
   ) {}
 
   async execute({ context, data }: AdminReviewKycDocumentInput): Promise<KycDocument> {
-    const actor = context.actor;
-    const adminUserId = Number(actor.id);
-    if (!Number.isInteger(adminUserId) || adminUserId <= 0 || (actor.kind !== 'ADMIN' && !actor.roles.includes('ADMIN'))) {
+    const adminUserId = Number(context.actor?.id);
+    if (!Number.isInteger(adminUserId) || adminUserId <= 0 || (context.actor?.kind !== 'ADMIN' && !context.actor?.roles.includes('ADMIN'))) {
       throw new Error('UNAUTHORIZED: Admin must be logged in');
     }
     const status = data.action === 'APPROVE' ? KycDocumentStatus.APPROVED : KycDocumentStatus.REJECTED;

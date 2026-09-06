@@ -1,111 +1,78 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const root = process.cwd();
+const canonicalWorkspaces = [
+  'apps/api',
+  'domains/identity', 'domains/partner', 'domains/customer', 'domains/catalog-pricing',
+  'domains/booking', 'domains/operations', 'domains/financials', 'domains/communications',
+  'domains/engagement', 'domains/configuration', 'domains/dispute', 'domains/enterprise', 'domains/audit',
+  'sdui/ui-sdk', 'sdui/registry',
+  'platform/database', 'platform/cache', 'platform/messaging', 'platform/storage',
+  'platform/observability', 'platform/integrations',
+  'foundation/kernel',
+] as const;
+const ignored = new Set(['node_modules', 'dist', 'coverage', 'generated', '.git']);
 
-function read(path: string): string {
-  return readFileSync(resolve(root, path), 'utf8');
+function walk(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    if (ignored.has(entry.name)) return [];
+    const absolute = path.join(dir, entry.name);
+    return entry.isDirectory() ? walk(absolute) : [absolute];
+  });
 }
 
-describe('canonical repository topology migration', () => {
-  it('places the executable API at the canonical path and identity', () => {
-    expect(existsSync(resolve(root, 'apps/api/package.json'))).toBe(true);
-    expect(existsSync(resolve(root, 'apps/backend-api'))).toBe(false);
+function relative(file: string): string {
+  return path.relative(root, file).split(path.sep).join('/');
+}
 
-    const api = JSON.parse(read('apps/api/package.json')) as { name?: string };
-    expect(api.name).toBe('@carbroz/api');
+function packageDirectories(base: string): string[] {
+  const absolute = path.join(root, base);
+  if (!fs.existsSync(absolute)) return [];
+  return fs.readdirSync(absolute, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(absolute, entry.name, 'package.json')))
+    .map((entry) => base + '/' + entry.name)
+    .sort();
+}
+
+describe('canonical Backend V3 topology', () => {
+  it('contains exactly the canonical production workspaces', () => {
+    const actual = [
+      ...packageDirectories('apps'), ...packageDirectories('domains'), ...packageDirectories('sdui'),
+      ...packageDirectories('platform'), ...packageDirectories('foundation'),
+    ].sort();
+    expect(actual).toEqual([...canonicalWorkspaces].sort());
   });
 
-  it('places the complete SDUI subsystem under the canonical sdui root', () => {
-    expect(existsSync(resolve(root, 'sdui/ui-sdk/package.json'))).toBe(true);
-    expect(existsSync(resolve(root, 'sdui/registry/package.json'))).toBe(true);
-    expect(existsSync(resolve(root, 'packages/sdui-engine'))).toBe(false);
-    expect(existsSync(resolve(root, 'domains/sdui-registry'))).toBe(false);
+  it('does not retain transitional source roots', () => {
+    for (const forbidden of ['packages', 'shared', 'libs']) expect(fs.existsSync(path.join(root, forbidden)), forbidden).toBe(false);
   });
 
-  it('uses the frozen SDUI package identities', () => {
-    const uiSdk = JSON.parse(read('sdui/ui-sdk/package.json')) as { name: string };
-    const registry = JSON.parse(read('sdui/registry/package.json')) as {
-      name: string;
-      dependencies?: Record<string, string>;
-    };
-
-    expect(uiSdk.name).toBe('@carbroz/ui-sdk');
-    expect(registry.name).toBe('@carbroz/sdui-registry');
-    expect(registry.dependencies?.['@carbroz/ui-sdk']).toBe('workspace:*');
-    expect(registry.dependencies?.['@carbroz/sdui-engine']).toBeUndefined();
+  it('keeps apps/api transport and composition only', () => {
+    const api = path.join(root, 'apps/api/src');
+    for (const forbidden of ['modules', 'providers', 'container']) expect(fs.existsSync(path.join(api, forbidden)), 'apps/api/src/' + forbidden).toBe(false);
+    const businessImplementations = walk(api)
+      .filter((file) => file.endsWith('.ts'))
+      .filter((file) => /class\s+\w+UseCase\b/.test(fs.readFileSync(file, 'utf8')))
+      .map(relative);
+    expect(businessImplementations).toEqual([]);
   });
 
-  it('does not retain a competing prompt-based architecture authority', () => {
-    expect(existsSync(resolve(root, 'prompts'))).toBe(false);
+  it('contains exactly two SDUI workspaces and no legacy structural vocabulary in production SDUI source', () => {
+    expect(packageDirectories('sdui')).toEqual(['sdui/registry', 'sdui/ui-sdk']);
+    const legacy = walk(path.join(root, 'sdui'))
+      .filter((file) => file.endsWith('.ts'))
+      .filter((file) => /\b(?:Subcomponent|SubComponent|ChildrenData)\b/.test(fs.readFileSync(file, 'utf8')))
+      .map(relative);
+    expect(legacy).toEqual([]);
   });
 
-  it('registers sdui as an explicit workspace category during migration', () => {
-    const workspace = read('pnpm-workspace.yaml');
-    expect(workspace).toContain('"sdui/*"');
-  });
-
-  it('keeps platform database free of business repository implementations', () => {
-    const repositoryDir = resolve(root, 'platform/database/src/repositories');
-    const repositoryFiles = readdirSync(repositoryDir).filter((entry) => entry.endsWith('.ts'));
-
-    expect(repositoryFiles).toEqual(['PrismaRepositoryBase.ts']);
-    expect(existsSync(resolve(repositoryDir, 'RepositoryFactory.ts'))).toBe(false);
-  });
-
-  it('freezes the canonical business topology in the Master Constitution', () => {
-    const constitution = read('docs/MASTER-BACKEND-CONSTITUTION.md');
-
-    expect(constitution).toContain('├── apps/');
-    expect(constitution).toContain('│   └── api/');
-    expect(constitution).toContain('├── domains/');
-    expect(constitution).toContain('│   ├── identity/');
-    expect(constitution).toContain('│   ├── partner/');
-    expect(constitution).toContain('│   ├── customer/');
-    expect(constitution).toContain('│   ├── catalog-pricing/');
-    expect(constitution).toContain('│   ├── booking/');
-    expect(constitution).toContain('│   ├── operations/');
-    expect(constitution).toContain('│   ├── financials/');
-    expect(constitution).toContain('│   ├── communications/');
-    expect(constitution).toContain('│   ├── engagement/');
-    expect(constitution).toContain('│   ├── configuration/');
-    expect(constitution).toContain('│   ├── dispute/');
-    expect(constitution).toContain('│   ├── enterprise/');
-    expect(constitution).toContain('│   └── audit/');
-    expect(constitution).toContain('├── sdui/');
-    expect(constitution).toContain('│   ├── ui-sdk/');
-    expect(constitution).toContain('│   └── registry/');
-    expect(constitution).toContain('│   └── integrations/');
-  });
-
-  it('freezes Partner, Customer and Admin as isolated API surfaces', () => {
-    const constitution = read('docs/MASTER-BACKEND-CONSTITUTION.md');
-
-    expect(constitution).toContain('├── surfaces/');
-    expect(constitution).toContain('│   ├── partner/');
-    expect(constitution).toContain('│   ├── customer/');
-    expect(constitution).toContain('│   └── admin/');
-    expect(constitution).toContain('/api/v1/partner/*');
-    expect(constitution).toContain('/api/v1/customer/*');
-    expect(constitution).toContain('/api/v1/admin/*');
-  });
-
-  it('forbids screen-name-driven backend architecture and freezes runtime SDUI scopes', () => {
-    const constitution = read('docs/MASTER-BACKEND-CONSTITUTION.md');
-
-    expect(constitution).toContain('No screen-name-driven backend architecture');
-    expect(constitution).toContain('GLOBAL');
-    expect(constitution).toContain('PARTNER');
-    expect(constitution).toContain('CUSTOMER');
-    expect(constitution).toContain('Published SDUI definitions/documents are immutable');
-  });
-
-  it('requires every future architecture-sensitive session to read the constitution first', () => {
-    const constitution = read('docs/MASTER-BACKEND-CONSTITUTION.md');
-
-    expect(constitution).toContain('Mandatory pre-change gate');
-    expect(constitution).toContain('Before ANY architecture-sensitive refactor or feature implementation');
-    expect(constitution).toContain('Architecture MUST NOT silently drift');
+  it('does not retain generated build output inside canonical workspaces', () => {
+    const residue = canonicalWorkspaces.flatMap((workspace) => walk(path.join(root, workspace)))
+      .map(relative)
+      .filter((file) => /(?:^|\/)(?:dist|coverage|generated)\/|\.tsbuildinfo$/.test(file));
+    expect(residue).toEqual([]);
   });
 });

@@ -2,6 +2,7 @@ import { BookingStatus } from './BookingStatus.js';
 import { BookingStatusHistoryItem } from './BookingStatusHistoryItem.js';
 import { BookingSnapshots } from './BookingSnapshots.js';
 
+/** BookingProps is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface BookingProps {
   id?: number;
   publicId?: string;
@@ -24,6 +25,7 @@ export interface BookingProps {
   updatedAt?: Date;
 }
 
+/** Booking is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Booking {
   id?: number;
   publicId?: string;

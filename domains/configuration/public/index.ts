@@ -10,3 +10,4 @@ export * from '../application/contracts/init-config.js';
 export * from '../application/use-cases/GetInitConfigUseCase.js';
 export * from '../config.module.js';
 export * from '../module.manifest.js';
+

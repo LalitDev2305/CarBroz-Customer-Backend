@@ -1,3 +1,4 @@
+/** LocationPingProps is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface LocationPingProps {
   latitude: number;
   longitude: number;
@@ -6,6 +7,7 @@ export interface LocationPingProps {
   timestamp?: Date;
 }
 
+/** LocationPing is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export class LocationPing {
   readonly latitude: number;
   readonly longitude: number;

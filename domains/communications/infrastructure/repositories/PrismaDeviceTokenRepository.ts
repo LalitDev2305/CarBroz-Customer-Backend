@@ -1,6 +1,9 @@
+import { DeviceToken } from '../../domain/DeviceToken.js';
+import { IDeviceTokenRepository } from '../../domain/repositories/IDeviceTokenRepository.js';
 import { PrismaClient } from '@prisma/client';
-import { DeviceToken, IDeviceTokenRepository } from '@carbroz/common';
 
+
+/** PrismaDeviceTokenRepository is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaDeviceTokenRepository implements IDeviceTokenRepository {
   private unitOfWorkPrisma: any = null;
 

@@ -2,6 +2,7 @@ import { PaymentStatus } from './PaymentStatus.js';
 import { PaymentMethod } from './PaymentMethod.js';
 import { Money } from '@carbroz/foundation-kernel';
 
+/** PaymentAttempt is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface PaymentAttempt {
   attemptId: string;
   providerPaymentId?: string;
@@ -12,6 +13,7 @@ export interface PaymentAttempt {
   failureReason?: string;
 }
 
+/** PaymentRefund is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface PaymentRefund {
   refundId: string;
   providerRefundId?: string;
@@ -21,6 +23,7 @@ export interface PaymentRefund {
   status: string;
 }
 
+/** PaymentProps is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface PaymentProps {
   id?: number;
   publicId?: string;
@@ -46,6 +49,7 @@ export interface PaymentProps {
   lockVersion?: number;
 }
 
+/** Payment is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Payment {
   id?: number;
   publicId?: string;

@@ -203,9 +203,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  database: link:../../platform/database
-
 importers:
 
   .:
@@ -213,10 +210,58 @@ importers:
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)
-      database:
-        specifier: link:../../platform/database
-        version: link:../../platform/database
     devDependencies:
+      '@carbroz/domain-audit':
+        specifier: workspace:*
+        version: link:domains/audit
+      '@carbroz/domain-booking':
+        specifier: workspace:*
+        version: link:domains/booking
+      '@carbroz/domain-catalog-pricing':
+        specifier: workspace:*
+        version: link:domains/catalog-pricing
+      '@carbroz/domain-communications':
+        specifier: workspace:*
+        version: link:domains/communications
+      '@carbroz/domain-configuration':
+        specifier: workspace:*
+        version: link:domains/configuration
+      '@carbroz/domain-customer':
+        specifier: workspace:*
+        version: link:domains/customer
+      '@carbroz/domain-dispute':
+        specifier: workspace:*
+        version: link:domains/dispute
+      '@carbroz/domain-engagement':
+        specifier: workspace:*
+        version: link:domains/engagement
+      '@carbroz/domain-enterprise':
+        specifier: workspace:*
+        version: link:domains/enterprise
+      '@carbroz/domain-financials':
+        specifier: workspace:*
+        version: link:domains/financials
+      '@carbroz/domain-identity':
+        specifier: workspace:*
+        version: link:domains/identity
+      '@carbroz/domain-operations':
+        specifier: workspace:*
+        version: link:domains/operations
+      '@carbroz/domain-partner':
+        specifier: workspace:*
+        version: link:domains/partner
+      '@carbroz/foundation-kernel':
+        specifier: workspace:*
+        version: link:foundation/kernel
+      '@carbroz/platform-integrations':
+        specifier: workspace:*
+        version: link:platform/integrations
+      '@carbroz/sdui-registry':
+        specifier: workspace:*
+        version: link:sdui/registry
+      '@carbroz/ui-sdk':
+        specifier: workspace:*
+        version: link:sdui/ui-sdk
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.6.0(jiti@2.7.0))
@@ -254,101 +299,74 @@ importers:
         specifier: ^4.1.9
         version: 4.1.9(@types/node@22.20.1)(@vitest/coverage-v8@4.1.9)(vite@8.1.3(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.0)(yaml@2.9.0))
 
-  apps/backend-api:
+  apps/api:
     dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@carbroz/domain-address':
-        specifier: workspace:*
-        version: link:../../domains/address
       '@carbroz/domain-audit':
         specifier: workspace:*
         version: link:../../domains/audit
       '@carbroz/domain-booking':
         specifier: workspace:*
         version: link:../../domains/booking
-      '@carbroz/domain-catalog':
+      '@carbroz/domain-catalog-pricing':
         specifier: workspace:*
-        version: link:../../domains/catalog
-      '@carbroz/domain-config':
+        version: link:../../domains/catalog-pricing
+      '@carbroz/domain-communications':
         specifier: workspace:*
-        version: link:../../domains/config
-      '@carbroz/domain-coupon':
+        version: link:../../domains/communications
+      '@carbroz/domain-configuration':
         specifier: workspace:*
-        version: link:../../domains/coupon
-      '@carbroz/domain-customer-profile':
+        version: link:../../domains/configuration
+      '@carbroz/domain-customer':
         specifier: workspace:*
-        version: link:../../domains/customer-profile
+        version: link:../../domains/customer
       '@carbroz/domain-dispute':
         specifier: workspace:*
         version: link:../../domains/dispute
-      '@carbroz/domain-garage':
+      '@carbroz/domain-engagement':
         specifier: workspace:*
-        version: link:../../domains/garage
+        version: link:../../domains/engagement
+      '@carbroz/domain-enterprise':
+        specifier: workspace:*
+        version: link:../../domains/enterprise
+      '@carbroz/domain-financials':
+        specifier: workspace:*
+        version: link:../../domains/financials
       '@carbroz/domain-identity':
         specifier: workspace:*
         version: link:../../domains/identity
-      '@carbroz/domain-invoice':
+      '@carbroz/domain-operations':
         specifier: workspace:*
-        version: link:../../domains/invoice
-      '@carbroz/domain-notification':
+        version: link:../../domains/operations
+      '@carbroz/domain-partner':
         specifier: workspace:*
-        version: link:../../domains/notification
-      '@carbroz/domain-partner-kyc':
+        version: link:../../domains/partner
+      '@carbroz/foundation-kernel':
         specifier: workspace:*
-        version: link:../../domains/partner-kyc
-      '@carbroz/domain-partner-profile':
-        specifier: workspace:*
-        version: link:../../domains/partner-profile
-      '@carbroz/domain-payment':
-        specifier: workspace:*
-        version: link:../../domains/payment
-      '@carbroz/domain-payout':
-        specifier: workspace:*
-        version: link:../../domains/payout
-      '@carbroz/domain-pricing':
-        specifier: workspace:*
-        version: link:../../domains/pricing
-      '@carbroz/domain-review':
-        specifier: workspace:*
-        version: link:../../domains/review
-      '@carbroz/domain-sdui-registry':
-        specifier: workspace:*
-        version: link:../../domains/sdui-registry
-      '@carbroz/domain-tracking':
-        specifier: workspace:*
-        version: link:../../domains/tracking
+        version: link:../../foundation/kernel
       '@carbroz/platform-cache':
         specifier: workspace:*
         version: link:../../platform/cache
       '@carbroz/platform-database':
         specifier: workspace:*
         version: link:../../platform/database
-      '@carbroz/platform-event-bus':
+      '@carbroz/platform-integrations':
         specifier: workspace:*
-        version: link:../../platform/event-bus
-      '@carbroz/platform-feature-flags':
+        version: link:../../platform/integrations
+      '@carbroz/platform-messaging':
         specifier: workspace:*
-        version: link:../../platform/feature-flags
-      '@carbroz/platform-notification':
-        specifier: workspace:*
-        version: link:../../platform/notification
+        version: link:../../platform/messaging
       '@carbroz/platform-observability':
         specifier: workspace:*
         version: link:../../platform/observability
-      '@carbroz/platform-queue':
-        specifier: workspace:*
-        version: link:../../platform/queue
       '@carbroz/platform-storage':
         specifier: workspace:*
         version: link:../../platform/storage
+      '@carbroz/sdui-registry':
+        specifier: workspace:*
+        version: link:../../sdui/registry
       '@carbroz/ui-sdk':
         specifier: workspace:*
-        version: link:../../packages/ui-sdk
+        version: link:../../sdui/ui-sdk
       '@fastify/awilix':
         specifier: ^8.2.0
         version: 8.2.0(awilix@13.0.5)(fastify@5.9.0)
@@ -380,11 +398,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       '@prisma/client':
-        specifier: ^7.8.0
-        version: 7.8.0(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
       awilix:
         specifier: ^13.0.5
         version: 13.0.5
@@ -425,37 +440,12 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@types/minio':
-        specifier: ^7.1.1
-        version: 7.1.1
-
-  domains/address:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
-      awilix:
-        specifier: ^12.0.0
-        version: 12.1.1
-    devDependencies:
       '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
+        specifier: ^22.20.1
+        version: 22.20.1
 
   domains/audit:
     dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -469,12 +459,15 @@ importers:
 
   domains/booking:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/domain-catalog-pricing':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
+        version: link:../catalog-pricing
+      '@carbroz/domain-customer':
         specifier: workspace:*
-        version: link:../../shared/kernel
+        version: link:../customer
+      '@carbroz/domain-partner':
+        specifier: workspace:*
+        version: link:../partner
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -486,14 +479,11 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
 
-  domains/catalog:
+  domains/catalog-pricing:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/foundation-kernel':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
+        version: link:../../foundation/kernel
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -505,14 +495,8 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
 
-  domains/config:
+  domains/communications:
     dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -524,14 +508,11 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
 
-  domains/coupon:
+  domains/configuration:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/foundation-kernel':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
+        version: link:../../foundation/kernel
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -543,17 +524,11 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
 
-  domains/customer-profile:
+  domains/customer:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/foundation-kernel':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+        version: link:../../foundation/kernel
       awilix:
         specifier: ^12.0.0
         version: 12.1.1
@@ -564,12 +539,21 @@ importers:
 
   domains/dispute:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/domain-audit':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
+        version: link:../audit
+      '@carbroz/domain-booking':
         specifier: workspace:*
-        version: link:../../shared/kernel
+        version: link:../booking
+      '@carbroz/domain-communications':
+        specifier: workspace:*
+        version: link:../communications
+      '@carbroz/domain-financials':
+        specifier: workspace:*
+        version: link:../financials
+      '@carbroz/foundation-kernel':
+        specifier: workspace:*
+        version: link:../../foundation/kernel
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -581,14 +565,70 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
 
-  domains/garage:
+  domains/engagement:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/domain-booking':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
+        version: link:../booking
+      '@carbroz/domain-partner':
         specifier: workspace:*
-        version: link:../../shared/kernel
+        version: link:../partner
+      '@carbroz/foundation-kernel':
+        specifier: workspace:*
+        version: link:../../foundation/kernel
+      '@prisma/client':
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
+  domains/enterprise:
+    dependencies:
+      '@carbroz/domain-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@carbroz/domain-booking':
+        specifier: workspace:*
+        version: link:../booking
+      '@carbroz/domain-communications':
+        specifier: workspace:*
+        version: link:../communications
+      '@carbroz/domain-customer':
+        specifier: workspace:*
+        version: link:../customer
+      '@carbroz/domain-financials':
+        specifier: workspace:*
+        version: link:../financials
+      '@carbroz/domain-identity':
+        specifier: workspace:*
+        version: link:../identity
+      '@carbroz/foundation-kernel':
+        specifier: workspace:*
+        version: link:../../foundation/kernel
+      '@prisma/client':
+        specifier: ^6.19.3
+        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
+
+  domains/financials:
+    dependencies:
+      '@carbroz/domain-booking':
+        specifier: workspace:*
+        version: link:../booking
+      '@carbroz/foundation-kernel':
+        specifier: workspace:*
+        version: link:../../foundation/kernel
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -602,15 +642,9 @@ importers:
 
   domains/identity:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/foundation-kernel':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@carbroz/shared-ui-sdk':
-        specifier: workspace:*
-        version: link:../../shared/ui-sdk
+        version: link:../../foundation/kernel
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -622,14 +656,17 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
 
-  domains/invoice:
+  domains/operations:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/domain-booking':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
+        version: link:../booking
+      '@carbroz/domain-partner':
         specifier: workspace:*
-        version: link:../../shared/kernel
+        version: link:../partner
+      '@carbroz/foundation-kernel':
+        specifier: workspace:*
+        version: link:../../foundation/kernel
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -641,172 +678,14 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
 
-  domains/notification:
+  domains/partner:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/foundation-kernel':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
-      awilix:
-        specifier: ^12.0.0
-        version: 12.1.1
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
-  domains/partner-kyc:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
+        version: link:../../foundation/kernel
       '@carbroz/platform-storage':
         specifier: workspace:*
         version: link:../../platform/storage
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
-      awilix:
-        specifier: ^12.0.0
-        version: 12.1.1
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
-  domains/partner-profile:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
-      awilix:
-        specifier: ^12.0.0
-        version: 12.1.1
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
-  domains/payment:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
-      awilix:
-        specifier: ^12.0.0
-        version: 12.1.1
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
-  domains/payout:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
-      awilix:
-        specifier: ^12.0.0
-        version: 12.1.1
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
-  domains/pricing:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
-      awilix:
-        specifier: ^12.0.0
-        version: 12.1.1
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
-  domains/review:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
-      awilix:
-        specifier: ^12.0.0
-        version: 12.1.1
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
-  domains/sdui-registry:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
-      '@carbroz/shared-ui-sdk':
-        specifier: workspace:*
-        version: link:../../shared/ui-sdk
-      '@prisma/client':
-        specifier: ^6.19.3
-        version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
-      awilix:
-        specifier: ^12.0.0
-        version: 12.1.1
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
-  domains/tracking:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
-        specifier: workspace:*
-        version: link:../../shared/kernel
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -824,37 +703,6 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
 
-  packages/common:
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
-  packages/config:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../common
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-
-  packages/ui-sdk:
-    dependencies:
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-
   platform/cache:
     devDependencies:
       '@types/node':
@@ -863,69 +711,9 @@ importers:
 
   platform/database:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/foundation-kernel':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@carbroz/domain-address':
-        specifier: workspace:*
-        version: link:../../domains/address
-      '@carbroz/domain-audit':
-        specifier: workspace:*
-        version: link:../../domains/audit
-      '@carbroz/domain-booking':
-        specifier: workspace:*
-        version: link:../../domains/booking
-      '@carbroz/domain-catalog':
-        specifier: workspace:*
-        version: link:../../domains/catalog
-      '@carbroz/domain-config':
-        specifier: workspace:*
-        version: link:../../domains/config
-      '@carbroz/domain-coupon':
-        specifier: workspace:*
-        version: link:../../domains/coupon
-      '@carbroz/domain-customer-profile':
-        specifier: workspace:*
-        version: link:../../domains/customer-profile
-      '@carbroz/domain-dispute':
-        specifier: workspace:*
-        version: link:../../domains/dispute
-      '@carbroz/domain-garage':
-        specifier: workspace:*
-        version: link:../../domains/garage
-      '@carbroz/domain-invoice':
-        specifier: workspace:*
-        version: link:../../domains/invoice
-      '@carbroz/domain-notification':
-        specifier: workspace:*
-        version: link:../../domains/notification
-      '@carbroz/domain-partner-kyc':
-        specifier: workspace:*
-        version: link:../../domains/partner-kyc
-      '@carbroz/domain-partner-profile':
-        specifier: workspace:*
-        version: link:../../domains/partner-profile
-      '@carbroz/domain-payment':
-        specifier: workspace:*
-        version: link:../../domains/payment
-      '@carbroz/domain-payout':
-        specifier: workspace:*
-        version: link:../../domains/payout
-      '@carbroz/domain-pricing':
-        specifier: workspace:*
-        version: link:../../domains/pricing
-      '@carbroz/domain-review':
-        specifier: workspace:*
-        version: link:../../domains/review
-      '@carbroz/domain-sdui-registry':
-        specifier: workspace:*
-        version: link:../../domains/sdui-registry
-      '@carbroz/domain-tracking':
-        specifier: workspace:*
-        version: link:../../domains/tracking
+        version: link:../../foundation/kernel
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)
@@ -936,30 +724,36 @@ importers:
         specifier: ^4.19.2
         version: 4.23.0
 
-  platform/event-bus:
+  platform/integrations:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/domain-communications':
         specifier: workspace:*
-        version: link:../../packages/common
-      '@carbroz/shared-kernel':
+        version: link:../../domains/communications
+      '@carbroz/domain-configuration':
         specifier: workspace:*
-        version: link:../../shared/kernel
+        version: link:../../domains/configuration
+      '@carbroz/domain-financials':
+        specifier: workspace:*
+        version: link:../../domains/financials
+      '@carbroz/domain-operations':
+        specifier: workspace:*
+        version: link:../../domains/operations
+      '@carbroz/platform-observability':
+        specifier: workspace:*
+        version: link:../observability
     devDependencies:
       '@types/node':
         specifier: ^26.1.0
         version: 26.1.0
 
-  platform/feature-flags:
+  platform/messaging:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/foundation-kernel':
         specifier: workspace:*
-        version: link:../../packages/common
-
-  platform/notification:
-    dependencies:
-      '@carbroz/common':
-        specifier: workspace:*
-        version: link:../../packages/common
+        version: link:../../foundation/kernel
+      bullmq:
+        specifier: ^5.79.2
+        version: 5.79.2
     devDependencies:
       '@types/node':
         specifier: ^26.1.0
@@ -981,21 +775,14 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  platform/queue:
-    dependencies:
-      bullmq:
-        specifier: ^5.79.2
-        version: 5.79.2
-    devDependencies:
-      '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
-
   platform/storage:
     dependencies:
-      '@carbroz/common':
+      '@carbroz/domain-configuration':
         specifier: workspace:*
-        version: link:../../packages/common
+        version: link:../../domains/configuration
+      '@carbroz/platform-observability':
+        specifier: workspace:*
+        version: link:../observability
       minio:
         specifier: ^8.0.7
         version: 8.0.7
@@ -1004,24 +791,37 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
 
-  shared/kernel:
+  sdui/registry:
+    dependencies:
+      '@carbroz/foundation-kernel':
+        specifier: workspace:*
+        version: link:../../foundation/kernel
+      '@carbroz/ui-sdk':
+        specifier: workspace:*
+        version: link:../ui-sdk
+      awilix:
+        specifier: ^12.0.0
+        version: 12.1.1
     devDependencies:
       '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
+        specifier: ^22.20.1
+        version: 22.20.1
 
-  shared/ui-sdk:
+  sdui/ui-sdk:
     dependencies:
       zod:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
       '@types/node':
-        specifier: ^26.1.0
-        version: 26.1.0
+        specifier: ^22.20.1
+        version: 22.20.1
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+      vitest:
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@22.20.1)(@vitest/coverage-v8@4.1.9)(vite@8.1.3(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.0)(yaml@2.9.0))
 
 packages:
 
@@ -1433,27 +1233,12 @@ packages:
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
 
-  '@prisma/client-runtime-utils@7.8.0':
-    resolution: {integrity: sha512-5NQZztQ0oY/ADFkmd9gPuweH5A1/CCY8YQPorLLO0Mu6a87mY5gsnDkzmFmIHs9NFaLnZojzgddFVN4RpKYrdw==}
-
   '@prisma/client@6.19.3':
     resolution: {integrity: sha512-mKq3jQFhjvko5LTJFHGilsuQs+W+T3Gm451NzuTDGQxwCzwXHYnIu2zGkRoW+Exq3Rob7yp2MfzSrdIiZVhrBg==}
     engines: {node: '>=18.18'}
     peerDependencies:
       prisma: '*'
       typescript: '>=5.1.0'
-    peerDependenciesMeta:
-      prisma:
-        optional: true
-      typescript:
-        optional: true
-
-  '@prisma/client@7.8.0':
-    resolution: {integrity: sha512-HFp3Dawv/3sU3JtlPha90IB+48lS7zHiH4LKZPjmcE8YH5P9DOXGPvo8dqOtO7MqLDd1p2hOWMcFlRT1DMblHw==}
-    engines: {node: ^20.19 || ^22.12 || >=24.0}
-    peerDependencies:
-      prisma: '*'
-      typescript: '>=5.4.0'
     peerDependenciesMeta:
       prisma:
         optional: true
@@ -1712,10 +1497,6 @@ packages:
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
-
-  '@types/minio@7.1.1':
-    resolution: {integrity: sha512-B7OWB7JwIxVBxypiS3gA96gaK4yo2UknGdqmuQsTccZZ/ABiQ2F3fTe9lZIXL6ZuN23l+mWIC3J4CefKNyWjxA==}
-    deprecated: This is a stub types definition. minio provides its own type definitions, so you do not need this installed.
 
   '@types/node@22.20.1':
     resolution: {integrity: sha512-EANqOCF9QFyra+4pfxUcX9STKJpCLjMbObVzljIJomAWSnuSIEAvyzEU53GaajbXJEgdh0iEcPL+DGvpUd4k1Q==}
@@ -3594,21 +3375,12 @@ snapshots:
 
   '@pinojs/redact@0.4.0': {}
 
-  '@prisma/client-runtime-utils@7.8.0': {}
-
   '@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)':
     optionalDependencies:
       prisma: 6.19.3(typescript@6.0.3)
       typescript: 6.0.3
 
   '@prisma/client@6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)':
-    optionalDependencies:
-      prisma: 7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
-      typescript: 6.0.3
-
-  '@prisma/client@7.8.0(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)':
-    dependencies:
-      '@prisma/client-runtime-utils': 7.8.0
     optionalDependencies:
       prisma: 7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
       typescript: 6.0.3
@@ -3864,10 +3636,6 @@ snapshots:
   '@types/estree@1.0.9': {}
 
   '@types/json-schema@7.0.15': {}
-
-  '@types/minio@7.1.1':
-    dependencies:
-      minio: 8.0.7
 
   '@types/node@22.20.1':
     dependencies:

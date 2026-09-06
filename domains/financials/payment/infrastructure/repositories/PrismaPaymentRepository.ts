@@ -5,6 +5,7 @@ import type { PaymentMethod } from '../../domain/PaymentMethod.js';
 import type { PaymentStatus } from '../../domain/PaymentStatus.js';
 import { PaymentWebhook } from '../../domain/PaymentWebhook.js';
 
+/** PrismaPaymentRepository is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaPaymentRepository implements IPaymentRepository {
   private unitOfWorkPrisma: any = null;
 

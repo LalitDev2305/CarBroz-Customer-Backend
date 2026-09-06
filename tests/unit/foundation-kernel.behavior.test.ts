@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { Entity } from '../../foundation/kernel/src/domain/base/Entity.js';
-import { AggregateRoot } from '../../foundation/kernel/src/domain/base/AggregateRoot.js';
+import { Entity } from '@carbroz/foundation-kernel';
+import { AggregateRoot } from '@carbroz/foundation-kernel';
 import type { IDomainEvent } from '../../foundation/kernel/src/domain/base/IDomainEvent.js';
-import { Result } from '../../foundation/kernel/src/domain/base/Result.js';
-import { DomainError } from '../../foundation/kernel/src/domain/errors/DomainError.js';
+import { Result } from '@carbroz/foundation-kernel';
+import { DomainError } from '@carbroz/foundation-kernel';
 import {
   ApplicationError,
   BadRequestError,

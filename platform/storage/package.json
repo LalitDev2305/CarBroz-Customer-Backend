@@ -8,7 +8,8 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@carbroz/common": "workspace:*",
+    "@carbroz/domain-configuration": "workspace:*",
+    "@carbroz/platform-observability": "workspace:*",
     "minio": "^8.0.7"
   },
   "devDependencies": {

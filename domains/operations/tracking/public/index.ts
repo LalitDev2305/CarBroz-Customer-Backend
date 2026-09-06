@@ -9,3 +9,4 @@ export * from '../application/CancelTrackingSessionUseCase.js';
 export * from '../application/SyncOfflineGpsLocationsUseCase.js';
 export * from '../tracking.module.js';
 export * from '../module.manifest.js';
+export * from '../domain/repositories/ITrackingSessionRepository.js';

@@ -1,5 +1,6 @@
 import { SduiNodeStatus } from './SduiNodeStatus.js';
 
+/** SduiGroupProps is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface SduiGroupProps {
   id: number;
   publicId: string;
@@ -14,6 +15,7 @@ export interface SduiGroupProps {
   updatedAt: Date;
 }
 
+/** SduiGroupEntity is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class SduiGroupEntity {
   public readonly id: number;
   public readonly publicId: string;

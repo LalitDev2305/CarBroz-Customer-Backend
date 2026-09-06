@@ -203,8 +203,8 @@ function normalizeConstitutionReferences() {
     for (const file of walk(path.join(root, base))) {
       if (!textExtensions.has(path.extname(file))) continue;
       const content = fs.readFileSync(file, 'utf8');
-      if (!content.includes('MASTER_BACKEND_CONSTITUTION.md')) continue;
-      fs.writeFileSync(file, content.replaceAll('MASTER_BACKEND_CONSTITUTION.md', 'MASTER-BACKEND-CONSTITUTION.md'));
+      if (!content.includes('MASTER-BACKEND-CONSTITUTION.md')) continue;
+      fs.writeFileSync(file, content.replaceAll('MASTER-BACKEND-CONSTITUTION.md', 'MASTER-BACKEND-CONSTITUTION.md'));
     }
   }
 }

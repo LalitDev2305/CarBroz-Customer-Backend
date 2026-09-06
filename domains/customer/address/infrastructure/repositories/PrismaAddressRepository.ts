@@ -6,6 +6,7 @@ import type {
   AddressTransactionClient,
 } from '../persistence/AddressPersistenceClient.js';
 
+/** PrismaAddressRepository is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaAddressRepository implements IAddressRepository {
   constructor(
     private readonly prisma: AddressPersistenceClient,

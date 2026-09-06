@@ -3,6 +3,7 @@ import type { IPartnerPayoutRepository } from '../../domain/repositories/IPartne
 import { PartnerPayout } from '../../domain/PartnerPayout.js';
 import type { PayoutStatus } from '../../domain/PayoutStatus.js';
 
+/** PrismaPartnerPayoutRepository is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaPartnerPayoutRepository implements IPartnerPayoutRepository {
   private unitOfWorkPrisma: any = null;
 

@@ -1,6 +1,7 @@
-import { IRepository } from '@carbroz/common';
+import { IRepository } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from '../providers/PrismaProvider.js';
 
+/** IPrismaDelegate is an exported platform/database contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IPrismaDelegate<TModel, TFindManyArgs, TFindUniqueArgs, TCreateArgs, TUpdateArgs> {
   findUnique(args: TFindUniqueArgs): Promise<TModel | null>;
   findMany(args?: TFindManyArgs): Promise<TModel[]>;
@@ -8,6 +9,7 @@ export interface IPrismaDelegate<TModel, TFindManyArgs, TFindUniqueArgs, TCreate
   update(args: TUpdateArgs): Promise<TModel>;
 }
 
+/** PrismaRepositoryBase is an exported platform/database contract/implementation; see the owning README for lifecycle and extension rules. */
 export abstract class PrismaRepositoryBase<
   TEntity,
   TId,

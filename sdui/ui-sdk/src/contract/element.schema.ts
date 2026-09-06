@@ -14,4 +14,5 @@ export const elementSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional(),
 }).strict();
 
+/** SduiElement is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiElement = z.infer<typeof elementSchema>;

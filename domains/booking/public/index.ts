@@ -6,3 +6,8 @@ export * from '../domain/repositories/IBookingRepository.js';
 export * from '../application/BookingUseCases.js';
 export * from '../booking.module.js';
 export * from '../module.manifest.js';
+export * from '../application/use-cases/CancelBookingUseCase.js';
+export * from '../application/use-cases/ConfirmBookingUseCase.js';
+export * from '../application/use-cases/CreateBookingUseCase.js';
+export * from '../application/use-cases/ExpirePendingBookingsUseCase.js';
+export * from '../application/use-cases/TransitionBookingStatusUseCase.js';

@@ -4,6 +4,7 @@ import { PartnerStatus } from '../../domain/PartnerStatus.js';
 import { PartnerType } from '../../domain/PartnerType.js';
 import type { IPartnerRepository } from '../../domain/repositories/IPartnerRepository.js';
 
+/** PrismaPartnerRepository is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaPartnerRepository implements IPartnerRepository {
   private unitOfWorkPrisma: PrismaClient | null = null;
 

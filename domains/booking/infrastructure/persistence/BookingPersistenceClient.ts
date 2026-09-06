@@ -1,3 +1,4 @@
+/** BookingPersistenceRecord is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface BookingPersistenceRecord {
   id: number;
   publicId: string;
@@ -26,6 +27,7 @@ interface BookingPersistenceDelegate {
   update(args: unknown): Promise<BookingPersistenceRecord>;
 }
 
+/** BookingPersistenceClient is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface BookingPersistenceClient {
   readonly booking: BookingPersistenceDelegate;
 }

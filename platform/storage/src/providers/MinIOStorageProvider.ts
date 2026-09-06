@@ -1,9 +1,12 @@
-import { IStorageProvider, ILoggerProvider, IConfigProvider } from '@carbroz/common';
+import { IStorageProvider } from '../ports/IStorageProvider.js';
+import { ILoggerProvider } from '@carbroz/platform-observability';
+import { IConfigProvider } from '@carbroz/domain-configuration';
 import * as Minio from 'minio';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
 
+/** MinIOStorageProvider is an exported platform/storage contract/implementation; see the owning README for lifecycle and extension rules. */
 export class MinIOStorageProvider implements IStorageProvider {
   private client: Minio.Client | null = null;
   private isMockMode = false;

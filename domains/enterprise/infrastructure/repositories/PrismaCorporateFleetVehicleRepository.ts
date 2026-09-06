@@ -1,6 +1,9 @@
+import { ICorporateFleetVehicleRepository } from '../../domain/repositories/ICorporateFleetVehicleRepository.js';
+import { CorporateFleetVehicle } from '../../domain/CorporateFleetVehicle.js';
 import { PrismaClient } from '@prisma/client';
-import { ICorporateFleetVehicleRepository, CorporateFleetVehicle } from '@carbroz/common';
 
+
+/** PrismaCorporateFleetVehicleRepository is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaCorporateFleetVehicleRepository implements ICorporateFleetVehicleRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

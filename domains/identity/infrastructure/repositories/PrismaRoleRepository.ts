@@ -2,6 +2,7 @@ import type { IRoleRepository } from '../../domain/repositories/IRoleRepository.
 import type { Role } from '../../domain/Role.js';
 import { PrismaClient } from '@prisma/client';
 
+/** PrismaRoleRepository is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaRoleRepository implements IRoleRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

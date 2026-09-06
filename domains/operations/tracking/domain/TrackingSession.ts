@@ -1,6 +1,7 @@
 import { TrackingStatus } from './TrackingStatus.js';
 import { LocationPing } from './LocationPing.js';
 
+/** TrackingSessionProps is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface TrackingSessionProps {
   id?: number;
   publicId?: string;
@@ -19,6 +20,7 @@ export interface TrackingSessionProps {
   updatedAt?: Date;
 }
 
+/** TrackingSession is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export class TrackingSession {
   id?: number;
   publicId?: string;

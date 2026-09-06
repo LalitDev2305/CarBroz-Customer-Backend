@@ -2,6 +2,7 @@ import { Money } from '@carbroz/foundation-kernel';
 import { DisputeStatus } from './DisputeStatus.js';
 import { DisputeReason } from './DisputeReason.js';
 
+/** DisputeProps is an exported domains/dispute contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface DisputeProps {
   id?: number;
   publicId?: string;
@@ -19,6 +20,7 @@ export interface DisputeProps {
   updatedAt?: Date;
 }
 
+/** Dispute is an exported domains/dispute contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Dispute {
   id?: number;
   publicId?: string;

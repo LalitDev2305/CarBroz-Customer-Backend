@@ -1,3 +1,4 @@
+/** PaymentWebhookProps is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface PaymentWebhookProps {
   id?: number;
   publicId?: string;
@@ -12,6 +13,7 @@ export interface PaymentWebhookProps {
   retryCount?: number;
 }
 
+/** PaymentWebhook is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PaymentWebhook {
   id?: number;
   publicId?: string;

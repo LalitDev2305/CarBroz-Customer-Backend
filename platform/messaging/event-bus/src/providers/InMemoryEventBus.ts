@@ -1,11 +1,13 @@
 import type { DomainEvent } from '@carbroz/foundation-kernel';
 
+/** EventBus is an exported platform/messaging contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface EventBus {
   publish(event: DomainEvent): Promise<void>;
   publishAll(events: DomainEvent[]): Promise<void>;
   subscribe(eventName: string, handler: (event: DomainEvent) => Promise<void>): void;
 }
 
+/** InMemoryEventBus is an exported platform/messaging contract/implementation; see the owning README for lifecycle and extension rules. */
 export class InMemoryEventBus implements EventBus {
   private readonly handlers = new Map<string, Array<(event: DomainEvent) => Promise<void>>>();
 

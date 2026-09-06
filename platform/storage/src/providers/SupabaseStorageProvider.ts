@@ -1,5 +1,5 @@
-import { IStorageProvider } from '@carbroz/common';
-
+import { IStorageProvider } from '../ports/IStorageProvider.js';
+/** PresignedUrlOptions is an exported platform/storage contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface PresignedUrlOptions {
   bucket: string;
   objectName: string;
@@ -7,11 +7,13 @@ export interface PresignedUrlOptions {
   contentType?: string;
 }
 
+/** FileValidationOptions is an exported platform/storage contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface FileValidationOptions {
   maxSizeBytes?: number;
   allowedMimeTypes?: string[];
 }
 
+/** SupabaseStorageProvider is an exported platform/storage contract/implementation; see the owning README for lifecycle and extension rules. */
 export class SupabaseStorageProvider implements IStorageProvider {
   private readonly baseUrl: string;
   private readonly defaultBucket: string;

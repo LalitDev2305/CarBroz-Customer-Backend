@@ -4,6 +4,7 @@ import { KycDocumentType } from '../domain/KycDocumentType.js';
 import type { IKycDocumentRepository } from '../domain/repositories/IKycDocumentRepository.js';
 import type { KycStoragePort } from './ports/KycStoragePort.js';
 
+/** UploadKycInput is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface UploadKycInput {
   partnerId: number;
   uploadedById: number;
@@ -22,6 +23,7 @@ function sanitizeFileName(fileName: string): string {
   return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
 }
 
+/** UploadPartnerKycDocumentUseCase is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export class UploadPartnerKycDocumentUseCase {
   constructor(
     private readonly kycRepository: IKycDocumentRepository,
@@ -29,6 +31,7 @@ export class UploadPartnerKycDocumentUseCase {
     private readonly now: () => number = Date.now,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   public async execute(input: UploadKycInput): Promise<{ document: KycDocument; presignedUrl: string }> {
     await this.storageProvider.validateFile(input.fileBuffer, input.mimeType, {
       maxSizeBytes: KYC_MAX_FILE_SIZE_BYTES,

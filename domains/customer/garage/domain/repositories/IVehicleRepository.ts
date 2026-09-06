@@ -1,5 +1,6 @@
 import type { Vehicle } from '../Vehicle.js';
 
+/** IVehicleRepository is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IVehicleRepository {
   create(vehicle: Vehicle): Promise<Vehicle>;
   findById(id: number): Promise<Vehicle | null>;

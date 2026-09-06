@@ -1,3 +1,4 @@
+/** CouponUsageProps is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CouponUsageProps {
   id?: number;
   publicId?: string;
@@ -8,6 +9,7 @@ export interface CouponUsageProps {
   usedAt?: Date;
 }
 
+/** CouponUsage is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CouponUsage {
   id?: number;
   publicId?: string;

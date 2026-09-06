@@ -1,15 +1,14 @@
-import {
-  ICorporateAccountRepository,
-  ICorporateInvoiceRepository,
-  IBookingRepository,
-  CorporateInvoice,
-  TaxCalculator,
-  NotificationService,
-  AuditLogService,
-  Money,
-} from '@carbroz/common';
+import { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
+import { ICorporateInvoiceRepository } from '../domain/repositories/ICorporateInvoiceRepository.js';
+import { CorporateInvoice } from '../domain/CorporateInvoice.js';
+import { IBookingRepository } from '@carbroz/domain-booking';
+import { TaxCalculator } from '@carbroz/domain-financials';
+import { NotificationService } from '@carbroz/domain-communications';
+import { AuditLogService } from '@carbroz/domain-audit';
+import { Money } from '@carbroz/foundation-kernel';
 import { GenerateCorporateInvoiceDto } from '../dtos/corporate.dto.js';
 
+/** GenerateCorporateInvoiceUseCase is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class GenerateCorporateInvoiceUseCase {
   constructor(
     private readonly corporateAccountRepo: ICorporateAccountRepository,
@@ -19,6 +18,7 @@ export class GenerateCorporateInvoiceUseCase {
     private readonly auditLogService: AuditLogService
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(dto: GenerateCorporateInvoiceDto, adminUserId: number) {
     void this.notificationService;
     const account = await this.corporateAccountRepo.findByPublicId(dto.accountPublicId);

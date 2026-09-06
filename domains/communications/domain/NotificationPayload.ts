@@ -1,5 +1,6 @@
 import { NotificationChannel } from './NotificationChannel.js';
 
+/** NotificationPayloadProps is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface NotificationPayloadProps {
   channel: NotificationChannel;
   templateId: string;
@@ -11,6 +12,7 @@ export interface NotificationPayloadProps {
   data?: Record<string, any>;
 }
 
+/** NotificationPayload is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export class NotificationPayload {
   readonly channel: NotificationChannel;
   readonly templateId: string;

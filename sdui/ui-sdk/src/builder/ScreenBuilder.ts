@@ -1,6 +1,7 @@
 import { screenSchema, type SduiScreen, type SduiTheme } from '../contract/screen.schema.js';
 import type { SduiTemplate } from '../contract/template.schema.js';
 
+/** ScreenBuilderInput is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ScreenBuilderInput {
   screenId: string;
   schemaVersion: string;
@@ -8,6 +9,7 @@ export interface ScreenBuilderInput {
   metadata?: Record<string, unknown>;
 }
 
+/** ScreenBuilder is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ScreenBuilder {
   private template?: SduiTemplate;
   private theme?: SduiTheme;

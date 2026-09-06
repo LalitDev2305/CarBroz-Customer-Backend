@@ -1,6 +1,7 @@
 import { Money } from '@carbroz/foundation-kernel';
 import { InvoiceStatus } from './InvoiceStatus.js';
 
+/** InvoiceDocument is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface InvoiceDocument {
   invoiceNumber: string;
   bookingPublicId: string;
@@ -20,6 +21,7 @@ export interface InvoiceDocument {
   issuedAt: Date | string;
 }
 
+/** InvoiceProps is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface InvoiceProps {
   id?: number;
   publicId?: string;
@@ -34,6 +36,7 @@ export interface InvoiceProps {
   updatedAt?: Date;
 }
 
+/** Invoice is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Invoice {
   id?: number;
   publicId?: string;

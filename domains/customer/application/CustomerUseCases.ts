@@ -13,13 +13,16 @@ function canAccessCustomer(context: ExecutionContext, customerId: number): boole
     || String(actor.id) === String(customerId);
 }
 
+/** GetCustomerProfileRequest is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface GetCustomerProfileRequest { userId: number; }
+/** GetCustomerProfileInput is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface GetCustomerProfileInput { context: ExecutionContext; data: GetCustomerProfileRequest; }
 
 /** Retrieves or initializes a Customer-owned profile for an authorized actor. */
 export class GetCustomerProfileUseCase implements IUseCase<GetCustomerProfileInput, CustomerProfile> {
   constructor(private readonly customerProfileRepository: ICustomerProfileRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(request: GetCustomerProfileInput): Promise<CustomerProfile> {
     if (!canAccessCustomer(request.context, request.data.userId)) {
       throw new Error('FORBIDDEN: You do not have permission to view this profile');
@@ -37,6 +40,7 @@ export class GetCustomerProfileUseCase implements IUseCase<GetCustomerProfileInp
   }
 }
 
+/** UpdateCustomerProfileRequest is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface UpdateCustomerProfileRequest {
   userId: number;
   firstName?: string | null;
@@ -45,12 +49,14 @@ export interface UpdateCustomerProfileRequest {
   gender?: string | null;
   marketingOptIn?: boolean;
 }
+/** UpdateCustomerProfileInput is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface UpdateCustomerProfileInput { context: ExecutionContext; data: UpdateCustomerProfileRequest; }
 
 /** Updates Customer-owned profile fields for an authorized actor. */
 export class UpdateCustomerProfileUseCase implements IUseCase<UpdateCustomerProfileInput, CustomerProfile> {
   constructor(private readonly customerProfileRepository: ICustomerProfileRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(request: UpdateCustomerProfileInput): Promise<CustomerProfile> {
     if (!canAccessCustomer(request.context, request.data.userId)) {
       throw new Error('FORBIDDEN: You do not have permission to edit this profile');
@@ -67,20 +73,25 @@ export class UpdateCustomerProfileUseCase implements IUseCase<UpdateCustomerProf
   }
 }
 
+/** AddressAction is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export type AddressAction = 'ADD' | 'UPDATE' | 'DELETE' | 'GET_ALL' | 'GET_DEFAULT';
+/** ManageAddressRequest is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ManageAddressRequest {
   userId: number;
   action: AddressAction;
   addressId?: number;
   payload?: Partial<Address>;
 }
+/** ManageAddressInput is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ManageAddressInput { context: ExecutionContext; data: ManageAddressRequest; }
+/** ManageAddressResult is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export type ManageAddressResult = Address | Address[] | null | boolean;
 
 /** Orchestrates Customer-owned address queries and mutations through the repository port. */
 export class ManageAddressUseCase implements IUseCase<ManageAddressInput, ManageAddressResult> {
   constructor(private readonly addressRepository: IAddressRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(request: ManageAddressInput): Promise<ManageAddressResult> {
     if (!canAccessCustomer(request.context, request.data.userId)) {
       throw new Error('FORBIDDEN: You do not have permission to manage these addresses');
@@ -120,8 +131,11 @@ export class ManageAddressUseCase implements IUseCase<ManageAddressInput, Manage
   }
 }
 
+/** ExtractCustomerDataRequest is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ExtractCustomerDataRequest { userId: number; }
+/** ExtractCustomerDataInput is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ExtractCustomerDataInput { context: ExecutionContext; data: ExtractCustomerDataRequest; }
+/** ExtractedCustomerData is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ExtractedCustomerData {
   userId: number;
   extractedAt: string;
@@ -136,6 +150,7 @@ export class ExtractCustomerDataUseCase implements IUseCase<ExtractCustomerDataI
     private readonly addressRepository: IAddressRepository,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(request: ExtractCustomerDataInput): Promise<ExtractedCustomerData> {
     if (!canAccessCustomer(request.context, request.data.userId)) {
       throw new Error('FORBIDDEN: You do not have permission to extract this data');

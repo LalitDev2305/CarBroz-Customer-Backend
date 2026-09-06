@@ -2,6 +2,7 @@ import type { ServiceCategory } from '../ServiceCategory.js';
 import type { Service } from '../Service.js';
 import type { ServiceAddon } from '../ServiceAddon.js';
 
+/** ICatalogRepository is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ICatalogRepository {
   findById(id: number): Promise<ServiceCategory | null>;
   findAll(): Promise<ServiceCategory[]>;

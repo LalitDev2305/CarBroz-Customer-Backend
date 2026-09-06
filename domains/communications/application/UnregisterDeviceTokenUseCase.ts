@@ -1,20 +1,15 @@
-import type { IDeviceTokenRepository } from '@carbroz/common';
+import type { IDeviceTokenRepository } from '../domain/repositories/IDeviceTokenRepository.js';
 
 export interface UnregisterTokenInput {
   userId: number;
   deviceId: string;
 }
 
-/**
- * Deactivates a registered device token through the Communications repository port.
- *
- * Application orchestration depends on the repository contract rather than a Prisma adapter so
- * persistence technology can change without changing this use case.
- */
+/** Deactivates one device token through the Communications repository port. */
 export class UnregisterDeviceTokenUseCase {
   constructor(private readonly tokenRepository: IDeviceTokenRepository) {}
 
-  public async execute(input: UnregisterTokenInput): Promise<void> {
+  async execute(input: UnregisterTokenInput): Promise<void> {
     await this.tokenRepository.deactivate(input.userId, input.deviceId);
   }
 }

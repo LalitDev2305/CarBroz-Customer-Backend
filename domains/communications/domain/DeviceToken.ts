@@ -1,3 +1,4 @@
+/** DeviceTokenProps is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface DeviceTokenProps {
   id?: number;
   publicId?: string;
@@ -12,6 +13,7 @@ export interface DeviceTokenProps {
   updatedAt?: Date;
 }
 
+/** DeviceToken is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export class DeviceToken {
   id?: number;
   publicId?: string;

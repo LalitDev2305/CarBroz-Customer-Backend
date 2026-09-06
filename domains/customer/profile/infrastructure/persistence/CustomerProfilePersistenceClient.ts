@@ -1,3 +1,4 @@
+/** CustomerProfilePersistenceRecord is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CustomerProfilePersistenceRecord {
   id: number;
   publicId?: string | null;
@@ -12,6 +13,7 @@ export interface CustomerProfilePersistenceRecord {
   deletedAt?: Date | null;
 }
 
+/** CustomerProfilePersistenceDelegate is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CustomerProfilePersistenceDelegate {
   findUnique(args: unknown): Promise<CustomerProfilePersistenceRecord | null>;
   findMany(args: unknown): Promise<CustomerProfilePersistenceRecord[]>;
@@ -19,6 +21,7 @@ export interface CustomerProfilePersistenceDelegate {
   create(args: unknown): Promise<CustomerProfilePersistenceRecord>;
 }
 
+/** CustomerProfilePersistenceClient is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CustomerProfilePersistenceClient {
   customerProfile: CustomerProfilePersistenceDelegate;
 }

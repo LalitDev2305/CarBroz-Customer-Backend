@@ -6,6 +6,7 @@ import type {
   BookingPersistenceRecord,
 } from '../persistence/BookingPersistenceClient.js';
 
+/** PrismaBookingRepository is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaBookingRepository implements IBookingRepository {
   constructor(private readonly prisma: BookingPersistenceClient) {}
 

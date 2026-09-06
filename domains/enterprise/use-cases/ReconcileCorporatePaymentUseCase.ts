@@ -1,12 +1,11 @@
-import {
-  ICorporateAccountRepository,
-  ICorporateInvoiceRepository,
-  ICorporateCreditLedgerRepository,
-  CorporateCreditLedger,
-  AuditLogService,
-} from '@carbroz/common';
+import { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
+import { ICorporateInvoiceRepository } from '../domain/repositories/ICorporateInvoiceRepository.js';
+import { ICorporateCreditLedgerRepository } from '../domain/repositories/ICorporateCreditLedgerRepository.js';
+import { CorporateCreditLedger } from '../domain/CorporateCreditLedger.js';
+import { AuditLogService } from '@carbroz/domain-audit';
 import { ReconcileCorporatePaymentDto } from '../dtos/corporate.dto.js';
 
+/** ReconcileCorporatePaymentUseCase is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ReconcileCorporatePaymentUseCase {
   constructor(
     private readonly corporateAccountRepo: ICorporateAccountRepository,
@@ -15,6 +14,7 @@ export class ReconcileCorporatePaymentUseCase {
     private readonly auditLogService: AuditLogService
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(dto: ReconcileCorporatePaymentDto, adminUserId: number) {
     const invoice = await this.corporateInvoiceRepo.findByPublicId(dto.invoicePublicId);
     if (!invoice) {

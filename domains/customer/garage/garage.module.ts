@@ -14,6 +14,7 @@ interface GarageCradle {
   prismaProvider: PrismaProviderPort;
 }
 
+/** registerGarageModule is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export function registerGarageModule(container: AwilixContainer): void {
   container.register({
     vehicleRepository: asFunction(

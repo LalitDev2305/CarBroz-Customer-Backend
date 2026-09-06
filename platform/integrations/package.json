@@ -4,9 +4,17 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "scripts": { "build": "tsc" },
-  "dependencies": {
-    "@carbroz/common": "workspace:*"
+  "scripts": {
+    "build": "tsc"
   },
-  "devDependencies": { "@types/node": "^26.1.0" }
+  "dependencies": {
+    "@carbroz/domain-communications": "workspace:*",
+    "@carbroz/domain-configuration": "workspace:*",
+    "@carbroz/domain-financials": "workspace:*",
+    "@carbroz/domain-operations": "workspace:*",
+    "@carbroz/platform-observability": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0"
+  }
 }

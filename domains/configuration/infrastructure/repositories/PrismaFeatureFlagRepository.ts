@@ -2,6 +2,7 @@ import type { PrismaClient } from '@prisma/client';
 import type { FeatureFlag } from '../../domain/FeatureFlag.js';
 import type { IFeatureFlagRepository } from '../../domain/repositories/IFeatureFlagRepository.js';
 
+/** PrismaFeatureFlagRepository is an exported domains/configuration contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaFeatureFlagRepository implements IFeatureFlagRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

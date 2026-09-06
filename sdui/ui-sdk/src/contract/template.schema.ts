@@ -9,4 +9,5 @@ export const templateSchema = z.object({
   components: z.array(componentSchema).min(1),
 }).strict();
 
+/** SduiTemplate is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiTemplate = z.infer<typeof templateSchema>;

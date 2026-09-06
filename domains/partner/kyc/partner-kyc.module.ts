@@ -8,6 +8,7 @@ interface PartnerKycCradle {
   };
 }
 
+/** registerPartnerKycModule is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export function registerPartnerKycModule(container: AwilixContainer): void {
   container.register({
     kycDocumentRepository: asFunction(

@@ -4,6 +4,7 @@ import type { ServiceCategory } from '../catalog/domain/ServiceCategory.js';
 import type { ICatalogRepository } from '../catalog/domain/repositories/ICatalogRepository.js';
 import type { IPricingRepository } from '../pricing/domain/repositories/IPricingRepository.js';
 
+/** CategoryWithServices is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CategoryWithServices extends ServiceCategory {
   services?: Service[];
 }
@@ -12,6 +13,7 @@ export interface CategoryWithServices extends ServiceCategory {
 export class GetCatalogUseCase implements IUseCase<void, CategoryWithServices[]> {
   constructor(private readonly catalogRepository: ICatalogRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(): Promise<CategoryWithServices[]> {
     const categories = await this.catalogRepository.findAllActiveCategories();
     return Promise.all(
@@ -23,12 +25,14 @@ export class GetCatalogUseCase implements IUseCase<void, CategoryWithServices[]>
   }
 }
 
+/** CalculatePriceRequest is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CalculatePriceRequest {
   serviceId: number;
   vehicleType: string;
   addonIds?: number[];
 }
 
+/** CalculatedPriceResult is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CalculatedPriceResult {
   serviceId: number;
   serviceName: string;
@@ -50,6 +54,7 @@ export class CalculateServicePriceUseCase
     private readonly pricingRepository: IPricingRepository,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(request: { data: CalculatePriceRequest }): Promise<CalculatedPriceResult> {
     const { serviceId, vehicleType, addonIds = [] } = request.data;
     const service = await this.catalogRepository.findServiceById(serviceId);
@@ -91,6 +96,7 @@ export class CalculateServicePriceUseCase
   }
 }
 
+/** ManageCatalogRequest is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ManageCatalogRequest {
   action: 'CREATE_CATEGORY' | 'UPDATE_CATEGORY' | 'CREATE_SERVICE' | 'UPDATE_SERVICE' | 'CREATE_ADDON';
   categoryId?: number;
@@ -105,6 +111,7 @@ export class ManageCatalogUseCase
 {
   constructor(private readonly catalogRepository: ICatalogRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(request: { context: ExecutionContext; data: ManageCatalogRequest }): Promise<unknown> {
     const actor = request.context.actor;
     if (actor?.kind !== 'ADMIN' && !actor?.roles.includes('ADMIN')) {
@@ -137,6 +144,7 @@ export class ManageCatalogUseCase
   }
 }
 
+/** ManagePricingRequest is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ManagePricingRequest {
   action: 'CREATE_TIER' | 'SET_VEHICLE_MULTIPLIER';
   serviceId: number;
@@ -149,6 +157,7 @@ export class ManagePricingTierUseCase
 {
   constructor(private readonly pricingRepository: IPricingRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(request: { context: ExecutionContext; data: ManagePricingRequest }): Promise<unknown> {
     const actor = request.context.actor;
     if (actor?.kind !== 'ADMIN' && !actor?.roles.includes('ADMIN')) {

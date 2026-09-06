@@ -1,5 +1,6 @@
 import { ServiceAddon } from './ServiceAddon.js';
 
+/** Service is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Service {
   id?: number;
   publicId?: string;

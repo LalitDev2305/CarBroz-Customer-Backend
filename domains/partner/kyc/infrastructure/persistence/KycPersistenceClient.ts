@@ -1,6 +1,7 @@
 import type { KycDocumentStatus } from '../../domain/KycDocumentStatus.js';
 import type { KycDocumentType } from '../../domain/KycDocumentType.js';
 
+/** KycPersistenceRecord is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface KycPersistenceRecord {
   id: number;
   publicId: string;
@@ -15,6 +16,7 @@ export interface KycPersistenceRecord {
   updatedAt: Date;
 }
 
+/** KycPersistenceClient is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface KycPersistenceClient {
   kycDocument: {
     findUnique(args: { where: { id: number } }): Promise<KycPersistenceRecord | null>;

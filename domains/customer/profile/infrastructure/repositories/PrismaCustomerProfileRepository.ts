@@ -5,6 +5,7 @@ import type {
   CustomerProfilePersistenceRecord,
 } from '../persistence/CustomerProfilePersistenceClient.js';
 
+/** PrismaCustomerProfileRepository is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaCustomerProfileRepository implements ICustomerProfileRepository {
   constructor(
     private readonly prisma: CustomerProfilePersistenceClient,

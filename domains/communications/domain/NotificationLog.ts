@@ -1,6 +1,7 @@
 import { NotificationChannel } from './NotificationChannel.js';
 import { NotificationStatus } from './NotificationStatus.js';
 
+/** NotificationLogProps is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface NotificationLogProps {
   id?: number;
   publicId?: string;
@@ -17,6 +18,7 @@ export interface NotificationLogProps {
   createdAt?: Date;
 }
 
+/** NotificationLog is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export class NotificationLog {
   id?: number;
   publicId?: string;

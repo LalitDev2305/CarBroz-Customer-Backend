@@ -1,3 +1,4 @@
+/** ServiceSnapshot is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ServiceSnapshot {
   serviceId: number;
   name: string;
@@ -6,12 +7,14 @@ export interface ServiceSnapshot {
   estimatedDurationMinutes: number;
 }
 
+/** AddonSnapshot is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface AddonSnapshot {
   addonId: number;
   name: string;
   pricePaise: number;
 }
 
+/** PriceSnapshot is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface PriceSnapshot {
   basePricePaise: number;
   addonsTotalPaise: number;
@@ -21,6 +24,7 @@ export interface PriceSnapshot {
   totalPricePaise: number;
 }
 
+/** AddressSnapshot is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface AddressSnapshot {
   addressLine1: string;
   addressLine2?: string | null;
@@ -32,6 +36,7 @@ export interface AddressSnapshot {
   longitude?: number | null;
 }
 
+/** VehicleSnapshot is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface VehicleSnapshot {
   make: string;
   model: string;
@@ -41,6 +46,7 @@ export interface VehicleSnapshot {
   fuelType: string;
 }
 
+/** BookingSnapshots is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface BookingSnapshots {
   service: ServiceSnapshot;
   addons: AddonSnapshot[];

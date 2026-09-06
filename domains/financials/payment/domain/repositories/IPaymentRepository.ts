@@ -1,6 +1,7 @@
 import type { Payment } from '../Payment.js';
 import type { PaymentWebhook } from '../PaymentWebhook.js';
 
+/** IPaymentRepository is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IPaymentRepository {
   create(payment: Payment): Promise<Payment>;
   findById(id: number): Promise<Payment | null>;

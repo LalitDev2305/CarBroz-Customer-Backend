@@ -1,3 +1,4 @@
+/** AddressPersistenceRecord is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface AddressPersistenceRecord {
   id: number;
   publicId?: string | null;
@@ -17,6 +18,7 @@ export interface AddressPersistenceRecord {
   deletedAt?: Date | null;
 }
 
+/** AddressPersistenceDelegate is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface AddressPersistenceDelegate {
   findUnique(args: unknown): Promise<AddressPersistenceRecord | null>;
   findFirst(args: unknown): Promise<AddressPersistenceRecord | null>;
@@ -26,10 +28,12 @@ export interface AddressPersistenceDelegate {
   create(args: unknown): Promise<AddressPersistenceRecord>;
 }
 
+/** AddressTransactionClient is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface AddressTransactionClient {
   address: AddressPersistenceDelegate;
 }
 
+/** AddressPersistenceClient is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface AddressPersistenceClient extends AddressTransactionClient {
   $transaction<T>(callback: (tx: AddressTransactionClient) => Promise<T>): Promise<T>;
 }

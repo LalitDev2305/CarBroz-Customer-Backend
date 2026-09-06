@@ -1,7 +1,8 @@
 import { TrackingSession } from '../domain/TrackingSession.js';
 import { LocationPing } from '../domain/LocationPing.js';
-import { PrismaTrackingSessionRepository } from '../infrastructure/repositories/PrismaTrackingSessionRepository.js';
+import type { ITrackingSessionRepository } from '../domain/ITrackingSessionRepository.js';
 
+/** OfflineGpsPing is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface OfflineGpsPing {
   latitude: number;
   longitude: number;
@@ -10,14 +11,17 @@ export interface OfflineGpsPing {
   timestamp: string;
 }
 
+/** SyncOfflineGpsInput is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface SyncOfflineGpsInput {
   sessionId: number;
   pings: OfflineGpsPing[];
 }
 
+/** SyncOfflineGpsLocationsUseCase is an exported domains/operations contract/implementation; see the owning README for lifecycle and extension rules. */
 export class SyncOfflineGpsLocationsUseCase {
-  constructor(private readonly trackingRepository: PrismaTrackingSessionRepository) {}
+  constructor(private readonly trackingRepository: ITrackingSessionRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   public async execute(input: SyncOfflineGpsInput): Promise<TrackingSession> {
     const session = await this.trackingRepository.findById(input.sessionId);
     if (!session) {

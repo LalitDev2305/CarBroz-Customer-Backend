@@ -1,3 +1,4 @@
+/** DefinitionFactory is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export type DefinitionFactory<TInput, TOutput> = (input: TInput) => TOutput;
 
 /**

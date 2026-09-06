@@ -5,3 +5,4 @@ export * from '../domain/PaymentWebhook.js';
 export * from '../domain/repositories/IPaymentRepository.js';
 export * from '../payment.module.js';
 export * from '../module.manifest.js';
+export * from '../application/ports/IPaymentGatewayProvider.js';

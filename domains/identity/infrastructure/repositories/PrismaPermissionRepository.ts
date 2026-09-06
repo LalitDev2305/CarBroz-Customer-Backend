@@ -2,6 +2,7 @@ import type { IPermissionRepository } from '../../domain/repositories/IPermissio
 import type { Permission } from '../../domain/Permission.js';
 import { PrismaClient } from '@prisma/client';
 
+/** PrismaPermissionRepository is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaPermissionRepository implements IPermissionRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

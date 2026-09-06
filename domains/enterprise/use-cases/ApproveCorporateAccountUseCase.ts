@@ -1,12 +1,11 @@
-import {
-  ICorporateAccountRepository,
-  ICorporateCreditLedgerRepository,
-  CorporateCreditLedger,
-  AuditLogService,
-  Money,
-} from '@carbroz/common';
+import { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
+import { ICorporateCreditLedgerRepository } from '../domain/repositories/ICorporateCreditLedgerRepository.js';
+import { CorporateCreditLedger } from '../domain/CorporateCreditLedger.js';
+import { AuditLogService } from '@carbroz/domain-audit';
+import { Money } from '@carbroz/foundation-kernel';
 import { ApproveCorporateAccountDto } from '../dtos/corporate.dto.js';
 
+/** ApproveCorporateAccountUseCase is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ApproveCorporateAccountUseCase {
   constructor(
     private readonly corporateAccountRepo: ICorporateAccountRepository,
@@ -14,6 +13,7 @@ export class ApproveCorporateAccountUseCase {
     private readonly auditLogService: AuditLogService
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(dto: ApproveCorporateAccountDto, adminUserId: number) {
     const account = await this.corporateAccountRepo.findByPublicId(dto.accountPublicId);
     if (!account) {

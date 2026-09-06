@@ -1,3 +1,4 @@
+/** Money is an exported foundation/kernel contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Money {
   private readonly _amountMinor: number;
   private readonly _currency: string;

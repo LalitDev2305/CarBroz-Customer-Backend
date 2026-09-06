@@ -1,8 +1,10 @@
 import type { KycDocument } from '../KycDocument.js';
 import type { KycDocumentStatus } from '../KycDocumentStatus.js';
 
+/** NewKycDocument is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export type NewKycDocument = Omit<KycDocument, 'id' | 'publicId' | 'createdAt' | 'updatedAt'>;
 
+/** IKycDocumentRepository is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IKycDocumentRepository {
   findById(id: number): Promise<KycDocument | null>;
   findByPartnerId(partnerId: number): Promise<KycDocument[]>;

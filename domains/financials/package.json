@@ -4,12 +4,16 @@
   "type": "module",
   "main": "dist/public/index.js",
   "types": "dist/public/index.d.ts",
-  "scripts": { "build": "tsc" },
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "@carbroz/domain-booking": "workspace:*",
     "@carbroz/foundation-kernel": "workspace:*",
     "@prisma/client": "^6.19.3",
     "awilix": "^12.0.0"
   },
-  "devDependencies": { "@types/node": "^26.1.0" }
+  "devDependencies": {
+    "@types/node": "^26.1.0"
+  }
 }

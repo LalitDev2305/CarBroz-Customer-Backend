@@ -4,6 +4,7 @@ import type { IPartnerProfileRepository } from '../../domain/repositories/IPartn
 
 type PartnerProfileCreateInput = Omit<PartnerProfile, 'id' | 'publicId' | 'createdAt' | 'updatedAt'>;
 
+/** PrismaPartnerProfileRepository is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaPartnerProfileRepository implements IPartnerProfileRepository {
   private unitOfWorkPrisma: PrismaClient | null = null;
 

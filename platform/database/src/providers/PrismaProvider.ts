@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
+/** PrismaProvider is an exported platform/database contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaProvider {
   private static instance: PrismaClient;
 

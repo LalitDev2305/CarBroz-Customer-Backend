@@ -1,6 +1,7 @@
 import { AuditLog, type AuditLogProps } from '../domain/AuditLog.js';
 import type { IAuditLogRepository } from '../domain/repositories/IAuditLogRepository.js';
 
+/** AuditLogService is an exported domains/audit contract/implementation; see the owning README for lifecycle and extension rules. */
 export class AuditLogService {
   constructor(private readonly auditLogRepository: IAuditLogRepository) {}
 

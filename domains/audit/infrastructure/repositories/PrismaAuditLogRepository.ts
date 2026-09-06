@@ -3,6 +3,7 @@ import type { IAuditLogRepository } from '../../domain/repositories/IAuditLogRep
 import type { ActorType } from '../../domain/AuditActor.js';
 import { AuditLog } from '../../domain/AuditLog.js';
 
+/** PrismaAuditLogRepository is an exported domains/audit contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaAuditLogRepository implements IAuditLogRepository {
   private unitOfWorkPrisma: any = null;
 

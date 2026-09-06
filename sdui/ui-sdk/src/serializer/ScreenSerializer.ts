@@ -1,5 +1,6 @@
 import { screenSchema, type SduiScreen } from '../contract/screen.schema.js';
 
+/** ScreenSerializer is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ScreenSerializer {
   static serialize(screen: SduiScreen): string {
     return JSON.stringify(screenSchema.parse(screen));

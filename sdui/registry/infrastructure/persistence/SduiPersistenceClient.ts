@@ -1,3 +1,4 @@
+/** ScreenPersistenceRecord is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ScreenPersistenceRecord {
   id: number;
   publicId: string;
@@ -15,6 +16,7 @@ export interface ScreenPersistenceRecord {
   updatedAt: Date;
 }
 
+/** TemplatePersistenceRecord is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface TemplatePersistenceRecord {
   id: number;
   publicId: string;
@@ -25,6 +27,7 @@ export interface TemplatePersistenceRecord {
   updatedAt: Date;
 }
 
+/** RegistryPersistenceRecord is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface RegistryPersistenceRecord {
   id: number;
   publicId: string;
@@ -50,6 +53,7 @@ interface PersistenceDelegate<TRecord> {
   upsert(args: unknown): Promise<TRecord>;
 }
 
+/** SduiPersistenceClient is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface SduiPersistenceClient {
   readonly sduiScreen: PersistenceDelegate<ScreenPersistenceRecord>;
   readonly sduiTemplate: PersistenceDelegate<TemplatePersistenceRecord>;

@@ -1,12 +1,5 @@
-import {
-  IEmailProvider,
-  INotificationProvider,
-  IPushProvider,
-  ISmsProvider,
-  NotificationDispatchResult,
-  NotificationPayload,
-} from '@carbroz/common';
-
+import { IEmailProvider, INotificationProvider, IPushProvider, ISmsProvider, NotificationDispatchResult, NotificationPayload } from '@carbroz/domain-communications';
+/** MultiChannelNotificationProvider is an exported platform/integrations contract/implementation; see the owning README for lifecycle and extension rules. */
 export class MultiChannelNotificationProvider implements INotificationProvider {
   constructor(
     private readonly pushProvider: IPushProvider,

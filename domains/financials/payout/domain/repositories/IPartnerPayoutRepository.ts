@@ -1,6 +1,7 @@
 import type { PartnerPayout } from '../PartnerPayout.js';
 import type { PayoutStatus } from '../PayoutStatus.js';
 
+/** IPartnerPayoutRepository is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IPartnerPayoutRepository {
   create(payout: PartnerPayout): Promise<PartnerPayout>;
   findById(id: number): Promise<PartnerPayout | null>;

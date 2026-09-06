@@ -3,3 +3,6 @@ export * from '../domain/CouponUsage.js';
 export * from '../domain/DiscountType.js';
 export * from '../coupon.module.js';
 export * from '../module.manifest.js';
+export * from '../domain/repositories/ICouponRepository.js';
+export * from '../domain/repositories/ICouponUsageRepository.js';
+export * from '../domain/services/CouponDiscountCalculator.js';

@@ -15,6 +15,7 @@ type PartnerMemberRecord = {
   updatedAt: Date;
 };
 
+/** PrismaPartnerMemberRepository is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaPartnerMemberRepository implements IPartnerMemberRepository {
   private unitOfWorkPrisma: PrismaClient | null = null;
 

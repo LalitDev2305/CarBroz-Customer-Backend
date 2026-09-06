@@ -24,4 +24,5 @@ export const componentSchema = z.union([
   sectionComponentSchema,
 ]);
 
+/** SduiComponent is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiComponent = z.infer<typeof componentSchema>;

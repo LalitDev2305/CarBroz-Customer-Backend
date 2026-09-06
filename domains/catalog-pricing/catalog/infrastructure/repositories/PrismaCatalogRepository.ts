@@ -4,6 +4,7 @@ import { ServiceCategory } from '../../domain/ServiceCategory.js';
 import { Service } from '../../domain/Service.js';
 import { ServiceAddon } from '../../domain/ServiceAddon.js';
 
+/** PrismaCatalogRepository is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaCatalogRepository implements ICatalogRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

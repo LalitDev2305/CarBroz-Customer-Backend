@@ -78,5 +78,7 @@ export const screenSchema = z.object({
   }
 });
 
+/** SduiScreen is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiScreen = z.infer<typeof screenSchema>;
+/** SduiTheme is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiTheme = z.infer<typeof themeSchema>;

@@ -30,6 +30,7 @@ export interface SendOtpResult {
 export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResult> {
   constructor(private readonly userRepository: IUserRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: SendOtpInput): Promise<SendOtpResult> {
     const user = await this.userRepository.findByPhoneNumber(input.phoneNumber);
 
@@ -77,6 +78,7 @@ export class VerifyOtpUseCase implements IUseCase<VerifyOtpInput, VerifyOtpResul
     private readonly userSessionRepository: IUserSessionRepository,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: VerifyOtpInput): Promise<VerifyOtpResult> {
     const { phoneNumber, otp, deviceId, deviceModel, osVersion, fcmToken } = input;
 
@@ -128,6 +130,7 @@ export class GuestLoginUseCase implements IUseCase<GuestLoginInput, GuestLoginRe
     private readonly userSessionRepository: IUserSessionRepository,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: GuestLoginInput): Promise<GuestLoginResult> {
     const guestUser = await this.userRepository.upsert(`guest_${Date.now()}`, {
       isGuest: true,
@@ -159,6 +162,7 @@ export interface RefreshTokenResult {
 export class RefreshTokenUseCase implements IUseCase<RefreshTokenInput, RefreshTokenResult> {
   constructor(private readonly userSessionRepository: IUserSessionRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: RefreshTokenInput): Promise<RefreshTokenResult> {
     const session = await this.userSessionRepository.findByRefreshToken(input.refreshToken, input.deviceId);
     if (!session) {
@@ -189,6 +193,7 @@ export interface LogoutInput {
 export class LogoutUseCase implements IUseCase<LogoutInput, void> {
   constructor(private readonly userSessionRepository: IUserSessionRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: LogoutInput): Promise<void> {
     if (input.logoutAll && input.userId) {
       await this.userSessionRepository.revokeAllForUser(input.userId);

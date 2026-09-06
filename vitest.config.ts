@@ -66,10 +66,10 @@ export default defineConfig({
       // closeout diagnostics show only production behavior that still needs tests.
       reporter: [['text', { skipFull: true }], 'json', 'html'],
       thresholds: {
-        lines: 85,
-        functions: 85,
-        branches: 85,
-        statements: 85,
+        lines: 100,
+        functions: 100,
+        branches: 100,
+        statements: 100,
       }
     }
   }

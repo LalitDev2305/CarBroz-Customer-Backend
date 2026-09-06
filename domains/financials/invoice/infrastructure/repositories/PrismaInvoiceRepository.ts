@@ -3,6 +3,7 @@ import type { IInvoiceRepository } from '../../domain/repositories/IInvoiceRepos
 import { Invoice } from '../../domain/Invoice.js';
 import type { InvoiceStatus } from '../../domain/InvoiceStatus.js';
 
+/** PrismaInvoiceRepository is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaInvoiceRepository implements IInvoiceRepository {
   private unitOfWorkPrisma: any = null;
 

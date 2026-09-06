@@ -1,7 +1,9 @@
 import type { SduiScreen, SduiTargetApp } from '@carbroz/ui-sdk';
 
+/** SduiScreenStatus is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiScreenStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
+/** SduiScreenProps is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface SduiScreenProps {
   id: number;
   publicId: string;
@@ -19,6 +21,7 @@ export interface SduiScreenProps {
   updatedAt: Date;
 }
 
+/** SduiScreenEntity is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class SduiScreenEntity {
   public readonly id: number;
   public readonly publicId: string;

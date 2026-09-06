@@ -1,6 +1,7 @@
+import { Review } from '../../domain/Review.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
-import { Review } from '@carbroz/common';
+
 import { PrismaReviewRepository } from './PrismaReviewRepository.js';
 
 function record(overrides: Record<string, unknown> = {}) {

@@ -1,6 +1,11 @@
+import { Dispute } from '../../domain/Dispute.js';
+import { DisputeStatus } from '../../domain/DisputeStatus.js';
+import { IDisputeRepository } from '../../domain/repositories/IDisputeRepository.js';
+import { Money } from '@carbroz/foundation-kernel';
 import { PrismaClient } from '@prisma/client';
-import { Dispute, DisputeStatus, IDisputeRepository, Money } from '@carbroz/common';
 
+
+/** PrismaDisputeRepository is an exported domains/dispute contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaDisputeRepository implements IDisputeRepository {
   private unitOfWorkPrisma: any = null;
 

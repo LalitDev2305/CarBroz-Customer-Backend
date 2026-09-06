@@ -4,16 +4,18 @@ import type { BookingStatus } from '../domain/BookingStatus.js';
 import type { IBookingRepository } from '../domain/repositories/IBookingRepository.js';
 import type { IAddressRepository, ICustomerProfileRepository, IVehicleRepository } from '@carbroz/domain-customer';
 import type { ICatalogRepository, IPricingRepository, ServiceAddon } from '@carbroz/domain-catalog-pricing';
-import type { IPartnerRepository } from '@carbroz/domain-partner';
 
+/** IBookingTransactionPort is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IBookingTransactionPort {
   runInTransaction<T>(work: () => Promise<T>): Promise<T>;
 }
 
+/** IPayoutEligibilityPort is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IPayoutEligibilityPort {
   execute(bookingId: number): Promise<unknown>;
 }
 
+/** CreateBookingInput is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CreateBookingInput {
   customerId: number;
   vehicleId: number;
@@ -24,6 +26,7 @@ export interface CreateBookingInput {
   slotEndTime: Date;
 }
 
+/** CreateBookingUseCase is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CreateBookingUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
@@ -35,6 +38,7 @@ export class CreateBookingUseCase {
     private readonly transactionProvider: IBookingTransactionPort,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: CreateBookingInput): Promise<Booking> {
     void this.customerRepository;
     const now = new Date();
@@ -137,35 +141,14 @@ export class CreateBookingUseCase {
   }
 }
 
+/** ConfirmBookingUseCase is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ConfirmBookingUseCase {
   constructor(private readonly bookingRepository: IBookingRepository) {}
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(bookingPublicId: string, customerId: number): Promise<Booking> {
     const booking = await this.bookingRepository.findByPublicId(bookingPublicId);
     if (!booking || booking.customerId !== customerId) throw new Error('Booking not found or unauthorized');
     booking.confirm(customerId);
-    return this.bookingRepository.update(booking);
-  }
-}
-
-export class AssignPartnerToBookingUseCase {
-  constructor(
-    private readonly bookingRepository: IBookingRepository,
-    private readonly partnerRepository: IPartnerRepository,
-  ) {}
-
-  async execute(bookingPublicId: string, partnerId: number, adminUserId: number): Promise<Booking> {
-    const booking = await this.bookingRepository.findByPublicId(bookingPublicId);
-    if (!booking) throw new Error('Booking not found');
-    const partner = await this.partnerRepository.findById(partnerId);
-    if (!partner || partner.status !== 'ACTIVE') throw new Error('Partner not found or not active');
-    const conflicting = await this.bookingRepository.findConflictingPartnerBooking(
-      partnerId,
-      booking.slotStartTime,
-      booking.slotEndTime,
-      booking.id,
-    );
-    if (conflicting) throw new Error('Partner has a conflicting booking assignment during this time slot');
-    booking.assignPartner(partnerId, adminUserId);
     return this.bookingRepository.update(booking);
   }
 }
@@ -176,12 +159,14 @@ export interface TransitionBookingStatusInput {
   actorId: number;
 }
 
+/** TransitionBookingStatusUseCase is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class TransitionBookingStatusUseCase {
   constructor(
     private readonly bookingRepository: IBookingRepository,
     private readonly createPayoutEligibilityUseCase?: IPayoutEligibilityPort,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: TransitionBookingStatusInput): Promise<Booking> {
     const booking = await this.bookingRepository.findByPublicId(input.bookingPublicId);
     if (!booking) throw new Error('Booking not found');
@@ -197,6 +182,7 @@ export class TransitionBookingStatusUseCase {
   }
 }
 
+/** CancelBookingInput is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CancelBookingInput {
   bookingPublicId: string;
   actorId: number;
@@ -204,8 +190,10 @@ export interface CancelBookingInput {
   isAdmin?: boolean;
 }
 
+/** CancelBookingUseCase is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CancelBookingUseCase {
   constructor(private readonly bookingRepository: IBookingRepository) {}
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: CancelBookingInput): Promise<Booking> {
     if (!input.reason?.trim()) throw new Error('Cancellation reason is required');
     const booking = await this.bookingRepository.findByPublicId(input.bookingPublicId);
@@ -216,8 +204,10 @@ export class CancelBookingUseCase {
   }
 }
 
+/** ExpirePendingBookingsUseCase is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ExpirePendingBookingsUseCase {
   constructor(private readonly bookingRepository: IBookingRepository) {}
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(): Promise<number> {
     const expired = await this.bookingRepository.findExpiredPendingBookings(new Date());
     for (const booking of expired) {

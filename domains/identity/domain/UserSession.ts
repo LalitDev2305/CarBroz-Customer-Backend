@@ -1,5 +1,6 @@
 import { User } from './User.js';
 
+/** UserSession is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface UserSession {
   id: number;
   publicId: string;

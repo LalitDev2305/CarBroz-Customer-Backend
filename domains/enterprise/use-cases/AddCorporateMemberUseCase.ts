@@ -1,12 +1,11 @@
-import {
-  ICorporateAccountRepository,
-  ICorporateMemberRepository,
-  IUserRepository,
-  CorporateMember,
-  AuditLogService,
-} from '@carbroz/common';
+import { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
+import { ICorporateMemberRepository } from '../domain/repositories/ICorporateMemberRepository.js';
+import { CorporateMember } from '../domain/CorporateMember.js';
+import { IUserRepository } from '@carbroz/domain-identity';
+import { AuditLogService } from '@carbroz/domain-audit';
 import { AddCorporateMemberDto } from '../dtos/corporate.dto.js';
 
+/** AddCorporateMemberUseCase is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class AddCorporateMemberUseCase {
   constructor(
     private readonly corporateAccountRepo: ICorporateAccountRepository,
@@ -15,6 +14,7 @@ export class AddCorporateMemberUseCase {
     private readonly auditLogService: AuditLogService
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(dto: AddCorporateMemberDto, actorUserId: number) {
     const account = await this.corporateAccountRepo.findByPublicId(dto.accountPublicId);
     if (!account) {

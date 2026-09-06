@@ -1,3 +1,4 @@
+/** QueueJobOptions is an exported platform/messaging contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface QueueJobOptions {
   delay?: number;
   attempts?: number;
@@ -9,6 +10,7 @@ export interface QueueJobOptions {
   removeOnFail?: boolean | number;
 }
 
+/** QueueJob is an exported platform/messaging contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface QueueJob<T = unknown> {
   id: string;
   name: string;
@@ -16,12 +18,14 @@ export interface QueueJob<T = unknown> {
   timestamp?: number;
 }
 
+/** QueueProvider is an exported platform/messaging contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface QueueProvider {
   enqueue<T>(queueName: string, jobName: string, data: T, options?: QueueJobOptions): Promise<QueueJob<T>>;
   process<T>(queueName: string, handler: (job: QueueJob<T>) => Promise<void>): void;
   close?(): Promise<void>;
 }
 
+/** InMemoryQueueProvider is an exported platform/messaging contract/implementation; see the owning README for lifecycle and extension rules. */
 export class InMemoryQueueProvider implements QueueProvider {
   private queues = new Map<string, Array<{ job: QueueJob<any>; options?: QueueJobOptions }>>();
   private handlers = new Map<string, (job: QueueJob<any>) => Promise<void>>();

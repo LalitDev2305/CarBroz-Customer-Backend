@@ -1,3 +1,4 @@
+/** FeatureFlag is an exported domains/configuration contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface FeatureFlag {
   id: number;
   publicId: string;

@@ -1,6 +1,9 @@
+import { CouponUsage } from '../../domain/CouponUsage.js';
+import { ICouponUsageRepository } from '../../domain/repositories/ICouponUsageRepository.js';
 import { PrismaClient } from '@prisma/client';
-import { CouponUsage, ICouponUsageRepository } from '@carbroz/common';
 
+
+/** PrismaCouponUsageRepository is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaCouponUsageRepository implements ICouponUsageRepository {
   private unitOfWorkPrisma: any = null;
 

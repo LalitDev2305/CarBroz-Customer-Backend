@@ -1,6 +1,7 @@
 import { Money } from '@carbroz/foundation-kernel';
 import { PayoutStatus } from './PayoutStatus.js';
 
+/** PayoutCalculation is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface PayoutCalculation {
   grossAmountPaise: number;
   commissionPercentage: number;
@@ -11,6 +12,7 @@ export interface PayoutCalculation {
   appliedRules: string[];
 }
 
+/** PartnerPayoutProps is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface PartnerPayoutProps {
   id?: number;
   publicId?: string;
@@ -30,6 +32,7 @@ export interface PartnerPayoutProps {
   updatedAt?: Date;
 }
 
+/** PartnerPayout is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PartnerPayout {
   id?: number;
   publicId?: string;

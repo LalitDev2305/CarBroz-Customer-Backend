@@ -16,7 +16,8 @@
     "format": "prettier --write .",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
-    "freeze:preflight": "node tools/production-freeze/preflight.mjs"
+    "freeze:preflight": "node tools/production-freeze/preflight.mjs",
+    "test:freeze": "vitest run --coverage"
   },
   "type": "module",
   "devDependencies": {
@@ -47,7 +48,8 @@
     "tsx": "^4.23.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.62.1",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "@carbroz/platform-integrations": "workspace:*"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3"

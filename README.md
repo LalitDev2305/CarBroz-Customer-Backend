@@ -1,168 +1,128 @@
-# CarBroz Backend V3
+# CarBroz Backend V3 — Constitution-Frozen Architecture
 
-CarBroz Backend V3 is a **TypeScript + Fastify modular monolith** organized around Domain-Driven Design, Clean/Hexagonal Architecture, strict dependency inversion, replaceable infrastructure providers, and a generic Server-Driven UI runtime for the Partner and Customer applications.
+This repository is a modular monolith built with TypeScript, Fastify, Prisma/PostgreSQL, Redis/BullMQ-ready platform adapters, and a strict Server-Driven UI boundary. **The normative architecture is `docs/MASTER-BACKEND-CONSTITUTION.md`; this README explains how that architecture executes in code.**
 
-> **Normative authority:** [`docs/MASTER-BACKEND-CONSTITUTION.md`](docs/MASTER-BACKEND-CONSTITUTION.md) is the repository's architecture law. This README is an operating guide; when it conflicts with the Constitution, the Constitution wins.
+## Runtime flow: process start to response
+1. `apps/api/src/bootstrap/server.ts` starts the process and calls `buildApp`.
+2. `bootstrap/app.ts` creates Fastify, installs security, multipart, DI, request context, JWT/authorization, safe lifecycle logging, static assets and global error mapping.
+3. `bootstrap/lifecycle/request-flow.plugin.ts` emits `http.request.started` and `http.request.completed` with correlation ID, route, surface, status and duration. It never receives raw bodies.
+4. The request enters exactly one product surface: `/api/v1/partner/*`, `/api/v1/customer/*`, or `/api/v1/admin/*`. Surfaces do not import one another.
+5. A route/controller validates transport input with Zod, resolves an application use case from DI, and maps the result to `transport/response/ResponseHelper`.
+6. The use case lives in its owning bounded context, applies authorization/orchestration and calls domain repositories/ports. Domain rules remain inside entities/value objects/domain services.
+7. Infrastructure adapters implement those inward ports. Prisma access stays inside the owning domain infrastructure; vendor APIs are under `platform/integrations`.
+8. Errors rise to `transport/middleware/error-handler.ts`, which converts Foundation/application errors to stable API envelopes. Technical logs are emitted by `platform/observability`; business/security audit records are owned by `domains/audit`.
 
-## Architecture at a glance
+## Where to change or add something
+- **New endpoint:** choose Partner/Customer/Admin first, add validation/route/controller under that surface, call an existing/new owning-domain use case. Never put a use case in API.
+- **New business rule:** add it to the owning domain/application. Do not put it in a controller, provider, or shared bucket.
+- **New repository query:** change the owning domain repository port, then its infrastructure adapter. Do not import Prisma into application/domain code.
+- **New third-party provider:** define/extend the inward port in the owning domain, put the concrete vendor adapter in `platform/integrations`, and wire it only in `bootstrap/container`.
+- **New SDUI component/schema primitive:** rendering/schema mechanics go to `sdui/ui-sdk`; draft/publish/version/scope lifecycle goes to `sdui/registry`. Admin manages SDUI but has no runtime SDUI scope.
+- **New cross-domain interaction:** depend only on the other domain's `public/index.ts` application contract/event. Never deep-import another domain's internals.
+- **New log:** emit a stable event name plus safe metadata. Never log OTPs, tokens, phones, emails, payment/KYC bodies, headers, or raw request/response payloads.
 
-The final production source tree is intentionally small at the top level:
+## API executable
+### `apps/api/src/bootstrap`
+`server.ts` owns process start; `app.ts` owns Fastify composition; `container` owns dependency wiring; `plugins` owns framework plugins; `lifecycle` owns technical request-flow hooks. No business logic belongs here. **Tests:** `pnpm vitest run apps/api/src/bootstrap tests/architecture/canonical-topology.policy.test.ts`.
 
-```text
-apps/
-  api/
-domains/
-  identity/
-  partner/
-  customer/
-  catalog-pricing/
-  booking/
-  operations/
-  financials/
-  communications/
-  engagement/
-  configuration/
-  dispute/
-  enterprise/
-  audit/
-sdui/
-  ui-sdk/
-  registry/
-platform/
-  database/
-  cache/
-  messaging/
-  storage/
-  observability/
-  integrations/
-foundation/
-  kernel/
-prisma/
-tests/
-  architecture/
-  contracts/
-  integration/
-  e2e/
-docs/
-```
+### `apps/api/src/surfaces/{partner,customer,admin}`
+Each surface owns only its routes/controllers/dto/validation mapping. Adding or changing a product API happens here after the business use case exists in a domain. **Tests:** `pnpm vitest run apps/api/src/surfaces tests/architecture/product-surface-isolation.policy.test.ts`.
 
-There is no final `packages/`, `shared/`, generic business `common`, duplicate kernel, or duplicate SDUI engine. `apps/api` is the **transport and composition root only**: HTTP validation, authentication/authorization guards, request/response mapping, lifecycle hooks, and dependency wiring live there; business use cases and business repositories do not.
+### `apps/api/src/transport`
+Framework mechanics shared by surfaces: middleware/guards/request context/error mapping/response plus shared auth and SDUI runtime adapters. This layer may translate; it may not decide business policy. **Tests:** `pnpm vitest run apps/api/src/transport tests/architecture/engineering-quality.policy.test.ts`.
 
-## Product surfaces
+### `apps/api/src/system`
+Operational endpoints such as health checks only. **Tests:** `pnpm vitest run apps/api/src/system/health`.
 
-The API has three independently evolvable transport families:
+## Bounded contexts and the tests to run while changing them
+### Identity — `domains/identity`
+Owns: Authentication, sessions, OTP/token/RBAC and actor authorization. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-```text
-/api/v1/partner/*
-/api/v1/customer/*
-/api/v1/admin/*
-```
+**Tests for this owner:** `pnpm vitest run domains/identity tests/architecture/identity-common-boundary.policy.test.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-Partner and Customer are independent client products. Admin is an operational/control-plane surface that invokes the owning bounded-context capabilities; it is not a third business bounded context and is not a third SDUI product scope.
+### Partner — `domains/partner`
+Owns: Partner/profile/member/KYC lifecycle. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-Cross-surface transport imports are forbidden. Shared behavior belongs in the bounded context that owns the business rule, not in a transport-common application layer.
+**Tests for this owner:** `pnpm vitest run domains/partner tests/architecture/partner-common-boundary.policy.test.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-## Bounded-context ownership
+### Customer — `domains/customer`
+Owns: Customer profile, address, garage and preferences. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-| Context | Owns |
-| --- | --- |
-| Identity | users, sessions, OTP/auth lifecycle, token/session policy, authorization contracts |
-| Partner | partner profile/organization, KYC, verification, training, availability, partner lifecycle |
-| Customer | customer profile/preferences, addresses, garage and vehicle ownership |
-| Catalog-Pricing | service catalog, add-ons, pricing tiers/multipliers and price policy |
-| Booking | booking aggregate, immutable booking snapshots, lifecycle state machine and cancellation invariants |
-| Operations | slot capacity/feasibility, dispatch/assignment, tracking, ETA and service execution operations |
-| Financials | payment/refund/invoice/payout lifecycle, commission/tax/settlement policy and financial invariants |
-| Communications | notification intent/orchestration, device tokens, delivery records and communication ports |
-| Engagement | reviews, ratings, coupons, promotions and offers |
-| Configuration | persisted product/runtime configuration, bootstrap/update/maintenance decisions and rollout policy |
-| Dispute | dispute aggregate, reasons/status, resolution and settlement decision semantics |
-| Enterprise | corporate accounts/members, corporate fleet and corporate credit/booking eligibility |
-| Audit | immutable business/security audit semantics and persistence contract |
+**Tests for this owner:** `pnpm vitest run domains/customer tests/architecture/customer-persistence-boundary.policy.test.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-A context may consume another context only through its approved public contract/application boundary or an explicit port/event. Deep cross-domain imports are not a supported integration mechanism.
+### Catalog & Pricing — `domains/catalog-pricing`
+Owns: Services, add-ons, pricing tiers and price calculation. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-## Foundation and Platform
+**Tests for this owner:** `pnpm vitest run domains/catalog-pricing tests/integration/application/CatalogUseCases.spec.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-`foundation/kernel` is the **only** universal kernel. It contains domain-independent primitives such as Money, universal results/errors, execution actor/context contracts, transaction/time/id abstractions, and similarly universal building blocks. It must not become a feature helper package.
+### Booking — `domains/booking`
+Owns: Booking lifecycle/invariants; dispatch is explicitly not owned here. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-`platform/*` owns technology mechanics only: Prisma/database capability, cache, queue/event transport, object storage, observability, and concrete vendor integrations. Business repositories remain owned by their bounded contexts. Vendor SDK models must stop at adapters and must not leak into domain/application contracts.
+**Tests for this owner:** `pnpm vitest run domains/booking tests/integration/application/booking-use-cases.test.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-## SDUI architecture
+### Operations — `domains/operations`
+Owns: Slots/capacity, dispatch, maps/location, tracking and service execution. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-There are exactly two SDUI workspaces:
+**Tests for this owner:** `pnpm vitest run domains/operations tests/integration/application/tracking-notification-engine.test.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-- `@carbroz/ui-sdk` — canonical generic structural vocabulary, definitions, builders/factories, validation, serialization and schema-version mechanics.
-- `@carbroz/sdui-registry` — draft/publish/version/history/rollback/archive/scope/persistence/checksum lifecycle for validated UI SDK structures.
+### Financials — `domains/financials`
+Owns: Payment, invoice/refund, payout, commission, tax, ledger and settlement. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-The only legal structural branches are:
+**Tests for this owner:** `pnpm vitest run domains/financials tests/integration/application/payment-engine-use-cases.test.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-```text
-Template -> Component -> Element
-Template -> Component -> Section -> Element
-Template -> Component -> Section -> Group -> Element
-```
+### Communications — `domains/communications`
+Owns: Notification templates/preferences/history and delivery orchestration. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-`Component` and `Element` are mandatory. `Section` and `Group` are optional. Legacy `Subcomponent`, `Child`, and `ChildrenData` hierarchy terminology is not part of Backend V3.
+**Tests for this owner:** `pnpm vitest run domains/communications tests/integration/application/tracking-notification-engine.test.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-Runtime definitions are scoped `GLOBAL`, `PARTNER`, or `CUSTOMER`. Published definitions/versions are immutable and independently adoptable by Partner and Customer. Product screen names belong in runtime data/definitions, not source-code architecture folders.
+### Engagement — `domains/engagement`
+Owns: Reviews/ratings, coupons, promotions and offers. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-## Core production invariants
+**Tests for this owner:** `pnpm vitest run domains/engagement tests/integration/application/review-coupon-engine.test.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-- Money is integer **minor units + currency**; floating-point business money is forbidden.
-- UTC is the canonical persistence/service time basis; time-sensitive policy should depend on a clock abstraction where determinism matters.
-- Booking owns booking lifecycle; Operations owns capacity, assignment and live service execution.
-- Financial effects require idempotent/transaction-safe behavior where duplication is possible.
-- Transactions are valid only when all participating writes share the same underlying database transaction.
-- OTP generation/storage/verification, refresh-token rotation/revocation/reuse detection, resource ownership checks and authorization are security boundaries, not controller conveniences.
-- OTPs, access/refresh tokens, Authorization headers, secrets and sensitive PII must never be logged.
-- Business Audit records and technical observability are separate concepts.
-- Expected errors are typed/mapped safely; internal details are not leaked through HTTP responses.
+### Configuration — `domains/configuration`
+Owns: Persisted runtime/product configuration and feature policy. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-## Testing and architecture enforcement
+**Tests for this owner:** `pnpm vitest run domains/configuration tests/integration/application/GetInitConfigUseCase.spec.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-The final merge target for executable production TypeScript is **100% statements, branches, functions and lines**. Type-only/barrel/generated artifacts are validated by build/architecture checks rather than fake coverage.
+### Dispute — `domains/dispute`
+Owns: Dispute lifecycle and settlement decisions. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-Required evidence includes unit tests, domain invariant/state-machine tests, use-case tests, repository contracts, real Prisma/PostgreSQL integration, rollback/concurrency/idempotency, HTTP auth/authz, provider contracts, SDUI contract/definition/factory/builder/serialization/versioning tests, configuration/error/security/architecture tests and critical E2E flows.
+**Tests for this owner:** `pnpm vitest run domains/dispute tests/integration/application/dispute-engine.test.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-Each module README generated during architecture validation inventories that module's ownership, source/classes, public API, existing executable tests, required positive/negative/regression matrix and extension/provider boundaries. Passing coverage does not permit deleting meaningful failure tests or adding exclusions merely to reach a number.
+### Enterprise — `domains/enterprise`
+Owns: B2B/corporate account concepts; financial records remain Financials. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-## Local validation
+**Tests for this owner:** `pnpm vitest run domains/enterprise tests/integration/application/corporate-fleet-billing-engine.test.ts`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-The repository uses the pinned pnpm version through Corepack. A production-equivalent validation flow is:
+### Audit — `domains/audit`
+Owns: Immutable business/security audit evidence; not technical logs. Application classes are under `application/`; domain invariants under `domain/`; adapters under `infrastructure/`; cross-module callers use only `public/index.ts`. To add behavior, add the use case in this owner, declare any needed port inward, implement the adapter outward, export only the deliberate contract, register it in `apps/api/src/bootstrap/container`, then expose it from the correct surface.
 
-```bash
-corepack enable
-corepack prepare pnpm@11.9.0 --activate
-pnpm install --frozen-lockfile
+**Tests for this owner:** `pnpm vitest run domains/audit`. For one class use `pnpm vitest run <path-to-nearest-spec> -t "<test name>"`.
 
-pnpm exec prisma validate
-pnpm exec prisma generate
-pnpm exec prisma migrate deploy
+## SDUI
+### `sdui/ui-sdk`
+Owns the six-level SDUI schema/rendering vocabulary and validation/build mechanics; it does not own persistence/lifecycle. **Tests:** `pnpm vitest run sdui/ui-sdk tests/architecture/sdui-authority.policy.test.ts tests/architecture/sdui-mapping.contract.test.ts`.
 
-pnpm -r build
-pnpm lint
-pnpm test
-pnpm test:freeze
-```
+### `sdui/registry`
+Owns draft/update/publish/archive/version history/compare/rollback/checksum and runtime scope resolution. Runtime scopes are exactly GLOBAL/PARTNER/CUSTOMER. **Tests:** `pnpm vitest run sdui/registry tests/architecture/sdui-registry-domain.test.ts tests/architecture/sdui-production-definitions.policy.test.ts`.
 
-`DATABASE_URL` must point to PostgreSQL for migration/integration evidence. Do not substitute an in-memory fake when validating transaction rollback or Prisma repository behavior.
+## Platform
+`platform/database` owns Prisma connectivity/transaction mechanics, `cache` Redis/cache mechanics, `messaging` queue/event transport, `storage` object storage, `observability` logs/traces/metrics, and `integrations` external vendor adapters. Platform code never becomes a business-rule owner. **Tests:** run `pnpm vitest run platform tests/architecture/domain-dependency.policy.test.ts` after platform changes.
 
-## Continuous integration
+## Logging and debugging the complete flow
+Search logs by `correlationId`. Normal request flow is `http.request.started` → surface/controller → application operation → `http.request.completed`; failures include the stable error code but not payloads. Add new application-flow events through `@carbroz/platform-observability` using stable names such as `booking.create.started` / `booking.create.completed`. Redaction is centralized in `platform/observability/src/index.ts` and is mandatory.
 
-Permanent CI is expected to enforce a frozen lockfile, Prisma validation/generation/migrations against PostgreSQL, monorepo build/lint/tests, architecture/security policies and the production coverage freeze. A clean validation run must not leave tracked build artifacts (`dist`, `*.tsbuildinfo`, emitted JS/declarations/maps, coverage output) behind.
+## Test commands used as the architecture gate
+During development run the command printed beside the module above. Before merge, the complete forensic gate is: `pnpm install --frozen-lockfile && pnpm exec prisma validate && pnpm exec prisma generate && pnpm -r build && pnpm lint && pnpm test -- --run`. Architecture-only evidence: `pnpm vitest run tests/architecture`. Contract evidence: `pnpm vitest run tests/contracts`. Integration evidence: `pnpm vitest run tests/integration`. Never waive a failing architecture test to merge a feature.
 
-## Documentation map
+## New-developer reading order
+Read `docs/MASTER-BACKEND-CONSTITUTION.md`, then this README, then `apps/api/src/bootstrap/app.ts`, `bootstrap/container/index.ts`, the target surface route/controller, the owning domain `public/index.ts`, its application use case, domain entity/service and finally the infrastructure adapter. That sequence mirrors the runtime dependency direction and is the fastest way to understand a feature without accidentally crossing a boundary.
 
-Start with these documents before changing architecture:
+## Canonical SDUI composition
 
-- [`docs/MASTER-BACKEND-CONSTITUTION.md`](docs/MASTER-BACKEND-CONSTITUTION.md) — normative architecture and freeze criteria.
-- [`docs/TESTING-EXTENSIBILITY-AND-PROVIDER-STANDARD.md`](docs/TESTING-EXTENSIBILITY-AND-PROVIDER-STANDARD.md) — positive/negative test evidence, provider contracts, resilience and extension rules.
-- [`docs/ENGINEERING-DOCUMENTATION-STANDARD.md`](docs/ENGINEERING-DOCUMENTATION-STANDARD.md) — source/module documentation expectations.
-- [`docs/FORENSIC-CHANGE-GATE.md`](docs/FORENSIC-CHANGE-GATE.md) — forensic change-review gate.
+The minimum structural composition is **Template -> Component -> Element**. Optional Section and Group levels may be inserted only where the canonical UI SDK schema allows them.
 
-## Feature gate after freeze
+## Final validation gate
 
-Before implementing a feature, establish: which product surface owns the transport, which bounded context owns the business rule, whether the response is SDUI or ordinary JSON, the SDUI scope/version impact if applicable, any cross-domain dependency and its public port/event, the required Admin capability, and the architecture regression test that prevents drift.
-
-**Final principle:** Partner-specific change stays Partner-specific; Customer-specific change stays Customer-specific; Admin manages both through their owning capabilities; genuinely shared concepts remain product-neutral; dynamic UI stays generic, runtime-driven, scoped and immutable after publication.
+Before merge or architecture freeze run `pnpm install --frozen-lockfile`, Prisma validation/generation, `pnpm -r build`, `pnpm lint`, `pnpm test -- --run`, and finally `pnpm test:freeze`.

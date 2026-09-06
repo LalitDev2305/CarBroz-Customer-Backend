@@ -10,6 +10,7 @@ import type {
   KycPersistenceRecord,
 } from '../persistence/KycPersistenceClient.js';
 
+/** PrismaKycDocumentRepository is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaKycDocumentRepository implements IKycDocumentRepository {
   constructor(private readonly client: KycPersistenceClient) {}
 

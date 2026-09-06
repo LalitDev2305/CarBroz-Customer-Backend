@@ -10,6 +10,7 @@ interface BookingCradle {
   prismaProvider: PrismaProviderPort;
 }
 
+/** registerBookingModule is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export function registerBookingModule(container: AwilixContainer): void {
   container.register({
     bookingRepository: asFunction(

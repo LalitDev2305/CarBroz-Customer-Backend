@@ -1,3 +1,4 @@
+/** SystemConfig is an exported domains/configuration contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface SystemConfig {
   id: number;
   publicId: string;

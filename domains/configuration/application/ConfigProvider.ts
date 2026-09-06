@@ -1,6 +1,7 @@
 import type { IConfigProvider } from './IConfigProvider.js';
 import type { IConfigRepository } from '../domain/repositories/IConfigRepository.js';
 
+/** ConfigProvider is an exported domains/configuration contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ConfigProvider implements IConfigProvider {
   constructor(private readonly configRepository: IConfigRepository) {}
 

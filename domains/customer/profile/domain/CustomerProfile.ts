@@ -1,3 +1,4 @@
+/** CustomerProfile is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CustomerProfile {
   id?: number;
   publicId?: string;

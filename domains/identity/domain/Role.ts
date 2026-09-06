@@ -1,3 +1,4 @@
+/** Role is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface Role {
   id: number;
   publicId: string;

@@ -1,5 +1,6 @@
 import { DiscountType } from './DiscountType.js';
 
+/** CouponProps is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CouponProps {
   id?: number;
   publicId?: string;
@@ -19,6 +20,7 @@ export interface CouponProps {
   updatedAt?: Date;
 }
 
+/** Coupon is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Coupon {
   id?: number;
   publicId?: string;

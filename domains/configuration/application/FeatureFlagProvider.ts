@@ -1,6 +1,7 @@
 import type { IFeatureFlagProvider } from './IFeatureFlagProvider.js';
 import type { IFeatureFlagRepository } from '../domain/repositories/IFeatureFlagRepository.js';
 
+/** FeatureFlagProvider is an exported domains/configuration contract/implementation; see the owning README for lifecycle and extension rules. */
 export class FeatureFlagProvider implements IFeatureFlagProvider {
   constructor(private readonly repository: IFeatureFlagRepository) {}
 

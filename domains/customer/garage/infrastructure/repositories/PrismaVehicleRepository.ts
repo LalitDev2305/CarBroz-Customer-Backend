@@ -6,6 +6,7 @@ import type {
   VehiclePersistenceRecord,
 } from '../persistence/VehiclePersistenceClient.js';
 
+/** PrismaVehicleRepository is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaVehicleRepository implements IVehicleRepository {
   constructor(private readonly prisma: VehiclePersistenceClient) {}
 

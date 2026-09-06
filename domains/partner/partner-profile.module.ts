@@ -12,6 +12,7 @@ interface PartnerProfileCradle {
   prismaProvider: PrismaProviderPort;
 }
 
+/** registerPartnerProfileModule is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export function registerPartnerProfileModule(container: AwilixContainer): void {
   container.register({
     partnerRepository: asFunction(

@@ -12,6 +12,7 @@ export class GetInitConfigUseCase {
     private readonly featureFlagProvider: IFeatureFlagProvider,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(): Promise<InitConfigSnapshot> {
     const [
       maintenanceEnabled,

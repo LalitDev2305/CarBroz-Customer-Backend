@@ -43,7 +43,7 @@ export class KernelError extends Error {
  * @remarks
  * `errorCode` preserves the legacy API contract while `code` is the canonical
  * Foundation property inherited from `KernelError`. Keeping one constructor
- * identity allows transitional `@carbroz/common` re-exports to remain safe
+ * identity allows transitional `the removed legacy compatibility package` re-exports to remain safe
  * while consumers migrate directly to Foundation.
  */
 export class ApplicationError extends KernelError {
@@ -105,7 +105,7 @@ export class InternalServerError extends ApplicationError {
 }
 
 /**
- * Transitional name retained for existing API consumers.
+ * Compatibility alias retained for stable application-error identity.
  *
  * @deprecated Import `ApplicationError` from `@carbroz/foundation-kernel` in
  * new code. The alias intentionally references the same constructor so

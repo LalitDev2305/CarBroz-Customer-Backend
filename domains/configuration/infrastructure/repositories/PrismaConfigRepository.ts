@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import type { SystemConfig } from '../../domain/SystemConfig.js';
 import type { IConfigRepository } from '../../domain/repositories/IConfigRepository.js';
 
+/** PrismaConfigRepository is an exported domains/configuration contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaConfigRepository implements IConfigRepository {
   private unitOfWorkPrisma: any = null;
 

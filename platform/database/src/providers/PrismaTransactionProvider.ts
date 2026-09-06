@@ -1,6 +1,7 @@
-import { ITransactionProvider } from '@carbroz/common';
+import { ITransactionProvider } from '@carbroz/foundation-kernel';
 import { PrismaProvider } from './PrismaProvider.js';
 
+/** PrismaTransactionProvider is an exported platform/database contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaTransactionProvider implements ITransactionProvider {
   private prismaProvider: PrismaProvider;
 

@@ -1,6 +1,11 @@
+import { INotificationLogRepository } from '../../domain/repositories/INotificationLogRepository.js';
+import { NotificationChannel } from '../../domain/NotificationChannel.js';
+import { NotificationLog } from '../../domain/NotificationLog.js';
+import { NotificationStatus } from '../../domain/NotificationStatus.js';
 import { PrismaClient } from '@prisma/client';
-import { INotificationLogRepository, NotificationChannel, NotificationLog, NotificationStatus } from '@carbroz/common';
 
+
+/** PrismaNotificationLogRepository is an exported domains/communications contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaNotificationLogRepository implements INotificationLogRepository {
   private unitOfWorkPrisma: any = null;
 

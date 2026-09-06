@@ -1,12 +1,11 @@
-import {
-  ICorporateAccountRepository,
-  ICorporateFleetVehicleRepository,
-  IVehicleRepository,
-  CorporateFleetVehicle,
-  AuditLogService,
-} from '@carbroz/common';
+import { ICorporateAccountRepository } from '../domain/repositories/ICorporateAccountRepository.js';
+import { ICorporateFleetVehicleRepository } from '../domain/repositories/ICorporateFleetVehicleRepository.js';
+import { CorporateFleetVehicle } from '../domain/CorporateFleetVehicle.js';
+import { IVehicleRepository } from '@carbroz/domain-customer';
+import { AuditLogService } from '@carbroz/domain-audit';
 import { EnrollFleetVehicleDto } from '../dtos/corporate.dto.js';
 
+/** EnrollFleetVehicleUseCase is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class EnrollFleetVehicleUseCase {
   constructor(
     private readonly corporateAccountRepo: ICorporateAccountRepository,
@@ -15,6 +14,7 @@ export class EnrollFleetVehicleUseCase {
     private readonly auditLogService: AuditLogService
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(dto: EnrollFleetVehicleDto, actorUserId: number) {
     const account = await this.corporateAccountRepo.findByPublicId(dto.accountPublicId);
     if (!account) {

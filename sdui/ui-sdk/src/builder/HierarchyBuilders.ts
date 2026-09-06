@@ -10,6 +10,7 @@ import { templateSchema } from '../contract/template.schema.js';
 
 interface NodeBase { id: string; type: string; properties?: Record<string, unknown>; }
 
+/** GroupBuilder is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class GroupBuilder {
   private readonly elements: SduiElement[] = [];
   constructor(private readonly base: NodeBase) {}
@@ -17,6 +18,7 @@ export class GroupBuilder {
   build(): SduiGroup { return groupSchema.parse({ ...this.base, elements: this.elements }); }
 }
 
+/** SectionBuilder is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class SectionBuilder {
   private readonly elements: SduiElement[] = [];
   private readonly groups: SduiGroup[] = [];
@@ -38,6 +40,7 @@ export class SectionBuilder {
   }
 }
 
+/** ComponentBuilder is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ComponentBuilder {
   private readonly elements: SduiElement[] = [];
   private readonly sections: SduiSection[] = [];
@@ -59,6 +62,7 @@ export class ComponentBuilder {
   }
 }
 
+/** TemplateBuilder is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class TemplateBuilder {
   private readonly components: SduiComponent[] = [];
   constructor(private readonly base: NodeBase) {}

@@ -1,6 +1,7 @@
-import { IDatabaseProvider } from '@carbroz/common';
+import { IDatabaseProvider } from '../ports/IDatabaseProvider.js';
 import { PrismaProvider } from './PrismaProvider.js';
 
+/** PrismaDatabaseProvider is an exported platform/database contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaDatabaseProvider implements IDatabaseProvider {
   private prismaProvider: PrismaProvider;
 

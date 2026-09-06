@@ -1,3 +1,4 @@
+/** PricingTier is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PricingTier {
   id?: number;
   publicId?: string;
@@ -20,6 +21,7 @@ export class PricingTier {
   }
 }
 
+/** VehicleTypeMultiplierEntity is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export class VehicleTypeMultiplierEntity {
   id?: number;
   publicId?: string;

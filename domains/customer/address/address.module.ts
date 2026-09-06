@@ -10,6 +10,7 @@ interface AddressCradle {
   prismaProvider: PrismaProviderPort;
 }
 
+/** registerAddressModule is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export function registerAddressModule(container: AwilixContainer): void {
   container.register({
     addressRepository: asFunction(

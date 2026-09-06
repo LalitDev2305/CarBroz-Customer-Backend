@@ -1,3 +1,4 @@
+/** Result is an exported foundation/kernel contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Result<T, E = Error> {
   private constructor(
     private readonly success: boolean,

@@ -1,6 +1,7 @@
 import type { Booking } from '../Booking.js';
 import type { BookingStatus } from '../BookingStatus.js';
 
+/** IBookingRepository is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IBookingRepository {
   create(booking: Booking): Promise<Booking>;
   findById(id: number): Promise<Booking | null>;

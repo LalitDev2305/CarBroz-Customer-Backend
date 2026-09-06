@@ -4,44 +4,19 @@ import { Money } from '@carbroz/foundation-kernel';
 import { Payment } from '../payment/domain/Payment.js';
 import { PaymentWebhook } from '../payment/domain/PaymentWebhook.js';
 import type { IPaymentRepository } from '../payment/domain/repositories/IPaymentRepository.js';
+import type { IPaymentGatewayProvider, PaymentOrderResult } from '../payment/application/ports/IPaymentGatewayProvider.js';
 import { Invoice, type InvoiceDocument } from '../invoice/domain/Invoice.js';
 import type { IInvoiceRepository } from '../invoice/domain/repositories/IInvoiceRepository.js';
 import { PartnerPayout, type PayoutCalculation } from '../payout/domain/PartnerPayout.js';
 import type { IPartnerPayoutRepository } from '../payout/domain/repositories/IPartnerPayoutRepository.js';
 import type { PayoutStatus } from '../payout/domain/PayoutStatus.js';
 
-export interface PaymentOrderResult {
-  providerOrderId: string;
-  amountPaise: number;
-  currency: string;
-  keyId?: string;
-}
-
-export interface ParsedPaymentWebhookEvent {
-  provider: string;
-  eventId: string;
-  eventType: string;
-  providerOrderId?: string;
-  providerPaymentId?: string;
-  failureCode?: string;
-  failureReason?: string;
-}
-
-export interface IPaymentGatewayPort {
-  createOrder(input: {
-    bookingPublicId: string;
-    amountPaise: number;
-    currency: string;
-    idempotencyKey: string;
-  }): Promise<PaymentOrderResult>;
-  verifyWebhookSignature(rawBodyBuffer: Buffer, signature: string, secret: string): boolean;
-  parseWebhookEvent(rawBodyString: string): ParsedPaymentWebhookEvent;
-}
-
+/** PaymentOrderResult is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ITransactionPort {
   runInTransaction<T>(work: () => Promise<T>): Promise<T>;
 }
 
+/** IFinancialTaxCalculator is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IFinancialTaxCalculator {
   calculateInvoiceTax(subtotal: Money): {
     cgst: Money;
@@ -61,18 +36,21 @@ export interface IFinancialTaxCalculator {
   };
 }
 
+/** CreatePaymentOrderInput is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CreatePaymentOrderInput {
   bookingPublicId: string;
   customerId: number;
 }
 
+/** CreatePaymentOrderUseCase is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CreatePaymentOrderUseCase {
   constructor(
     private readonly paymentRepository: IPaymentRepository,
     private readonly bookingRepository: IBookingRepository,
-    private readonly paymentGatewayProvider: IPaymentGatewayPort,
+    private readonly paymentGatewayProvider: IPaymentGatewayProvider,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: CreatePaymentOrderInput): Promise<{ payment: Payment; checkoutParams: PaymentOrderResult }> {
     const booking = await this.bookingRepository.findByPublicId(input.bookingPublicId);
     if (!booking || booking.customerId !== input.customerId) {
@@ -128,9 +106,11 @@ export class CreatePaymentOrderUseCase {
   }
 }
 
+/** GetPaymentUseCase is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class GetPaymentUseCase {
   constructor(private readonly paymentRepository: IPaymentRepository) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(publicId: string, customerId: number): Promise<Payment> {
     const payment = await this.paymentRepository.findByPublicId(publicId);
     if (!payment || payment.customerId !== customerId) {
@@ -140,6 +120,7 @@ export class GetPaymentUseCase {
   }
 }
 
+/** GenerateInvoiceUseCase is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class GenerateInvoiceUseCase {
   constructor(
     private readonly invoiceRepository: IInvoiceRepository,
@@ -148,6 +129,7 @@ export class GenerateInvoiceUseCase {
     private readonly sellerGstin = '',
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(bookingId: number): Promise<Invoice> {
     const existing = await this.invoiceRepository.findByBookingId(bookingId);
     if (existing) return existing;
@@ -190,8 +172,10 @@ export class GenerateInvoiceUseCase {
   }
 }
 
+/** GetInvoiceUseCase is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class GetInvoiceUseCase {
   constructor(private readonly invoiceRepository: IInvoiceRepository) {}
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(publicId: string): Promise<Invoice> {
     const invoice = await this.invoiceRepository.findByPublicId(publicId);
     if (!invoice) throw new Error('Invoice not found');
@@ -199,21 +183,24 @@ export class GetInvoiceUseCase {
   }
 }
 
+/** ProcessWebhookInput is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ProcessWebhookInput {
   rawBodyBuffer: Buffer;
   signature: string;
   webhookSecret: string;
 }
 
+/** ProcessPaymentWebhookUseCase is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ProcessPaymentWebhookUseCase {
   constructor(
     private readonly paymentRepository: IPaymentRepository,
     private readonly bookingRepository: IBookingRepository,
-    private readonly paymentGatewayProvider: IPaymentGatewayPort,
+    private readonly paymentGatewayProvider: IPaymentGatewayProvider,
     private readonly generateInvoiceUseCase: GenerateInvoiceUseCase,
     private readonly transactionProvider: ITransactionPort,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: ProcessWebhookInput): Promise<{ processed: boolean; message: string }> {
     if (!this.paymentGatewayProvider.verifyWebhookSignature(input.rawBodyBuffer, input.signature, input.webhookSecret)) {
       throw new Error('Invalid webhook signature');
@@ -267,6 +254,7 @@ export class ProcessPaymentWebhookUseCase {
   }
 }
 
+/** CreatePayoutEligibilityUseCase is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CreatePayoutEligibilityUseCase {
   constructor(
     private readonly payoutRepository: IPartnerPayoutRepository,
@@ -274,6 +262,7 @@ export class CreatePayoutEligibilityUseCase {
     private readonly taxCalculator: IFinancialTaxCalculator,
   ) {}
 
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(bookingId: number): Promise<PartnerPayout> {
     const existing = await this.payoutRepository.findByBookingId(bookingId);
     if (existing) return existing;
@@ -306,6 +295,7 @@ export class CreatePayoutEligibilityUseCase {
   }
 }
 
+/** ListPartnerPayoutsUseCase is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ListPartnerPayoutsUseCase {
   constructor(private readonly payoutRepository: IPartnerPayoutRepository) {}
   execute(partnerId: number, status?: PayoutStatus): Promise<PartnerPayout[]> {
@@ -313,9 +303,12 @@ export class ListPartnerPayoutsUseCase {
   }
 }
 
+/** MarkPayoutPaidInput is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface MarkPayoutPaidInput { publicId: string; externalReference: string }
+/** MarkPayoutPaidUseCase is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class MarkPayoutPaidUseCase {
   constructor(private readonly payoutRepository: IPartnerPayoutRepository) {}
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: MarkPayoutPaidInput): Promise<PartnerPayout> {
     if (!input.externalReference?.trim()) throw new Error('External reference is required to mark payout as paid');
     const payout = await this.payoutRepository.findByPublicId(input.publicId);
@@ -325,8 +318,10 @@ export class MarkPayoutPaidUseCase {
   }
 }
 
+/** ProcessPayoutBatchUseCase is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ProcessPayoutBatchUseCase {
   constructor(private readonly payoutRepository: IPartnerPayoutRepository) {}
+  /** Executes this application operation through its declared ports and domain invariants. */
   async execute(): Promise<number> {
     const payouts = await this.payoutRepository.listByStatus('SCHEDULED', 100);
     for (const payout of payouts) {

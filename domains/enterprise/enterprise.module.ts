@@ -22,6 +22,7 @@ interface EnterpriseCradle {
   };
 }
 
+/** registerEnterpriseModule is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export function registerEnterpriseModule(container: AwilixContainer): void {
   container.register({
     corporateAccountRepo: asFunction(

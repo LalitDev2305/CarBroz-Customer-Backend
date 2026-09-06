@@ -34,5 +34,7 @@ export const actionsSchema = z.record(z.string().min(1), actionSchema);
  */
 export const targetAppSchema = z.enum(['GLOBAL', 'PARTNER', 'CUSTOMER']);
 
+/** SduiAction is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiAction = z.infer<typeof actionSchema>;
+/** SduiTargetApp is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiTargetApp = z.infer<typeof targetAppSchema>;

@@ -1,3 +1,4 @@
+/** VehiclePersistenceRecord is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface VehiclePersistenceRecord {
   id: number;
   publicId: string;
@@ -17,6 +18,7 @@ export interface VehiclePersistenceRecord {
   deletedAt: Date | null;
 }
 
+/** VehiclePersistenceClient is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface VehiclePersistenceClient {
   vehicle: {
     create(args: unknown): Promise<VehiclePersistenceRecord>;

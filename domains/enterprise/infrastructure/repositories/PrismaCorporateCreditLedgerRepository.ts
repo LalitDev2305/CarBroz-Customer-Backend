@@ -1,6 +1,9 @@
+import { ICorporateCreditLedgerRepository } from '../../domain/repositories/ICorporateCreditLedgerRepository.js';
+import { CorporateCreditLedger, CorporateLedgerEntryType } from '../../domain/CorporateCreditLedger.js';
 import { PrismaClient } from '@prisma/client';
-import { ICorporateCreditLedgerRepository, CorporateCreditLedger, CorporateLedgerEntryType } from '@carbroz/common';
 
+
+/** PrismaCorporateCreditLedgerRepository is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaCorporateCreditLedgerRepository implements ICorporateCreditLedgerRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

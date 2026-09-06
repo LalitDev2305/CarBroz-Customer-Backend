@@ -1,3 +1,4 @@
+/** AuditAction is an exported domains/audit contract/implementation; see the owning README for lifecycle and extension rules. */
 export type AuditAction =
   | 'AUTH_LOGIN'
   | 'AUTH_OTP_VERIFY'

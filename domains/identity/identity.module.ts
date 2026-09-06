@@ -1,10 +1,11 @@
-import { asFunction, type AwilixContainer } from 'awilix';
+import { asClass, asFunction, type AwilixContainer } from 'awilix';
 import type { PrismaClient } from '@prisma/client';
 import { PrismaUserRepository } from './infrastructure/repositories/PrismaUserRepository.js';
 import { PrismaUserSessionRepository } from './infrastructure/repositories/PrismaUserSessionRepository.js';
 import { PrismaRoleRepository } from './infrastructure/repositories/PrismaRoleRepository.js';
 import { PrismaPermissionRepository } from './infrastructure/repositories/PrismaPermissionRepository.js';
 import { PrismaAdminRoleRepository } from './infrastructure/repositories/PrismaAdminRoleRepository.js';
+import { AuthorizationProvider } from './infrastructure/authorization/AuthorizationProvider.js';
 
 interface IdentityCradle {
   prismaProvider: {
@@ -12,8 +13,10 @@ interface IdentityCradle {
   };
 }
 
+/** registerIdentityModule is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
 export function registerIdentityModule(container: AwilixContainer): void {
   container.register({
+    authorizationProvider: asClass(AuthorizationProvider).singleton(),
     userRepository: asFunction(
       (cradle: IdentityCradle) => new PrismaUserRepository(cradle.prismaProvider.getClient()),
     ).singleton(),

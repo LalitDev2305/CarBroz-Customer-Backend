@@ -10,6 +10,7 @@ interface SduiRegistryCradle {
   prismaProvider: PrismaProviderPort;
 }
 
+/** registerSduiRegistryModule is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export function registerSduiRegistryModule(container: AwilixContainer): void {
   container.register({
     sduiRegistryRepository: asFunction(

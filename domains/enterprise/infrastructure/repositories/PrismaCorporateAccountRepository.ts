@@ -1,6 +1,9 @@
+import { ICorporateAccountRepository } from '../../domain/repositories/ICorporateAccountRepository.js';
+import { CorporateAccount, CorporateAccountStatus } from '../../domain/CorporateAccount.js';
 import { PrismaClient } from '@prisma/client';
-import { ICorporateAccountRepository, CorporateAccount, CorporateAccountStatus } from '@carbroz/common';
 
+
+/** PrismaCorporateAccountRepository is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaCorporateAccountRepository implements ICorporateAccountRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

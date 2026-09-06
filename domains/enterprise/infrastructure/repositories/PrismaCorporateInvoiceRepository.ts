@@ -1,6 +1,9 @@
+import { ICorporateInvoiceRepository } from '../../domain/repositories/ICorporateInvoiceRepository.js';
+import { CorporateInvoice, CorporateInvoiceStatus } from '../../domain/CorporateInvoice.js';
 import { PrismaClient } from '@prisma/client';
-import { ICorporateInvoiceRepository, CorporateInvoice, CorporateInvoiceStatus } from '@carbroz/common';
 
+
+/** PrismaCorporateInvoiceRepository is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaCorporateInvoiceRepository implements ICorporateInvoiceRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

@@ -12,6 +12,7 @@ import {
   type InstanceInput,
 } from '../registry/registries.js';
 
+/** ElementFactory is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ElementFactory {
   static create(type: string, input: InstanceInput): SduiElement {
     return elementSchema.parse(elementRegistry.create(type, input));
@@ -19,6 +20,7 @@ export class ElementFactory {
   static raw(value: SduiElement): SduiElement { return elementSchema.parse(value); }
 }
 
+/** GroupFactory is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class GroupFactory {
   static create(type: string, input: InstanceInput): SduiGroup {
     return groupSchema.parse(groupRegistry.create(type, input));
@@ -26,6 +28,7 @@ export class GroupFactory {
   static raw(value: SduiGroup): SduiGroup { return groupSchema.parse(value); }
 }
 
+/** SectionFactory is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class SectionFactory {
   static create(type: string, input: InstanceInput): SduiSection {
     return sectionSchema.parse(sectionRegistry.create(type, input));
@@ -33,6 +36,7 @@ export class SectionFactory {
   static raw(value: SduiSection): SduiSection { return sectionSchema.parse(value); }
 }
 
+/** ComponentFactory is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ComponentFactory {
   static create(type: string, input: InstanceInput): SduiComponent {
     return componentSchema.parse(componentRegistry.create(type, input));
@@ -40,6 +44,7 @@ export class ComponentFactory {
   static raw(value: SduiComponent): SduiComponent { return componentSchema.parse(value); }
 }
 
+/** TemplateFactory is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export class TemplateFactory {
   static create(type: string, input: InstanceInput): SduiTemplate {
     return templateSchema.parse(templateRegistry.create(type, input));

@@ -24,4 +24,5 @@ export const sectionSchema = z.union([
   groupedSectionSchema,
 ]);
 
+/** SduiSection is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiSection = z.infer<typeof sectionSchema>;

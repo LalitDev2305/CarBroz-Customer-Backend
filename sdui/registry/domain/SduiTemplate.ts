@@ -1,5 +1,6 @@
 import type { SduiTemplate } from '@carbroz/ui-sdk';
 
+/** SduiTemplateProps is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface SduiTemplateProps {
   id: number;
   publicId: string;
@@ -10,6 +11,7 @@ export interface SduiTemplateProps {
   updatedAt: Date;
 }
 
+/** SduiTemplateEntity is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class SduiTemplateEntity {
   public readonly id: number;
   public readonly publicId: string;

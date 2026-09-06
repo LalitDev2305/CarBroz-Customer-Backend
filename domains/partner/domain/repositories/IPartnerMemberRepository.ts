@@ -1,6 +1,7 @@
 import type { IRepository } from '@carbroz/foundation-kernel';
 import type { PartnerMember } from '../PartnerMember.js';
 
+/** IPartnerMemberRepository is an exported domains/partner contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface IPartnerMemberRepository extends IRepository<PartnerMember, number> {
   findByPublicId(publicId: string): Promise<PartnerMember | null>;
   findByUserIdAndPartnerId(userId: number, partnerId: number): Promise<PartnerMember | null>;

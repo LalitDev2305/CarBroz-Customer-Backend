@@ -1,6 +1,7 @@
 import { ActorType } from './AuditActor.js';
 import { AuditAction } from './AuditAction.js';
 
+/** AuditLogProps is an exported domains/audit contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface AuditLogProps {
   id?: number;
   publicId?: string;
@@ -17,6 +18,7 @@ export interface AuditLogProps {
   createdAt?: Date;
 }
 
+/** AuditLog is an exported domains/audit contract/implementation; see the owning README for lifecycle and extension rules. */
 export class AuditLog {
   id?: number;
   publicId?: string;

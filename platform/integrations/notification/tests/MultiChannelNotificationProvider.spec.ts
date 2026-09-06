@@ -1,5 +1,6 @@
+import { NotificationPayload } from '@carbroz/domain-communications';
 import { describe, it, expect, vi } from 'vitest';
-import { NotificationPayload } from '@carbroz/common';
+
 import { MultiChannelNotificationProvider } from '../src/providers/MultiChannelNotificationProvider.js';
 
 describe('MultiChannelNotificationProvider', () => {

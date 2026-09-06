@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import type { IPricingRepository } from '../../domain/repositories/IPricingRepository.js';
 import { PricingTier, VehicleTypeMultiplierEntity } from '../../domain/PricingTier.js';
 
+/** PrismaPricingRepository is an exported domains/catalog-pricing contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaPricingRepository implements IPricingRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

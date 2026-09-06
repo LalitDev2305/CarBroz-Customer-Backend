@@ -13,3 +13,4 @@ export * from '../domain/errors/DomainError.js';
 export * from '../domain/value-objects/Coordinates.js';
 export * from '../application/contracts.js';
 export * from '../errors/errors.js';
+export * from '../errors/ErrorCode.js';

@@ -1,6 +1,10 @@
+import { IReviewRepository, PartnerRatingStats } from '../../domain/repositories/IReviewRepository.js';
+import { Review } from '../../domain/Review.js';
+import { ReviewStatus } from '../../domain/ReviewStatus.js';
 import { PrismaClient } from '@prisma/client';
-import { IReviewRepository, PartnerRatingStats, Review, ReviewStatus } from '@carbroz/common';
 
+
+/** PrismaReviewRepository is an exported domains/engagement contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaReviewRepository implements IReviewRepository {
   private unitOfWorkPrisma: any = null;
 

@@ -1,6 +1,9 @@
+import { ICorporateMemberRepository } from '../../domain/repositories/ICorporateMemberRepository.js';
+import { CorporateMember, CorporateMemberRole } from '../../domain/CorporateMember.js';
 import { PrismaClient } from '@prisma/client';
-import { ICorporateMemberRepository, CorporateMember, CorporateMemberRole } from '@carbroz/common';
 
+
+/** PrismaCorporateMemberRepository is an exported domains/enterprise contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PrismaCorporateMemberRepository implements ICorporateMemberRepository {
   constructor(private readonly prisma: PrismaClient) {}
 

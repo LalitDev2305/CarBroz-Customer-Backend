@@ -6,6 +6,7 @@ import type { SduiScreenEntity } from '../SduiScreen.js';
 import type { SduiSectionEntity } from '../SduiSection.js';
 import type { SduiTemplateEntity } from '../SduiTemplate.js';
 
+/** CreateDraftInput is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface CreateDraftInput {
   screenId: string;
   targetApp?: SduiTargetApp;
@@ -15,6 +16,7 @@ export interface CreateDraftInput {
   overwriteExistingDraft?: boolean;
 }
 
+/** UpdateDraftInput is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface UpdateDraftInput {
   screenId: string;
   targetApp?: SduiTargetApp;
@@ -23,6 +25,7 @@ export interface UpdateDraftInput {
   changeDescription?: string;
 }
 
+/** RegistryNodeInput is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface RegistryNodeInput {
   name: string;
   componentType: string;
@@ -31,6 +34,7 @@ export interface RegistryNodeInput {
   supportedActions?: unknown;
 }
 
+/** ISduiRegistryRepository is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface ISduiRegistryRepository {
   findPublishedScreen(screenId: string, targetApp?: SduiTargetApp): Promise<SduiScreenEntity | null>;
   upsertScreen(

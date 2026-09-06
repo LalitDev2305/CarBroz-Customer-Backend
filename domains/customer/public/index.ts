@@ -11,3 +11,7 @@ export * from '../garage/application/use-cases/SetDefaultVehicleUseCase.js';
 export * from '../garage/application/use-cases/ArchiveVehicleUseCase.js';
 export * from '../application/CustomerUseCases.js';
 export * from '../customer.module.js';
+export * from '../application/use-cases/ExtractCustomerDataUseCase.js';
+export * from '../application/use-cases/GetCustomerProfileUseCase.js';
+export * from '../application/use-cases/ManageAddressUseCase.js';
+export * from '../application/use-cases/UpdateCustomerProfileUseCase.js';

@@ -1,5 +1,6 @@
 import { VehicleStatus } from './VehicleStatus.js';
 
+/** VehicleProps is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface VehicleProps {
   id?: number;
   publicId?: string;
@@ -19,6 +20,7 @@ export interface VehicleProps {
   deletedAt?: Date | null;
 }
 
+/** Vehicle is an exported domains/customer contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Vehicle {
   id?: number;
   publicId?: string;
