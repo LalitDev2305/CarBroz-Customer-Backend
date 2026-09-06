@@ -10,6 +10,7 @@ function canAccessCustomer(
   userId: number,
 ): boolean {
   const actor = context.actor;
+  if (!actor) return false;
   return (
     actor.kind === "ADMIN" ||
     actor.roles.includes("ADMIN") ||
