@@ -203,6 +203,20 @@ describe('canonical Observability behavior', () => {
 `);
 }
 
+function requireConvergenceCoverageEvidence() {
+  const required = [
+    'domains/engagement/coupon/application/use-cases/UpdateCouponUseCase.spec.ts',
+    'domains/engagement/review/infrastructure/repositories/PrismaReviewRepository.spec.ts',
+    'domains/catalog-pricing/catalog/infrastructure/repositories/PrismaCatalogRepository.spec.ts',
+    'domains/financials/payment/infrastructure/repositories/PrismaPaymentRepository.spec.ts',
+  ];
+  const missing = required.filter((file) => !exists(p(file)));
+  if (missing.length > 0) {
+    throw new Error(`Production convergence behavior evidence is incomplete: ${missing.join(', ')}`);
+  }
+  console.log(`[architecture-closeout-coverage-tests] production convergence evidence covers ${required.length} priority production owners`);
+}
+
 function requireDocumentationEvidence() {
   const required = [
     'tests/architecture/tsdoc-documentation.policy.test.ts',
@@ -223,6 +237,7 @@ function requireDocumentationEvidence() {
 
 normalizeFinalRuntimeSweep();
 generateObservabilityCoverage();
+requireConvergenceCoverageEvidence();
 await import('./architecture-closeout-documentation.mjs');
 requireDocumentationEvidence();
 if (exists(p('closeout-test-output.txt'))) fs.rmSync(p('tools/architecture-closeout-documentation.mjs'), { force: true });
