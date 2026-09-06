@@ -5,6 +5,7 @@
 **Bootstrap:** `docs/AI_PROJECT_BOOTSTRAP.md`  
 **Freeze contract:** `docs/PRODUCTION_FREEZE_CONSTITUTION.md`  
 **Playbook:** `docs/PRODUCTION_FREEZE_PLAYBOOK.md`  
+**Literal compliance matrix:** `docs/CONSTITUTION-COMPLIANCE-MATRIX.md`  
 **Historical forensic ledger:** `docs/PRODUCTION-ARCHITECTURE-CLOSEOUT-IMPLEMENTATION.md`
 
 This is the concise live handoff. Historical investigation and the original audit reconciliation remain in the historical ledger; do not duplicate that history here.
@@ -14,139 +15,74 @@ This is the concise live handoff. Historical investigation and the original audi
 Repository: `LalitDev2305/CarBroz-Customer-Backend`  
 Branch: `fix/stage-a-production-definitions`
 
-Milestone 1 implementation HEAD before this ledger update:
+The Master Constitution remains the only normative architecture authority. Earlier closeout runs are evidence, not authority. A closeout gate passing is no longer treated as sufficient if the gate does not encode a mandatory Constitution rule.
 
-`6219cdb835e9b6fd33fb9c8f53f28610c8e530c3`
+Latest authoritative transformed strict coverage measurement before the literal-compliance phase reset was closeout #118:
 
-Normal CI on that exact SHA:
+- Statements: 85.62%
+- Branches: 74.98%
+- Functions: 92.98%
+- Lines: 86.92%
 
-- `CarBroz Backend CI` #1328
-- run `33991002536`
-- result SUCCESS
-- normal Prisma/build/lint/Vitest pipeline green.
-
-Canonical architecture closeout baseline remains #116 from `179935d0a3d63991bde16c6bf296985a036761b8`:
-
-- transformation/topology/ownership/Prisma/build/lint/normal tests PASS;
-- only strict executable production coverage failed;
-- Statements 82.10%; Branches 69.35%; Functions 91.53%; Lines 84.08%.
-
-Comparison `179935d0...` → `6219cdb...` proves the eight intervening commits changed only freeze documentation, root `package.json`, and `tools/production-freeze/**`; no production `apps/domains/sdui/platform/foundation` source and no closeout transformation script changed. Therefore #116 remains valid architecture-candidate evidence while its coverage percentages remain the current transformed coverage baseline until the next transformed measurement.
-
-Always re-verify live HEAD before implementation.
+Those numbers are diagnostic only. Literal freeze remains 100/100/100/100 plus every Constitution and exact-SHA validation gate.
 
 ## 2. Milestone ledger
 
 | Milestone | Status | Exit evidence |
 |---|---|---|
-| M1 — Repository Foundation & AI Operating System | DONE | Bootstrap/freeze contract/live ledger/playbook committed; safe non-destructive `pnpm freeze:preflight` added; exact implementation SHA `6219cdb...`; CI #1328 SUCCESS. |
-| M2 — Repository Convergence | DONE | Current topology inventoried; transformation chain reconstructed; historical audit reconciled; #116 final candidate passed architecture/topology/ownership gates; comparison to M1 HEAD proves no production/closeout architecture drift. |
-| M3 — Production Convergence | IN PROGRESS | Close strict executable production gaps legitimately until transformed candidate reaches 100/100/100/100 with normal gates green. |
-| M4 — Production Freeze | NOT STARTED | Final closeout candidate passes every freeze gate and one-time closeout tooling is removed only by approved finalization. |
+| M1 — Repository Foundation & AI Operating System | DONE | Bootstrap/freeze contract/live ledger/playbook and safe preflight exist. |
+| M2 — Repository Convergence | REOPENED FOR LITERAL COMPLIANCE | Earlier transformed topology passed the older gate, but deep Constitution audit found rules the gate did not encode. The Constitution, not historical gate success, wins. |
+| M3 — Production Convergence | IN PROGRESS | Coverage work exists, but literal structure/ownership/security convergence now precedes final coverage closure. |
+| M4 — Production Freeze | NOT STARTED | Requires every mandatory Constitution rule, 100/100/100/100, final validation, cleanup and exact-final-SHA CI. |
 
-## 3. Milestone 1 completion
+## 3. Six-phase literal Constitution convergence
 
-| ID | Task | Status | Evidence |
-|---|---|---|---|
-| M1-001 | Single AI entry point | DONE | `docs/AI_PROJECT_BOOTSTRAP.md`. |
-| M1-002 | Production freeze contract | DONE | `docs/PRODUCTION_FREEZE_CONSTITUTION.md`; Master Constitution remains sole architecture authority. |
-| M1-003 | Live execution ledger | DONE | This file. |
-| M1-004 | Production freeze playbook | DONE | `docs/PRODUCTION_FREEZE_PLAYBOOK.md`. |
-| M1-005 | Safe permanent local validation entry point | DONE | `pnpm freeze:preflight` → `tools/production-freeze/preflight.mjs`; build → lint → architecture tests → complete Vitest; does not execute mutating closeout transforms. |
-| M1-006 | Verify M1 repository state | DONE | HEAD `6219cdb...`; CI #1328 / `33991002536` SUCCESS. |
+| Phase | Status | Exit rule |
+|---|---|---|
+| P1 — Constitution Gap Map & Enforcement | COMPLETE | §§1–56 mapped; known gaps classified; high-risk drift added to executable closeout enforcement; impossible KYC actor fixture removed. |
+| P2 — Physical Structure Convergence | NEXT | Checked-in repository physically uses canonical taxonomy/workspace/API/domain structure without transitional authorities. |
+| P3 — Bounded-Context & Dependency Convergence | PENDING | Every business capability has one constitutional owner and cross-context access uses public boundaries. |
+| P4 — Domain/Application Contract Convergence | PENDING | Domain invariants, application orchestration, ExecutionContext, transactions/Clock/idempotency/state ownership converge semantically. |
+| P5 — Security/Infrastructure Production Hardening | PENDING | §37–45 production/security/config/PII/provider/financial/concurrency requirements proven. |
+| P6 — Proof, 100% Coverage & Production Freeze | PENDING | Every matrix row PASS; Prisma/build/lint/tests/coverage/Constitution/final-SHA CI all green; one-time migration tooling removed. |
 
-## 4. Milestone 2 convergence proof
+## 4. Phase 1 — Constitution Gap Map & Enforcement
 
-### M2-001 — Current topology — DONE
+Phase 1 deliberately did not change the Constitution to fit current code. It changed enforcement and evidence so later phases must change the repository to fit the Constitution.
 
-Current pre-closeout workspace contains canonical roots `apps`, `domains`, `sdui`, `platform`, `foundation` plus transitional `packages/common`. `apps` contains only `apps/api`. Domains are exactly Audit, Booking, Catalog/Pricing, Communications, Configuration, Customer, Dispute, Engagement, Enterprise, Financials, Identity, Operations and Partner. SDUI contains exactly Registry + UI SDK. Platform contains Cache, Database, Integrations, Messaging, Observability and Storage. Foundation contains Kernel.
+Completed:
 
-Current `apps/api/src` still contains transitional `modules`, `container` and `providers`. These are migration inputs, not accepted final topology.
+1. Re-read the Master Constitution as the sole authority, including physical taxonomy, all bounded contexts, SDUI, dependency law, production/security rules, migration classification, testing/enforcement and final freeze criteria.
+2. Added `docs/CONSTITUTION-COMPLIANCE-MATRIX.md`, mapping every Constitution section 1–56 into PASS / TRANSITIONAL / GAP / DEFERRED-CAPABILITY status and a concrete P2–P6 queue.
+3. Strengthened `tools/architecture-closeout-constitution-gate.mjs` so final closeout now rejects additional literal drift classes that the older gate missed:
+   - forbidden generic roots/workspaces;
+   - incomplete canonical API root/surface structure;
+   - Partner/Customer/Admin surface cross-imports;
+   - forbidden deep cross-domain imports instead of public boundaries;
+   - Enterprise-owned invoice/payment/settlement/ledger accounting;
+   - Booking-owned Operations dispatch/tracking/capacity/assignment authority;
+   - legacy SDUI hierarchy vocabulary;
+   - generic UI SDK dependency on Partner/Customer;
+   - mock/hardcoded production OTP behavior;
+   - timestamp-derived refresh/session token material;
+   - tracked generated/build/coverage output.
+4. Corrected the KYC coverage fixture so it no longer fabricates a string actor ID that the canonical `ExecutionContext` contract makes impossible.
+5. Reclassified earlier M2 historical closeout success: it remains useful migration evidence, but it cannot certify literal Constitution compliance because the old gate did not encode every mandatory rule.
 
-### M2-002 — Transformation source→final topology — DONE
+### Phase 1 cross-check result
 
-The closeout chain is deterministic:
+**PASS as an audit/enforcement phase, not as architecture freeze.** The cross-check intentionally exposes unresolved repository gaps rather than hiding them. Known mandatory gaps include transitional `packages/*`, transitional API structure, Enterprise/Financials accounting ownership, production Identity OTP/token security, transaction/concurrency proof, resource-ownership audit, configuration/PII/provider-failure proof and strict coverage.
 
-1. `architecture-closeout.mjs` runs the baseline migration driver, residue cleanup, self-import/Partner/Financials+Operations/API/quality convergence, permanent-CI convergence, and removes executed helper authorities.
-2. `architecture-closeout-finalize.mjs` verifies `packages/` is gone, canonicalizes Foundation contracts, public boundaries, tests, Financials composition and Operations dispatch ownership.
-3. `architecture-closeout-lastmile.mjs` freezes Identity authorization composition, API execution context, Booking→Operations dispatch ownership and contract evidence.
-4. module documentation is generated.
-5. `architecture-closeout-constitution-gate.mjs` executes hardening/runtime-regression/coverage-test normalization and rejects non-canonical topology/dependencies/coverage thresholds.
-6. final workspace reinstall, Prisma, build, lint, tests and strict coverage execute.
-7. Constitution gate reruns after executable validation.
-8. only after all gates pass are one-time closeout tools/workflow removed and constitution-closed source committed.
+The next unfinished task is therefore **P2 — Physical Structure Convergence**, not further blind coverage accumulation.
 
-`architecture-closeout-postpatch.mjs` rewrites the workspace to only the five canonical roots and rejects surface cross-imports, Common residue and package self-imports. Generated canonical topology/engineering tests permanently reject `packages`, API business roots, deep cross-domain imports, framework/persistence leakage and unsafe logging.
+## 5. Frozen execution rules
 
-### M2-003 — Historical audit #1–#20 — DONE
-
-The historical ledger remains the detailed reconciliation. Final disposition after live/transformed verification:
-
-- topology/business-in-API/SDUI/public-boundary/ExecutionContext/API-isolation/use-case/middleware/observability/AppController concerns: stale or resolved by deterministic closeout + executable gates;
-- DI/repository/validation/typed-error/transaction/events-outbox concerns: governed by current Master Constitution and existing owner/port/gate evidence; no unproven replacement architecture is introduced;
-- mandatory global Result/Either and event sourcing recommendations: rejected as architecture overreach;
-- coverage: only confirmed remaining freeze gap from #116;
-- no new architecture VALID GAP was introduced between #116 baseline and M1 HEAD because no production/closeout architecture source changed.
-
-### M2-004 — Permanent enforcement map — DONE
-
-Permanent/generated enforcement includes canonical topology policy, engineering quality policy, production coverage-scope policy/support, canonical public-contract tests, API Booking ownership policy, unit/integration/e2e evidence, Constitution gate, and permanent CI convergence installed by the closeout executor.
-
-### M2-005 — Residual architecture closure — DONE
-
-No additional architecture code change is justified before coverage work. The latest canonical transformed candidate already passed architecture/topology/ownership and all non-coverage closeout gates. Changing architecture now without new evidence would violate the frozen decision rule.
-
-### M2-006 — Repository convergence proof — DONE
-
-Architecture convergence is certified for the current production source lineage by closeout #116 plus the `179935d0...` → `6219cdb...` comparison showing no production or closeout-transform drift.
-
-## 5. Milestone 3 — strict production convergence
-
-**FIRST UNFINISHED TASK: M3-COV-001 — Engagement Coupon `UpdateCouponUseCase` transformed coverage producer.**
-
-Rules:
-
-1. trace final transformed file to its actual producer;
-2. classify uncovered behavior before editing;
-3. fix semantic/dead-code defects before adding tests;
-4. add only meaningful behavior tests;
-5. use local/targeted validation first when an execution runtime is available;
-6. do not wait on CI between ordinary coverage batches;
-7. remeasure the transformed candidate at meaningful checkpoints;
-8. never weaken scope/thresholds or manufacture impossible states.
-
-Starting transformed coverage baseline from #116:
-
-| Metric | Baseline | Freeze target |
-|---|---:|---:|
-| Statements | 82.10% | 100% |
-| Branches | 69.35% | 100% |
-| Functions | 91.53% | 100% |
-| Lines | 84.08% | 100% |
-
-Starting priority queue:
-
-1. Engagement Coupon transformed `UpdateCouponUseCase.ts`.
-2. Customer surface controller branches.
-3. Engagement Review Prisma repository.
-4. Catalog/Pricing Prisma repository/application use cases.
-5. Partner KYC use case/controller.
-6. Financials Payment repository.
-7. Booking repository.
-8. SDUI Registry residual transformed branches.
-9. Identity Auth use cases.
-10. Remaining executable production misses by meaningful branch/statement impact.
-
-## 6. Current hazards
-
-- Current pre-closeout source is transitional; fix transformed defects at their true producer.
-- Do not create duplicate final implementations.
-- ExecutionContext actor is mandatory; never fabricate anonymous/impossible actor states for coverage.
-- Do not weaken coverage configuration.
-- Do not remove one-time closeout tooling before final strict coverage and downstream gates pass.
-- Avoid overlapping closeout-triggering commits while a closeout run is active.
-- Existing historical safety branches are not execution authorities.
-
-## 7. Handoff rule
-
-A new session reads `docs/AI_PROJECT_BOOTSTRAP.md`, verifies live truth, then resumes the `FIRST UNFINISHED TASK`. Update this ledger after each meaningful validated batch with exact implementation SHA, validation evidence and coverage delta.
+1. Read the Master Constitution before architecture-sensitive work.
+2. Constitution + current source evidence + executable validation must agree.
+3. Do not redesign the frozen architecture.
+4. Do not weaken a Constitution rule, architecture gate, coverage scope or threshold to accommodate current code.
+5. Do not create empty ceremonial folders merely to resemble diagrams.
+6. Do not manufacture impossible states or casts solely for coverage.
+7. Fix the true producer of generated/transformed defects.
+8. Work continuously through P2 → P6; CI confirms meaningful boundaries rather than replacing implementation/debugging.
+9. Architecture freeze is declared only after the actual checked-in final repository—not a hypothetical transformed tree—satisfies §54 and exact-final-SHA CI.
