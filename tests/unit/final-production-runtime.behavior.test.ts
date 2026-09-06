@@ -204,7 +204,7 @@ function dependency(mode: Mode, callbacks: Callable[], literal?: unknown): any {
       if (/email/i.test(name)) return 'user@example.test';
       if (/phone/i.test(name)) return '9999999999';
       if (/name|code|key|type|token|secret|url|path|bucket|route|method/i.test(name)) return typeof literal === 'string' ? literal : 'sample';
-      return async (...args: unknown[]) => {
+      return (...args: unknown[]) => {
         calls += 1;
         args.forEach((arg) => collectCallbacks(arg, callbacks));
         if (mode === 'fail') throw new Error(`${name} failure`);
