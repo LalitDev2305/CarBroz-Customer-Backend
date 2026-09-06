@@ -184,6 +184,7 @@ describe('Booking Engine Use Cases', () => {
     addressRepo = {
       findById: async () => ({
         id: 1,
+        userId: 100,
         addressLine1: '123 MG Road',
         city: 'Bangalore',
         state: 'Karnataka',
