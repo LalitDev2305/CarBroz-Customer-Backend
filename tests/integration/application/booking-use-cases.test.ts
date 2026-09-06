@@ -1,15 +1,40 @@
-import { Booking, type BookingStatus, type IBookingRepository } from '@carbroz/domain-booking';
-import { Vehicle, type IAddressRepository, type ICustomerProfileRepository, type IVehicleRepository } from '@carbroz/domain-customer';
-import { type ICatalogRepository, type IPricingRepository } from '@carbroz/domain-catalog-pricing';
-import { type IPartnerRepository } from '@carbroz/domain-partner';
-import { type ITransactionProvider } from '@carbroz/foundation-kernel';
-import { describe, expect, it, beforeEach } from 'vitest';
-import { CreateBookingUseCase } from '@carbroz/domain-booking';
-import { ConfirmBookingUseCase } from '@carbroz/domain-booking';
+import {
+  Booking,
+  type BookingStatus,
+  type IBookingRepository,
+} from '@carbroz/domain-booking';
+import { Vehicle } from '@carbroz/domain-customer';
+import type { IPartnerRepository } from '@carbroz/domain-partner';
+import type {
+  ExecutionContext,
+  ITransactionProvider,
+  TransactionContext,
+} from '@carbroz/foundation-kernel';
+import { beforeEach, describe, expect, it } from 'vitest';
+import {
+  CancelBookingUseCase,
+  ConfirmBookingUseCase,
+  CreateBookingUseCase,
+  ExpirePendingBookingsUseCase,
+} from '@carbroz/domain-booking';
 import { AssignPartnerToBookingUseCase } from '@carbroz/domain-operations';
-import { CancelBookingUseCase } from '@carbroz/domain-booking';
-import { ExpirePendingBookingsUseCase } from '@carbroz/domain-booking';
 
+const transaction: TransactionContext = { resource: {} };
+const customerContext: ExecutionContext = {
+  correlationId: 'booking-integration-customer',
+  timestamp: new Date('2026-09-06T12:00:00Z'),
+  actor: {
+    id: 100,
+    kind: 'CUSTOMER',
+    roles: ['CUSTOMER'],
+    customerId: 10,
+  },
+};
+const systemContext: ExecutionContext = {
+  correlationId: 'booking-integration-system',
+  timestamp: new Date('2026-09-06T12:00:00Z'),
+  actor: { id: 1, kind: 'SYSTEM', roles: ['SYSTEM'] },
+};
 
 class MemoryBookingRepository implements IBookingRepository {
   public items: Booking[] = [];
@@ -23,53 +48,102 @@ class MemoryBookingRepository implements IBookingRepository {
   }
 
   async findById(id: number): Promise<Booking | null> {
-    return this.items.find((b) => b.id === id) ?? null;
+    return this.items.find((booking) => booking.id === id) ?? null;
   }
 
   async findByPublicId(publicId: string): Promise<Booking | null> {
-    return this.items.find((b) => b.publicId === publicId) ?? null;
+    return this.items.find((booking) => booking.publicId === publicId) ?? null;
   }
 
-  async listByCustomerId(customerId: number, status?: BookingStatus): Promise<Booking[]> {
-    return this.items.filter((b) => b.customerId === customerId && (!status || b.status === status));
+  async listByCustomerId(
+    customerId: number,
+    status?: BookingStatus,
+  ): Promise<Booking[]> {
+    return this.items.filter(
+      (booking) =>
+        booking.customerId === customerId && (!status || booking.status === status),
+    );
   }
 
-  async listByPartnerId(partnerId: number, status?: BookingStatus): Promise<Booking[]> {
-    return this.items.filter((b) => b.partnerId === partnerId && (!status || b.status === status));
+  async listByPartnerId(
+    partnerId: number,
+    status?: BookingStatus,
+  ): Promise<Booking[]> {
+    return this.items.filter(
+      (booking) =>
+        booking.partnerId === partnerId && (!status || booking.status === status),
+    );
   }
 
-  async listAll(status?: BookingStatus, limit = 50, offset = 0): Promise<Booking[]> {
-    return this.items.filter((b) => !status || b.status === status).slice(offset, offset + limit);
+  async listByCorporateAccountId(
+    corporateAccountId: number,
+    status?: BookingStatus,
+  ): Promise<Booking[]> {
+    return this.items.filter(
+      (booking) =>
+        booking.corporateAccountId === corporateAccountId &&
+        (!status || booking.status === status),
+    );
   }
 
-  async findConflictingPartnerBooking(partnerId: number, startTime: Date, endTime: Date, excludeBookingId?: number): Promise<Booking | null> {
-    return this.items.find(
-      (b) =>
-        b.partnerId === partnerId &&
-        b.id !== excludeBookingId &&
-        ['ASSIGNED', 'IN_PROGRESS'].includes(b.status) &&
-        b.slotStartTime < endTime &&
-        b.slotEndTime > startTime
-    ) ?? null;
+  async listAll(
+    status?: BookingStatus,
+    limit = 50,
+    offset = 0,
+  ): Promise<Booking[]> {
+    return this.items
+      .filter((booking) => !status || booking.status === status)
+      .slice(offset, offset + limit);
   }
 
-  async findConflictingSlotBooking(serviceId: number, startTime: Date, endTime: Date): Promise<Booking | null> {
-    return this.items.find(
-      (b) =>
-        b.serviceId === serviceId &&
-        ['CREATED', 'CONFIRMED', 'ASSIGNED', 'IN_PROGRESS'].includes(b.status) &&
-        b.slotStartTime.getTime() === startTime.getTime() &&
-        b.slotEndTime.getTime() === endTime.getTime()
-    ) ?? null;
+  async findConflictingPartnerBooking(
+    partnerId: number,
+    startTime: Date,
+    endTime: Date,
+    excludeBookingId?: number,
+  ): Promise<Booking | null> {
+    return (
+      this.items.find(
+        (booking) =>
+          booking.partnerId === partnerId &&
+          booking.id !== excludeBookingId &&
+          ['ASSIGNED', 'IN_PROGRESS'].includes(booking.status) &&
+          booking.slotStartTime < endTime &&
+          booking.slotEndTime > startTime,
+      ) ?? null
+    );
+  }
+
+  async findConflictingSlotBooking(
+    serviceId: number,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<Booking | null> {
+    return (
+      this.items.find(
+        (booking) =>
+          booking.serviceId === serviceId &&
+          ['CREATED', 'CONFIRMED', 'ASSIGNED', 'IN_PROGRESS'].includes(
+            booking.status,
+          ) &&
+          booking.slotStartTime.getTime() === startTime.getTime() &&
+          booking.slotEndTime.getTime() === endTime.getTime(),
+      ) ?? null
+    );
   }
 
   async findExpiredPendingBookings(now: Date): Promise<Booking[]> {
-    return this.items.filter((b) => b.status === 'CREATED' && b.expiryAt && b.expiryAt < now);
+    return this.items.filter(
+      (booking) =>
+        booking.status === 'CREATED' &&
+        booking.expiryAt !== null &&
+        booking.expiryAt < now,
+    );
   }
 
   async update(booking: Booking): Promise<Booking> {
-    const idx = this.items.findIndex((b) => b.id === booking.id);
-    if (idx !== -1) this.items[idx] = booking;
+    const index = this.items.findIndex((item) => item.id === booking.id);
+    if (index !== -1) this.items[index] = booking;
     return booking;
   }
 }
@@ -81,7 +155,7 @@ describe('Booking Engine Use Cases', () => {
   let catalogRepo: any;
   let pricingRepo: any;
   let customerRepo: any;
-  let partnerRepo: any;
+  let partnerRepo: IPartnerRepository;
   let txProvider: ITransactionProvider;
 
   let createUseCase: CreateBookingUseCase;
@@ -93,7 +167,7 @@ describe('Booking Engine Use Cases', () => {
   beforeEach(() => {
     bookingRepo = new MemoryBookingRepository();
 
-    const v = new Vehicle({
+    const vehicle = new Vehicle({
       id: 1,
       customerId: 10,
       make: 'Honda',
@@ -104,11 +178,11 @@ describe('Booking Engine Use Cases', () => {
     });
 
     vehicleRepo = {
-      findById: async (id: number) => (id === 1 ? v : null),
+      findById: async (id: number) => (id === 1 ? vehicle : null),
     };
 
     addressRepo = {
-      findById: async (id: number) => ({
+      findById: async () => ({
         id: 1,
         addressLine1: '123 MG Road',
         city: 'Bangalore',
@@ -119,7 +193,7 @@ describe('Booking Engine Use Cases', () => {
     };
 
     catalogRepo = {
-      findServiceById: async (id: number) => ({
+      findServiceById: async () => ({
         id: 1,
         name: 'Basic Car Wash',
         basePrice: 40000,
@@ -134,14 +208,17 @@ describe('Booking Engine Use Cases', () => {
       findVehicleMultiplier: async () => ({ multiplier: 1.0 }),
     };
 
-    customerRepo = {};
-
-    partnerRepo = {
-      findById: async (id: number) => ({ id, status: 'ACTIVE' }),
+    customerRepo = {
+      findByUserId: async () => ({ id: 10 }),
     };
 
+    partnerRepo = {
+      findById: async (id: number) =>
+        ({ id, status: 'ACTIVE' }) as Awaited<ReturnType<IPartnerRepository['findById']>>,
+    } as IPartnerRepository;
+
     txProvider = {
-      runInTransaction: async (cb) => cb(),
+      runInTransaction: async (work) => work(transaction),
     };
 
     createUseCase = new CreateBookingUseCase(
@@ -151,72 +228,75 @@ describe('Booking Engine Use Cases', () => {
       catalogRepo,
       pricingRepo,
       customerRepo,
-      txProvider
+      txProvider,
     );
 
-    confirmUseCase = new ConfirmBookingUseCase(bookingRepo);
+    confirmUseCase = new ConfirmBookingUseCase(bookingRepo, customerRepo);
     assignUseCase = new AssignPartnerToBookingUseCase(bookingRepo, partnerRepo);
-    cancelUseCase = new CancelBookingUseCase(bookingRepo);
-    expireUseCase = new ExpirePendingBookingsUseCase(bookingRepo);
+    cancelUseCase = new CancelBookingUseCase(bookingRepo, customerRepo);
+    expireUseCase = new ExpirePendingBookingsUseCase(bookingRepo, txProvider);
+    void cancelUseCase;
   });
 
   it('should create booking and calculate pricing snapshots in paise', async () => {
-    const start = new Date(Date.now() + 3600000);
-    const end = new Date(Date.now() + 7200000);
+    const start = new Date(Date.now() + 3_600_000);
+    const end = new Date(Date.now() + 7_200_000);
 
-    const booking = await createUseCase.execute({
-      customerId: 10,
-      vehicleId: 1,
-      addressId: 1,
-      serviceId: 1,
-      slotStartTime: start,
-      slotEndTime: end,
-    });
-
-    expect(booking.status).toBe('CREATED');
-    expect(booking.totalPricePaise).toBe(47200); // 40000 + 18% GST (7200)
-    expect(booking.snapshots.vehicle.registrationNumber).toBe('KA01AB1234');
-  });
-
-  it('should prevent double booking of identical slot', async () => {
-    const start = new Date(Date.now() + 3600000);
-    const end = new Date(Date.now() + 7200000);
-
-    await createUseCase.execute({
-      customerId: 10,
-      vehicleId: 1,
-      addressId: 1,
-      serviceId: 1,
-      slotStartTime: start,
-      slotEndTime: end,
-    });
-
-    await expect(
-      createUseCase.execute({
+    const booking = await createUseCase.execute(
+      {
         customerId: 10,
         vehicleId: 1,
         addressId: 1,
         serviceId: 1,
         slotStartTime: start,
         slotEndTime: end,
-      })
-    ).rejects.toThrow();
+      },
+      customerContext,
+    );
+
+    expect(booking.status).toBe('CREATED');
+    expect(booking.totalPricePaise).toBe(47_200);
+    expect(booking.snapshots.vehicle.registrationNumber).toBe('KA01AB1234');
   });
 
-  it('should confirm booking and assign eligible partner', async () => {
-    const start = new Date(Date.now() + 3600000);
-    const end = new Date(Date.now() + 7200000);
-
-    const booking = await createUseCase.execute({
+  it('should prevent double booking of identical slot', async () => {
+    const start = new Date(Date.now() + 3_600_000);
+    const end = new Date(Date.now() + 7_200_000);
+    const command = {
       customerId: 10,
       vehicleId: 1,
       addressId: 1,
       serviceId: 1,
       slotStartTime: start,
       slotEndTime: end,
-    });
+    };
 
-    const confirmed = await confirmUseCase.execute(booking.publicId!, 10);
+    await createUseCase.execute(command, customerContext);
+    await expect(createUseCase.execute(command, customerContext)).rejects.toThrow(
+      'Selected service slot is no longer available',
+    );
+  });
+
+  it('should confirm booking and assign eligible partner', async () => {
+    const start = new Date(Date.now() + 3_600_000);
+    const end = new Date(Date.now() + 7_200_000);
+
+    const booking = await createUseCase.execute(
+      {
+        customerId: 10,
+        vehicleId: 1,
+        addressId: 1,
+        serviceId: 1,
+        slotStartTime: start,
+        slotEndTime: end,
+      },
+      customerContext,
+    );
+
+    const confirmed = await confirmUseCase.execute(
+      booking.publicId!,
+      customerContext,
+    );
     expect(confirmed.status).toBe('CONFIRMED');
 
     const assigned = await assignUseCase.execute(booking.publicId!, 99, 1);
@@ -225,23 +305,25 @@ describe('Booking Engine Use Cases', () => {
   });
 
   it('should expire unconfirmed booking slot holds', async () => {
-    const start = new Date(Date.now() + 3600000);
-    const end = new Date(Date.now() + 7200000);
+    const start = new Date(Date.now() + 3_600_000);
+    const end = new Date(Date.now() + 7_200_000);
 
-    const booking = await createUseCase.execute({
-      customerId: 10,
-      vehicleId: 1,
-      addressId: 1,
-      serviceId: 1,
-      slotStartTime: start,
-      slotEndTime: end,
-    });
+    const booking = await createUseCase.execute(
+      {
+        customerId: 10,
+        vehicleId: 1,
+        addressId: 1,
+        serviceId: 1,
+        slotStartTime: start,
+        slotEndTime: end,
+      },
+      customerContext,
+    );
 
-    // Manually set expiry in the past
-    booking.expiryAt = new Date(Date.now() - 1000);
+    booking.expiryAt = new Date(Date.now() - 1_000);
     await bookingRepo.update(booking);
 
-    const count = await expireUseCase.execute();
+    const count = await expireUseCase.execute(systemContext);
     expect(count).toBe(1);
 
     const updated = await bookingRepo.findById(booking.id!);
