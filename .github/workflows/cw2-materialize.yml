@@ -1,0 +1,57 @@
+name: CW2 Physical Structure Materializer
+on:
+  push:
+    branches: [fix/stage-a-production-definitions]
+    paths: [.github/workflows/cw2-materialize.yml]
+permissions:
+  contents: write
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: fix/stage-a-production-definitions, fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: corepack enable && corepack prepare pnpm@11.9.0 --activate
+      - run: pnpm install --no-frozen-lockfile
+      - run: sed -i "s#path.join(apiRoot,'context/toExecutionContext.ts')#path.join(apiRoot,'bootstrap/lifecycle/toExecutionContext.ts')#g" tools/architecture-closeout-api.mjs
+      - name: Materialize final topology
+        run: |
+          node tools/architecture-closeout.mjs
+          node tools/architecture-closeout-finalize.mjs
+          node tools/architecture-closeout-lastmile.mjs
+      - name: Eliminate residual ExecutionContext shim
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os,re
+          root=Path('apps/api/src'); target=root/'bootstrap/lifecycle/toExecutionContext.ts'
+          for f in root.rglob('*.ts'):
+              if f == target: continue
+              s=f.read_text()
+              if 'context/toExecutionContext.js' not in s: continue
+              rel=os.path.relpath(target.with_suffix('.js'),f.parent).replace('\\','/')
+              if not rel.startswith('.'): rel='./'+rel
+              f.write_text(re.sub(r"(['\"])(?:\.\.?/)+context/toExecutionContext\.js\1",lambda m:"'"+rel+"'",s))
+          PY
+          rm -rf apps/api/src/context
+          ! grep -R "context/toExecutionContext.js" apps/api/src --include='*.ts'
+      - run: pnpm install --no-frozen-lockfile
+      - name: CW2 proof
+        run: |
+          test ! -e packages
+          test ! -e apps/api/src/modules
+          test ! -e apps/api/src/context
+          ! grep -q 'packages/\*' pnpm-workspace.yaml
+          pnpm exec vitest run tests/architecture/workspace-taxonomy.policy.test.ts tests/architecture/canonical-topology.policy.test.ts
+          pnpm -r build
+          pnpm lint
+      - name: Persist proven CW2 topology without workflow mutations
+        run: |
+          git config user.name "CarBroz Architecture Bot"
+          git config user.email "architecture@carbroz.local"
+          git checkout origin/fix/stage-a-production-definitions -- .github/workflows
+          git add -A
+          git commit -m "refactor(cw2): materialize canonical repository topology"
+          git push origin HEAD:fix/stage-a-production-definitions
