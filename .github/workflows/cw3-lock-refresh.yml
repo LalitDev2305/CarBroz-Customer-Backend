@@ -6,6 +6,8 @@ on:
       - tmp/cw3-lock-refresh-worker
     paths:
       - domains/enterprise/package.json
+      - domains/booking/package.json
+      - domains/partner/package.json
       - .github/workflows/cw3-lock-refresh.yml
 
 permissions:
