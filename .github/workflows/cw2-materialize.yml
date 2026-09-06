@@ -1,0 +1,83 @@
+name: CW2 Physical Structure Materializer
+
+on:
+  push:
+    branches:
+      - fix/stage-a-production-definitions
+    paths:
+      - .github/workflows/cw2-materialize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://carbroz_ci:carbroz_ci@127.0.0.1:5432/carbroz_ci
+      JWT_SECRET: carbroz-ci-validation-only-secret-not-for-runtime
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: carbroz_ci
+          POSTGRES_PASSWORD: carbroz_ci
+          POSTGRES_DB: carbroz_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U carbroz_ci -d carbroz_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/stage-a-production-definitions
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: corepack prepare pnpm@11.9.0 --activate
+      - run: pnpm install --no-frozen-lockfile
+      - name: Correct CW2 ExecutionContext producer before materialization
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('tools/architecture-closeout-api.mjs')
+          s=p.read_text()
+          old="path.join(apiRoot,'context/toExecutionContext.ts')"
+          new="path.join(apiRoot,'bootstrap/lifecycle/toExecutionContext.ts')"
+          if old not in s:
+              raise SystemExit('expected transitional ExecutionContext producer not found')
+          p.write_text(s.replace(old,new))
+          PY
+      - name: Materialize canonical closeout candidate
+        run: node tools/architecture-closeout.mjs
+      - name: Finalize canonical product surfaces
+        run: node tools/architecture-closeout-finalize.mjs
+      - name: Finalize last-mile physical ownership
+        run: node tools/architecture-closeout-lastmile.mjs
+      - name: Generate canonical module documentation
+        run: node tools/generate-module-readmes.mjs
+      - name: Enforce Constitution topology
+        run: node tools/architecture-closeout-constitution-gate.mjs
+      - name: Refresh final workspace
+        run: pnpm install --no-frozen-lockfile
+      - name: Validate final physical workspace policy
+        run: pnpm exec vitest run tests/architecture/workspace-taxonomy.policy.test.ts tests/architecture/canonical-topology.policy.test.ts
+      - name: Validate build and lint
+        run: |
+          pnpm -r build
+          pnpm lint
+      - name: Validate full tests
+        run: pnpm test -- --run
+      - name: Commit CW2 physical convergence
+        run: |
+          git config user.name "CarBroz Architecture Bot"
+          git config user.email "architecture@carbroz.local"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "refactor(cw2): materialize canonical repository topology"
+          git push origin HEAD:fix/stage-a-production-definitions
