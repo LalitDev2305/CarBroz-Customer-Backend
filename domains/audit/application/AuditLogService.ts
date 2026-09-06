@@ -1,18 +1,47 @@
-import { AuditLog, type AuditLogProps } from '../domain/AuditLog.js';
-import type { IAuditLogRepository } from '../domain/repositories/IAuditLogRepository.js';
+import type {
+  AuditAction,
+  AuditLog,
+  IAuditLogRepository,
+} from "@carbroz/domain-audit";
 
-/** AuditLogService is an exported domains/audit contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Audit-owned observability seam; infrastructure logging is injected by composition. */
+export interface IAuditFailureObserver {
+  error(
+    message: string,
+    error?: Error | unknown,
+    context?: Record<string, unknown>,
+  ): void;
+}
+
 export class AuditLogService {
-  constructor(private readonly auditLogRepository: IAuditLogRepository) {}
+  constructor(
+    private readonly auditLogRepository: IAuditLogRepository,
+    private readonly logger: IAuditFailureObserver,
+  ) {}
 
-  async log(props: AuditLogProps): Promise<AuditLog | null> {
+  async log(input: {
+    actorUserId?: number;
+    action: AuditAction;
+    targetType: string;
+    targetPublicId?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<void> {
+    const log: AuditLog = {
+      actorUserId: input.actorUserId,
+      action: input.action,
+      targetType: input.targetType,
+      targetPublicId: input.targetPublicId,
+      metadata: input.metadata,
+    };
     try {
-      const auditLog = new AuditLog(props);
-      return await this.auditLogRepository.create(auditLog);
+      await this.auditLogRepository.create(log);
     } catch (error) {
-      // Non-blocking: audit log failure must never interrupt business execution flow.
-      console.error('[AuditLogService] Non-blocking audit log error:', error);
-      return null;
+      this.logger.error("Audit persistence failed", error, {
+        event: "audit.persistence.failed",
+        action: input.action,
+        targetType: input.targetType,
+      });
+      // Audit persistence remains non-blocking for the originating business flow.
     }
   }
 }
