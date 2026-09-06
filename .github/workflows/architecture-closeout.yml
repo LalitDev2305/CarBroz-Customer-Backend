@@ -3,7 +3,8 @@ name: Backend Architecture Closeout Verifier
 on:
   push:
     branches:
-      - fix/stage-a-production-definitions
+      - main
+      - development
     paths:
       - '.github/workflows/architecture-closeout.yml'
       - '.github/workflows/ci.yml'
