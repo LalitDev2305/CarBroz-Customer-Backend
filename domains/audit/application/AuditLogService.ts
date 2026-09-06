@@ -22,7 +22,8 @@ export class AuditLogService {
         error instanceof Error ? error : new Error('Unknown audit persistence failure');
       this.logger.error('audit.persistence.failed', normalizedError, {
         action: props.action,
-        entityType: props.entityType,
+        resource: props.resource,
+        correlationId: props.correlationId ?? undefined,
       });
       return null;
     }
