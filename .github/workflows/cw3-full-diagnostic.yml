@@ -1,0 +1,48 @@
+name: CW3 Full Constitution Diagnostic
+
+on:
+  push:
+    branches:
+      - tmp/cw3-full-diagnostic
+
+permissions:
+  contents: read
+
+jobs:
+  verify-no-cw3-full-gate-blockers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact diagnostic SHA
+        uses: actions/checkout@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full Constitution gate and reject any non-CW5 blocker
+        shell: bash
+        run: |
+          set +e
+          node tools/architecture-closeout-constitution-gate.mjs > full-constitution-output.txt 2>&1
+          gate_status=$?
+          set -e
+          cat full-constitution-output.txt
+
+          unexpected="$(grep '^-' full-constitution-output.txt | grep -Ev '^- (apps/api/src/bootstrap/config/runtime-config\.ts|domains/audit/application/AuditLogService\.ts|domains/identity/application/AuthUseCases\.ts):' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected non-CW5 Constitution blockers remain:"
+            echo "$unexpected"
+            exit 1
+          fi
+
+          if [ "$gate_status" -eq 0 ]; then
+            echo "Full Constitution gate is fully green; no later blockers remain."
+          else
+            echo "Full gate failures are confined to the known later CW5 blocker files."
+          fi
+      - name: Upload full-gate diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: cw3-full-constitution-diagnostic
+          path: full-constitution-output.txt
+          if-no-files-found: error
+          retention-days: 1
