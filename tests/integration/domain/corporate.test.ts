@@ -1,6 +1,7 @@
 import { Money } from '@carbroz/foundation-kernel';
 import { describe, it, expect } from 'vitest';
-import { CorporateAccount, CorporateMember, CorporateFleetVehicle, CorporateCreditLedger, CorporateInvoice } from '@carbroz/domain-enterprise';
+import { CorporateAccount, CorporateMember, CorporateFleetVehicle } from '@carbroz/domain-enterprise';
+import { CorporateCreditLedger, CorporateInvoice } from '@carbroz/domain-financials';
 
 describe('Phase 22 — Corporate Accounts, Fleet Management & B2B Billing Domain Unit Tests', () => {
   it('should instantiate CorporateAccount and manage credit limits correctly', () => {
