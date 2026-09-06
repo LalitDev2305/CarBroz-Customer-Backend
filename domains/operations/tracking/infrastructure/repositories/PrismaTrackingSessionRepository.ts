@@ -1,4 +1,4 @@
-import type { ITrackingSessionRepository } from '../../domain/ITrackingSessionRepository.js';
+import type { ITrackingSessionRepository } from '../../domain/repositories/ITrackingSessionRepository.js';
 import { TrackingSession } from '../../domain/TrackingSession.js';
 import type { TrackingStatus } from '../../domain/TrackingStatus.js';
 import { PrismaClient } from '@prisma/client';
