@@ -18,13 +18,18 @@ finalDescribe('Financials architecture policy', () => {
   it('uses the Foundation Money value object for monetary aggregate invariants', () => {
     const violations = financialDomainFiles.filter((file) => {
       const source = readFileSync(file, 'utf8');
-      return !source.includes("from '@carbroz/foundation-kernel'") || !source.includes('Money.fromMinor(');
+      const importsFoundation = /from\s+["']@carbroz\/foundation-kernel["']/.test(source);
+      return !importsFoundation || !source.includes('Money.fromMinor(');
     });
     expect(violations).toEqual([]);
   });
 
   it('does not publish concrete Financials infrastructure adapters', () => {
-    expect(financialPublicFiles.filter((file) => readFileSync(file, 'utf8').includes('/infrastructure/'))).toEqual([]);
+    expect(
+      financialPublicFiles.filter((file) =>
+        readFileSync(file, 'utf8').includes('/infrastructure/'),
+      ),
+    ).toEqual([]);
   });
 
   it('keeps one canonical Money implementation owned by Foundation with no compatibility implementation', () => {
