@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { AuditActor, AuditLog, AuditLogService, type IAuditLogRepository } from '@carbroz/domain-audit';
 
 describe('Phase 20 — Audit Logging Domain Model & Service', () => {
@@ -33,8 +33,9 @@ describe('Phase 20 — Audit Logging Domain Model & Service', () => {
       async listByResource() { return []; },
       async listByActor() { return []; },
     };
+    const logger = { error: vi.fn() };
 
-    const auditService = new AuditLogService(mockRepo);
+    const auditService = new AuditLogService(mockRepo, logger);
     const result = await auditService.log({
       action: 'PAYMENT_CREATE',
       resource: 'Payment',
@@ -44,22 +45,35 @@ describe('Phase 20 — Audit Logging Domain Model & Service', () => {
     expect(result).not.toBeNull();
     expect(logs.length).toBe(1);
     expect(logs[0]?.action).toBe('PAYMENT_CREATE');
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('should swallow errors safely in AuditLogService without throwing', async () => {
+  it('should swallow persistence errors while reporting them through observability', async () => {
     const failingRepo: IAuditLogRepository = {
       async create() { throw new Error('Database connection failed'); },
       async findByPublicId() { return null; },
       async listByResource() { return []; },
       async listByActor() { return []; },
     };
+    const logger = { error: vi.fn() };
 
-    const auditService = new AuditLogService(failingRepo);
+    const auditService = new AuditLogService(failingRepo, logger);
     const result = await auditService.log({
       action: 'SYSTEM_OPERATION',
       resource: 'System',
+      correlationId: 'audit-correlation-1',
     });
 
-    expect(result).toBeNull(); // Gracefully returns null without throwing exception
+    expect(result).toBeNull();
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledWith(
+      'audit.persistence.failed',
+      expect.objectContaining({ message: 'Database connection failed' }),
+      {
+        action: 'SYSTEM_OPERATION',
+        resource: 'System',
+        correlationId: 'audit-correlation-1',
+      },
+    );
   });
 });
