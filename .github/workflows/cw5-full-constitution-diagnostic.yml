@@ -1,0 +1,55 @@
+name: CW5 Full Constitution Diagnostic
+
+on:
+  push:
+    branches:
+      - fix/cw5-production-hardening-worker
+  workflow_dispatch:
+
+jobs:
+  classify-current-blockers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate repository pnpm version
+        run: corepack prepare pnpm@11.9.0 --activate
+
+      - name: Install immutable workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Capture full Constitution gate
+        id: full_gate
+        shell: bash
+        run: |
+          set +e
+          node tools/architecture-closeout-constitution-gate.mjs 2>&1 | tee cw5-full-constitution.txt
+          gate_status=${PIPESTATUS[0]}
+          echo "gate_status=$gate_status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload full Constitution diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: cw5-full-constitution-diagnostic
+          path: cw5-full-constitution.txt
+          if-no-files-found: error
+
+      - name: Report diagnostic classification
+        run: |
+          if [ "${{ steps.full_gate.outputs.gate_status }}" = "0" ]; then
+            echo "Full Constitution gate is already green."
+          else
+            echo "Full Constitution gate remains non-zero; artifact contains the current CW5 blocker set."
+          fi
