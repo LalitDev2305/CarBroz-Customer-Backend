@@ -47,19 +47,27 @@ for (const directory of [
 for (const directory of [
   'packages', 'shared', 'libs', 'common',
   'apps/api/src/modules', 'apps/api/src/container', 'apps/api/src/providers', 'apps/api/src/infra/repositories',
+  'apps/api/src/config', 'apps/api/src/context', 'apps/api/src/controllers', 'apps/api/src/middlewares', 'apps/api/src/plugins',
   'domains/catalog-pricing/app2', 'domains/partner/app2', 'domains/partner-core',
 ]) forbidden(directory, 'legacy/transitional authority survived closeout');
+for (const file of ['apps/api/src/app.ts', 'apps/api/src/server.ts', 'apps/api/src/app.routes.ts']) {
+  forbidden(file, 'API bootstrap/route entry point must live under the canonical bootstrap/surface structure');
+}
 
 const workspaceFile = path.join(root, 'pnpm-workspace.yaml');
 required('pnpm-workspace.yaml', 'workspace definition is required');
 if (fs.existsSync(workspaceFile)) {
   const workspace = fs.readFileSync(workspaceFile, 'utf8');
   const canonicalRoots = ['apps/*', 'domains/*', 'sdui/*', 'platform/*', 'foundation/*'];
+  const declaredRoots = [...workspace.matchAll(/^\s*-\s*["']?([^"'\s]+)["']?\s*$/gm)].map((match) => match[1]);
   for (const canonicalRoot of canonicalRoots) {
-    if (!workspace.includes(canonicalRoot)) violations.push(`pnpm-workspace.yaml: missing canonical root ${canonicalRoot}`);
+    if (!declaredRoots.includes(canonicalRoot)) violations.push(`pnpm-workspace.yaml: missing canonical root ${canonicalRoot}`);
   }
-  for (const forbiddenRoot of ['packages/*', 'shared/*', 'libs/*', 'common/*']) {
-    if (workspace.includes(forbiddenRoot)) violations.push(`pnpm-workspace.yaml: forbidden workspace root ${forbiddenRoot}`);
+  for (const declaredRoot of declaredRoots) {
+    if (!canonicalRoots.includes(declaredRoot)) violations.push(`pnpm-workspace.yaml: noncanonical workspace root ${declaredRoot}`);
+  }
+  if (declaredRoots.length !== canonicalRoots.length) {
+    violations.push(`pnpm-workspace.yaml: workspace roots must be exactly ${canonicalRoots.join(', ')}`);
   }
 }
 
@@ -72,6 +80,9 @@ for (const directory of [
   'apps/api/src/transport',
   'apps/api/src/system',
 ]) required(directory, 'canonical API structure is incomplete');
+for (const file of ['apps/api/src/bootstrap/app.ts', 'apps/api/src/bootstrap/server.ts']) {
+  required(file, 'canonical API bootstrap entry point is missing');
+}
 
 const surfaceRules = [
   ['apps/api/src/surfaces/partner', /(?:surfaces\/customer|surfaces\/admin)/, 'Partner surface imports another surface internals'],
@@ -162,7 +173,7 @@ for (const file of sourceFiles('domains')) {
   const owner = ownerMatch?.[1];
   for (const specifier of imports(content)) {
     const target = specifier.match(/^@carbroz\/domain-([^/]+)(\/.*)?$/);
-    if (target && target[1] !== owner && target[2] && target[2] !== '/public' && target[2] !== '/public/index.js') {
+    if (target && target[1] !== owner && target[2] && !/^\/public(?:\/|$)/.test(target[2])) {
       violations.push(`${relative(file)}: forbidden deep cross-domain import ${specifier}; consume the target public boundary`);
     }
   }
