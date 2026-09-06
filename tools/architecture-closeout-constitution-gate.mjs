@@ -2,13 +2,27 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-// Execute deterministic convergence producers before evaluating the final candidate tree.
-await import('./architecture-closeout-hardening.mjs');
-await import('./architecture-closeout-runtime-regression.mjs');
-await import('./architecture-closeout-coverage-tests.mjs');
-
+/**
+ * Permanent Backend V3 Constitution verifier.
+ *
+ * This gate is intentionally read-only. It verifies the checked-in canonical tree and must never
+ * rewrite source, generate tests/docs, delete tooling, or materialize a transformed candidate.
+ */
 const root = process.cwd();
 const violations = [];
+const canonicalWorkspaces = [
+  'apps/api',
+  'domains/identity', 'domains/partner', 'domains/customer', 'domains/catalog-pricing',
+  'domains/booking', 'domains/operations', 'domains/financials', 'domains/communications',
+  'domains/engagement', 'domains/configuration', 'domains/dispute', 'domains/enterprise', 'domains/audit',
+  'sdui/ui-sdk', 'sdui/registry',
+  'platform/database', 'platform/cache', 'platform/messaging', 'platform/storage',
+  'platform/observability', 'platform/integrations',
+  'foundation/kernel',
+];
+const canonicalWorkspaceRoots = ['apps/*', 'domains/*', 'sdui/*', 'platform/*', 'foundation/*'];
+const canonicalApiRoots = ['bootstrap', 'surfaces', 'system', 'transport'];
+
 const required = (relative, reason) => {
   if (!fs.existsSync(path.join(root, relative))) violations.push(`${relative}: ${reason}`);
 };
@@ -36,45 +50,52 @@ function relative(file) {
 function imports(content) {
   return [...content.matchAll(/(?:from\s+|import\s*\()\s*['"]([^'"]+)['"]/g)].map((match) => match[1]);
 }
+function packageDirectories(base) {
+  const absolute = path.join(root, base);
+  if (!fs.existsSync(absolute)) return [];
+  return fs.readdirSync(absolute, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(absolute, entry.name, 'package.json')))
+    .map((entry) => `${base}/${entry.name}`)
+    .sort();
+}
 
-// Constitution §§5–7: exact canonical source authorities.
-for (const directory of [
-  'apps/api', 'foundation/kernel',
-  'domains/identity', 'domains/customer', 'domains/partner', 'domains/catalog-pricing', 'domains/booking',
-  'domains/financials', 'domains/operations', 'domains/communications', 'domains/engagement',
-  'domains/configuration', 'domains/dispute', 'domains/enterprise', 'domains/audit',
-  'sdui/ui-sdk', 'sdui/registry',
-  'platform/database', 'platform/cache', 'platform/messaging', 'platform/storage',
-  'platform/observability', 'platform/integrations',
-]) required(directory, 'canonical Constitution owner is missing');
-for (const directory of [
-  'packages', 'shared', 'libs', 'common',
-  'apps/api/src/modules', 'apps/api/src/container', 'apps/api/src/providers', 'apps/api/src/infra/repositories',
-  'apps/api/src/config', 'apps/api/src/context', 'apps/api/src/controllers', 'apps/api/src/middlewares', 'apps/api/src/plugins',
-  'domains/catalog-pricing/app2', 'domains/partner/app2', 'domains/partner-core',
-]) forbidden(directory, 'legacy/transitional authority survived closeout');
-for (const file of ['apps/api/src/app.ts', 'apps/api/src/server.ts', 'apps/api/src/app.routes.ts']) {
-  forbidden(file, 'API bootstrap/route entry point must live under the canonical bootstrap/surface structure');
+// Constitution §§5–7: exact canonical physical authorities and workspace roots.
+for (const workspace of canonicalWorkspaces) {
+  required(`${workspace}/package.json`, 'canonical workspace package is missing');
+  required(`${workspace}/README.md`, 'canonical workspace architecture documentation is missing');
+}
+for (const forbiddenRoot of ['packages', 'shared', 'libs', 'common']) {
+  forbidden(forbiddenRoot, 'legacy/transitional top-level authority survived convergence');
+}
+const actualWorkspaces = [
+  ...packageDirectories('apps'), ...packageDirectories('domains'), ...packageDirectories('sdui'),
+  ...packageDirectories('platform'), ...packageDirectories('foundation'),
+].sort();
+if (JSON.stringify(actualWorkspaces) !== JSON.stringify([...canonicalWorkspaces].sort())) {
+  violations.push(`production workspaces must be exactly ${[...canonicalWorkspaces].sort().join(', ')}`);
 }
 
 const workspaceFile = path.join(root, 'pnpm-workspace.yaml');
 required('pnpm-workspace.yaml', 'workspace definition is required');
 if (fs.existsSync(workspaceFile)) {
   const workspace = fs.readFileSync(workspaceFile, 'utf8');
-  const canonicalRoots = ['apps/*', 'domains/*', 'sdui/*', 'platform/*', 'foundation/*'];
   const declaredRoots = [...workspace.matchAll(/^\s*-\s*["']?([^"'\s]+)["']?\s*$/gm)].map((match) => match[1]);
-  for (const canonicalRoot of canonicalRoots) {
-    if (!declaredRoots.includes(canonicalRoot)) violations.push(`pnpm-workspace.yaml: missing canonical root ${canonicalRoot}`);
-  }
-  for (const declaredRoot of declaredRoots) {
-    if (!canonicalRoots.includes(declaredRoot)) violations.push(`pnpm-workspace.yaml: noncanonical workspace root ${declaredRoot}`);
-  }
-  if (declaredRoots.length !== canonicalRoots.length) {
-    violations.push(`pnpm-workspace.yaml: workspace roots must be exactly ${canonicalRoots.join(', ')}`);
+  if (JSON.stringify(declaredRoots) !== JSON.stringify(canonicalWorkspaceRoots)) {
+    violations.push(`pnpm-workspace.yaml roots must be exactly ${canonicalWorkspaceRoots.join(', ')}`);
   }
 }
 
-// Constitution §§8–9: API is composition/transport only and surfaces are physically isolated.
+// Constitution §§8–9: API is composition/transport only and surface families stay isolated.
+const apiSrc = path.join(root, 'apps/api/src');
+required('apps/api/src', 'canonical API source root is missing');
+if (fs.existsSync(apiSrc)) {
+  const actualApiRoots = fs.readdirSync(apiSrc, { withFileTypes: true })
+    .map((entry) => entry.name)
+    .sort();
+  if (JSON.stringify(actualApiRoots) !== JSON.stringify([...canonicalApiRoots].sort())) {
+    violations.push(`apps/api/src entries must be exactly ${canonicalApiRoots.join(', ')}`);
+  }
+}
 for (const directory of [
   'apps/api/src/bootstrap',
   'apps/api/src/surfaces/partner',
@@ -86,6 +107,12 @@ for (const directory of [
 for (const file of ['apps/api/src/bootstrap/app.ts', 'apps/api/src/bootstrap/server.ts']) {
   required(file, 'canonical API bootstrap entry point is missing');
 }
+for (const legacyPath of [
+  'apps/api/src/app.ts', 'apps/api/src/server.ts', 'apps/api/src/app.routes.ts',
+  'apps/api/src/modules', 'apps/api/src/container', 'apps/api/src/providers', 'apps/api/src/context',
+  'apps/api/src/config', 'apps/api/src/controllers', 'apps/api/src/middlewares', 'apps/api/src/plugins',
+  'apps/api/src/infra/repositories',
+]) forbidden(legacyPath, 'legacy API authority survived convergence');
 
 const surfaceRules = [
   ['apps/api/src/surfaces/partner', /(?:surfaces\/customer|surfaces\/admin)/, 'Partner surface imports another surface internals'],
@@ -100,20 +127,12 @@ for (const [base, pattern, reason] of surfaceRules) {
   }
 }
 
+// Governing docs and executable proof layers must remain present.
 for (const document of [
   'README.md', 'docs/MASTER-BACKEND-CONSTITUTION.md', 'docs/ENGINEERING-DOCUMENTATION-STANDARD.md',
   'docs/FORENSIC-CHANGE-GATE.md', 'docs/TESTING-EXTENSIBILITY-AND-PROVIDER-STANDARD.md',
   'docs/CONSTITUTION-COMPLIANCE-MATRIX.md',
 ]) required(document, 'governing architecture documentation is missing');
-for (const packageFile of walk(root).filter((file) => path.basename(file) === 'package.json')) {
-  if (relative(packageFile).startsWith('node_modules/')) continue;
-  const packageRoot = path.dirname(packageFile);
-  const relRoot = relative(packageRoot);
-  if (relRoot !== '.' && !fs.existsSync(path.join(packageRoot, 'README.md'))) {
-    violations.push(`${relRoot}/README.md: package/module architecture documentation is missing`);
-  }
-}
-
 for (const evidence of [
   'tests/architecture/canonical-topology.policy.test.ts', 'tests/architecture/engineering-quality.policy.test.ts',
   'tests/architecture/production-coverage-scope.policy.test.ts', 'tests/architecture/support/production-coverage-scope.mjs',
@@ -123,6 +142,7 @@ for (const evidence of [
   'sdui/ui-sdk/tests/screen-serializer.test.ts',
 ]) required(evidence, 'required positive/negative/regression evidence layer is missing');
 
+// Constitution §49: deterministic production coverage scope and literal freeze thresholds.
 const vitestConfigFile = path.join(root, 'vitest.config.ts');
 required('vitest.config.ts', 'production test/coverage configuration is missing');
 if (fs.existsSync(vitestConfigFile)) {
@@ -134,7 +154,6 @@ if (fs.existsSync(vitestConfigFile)) {
     if (!config.includes(threshold)) violations.push(`vitest.config.ts: final freeze threshold missing ${threshold}`);
   }
 }
-
 const coverageScopeFile = path.join(root, 'tests/architecture/support/production-coverage-scope.mjs');
 if (fs.existsSync(coverageScopeFile)) {
   const scope = fs.readFileSync(coverageScopeFile, 'utf8');
@@ -143,6 +162,7 @@ if (fs.existsSync(coverageScopeFile)) {
   }
 }
 
+// Constitution §§33–36/45: dependency direction, public boundaries and observability hygiene.
 const productionRoots = ['apps', 'domains', 'sdui', 'platform', 'foundation'];
 const allProduction = productionRoots.flatMap(sourceFiles);
 const legacyPatterns = [
@@ -158,8 +178,6 @@ for (const file of allProduction) {
     violations.push(`${relative(file)}: direct console logging bypasses canonical observability`);
   }
 }
-
-// Constitution §§33–36: inward dependencies and public context boundaries.
 for (const file of sourceFiles('foundation')) {
   const content = fs.readFileSync(file, 'utf8');
   if (/from\s+['"]@carbroz\/(?:domain-|platform-|api|ui-sdk|sdui)/.test(content) || /from\s+['"][^'"]*(?:apps|domains|platform|sdui)\//.test(content)) {
@@ -172,8 +190,7 @@ for (const file of sourceFiles('domains')) {
   if (/from\s+['"]@carbroz\/platform-|from\s+['"][^'"]*platform\//.test(content)) violations.push(`${relative(file)}: domain imports a platform implementation`);
   if (/from\s+['"](?:razorpay|twilio|firebase-admin|@aws-sdk\/|minio|bullmq)/i.test(content)) violations.push(`${relative(file)}: vendor SDK leaked into domain`);
 
-  const ownerMatch = relative(file).match(/^domains\/([^/]+)\//);
-  const owner = ownerMatch?.[1];
+  const owner = relative(file).match(/^domains\/([^/]+)\//)?.[1];
   for (const specifier of imports(content)) {
     const target = specifier.match(/^@carbroz\/domain-([^/]+)(\/.*)?$/);
     if (target && target[1] !== owner && target[2] && !/^\/public(?:\/|$)/.test(target[2])) {
@@ -187,13 +204,14 @@ for (const file of sourceFiles('apps/api')) {
   if (/\/use-cases\//.test(relative(file)) || /\/domain\//.test(relative(file)) || /\/repositories\//.test(relative(file))) {
     violations.push(`${relative(file)}: business/persistence authority remains under API transport`);
   }
+  if (/class\s+\w+UseCase\b/.test(content)) violations.push(`${relative(file)}: business use-case implementation remains under API transport`);
 }
 for (const file of walk(path.join(root, 'domains')).filter((candidate) => candidate.endsWith('/public/index.ts'))) {
   const content = fs.readFileSync(file, 'utf8');
   if (content.includes('/infrastructure/') || content.includes('@prisma/client')) violations.push(`${relative(file)}: public boundary exposes concrete infrastructure`);
 }
 
-// Constitution §§14–16/21: explicit bounded-context ownership that cannot be inferred from generic dependency scans.
+// Constitution §§14–16/21: explicit bounded-context ownership checks.
 for (const file of sourceFiles('domains/enterprise')) {
   const rel = relative(file);
   if (/(?:^|\/)(?:Corporate)?(?:Invoice|Payment|Settlement|Ledger)(?:[A-Z./-]|$)/.test(rel) || /ReconcileCorporatePayment|GenerateCorporateInvoice/.test(rel)) {
@@ -220,7 +238,7 @@ for (const file of sourceFiles('sdui/ui-sdk')) {
   }
 }
 
-// Constitution §41: inspect executable Identity production source, never test fixtures that intentionally mention insecure values.
+// Constitution §41: production Identity cannot regress to development-only auth behavior.
 for (const file of executableSourceFiles('domains/identity')) {
   const content = fs.readFileSync(file, 'utf8');
   if (/\bmockOtp\b/.test(content)) violations.push(`${relative(file)}: production Identity exposes mock OTP behavior`);
@@ -252,7 +270,7 @@ const providerPorts = sourceFiles('domains').filter((file) => /\/ports\/I[^/]*Pr
 if (providerPorts.length === 0) violations.push('domains/**/ports/I*Provider.ts: no semantic provider ports found');
 required('platform/integrations', 'replaceable external provider adapter boundary is missing');
 
-// Constitution §52: tracked build/coverage output is never source. Untracked build output is allowed during validation.
+// Constitution §52: tracked generated/build/coverage output is forbidden.
 try {
   const tracked = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean);
   for (const file of tracked) {
@@ -265,17 +283,9 @@ try {
 }
 
 if (violations.length) {
-  console.error('[constitution-gate] FINAL CONSTITUTION CLOSEOUT FAILED');
+  console.error('[constitution-gate] BACKEND V3 CONSTITUTION VERIFICATION FAILED');
   for (const violation of [...new Set(violations)].sort()) console.error(`- ${violation}`);
   process.exit(1);
 }
 
-// The second invocation occurs after executable tests/coverage and is the last pre-cleanup proof.
-if (fs.existsSync(path.join(root, 'closeout-test-output.txt'))) {
-  fs.rmSync(path.join(root, 'closeout-test-output.txt'), { force: true });
-  fs.rmSync(path.join(root, 'coverage'), { recursive: true, force: true });
-  fs.rmSync(path.join(root, 'tools/architecture-closeout-hardening.mjs'), { force: true });
-  fs.rmSync(path.join(root, 'tools/architecture-closeout-runtime-regression.mjs'), { force: true });
-  fs.rmSync(path.join(root, 'tools/architecture-closeout-coverage-tests.mjs'), { force: true });
-}
-console.log('[constitution-gate] literal topology, ownership, isolation, dependency, SDUI, auth-security, generated-output and coverage-scope Constitution rules verified');
+console.log('[constitution-gate] PASS: read-only topology, ownership, isolation, dependency, SDUI, auth-security, generated-output and coverage-scope rules verified');

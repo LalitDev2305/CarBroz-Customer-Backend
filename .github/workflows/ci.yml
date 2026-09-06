@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Checkout codebase
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
@@ -68,6 +70,9 @@ jobs:
 
       - name: Verify CW2 physical architecture
         run: node tools/architecture-closeout.mjs
+
+      - name: Verify Backend V3 Constitution
+        run: node tools/architecture-closeout-constitution-gate.mjs
 
       - name: Prisma validate
         run: pnpm prisma validate
@@ -108,6 +113,9 @@ jobs:
           name: vitest-diagnostic
           path: vitest-output.txt
           if-no-files-found: error
+
+      - name: Re-verify Backend V3 Constitution after executable validation
+        run: node tools/architecture-closeout-constitution-gate.mjs
 
       - name: Prove validation is non-mutating
         run: |

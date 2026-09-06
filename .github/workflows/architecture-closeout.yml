@@ -8,6 +8,7 @@ on:
       - '.github/workflows/architecture-closeout.yml'
       - '.github/workflows/ci.yml'
       - 'tools/architecture-closeout.mjs'
+      - 'tools/architecture-closeout-constitution-gate.mjs'
       - 'pnpm-workspace.yaml'
       - 'pnpm-lock.yaml'
       - 'apps/api/**'
@@ -20,6 +21,7 @@ on:
       - 'tests/integration/**'
       - 'tests/e2e/**'
       - 'docs/CW2-PHYSICAL-STRUCTURE-CLOSEOUT.md'
+      - 'docs/CONSTITUTION-COMPLIANCE-MATRIX.md'
   workflow_dispatch:
 
 permissions:
@@ -73,6 +75,9 @@ jobs:
       - name: Verify canonical CW2 topology
         run: node tools/architecture-closeout.mjs
 
+      - name: Verify Backend V3 Constitution
+        run: node tools/architecture-closeout-constitution-gate.mjs
+
       - name: Validate Prisma
         run: pnpm exec prisma validate
 
@@ -102,6 +107,9 @@ jobs:
           path: closeout-test-output.txt
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: Re-verify Backend V3 Constitution after executable validation
+        run: node tools/architecture-closeout-constitution-gate.mjs
 
       - name: Prove closeout verification is read-only
         run: |
