@@ -86,13 +86,13 @@ describe('PrismaPartnerMemberRepository', () => {
   it('preserves explicitly supplied status and public id during creation', async () => {
     const { prisma, partnerMember } = client();
     const repository = new PrismaPartnerMemberRepository(prisma);
-    partnerMember.create.mockResolvedValue(memberRecord({ publicId: 'explicit', status: PartnerMemberStatus.INACTIVE }));
+    partnerMember.create.mockResolvedValue(memberRecord({ publicId: 'explicit', status: PartnerMemberStatus.SUSPENDED }));
 
     await repository.create({
       userId: 7,
       partnerId: 9,
       role: PartnerMemberRole.OWNER,
-      status: PartnerMemberStatus.INACTIVE,
+      status: PartnerMemberStatus.SUSPENDED,
       publicId: 'explicit',
     });
 
@@ -101,22 +101,25 @@ describe('PrismaPartnerMemberRepository', () => {
         userId: 7,
         partnerId: 9,
         role: PartnerMemberRole.OWNER,
-        status: PartnerMemberStatus.INACTIVE,
+        status: PartnerMemberStatus.SUSPENDED,
         publicId: 'explicit',
       },
     });
   });
 
-  it.each([
-    [{ partnerId: 9, role: PartnerMemberRole.OWNER }, 'userId'],
-    [{ userId: 7, role: PartnerMemberRole.OWNER }, 'partnerId'],
-    [{ userId: 7, partnerId: 9 }, 'role'],
-  ] as const)('rejects incomplete creation data when %s is incomplete', async (data) => {
-    const { prisma, partnerMember } = client();
-    const repository = new PrismaPartnerMemberRepository(prisma);
+  it('rejects incomplete creation data', async () => {
+    const incomplete: Partial<PartnerMember>[] = [
+      { partnerId: 9, role: PartnerMemberRole.OWNER },
+      { userId: 7, role: PartnerMemberRole.OWNER },
+      { userId: 7, partnerId: 9 },
+    ];
 
-    await expect(repository.create(data as Partial<PartnerMember>)).rejects.toThrow('Partner member userId, partnerId and role are required');
-    expect(partnerMember.create).not.toHaveBeenCalled();
+    for (const data of incomplete) {
+      const { prisma, partnerMember } = client();
+      const repository = new PrismaPartnerMemberRepository(prisma);
+      await expect(repository.create(data)).rejects.toThrow('Partner member userId, partnerId and role are required');
+      expect(partnerMember.create).not.toHaveBeenCalled();
+    }
   });
 
   it('creates through save when no persisted id exists and updates when it does', async () => {
