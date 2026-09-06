@@ -10,7 +10,7 @@ import {
 import { ManageCatalogUseCase } from '../../catalog/use-cases/ManageCatalogUseCase.js';
 import { ManagePricingTierUseCase } from '../../catalog/use-cases/ManagePricingTierUseCase.js';
 import { ResponseHelper } from '@carbroz/common';
-import { toExecutionContext } from '../../../context/toExecutionContext.js';
+import { toExecutionContext } from '../../../bootstrap/lifecycle/toExecutionContext.js';
 
 export class AdminCatalogController {
   constructor(
