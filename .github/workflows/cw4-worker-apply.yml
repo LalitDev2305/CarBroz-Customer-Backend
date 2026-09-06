@@ -1,0 +1,61 @@
+name: CW4 Worker Apply
+
+on:
+  push:
+    branches:
+      - fix/cw4-one-pass-worker
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.head_commit.message == 'chore(cw4-worker): add apply runner'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout worker branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: fix/cw4-one-pass-worker
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable repository pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.9.0 --activate
+
+      - name: Apply deterministic CW4 convergence transform
+        run: node tools/cw4-worker-bootstrap.mjs
+
+      - name: Refresh lockfile and dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Format generated candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only --diff-filter=ACM -z | xargs -0 -r pnpm exec prettier --write --ignore-unknown
+
+      - name: Verify CW4 candidate gate before commit
+        run: node tools/cw4-contract-gate.mjs
+
+      - name: Remove worker-only producer tooling
+        run: |
+          git rm tools/cw4-one-pass-codemod.mjs
+          git rm tools/cw4-worker-bootstrap.mjs
+          git rm .github/workflows/cw4-worker-apply.yml
+
+      - name: Commit generated CW4 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Lalit Naiya'
+          git config user.email 'developer.lalit.naiya@gmail.com'
+          git add -A
+          git commit -m 'fix(cw4): converge semantic contracts in one pass'
+          git push origin HEAD:fix/cw4-one-pass-worker
