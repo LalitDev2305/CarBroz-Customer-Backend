@@ -77,6 +77,9 @@ jobs:
       - name: Verify CW3 bounded-context and dependency convergence
         run: node tools/cw3-boundary-gate.mjs
 
+      - name: Audit CW4 domain/application contract convergence
+        run: node tools/cw4-contract-gate.mjs --audit
+
       - name: Prisma validate
         run: pnpm prisma validate
 
