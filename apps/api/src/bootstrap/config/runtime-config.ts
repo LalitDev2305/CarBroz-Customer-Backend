@@ -3,10 +3,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 
+export class RuntimeConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'RuntimeConfigError';
+  }
+}
+
 export const appSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().default(3000),
-  HOST: z.string().default('0.0.0.0'),
+  PORT: z.coerce.number().int().positive().max(65535).default(3000),
+  HOST: z.string().min(1).default('0.0.0.0'),
 });
 
 export const databaseSchema = z.object({
@@ -14,11 +21,11 @@ export const databaseSchema = z.object({
 });
 
 export const jwtSchema = z.object({
-  JWT_SECRET: z.string().min(16),
+  JWT_SECRET: z.string().min(32),
   JWT_ACCESS_EXPIRATION: z.string().default('15m'),
   JWT_REFRESH_EXPIRATION: z.string().default('7d'),
-  JWT_ISSUER: z.string().default('carbroz.com'),
-  JWT_AUDIENCE: z.string().default('carbroz-users'),
+  JWT_ISSUER: z.string().min(1).default('carbroz.com'),
+  JWT_AUDIENCE: z.string().min(1).default('carbroz-users'),
 });
 
 export const redisSchema = z.object({
@@ -31,25 +38,64 @@ export const loggingSchema = z.object({
 
 export const securitySchema = z.object({
   CORS_ORIGIN: z.string().default('*'),
-  RATE_LIMIT_MAX: z.coerce.number().default(100),
-  RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
 });
 
 export const providersSchema = z.object({
   MINIO_ENDPOINT: z.string().default('localhost'),
-  MINIO_PORT: z.coerce.number().default(9000),
+  MINIO_PORT: z.coerce.number().int().positive().max(65535).default(9000),
   MINIO_USE_SSL: z.coerce.boolean().default(false),
   MINIO_ACCESS_KEY: z.string().optional(),
   MINIO_SECRET_KEY: z.string().optional(),
 });
 
-const rootSchema = appSchema
+export const rootSchema = appSchema
   .merge(databaseSchema)
   .merge(jwtSchema)
   .merge(redisSchema)
   .merge(loggingSchema)
   .merge(securitySchema)
-  .merge(providersSchema);
+  .merge(providersSchema)
+  .superRefine((value, ctx) => {
+    if (value.NODE_ENV !== 'production') return;
+
+    if (value.CORS_ORIGIN.trim() === '*') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['CORS_ORIGIN'],
+        message: 'Production CORS_ORIGIN must be explicit',
+      });
+    }
+    if (/localhost|127\.0\.0\.1/i.test(value.REDIS_URL)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['REDIS_URL'],
+        message: 'Production REDIS_URL must not use localhost',
+      });
+    }
+    if (/localhost|127\.0\.0\.1/i.test(value.MINIO_ENDPOINT)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['MINIO_ENDPOINT'],
+        message: 'Production MINIO_ENDPOINT must not use localhost',
+      });
+    }
+    if (!value.MINIO_ACCESS_KEY || !value.MINIO_SECRET_KEY) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['MINIO_ACCESS_KEY'],
+        message: 'Production object storage credentials are required',
+      });
+    }
+    if (!value.MINIO_USE_SSL) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['MINIO_USE_SSL'],
+        message: 'Production object storage must use TLS',
+      });
+    }
+  });
 
 let envPath = path.resolve(process.cwd(), '../../.env');
 if (!fs.existsSync(envPath)) {
@@ -59,8 +105,10 @@ dotenv.config({ path: envPath });
 
 const parsedEnv = rootSchema.safeParse(process.env);
 if (!parsedEnv.success) {
-  console.error('❌ Invalid environment variables:', parsedEnv.error.format());
-  process.exit(1);
+  const issues = parsedEnv.error.issues
+    .map((issue) => `${issue.path.join('.') || 'environment'}: ${issue.message}`)
+    .join('; ');
+  throw new RuntimeConfigError(`Invalid runtime configuration: ${issues}`);
 }
 
 export const env = parsedEnv.data;
