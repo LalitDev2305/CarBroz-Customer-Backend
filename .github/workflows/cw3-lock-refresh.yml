@@ -1,0 +1,33 @@
+name: CW3 Lockfile Refresh
+
+on:
+  push:
+    branches:
+      - tmp/cw3-lock-refresh-worker
+
+permissions:
+  contents: read
+
+jobs:
+  refresh-lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact temporary candidate
+        uses: actions/checkout@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Activate repository pnpm version
+        run: corepack prepare pnpm@11.9.0 --activate
+      - name: Refresh lockfile only
+        run: pnpm install --lockfile-only --no-frozen-lockfile
+      - name: Upload regenerated lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: cw3-regenerated-lockfile
+          path: pnpm-lock.yaml
+          if-no-files-found: error
+          retention-days: 1
