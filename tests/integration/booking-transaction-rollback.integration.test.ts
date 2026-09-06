@@ -10,6 +10,12 @@ const provider = new PrismaProvider();
 const prisma = provider.getClient();
 let createdBookingFixture = false;
 let createdBookingStatusFixture = false;
+let fixtureUserId: number | undefined;
+let fixtureCustomerId: number | undefined;
+let fixtureVehicleId: number | undefined;
+let fixtureAddressId: number | undefined;
+let fixtureServiceId: number | undefined;
+let fixtureServiceCategoryId: number | undefined;
 
 const snapshots: BookingSnapshots = {
   service: {
@@ -109,11 +115,86 @@ beforeAll(async () => {
     `);
     createdBookingFixture = true;
   }
+
+  // The reconciled fresh schema enforces Booking's real foreign keys. Seed
+  // valid prerequisites outside the transaction under test so this proof
+  // reaches the intentional rollback boundary rather than failing on fixture
+  // integrity first.
+  const fixtureSuffix = `${Date.now()}-${process.pid}`;
+  const user = await prisma.user.create({ data: {} });
+  fixtureUserId = user.id;
+
+  const customer = await prisma.customerProfile.create({
+    data: { userId: user.id },
+  });
+  fixtureCustomerId = customer.id;
+
+  const address = await prisma.address.create({
+    data: {
+      userId: user.id,
+      label: 'CW4 rollback fixture',
+      addressLine1: 'CW4 Road',
+      city: 'Pune',
+      state: 'MH',
+      postalCode: '411001',
+      country: 'IN',
+    },
+  });
+  fixtureAddressId = address.id;
+
+  const serviceCategory = await prisma.serviceCategory.create({
+    data: {
+      name: `CW4 rollback ${fixtureSuffix}`,
+      slug: `cw4-rollback-${fixtureSuffix}`,
+    },
+  });
+  fixtureServiceCategoryId = serviceCategory.id;
+
+  const service = await prisma.service.create({
+    data: {
+      categoryId: serviceCategory.id,
+      name: 'CW4 rollback service',
+      slug: `cw4-rollback-service-${fixtureSuffix}`,
+      basePrice: 1_000,
+      estimatedDurationMinutes: 60,
+    },
+  });
+  fixtureServiceId = service.id;
+
+  const vehicle = await prisma.vehicle.create({
+    data: {
+      customerId: customer.id,
+      make: 'Tata',
+      model: 'Nexon',
+      year: 2026,
+      registrationNumber: `CW4-${fixtureSuffix}`,
+      fuelType: 'PETROL',
+    },
+  });
+  fixtureVehicleId = vehicle.id;
 });
 
 afterAll(async () => {
   if (createdBookingFixture) {
     await prisma.$executeRawUnsafe('DROP TABLE IF EXISTS "bookings"');
+  }
+  if (fixtureVehicleId !== undefined) {
+    await prisma.vehicle.delete({ where: { id: fixtureVehicleId } });
+  }
+  if (fixtureAddressId !== undefined) {
+    await prisma.address.delete({ where: { id: fixtureAddressId } });
+  }
+  if (fixtureCustomerId !== undefined) {
+    await prisma.customerProfile.delete({ where: { id: fixtureCustomerId } });
+  }
+  if (fixtureUserId !== undefined) {
+    await prisma.user.delete({ where: { id: fixtureUserId } });
+  }
+  if (fixtureServiceId !== undefined) {
+    await prisma.service.delete({ where: { id: fixtureServiceId } });
+  }
+  if (fixtureServiceCategoryId !== undefined) {
+    await prisma.serviceCategory.delete({ where: { id: fixtureServiceCategoryId } });
   }
   if (createdBookingStatusFixture) {
     await prisma.$executeRawUnsafe('DROP TYPE IF EXISTS "BookingStatus"');
@@ -123,11 +204,16 @@ afterAll(async () => {
 
 describe('CW4 real PostgreSQL transaction propagation', () => {
   it('rolls back a Booking repository write performed through the exact transaction-bound Prisma client', async () => {
+    expect(fixtureCustomerId).toBeDefined();
+    expect(fixtureVehicleId).toBeDefined();
+    expect(fixtureAddressId).toBeDefined();
+    expect(fixtureServiceId).toBeDefined();
+
     const booking = new Booking({
-      customerId: 10,
-      vehicleId: 20,
-      addressId: 30,
-      serviceId: 40,
+      customerId: fixtureCustomerId!,
+      vehicleId: fixtureVehicleId!,
+      addressId: fixtureAddressId!,
+      serviceId: fixtureServiceId!,
       slotStartTime: new Date('2026-10-01T10:00:00Z'),
       slotEndTime: new Date('2026-10-01T11:00:00Z'),
       totalPricePaise: 1_180,
