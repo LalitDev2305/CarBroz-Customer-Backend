@@ -1,10 +1,8 @@
-import { Booking } from '@carbroz/domain-booking';
+import { Booking, BookingAccessPolicy, type IBookingRepository } from '@carbroz/domain-booking';
 import { Coupon, CouponDiscountCalculator, CouponUsage, PartnerRatingCalculator, Review } from '@carbroz/domain-engagement';
-import { type IBookingRepository } from '@carbroz/domain-booking';
 import { type ICouponRepository, type ICouponUsageRepository, type IReviewRepository } from '@carbroz/domain-engagement';
 import { type IPartnerRepository, type Partner } from '@carbroz/domain-partner';
 import { beforeEach, describe, expect, it } from 'vitest';
-
 
 import { SubmitReviewUseCase } from '@carbroz/domain-engagement';
 import { ModerateReviewUseCase } from '@carbroz/domain-engagement';
@@ -79,6 +77,16 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     async delete() { return true; },
     setUnitOfWork() {},
   };
+
+  const bookingAccessPolicy = new BookingAccessPolicy(
+    mockBookingRepo,
+    {
+      findByUserId: async (userId: number) => userId === 5 ? ({ id: 5 } as any) : null,
+    } as any,
+    {
+      findByUserIdAndPartnerId: async () => null,
+    },
+  );
 
   const mockReviewRepo: IReviewRepository = {
     async create(r) {
@@ -159,7 +167,7 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
 
   it('should submit review for completed booking and update partner ratings', async () => {
     const ratingCalculator = new PartnerRatingCalculator(mockReviewRepo);
-    const submitUseCase = new SubmitReviewUseCase(mockReviewRepo, mockBookingRepo, ratingCalculator);
+    const submitUseCase = new SubmitReviewUseCase(mockReviewRepo, bookingAccessPolicy, ratingCalculator);
 
     const review = await submitUseCase.execute({
       bookingPublicId: dummyBooking.publicId!,
@@ -175,7 +183,7 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
 
   it('should prevent duplicate reviews on same booking', async () => {
     const ratingCalculator = new PartnerRatingCalculator(mockReviewRepo);
-    const submitUseCase = new SubmitReviewUseCase(mockReviewRepo, mockBookingRepo, ratingCalculator);
+    const submitUseCase = new SubmitReviewUseCase(mockReviewRepo, bookingAccessPolicy, ratingCalculator);
 
     await submitUseCase.execute({
       bookingPublicId: dummyBooking.publicId!,
@@ -196,7 +204,7 @@ describe('Phase 19 — Reviews & Coupon Engine Integration Use Cases', () => {
     const createUseCase = new CreateCouponUseCase(mockCouponRepo);
     const discountCalculator = new CouponDiscountCalculator(mockCouponUsageRepo);
     const validateUseCase = new ValidateCouponUseCase(mockCouponRepo, discountCalculator);
-    const applyUseCase = new ApplyCouponUseCase(mockCouponRepo, mockCouponUsageRepo, mockBookingRepo, discountCalculator);
+    const applyUseCase = new ApplyCouponUseCase(mockCouponRepo, mockCouponUsageRepo, bookingAccessPolicy, discountCalculator);
     const validityAnchor = new Date();
 
     const coupon = await createUseCase.execute({
