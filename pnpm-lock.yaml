@@ -465,9 +465,6 @@ importers:
       '@carbroz/domain-customer':
         specifier: workspace:*
         version: link:../customer
-      '@carbroz/domain-partner':
-        specifier: workspace:*
-        version: link:../partner
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -674,9 +671,6 @@ importers:
       '@carbroz/foundation-kernel':
         specifier: workspace:*
         version: link:../../foundation/kernel
-      '@carbroz/platform-storage':
-        specifier: workspace:*
-        version: link:../../platform/storage
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
