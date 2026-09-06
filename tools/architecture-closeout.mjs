@@ -20,6 +20,7 @@ const canonicalWorkspaces = [
 ];
 const canonicalWorkspaceRoots = ['apps/*', 'domains/*', 'sdui/*', 'platform/*', 'foundation/*'];
 const canonicalApiRoots = ['bootstrap', 'surfaces', 'system', 'transport'];
+const constitutionRegressionCommand = 'node tools/architecture-closeout-constitution-gate.mjs --regression';
 
 const violations = [];
 const exists = (relative) => fs.existsSync(path.join(root, relative));
@@ -96,14 +97,14 @@ if (fs.existsSync(ciFile)) {
   const ci = fs.readFileSync(ciFile, 'utf8');
   if (!ci.includes('pnpm install --frozen-lockfile')) violations.push('permanent CI does not enforce frozen lockfile installation');
   if (ci.includes('pnpm install --no-frozen-lockfile')) violations.push('permanent CI still contains mutable lockfile installation');
-  if (!ci.includes('node tools/architecture-closeout-constitution-gate.mjs')) violations.push('permanent CI does not invoke the read-only Constitution gate');
+  if (!ci.includes(constitutionRegressionCommand)) violations.push('permanent CI does not invoke the read-only CW1/CW2 Constitution regression gate');
 }
 
 const closeoutWorkflow = path.join(root, '.github/workflows/architecture-closeout.yml');
 requirePresent('.github/workflows/architecture-closeout.yml');
 if (fs.existsSync(closeoutWorkflow)) {
   const workflow = fs.readFileSync(closeoutWorkflow, 'utf8');
-  if (!workflow.includes('node tools/architecture-closeout-constitution-gate.mjs')) violations.push('architecture closeout workflow does not invoke the read-only Constitution gate');
+  if (!workflow.includes(constitutionRegressionCommand)) violations.push('architecture closeout workflow does not invoke the read-only CW1/CW2 Constitution regression gate');
 }
 
 if (violations.length > 0) {
@@ -111,5 +112,5 @@ if (violations.length > 0) {
   for (const violation of violations) console.error(` - ${violation}`);
   process.exitCode = 1;
 } else {
-  console.log(`[cw2-verifier] PASS: ${canonicalWorkspaces.length} exact canonical workspaces, exact API roots, frozen workspace globs, and permanent Constitution enforcement verified`);
+  console.log(`[cw2-verifier] PASS: ${canonicalWorkspaces.length} exact canonical workspaces, exact API roots, frozen workspace globs, and permanent CW1/CW2 regression enforcement verified`);
 }

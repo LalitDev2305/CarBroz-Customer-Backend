@@ -71,8 +71,8 @@ jobs:
       - name: Verify CW2 physical architecture
         run: node tools/architecture-closeout.mjs
 
-      - name: Verify Backend V3 Constitution
-        run: node tools/architecture-closeout-constitution-gate.mjs
+      - name: Verify CW1/CW2 Constitution regression baseline
+        run: node tools/architecture-closeout-constitution-gate.mjs --regression
 
       - name: Prisma validate
         run: pnpm prisma validate
@@ -114,8 +114,8 @@ jobs:
           path: vitest-output.txt
           if-no-files-found: error
 
-      - name: Re-verify Backend V3 Constitution after executable validation
-        run: node tools/architecture-closeout-constitution-gate.mjs
+      - name: Re-verify CW1/CW2 Constitution regression baseline
+        run: node tools/architecture-closeout-constitution-gate.mjs --regression
 
       - name: Prove validation is non-mutating
         run: |

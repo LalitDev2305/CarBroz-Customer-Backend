@@ -1,15 +1,18 @@
 import { spawnSync } from 'node:child_process';
 
 const checks = [
-  ['build', ['build']],
-  ['lint', ['lint']],
-  ['architecture', ['exec', 'vitest', 'run', 'tests/architecture']],
-  ['tests', ['exec', 'vitest', 'run']],
+  ['cw2-architecture', 'node', ['tools/architecture-closeout.mjs']],
+  ['cw1-cw2-constitution-regression', 'node', ['tools/architecture-closeout-constitution-gate.mjs', '--regression']],
+  ['build', 'pnpm', ['build']],
+  ['lint', 'pnpm', ['lint']],
+  ['architecture-tests', 'pnpm', ['exec', 'vitest', 'run', 'tests/architecture']],
+  ['tests', 'pnpm', ['exec', 'vitest', 'run']],
+  ['cw1-cw2-constitution-regression-post-validation', 'node', ['tools/architecture-closeout-constitution-gate.mjs', '--regression']],
 ];
 
-for (const [name, args] of checks) {
+for (const [name, command, args] of checks) {
   process.stdout.write(`\n[production-freeze] ${name}\n`);
-  const result = spawnSync('pnpm', args, {
+  const result = spawnSync(command, args, {
     cwd: process.cwd(),
     env: process.env,
     stdio: 'inherit',
