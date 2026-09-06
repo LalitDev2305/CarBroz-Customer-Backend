@@ -26,14 +26,12 @@ const canonicalWorkspaces = [
 const canonicalWorkspaceRoots = ['apps/*', 'domains/*', 'sdui/*', 'platform/*', 'foundation/*'];
 const canonicalApiRoots = ['bootstrap', 'surfaces', 'system', 'transport'];
 
-// Only blockers owned by later workstreams may remain in regression mode after CW3 closeout.
+// Only unresolved later-workstream blockers may remain in regression mode.
+// Identity §41 is intentionally absent: CW5 Identity security must pass without a waiver.
 const knownLaterBlockers = Object.freeze({
   consoleLogging: new Set([
     'apps/api/src/bootstrap/config/runtime-config.ts',
     'domains/audit/application/AuditLogService.ts',
-  ]),
-  insecureIdentity: new Set([
-    'domains/identity/application/AuthUseCases.ts',
   ]),
 });
 
@@ -253,14 +251,14 @@ for (const file of sourceFiles('sdui/ui-sdk')) {
   }
 }
 
-// Constitution §41: production Identity cannot regress beyond the known CW5 blocker file.
+// Constitution §41: production Identity has no regression exception after CW5 hardening.
 for (const file of executableSourceFiles('domains/identity')) {
   const content = fs.readFileSync(file, 'utf8');
   const rel = relative(file);
   const insecure = /\bmockOtp\b/.test(content)
     || /otp\s*!==\s*['"](?:123456|111111)['"]|otp\s*===\s*['"](?:123456|111111)['"]/.test(content)
     || /Buffer\.from\([^\n]*Date\.now\(\)/.test(content);
-  if (insecure && !laterBlockerAllowed('insecureIdentity', rel)) {
+  if (insecure) {
     violations.push(`${rel}: insecure production OTP/session-token behavior violates Constitution §41`);
   }
 }

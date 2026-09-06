@@ -2,14 +2,14 @@ import type { PrismaClient } from '@prisma/client';
 import type { UserSession } from '../../domain/UserSession.js';
 import type { IUserSessionRepository } from '../../domain/repositories/IUserSessionRepository.js';
 
-/** PrismaUserSessionRepository is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Prisma adapter for Identity-owned device sessions. Refresh-token state lives in its dedicated repository. */
 export class PrismaUserSessionRepository implements IUserSessionRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async findById(id: number): Promise<UserSession | null> {
     const session = await this.prisma.userSession.findUnique({
       where: { id, deletedAt: null },
-      include: { user: true }
+      include: { user: true },
     });
     return session ? this.mapToDomain(session) : null;
   }
@@ -17,9 +17,9 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
   async findAll(): Promise<UserSession[]> {
     const sessions = await this.prisma.userSession.findMany({
       where: { deletedAt: null },
-      include: { user: true }
+      include: { user: true },
     });
-    return sessions.map(this.mapToDomain);
+    return sessions.map((session) => this.mapToDomain(session));
   }
 
   async create(data: Partial<UserSession>): Promise<UserSession> {
@@ -30,9 +30,10 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
         deviceModel: data.deviceModel,
         osVersion: data.osVersion,
         fcmToken: data.fcmToken,
-        refreshToken: data.refreshToken,
+        isRevoked: data.isRevoked ?? false,
+        lastActiveAt: data.lastActiveAt ?? new Date(),
       },
-      include: { user: true }
+      include: { user: true },
     });
     return this.mapToDomain(session);
   }
@@ -44,19 +45,16 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
         deviceModel: data.deviceModel,
         osVersion: data.osVersion,
         fcmToken: data.fcmToken,
-        refreshToken: data.refreshToken,
         isRevoked: data.isRevoked,
         lastActiveAt: data.lastActiveAt,
       },
-      include: { user: true }
+      include: { user: true },
     });
     return this.mapToDomain(session);
   }
 
   async save(entity: UserSession): Promise<UserSession> {
-    if (entity.id) {
-      return this.update(entity.id, entity);
-    }
+    if (entity.id) return this.update(entity.id, entity);
     return this.create(entity);
   }
 
@@ -64,7 +62,7 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
     try {
       await this.prisma.userSession.update({
         where: { id },
-        data: { deletedAt: new Date() }
+        data: { deletedAt: new Date(), isRevoked: true },
       });
       return true;
     } catch {
@@ -74,41 +72,24 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
 
   async findByDevice(userId: number, deviceId: string): Promise<UserSession | null> {
     const session = await this.prisma.userSession.findUnique({
-      where: {
-        userId_deviceId: { userId, deviceId },
-      },
-      include: { user: true }
+      where: { userId_deviceId: { userId, deviceId } },
+      include: { user: true },
     });
-
     if (!session || session.deletedAt) return null;
     return this.mapToDomain(session);
   }
 
-  async findByRefreshToken(refreshToken: string, deviceId: string): Promise<UserSession | null> {
-    const session = await this.prisma.userSession.findFirst({
-      where: {
-        refreshToken,
-        deviceId,
-        isRevoked: false,
-        deletedAt: null
-      },
-      include: { user: true }
-    });
-    return session ? this.mapToDomain(session) : null;
-  }
-
   async upsert(userId: number, deviceId: string, data: Partial<UserSession>): Promise<UserSession> {
+    const lastActiveAt = data.lastActiveAt ?? new Date();
     const session = await this.prisma.userSession.upsert({
-      where: {
-        userId_deviceId: { userId, deviceId }
-      },
+      where: { userId_deviceId: { userId, deviceId } },
       update: {
         deviceModel: data.deviceModel,
         osVersion: data.osVersion,
         fcmToken: data.fcmToken,
-        refreshToken: data.refreshToken,
-        lastActiveAt: new Date(),
-        isRevoked: false
+        lastActiveAt,
+        isRevoked: false,
+        deletedAt: null,
       },
       create: {
         userId,
@@ -116,9 +97,9 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
         deviceModel: data.deviceModel,
         osVersion: data.osVersion,
         fcmToken: data.fcmToken,
-        refreshToken: data.refreshToken,
+        lastActiveAt,
       },
-      include: { user: true }
+      include: { user: true },
     });
     return this.mapToDomain(session);
   }
@@ -126,26 +107,25 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
   async revokeAllForUser(userId: number): Promise<void> {
     await this.prisma.userSession.updateMany({
       where: { userId },
-      data: { isRevoked: true, refreshToken: null }
+      data: { isRevoked: true },
     });
   }
 
-  private mapToDomain(prismaSession: any): UserSession {
+  private mapToDomain(session: any): UserSession {
     return {
-      id: prismaSession.id,
-      publicId: prismaSession.publicId,
-      userId: prismaSession.userId,
-      deviceId: prismaSession.deviceId,
-      deviceModel: prismaSession.deviceModel,
-      osVersion: prismaSession.osVersion,
-      fcmToken: prismaSession.fcmToken,
-      refreshToken: prismaSession.refreshToken,
-      isRevoked: prismaSession.isRevoked,
-      lastActiveAt: prismaSession.lastActiveAt,
-      createdAt: prismaSession.createdAt,
-      updatedAt: prismaSession.updatedAt,
-      deletedAt: prismaSession.deletedAt,
-      user: prismaSession.user,
+      id: session.id,
+      publicId: session.publicId,
+      userId: session.userId,
+      deviceId: session.deviceId,
+      deviceModel: session.deviceModel,
+      osVersion: session.osVersion,
+      fcmToken: session.fcmToken,
+      isRevoked: session.isRevoked,
+      lastActiveAt: session.lastActiveAt,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+      deletedAt: session.deletedAt,
+      user: session.user,
     };
   }
 }

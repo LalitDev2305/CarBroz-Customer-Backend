@@ -1,6 +1,6 @@
-import { User } from './User.js';
+import type { User } from './User.js';
 
-/** UserSession is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Identity-owned authenticated or guest device session. Refresh-token material is never stored here. */
 export interface UserSession {
   id: number;
   publicId: string;
@@ -9,7 +9,6 @@ export interface UserSession {
   deviceModel: string | null;
   osVersion: string | null;
   fcmToken: string | null;
-  refreshToken: string | null;
   isRevoked: boolean;
   lastActiveAt: Date;
   createdAt: Date;

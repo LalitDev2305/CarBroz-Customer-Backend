@@ -1,11 +1,14 @@
 import { asClass, asFunction, type AwilixContainer } from 'awilix';
 import type { PrismaClient } from '@prisma/client';
+import { AuthorizationProvider } from './infrastructure/authorization/AuthorizationProvider.js';
+import { NodeAuthSecurityProvider } from './infrastructure/security/NodeAuthSecurityProvider.js';
+import { PrismaAdminRoleRepository } from './infrastructure/repositories/PrismaAdminRoleRepository.js';
+import { PrismaOtpChallengeRepository } from './infrastructure/repositories/PrismaOtpChallengeRepository.js';
+import { PrismaPermissionRepository } from './infrastructure/repositories/PrismaPermissionRepository.js';
+import { PrismaRefreshTokenRepository } from './infrastructure/repositories/PrismaRefreshTokenRepository.js';
+import { PrismaRoleRepository } from './infrastructure/repositories/PrismaRoleRepository.js';
 import { PrismaUserRepository } from './infrastructure/repositories/PrismaUserRepository.js';
 import { PrismaUserSessionRepository } from './infrastructure/repositories/PrismaUserSessionRepository.js';
-import { PrismaRoleRepository } from './infrastructure/repositories/PrismaRoleRepository.js';
-import { PrismaPermissionRepository } from './infrastructure/repositories/PrismaPermissionRepository.js';
-import { PrismaAdminRoleRepository } from './infrastructure/repositories/PrismaAdminRoleRepository.js';
-import { AuthorizationProvider } from './infrastructure/authorization/AuthorizationProvider.js';
 
 interface IdentityCradle {
   prismaProvider: {
@@ -13,15 +16,22 @@ interface IdentityCradle {
   };
 }
 
-/** registerIdentityModule is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Registers Identity-owned repositories and security primitives in the application composition container. */
 export function registerIdentityModule(container: AwilixContainer): void {
   container.register({
     authorizationProvider: asClass(AuthorizationProvider).singleton(),
+    authSecurityProvider: asClass(NodeAuthSecurityProvider).singleton(),
     userRepository: asFunction(
       (cradle: IdentityCradle) => new PrismaUserRepository(cradle.prismaProvider.getClient()),
     ).singleton(),
     userSessionRepository: asFunction(
       (cradle: IdentityCradle) => new PrismaUserSessionRepository(cradle.prismaProvider.getClient()),
+    ).singleton(),
+    otpChallengeRepository: asFunction(
+      (cradle: IdentityCradle) => new PrismaOtpChallengeRepository(cradle.prismaProvider.getClient()),
+    ).singleton(),
+    refreshTokenRepository: asFunction(
+      (cradle: IdentityCradle) => new PrismaRefreshTokenRepository(cradle.prismaProvider.getClient()),
     ).singleton(),
     roleRepository: asFunction(
       (cradle: IdentityCradle) => new PrismaRoleRepository(cradle.prismaProvider.getClient()),

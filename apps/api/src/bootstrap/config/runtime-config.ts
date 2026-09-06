@@ -48,6 +48,9 @@ export const providersSchema = z.object({
   MINIO_USE_SSL: z.coerce.boolean().default(false),
   MINIO_ACCESS_KEY: z.string().optional(),
   MINIO_SECRET_KEY: z.string().optional(),
+  MSG91_AUTH_KEY: z.string().min(1).optional(),
+  MSG91_OTP_TEMPLATE_ID: z.string().min(1).optional(),
+  MSG91_OTP_VARIABLE_NAME: z.string().min(1).optional(),
 });
 
 export const rootSchema = appSchema
@@ -95,12 +98,31 @@ export const rootSchema = appSchema
         message: 'Production object storage must use TLS',
       });
     }
+    if (!value.MSG91_AUTH_KEY) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['MSG91_AUTH_KEY'],
+        message: 'Production SMS provider credentials are required',
+      });
+    }
+    if (!value.MSG91_OTP_TEMPLATE_ID) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['MSG91_OTP_TEMPLATE_ID'],
+        message: 'Production OTP template configuration is required',
+      });
+    }
+    if (!value.MSG91_OTP_VARIABLE_NAME) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['MSG91_OTP_VARIABLE_NAME'],
+        message: 'Production OTP template variable configuration is required',
+      });
+    }
   });
 
 let envPath = path.resolve(process.cwd(), '../../.env');
-if (!fs.existsSync(envPath)) {
-  envPath = path.resolve(process.cwd(), '.env');
-}
+if (!fs.existsSync(envPath)) envPath = path.resolve(process.cwd(), '.env');
 dotenv.config({ path: envPath });
 
 const parsedEnv = rootSchema.safeParse(process.env);
@@ -119,9 +141,7 @@ export const AppConfig = {
   host: env.HOST,
 };
 
-export const DatabaseConfig = {
-  url: env.DATABASE_URL,
-};
+export const DatabaseConfig = { url: env.DATABASE_URL };
 
 export const JwtConfig = {
   secret: env.JWT_SECRET,
@@ -131,13 +151,8 @@ export const JwtConfig = {
   audience: env.JWT_AUDIENCE,
 };
 
-export const RedisConfig = {
-  url: env.REDIS_URL,
-};
-
-export const LoggingConfig = {
-  logLevel: env.LOG_LEVEL,
-};
+export const RedisConfig = { url: env.REDIS_URL };
+export const LoggingConfig = { logLevel: env.LOG_LEVEL };
 
 export const SecurityConfig = {
   corsOrigin: env.CORS_ORIGIN,
@@ -151,4 +166,7 @@ export const ProvidersConfig = {
   minioUseSSL: env.MINIO_USE_SSL,
   minioAccessKey: env.MINIO_ACCESS_KEY,
   minioSecretKey: env.MINIO_SECRET_KEY,
+  msg91AuthKey: env.MSG91_AUTH_KEY,
+  msg91OtpTemplateId: env.MSG91_OTP_TEMPLATE_ID,
+  msg91OtpVariableName: env.MSG91_OTP_VARIABLE_NAME,
 };

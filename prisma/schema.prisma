@@ -8,25 +8,25 @@ datasource db {
 }
 
 model User {
-  id              Int              @id @default(autoincrement())
-  publicId        String           @unique @default(uuid())
-  email           String?          @unique
-  phoneNumber     String?          @unique
-  isGuest         Boolean          @default(false)
-  isAdmin         Boolean          @default(false)
-  role            String           @default("USER")
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  deletedAt       DateTime?
-  sessions        UserSession[]
-  adminRoles      AdminUserRole[]
-  partnerMembers  PartnerMember[]
-  uploadedKycs    KycDocument[]    @relation("KycUploader")
-  verifiedKycs    KycDocument[]    @relation("KycVerifier")
-  customerProfile CustomerProfile?
-  addresses       Address[]
-  deviceTokens    DeviceToken[]
-  couponUsages    CouponUsage[]
+  id               Int              @id @default(autoincrement())
+  publicId         String           @unique @default(uuid())
+  email            String?          @unique
+  phoneNumber      String?          @unique
+  isGuest          Boolean          @default(false)
+  isAdmin          Boolean          @default(false)
+  role             String           @default("USER")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
+  sessions         UserSession[]
+  adminRoles       AdminUserRole[]
+  partnerMembers   PartnerMember[]
+  uploadedKycs     KycDocument[]    @relation("KycUploader")
+  verifiedKycs     KycDocument[]    @relation("KycVerifier")
+  customerProfile  CustomerProfile?
+  addresses        Address[]
+  deviceTokens     DeviceToken[]
+  couponUsages     CouponUsage[]
   corporateMembers CorporateMember[]
 }
 
@@ -77,32 +77,61 @@ model AdminUserRole {
 }
 
 model RefreshToken {
-  id        Int       @id @default(autoincrement())
-  publicId  String    @unique @default(uuid())
-  token     String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  id         Int       @id @default(autoincrement())
+  publicId   String    @unique @default(uuid())
+  sessionId  Int
+  tokenHash  String    @unique
+  familyId   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  session UserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, familyId])
+  @@index([familyId, revokedAt])
 }
 
 model UserSession {
-  id           Int       @id @default(autoincrement())
-  publicId     String    @unique @default(uuid())
-  userId       Int
-  deviceId     String
-  deviceModel  String?
-  osVersion    String?
-  fcmToken     String?
-  refreshToken String?
-  isRevoked    Boolean   @default(false)
-  lastActiveAt DateTime  @default(now())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  deletedAt    DateTime?
+  id            Int            @id @default(autoincrement())
+  publicId      String         @unique @default(uuid())
+  userId        Int
+  deviceId      String
+  deviceModel   String?
+  osVersion     String?
+  fcmToken      String?
+  isRevoked     Boolean        @default(false)
+  lastActiveAt  DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+  refreshTokens RefreshToken[]
 
   user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, deviceId])
+}
+
+model OtpChallenge {
+  id            Int       @id @default(autoincrement())
+  publicId      String    @unique @default(uuid())
+  phoneNumber   String
+  deviceId      String
+  otpHash       String
+  attemptCount  Int       @default(0)
+  maxAttempts   Int
+  expiresAt     DateTime
+  consumedAt    DateTime?
+  invalidatedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([phoneNumber, createdAt])
+  @@index([phoneNumber, deviceId, createdAt])
+  @@index([expiresAt])
 }
 
 model SystemConfig {
@@ -953,12 +982,3 @@ model CorporateInvoiceLine {
 
   @@map("corporate_invoice_lines")
 }
-
-
-
-
-
-
-
-
-

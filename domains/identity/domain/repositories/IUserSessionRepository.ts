@@ -1,10 +1,9 @@
 import type { IReadRepository, IWriteRepository } from '@carbroz/foundation-kernel';
 import type { UserSession } from '../UserSession.js';
 
-/** IUserSessionRepository is an exported domains/identity contract/implementation; see the owning README for lifecycle and extension rules. */
+/** Identity-owned device-session repository. Refresh tokens are persisted by IRefreshTokenRepository. */
 export interface IUserSessionRepository extends IReadRepository<UserSession, number>, IWriteRepository<UserSession, number> {
   findByDevice(userId: number, deviceId: string): Promise<UserSession | null>;
-  findByRefreshToken(refreshToken: string, deviceId: string): Promise<UserSession | null>;
   upsert(userId: number, deviceId: string, data: Partial<UserSession>): Promise<UserSession>;
   revokeAllForUser(userId: number): Promise<void>;
 }
