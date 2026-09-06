@@ -27,6 +27,9 @@ function walk(dir) {
 function sourceFiles(base) {
   return walk(path.join(root, base)).filter((file) => /\.(?:ts|mts|cts)$/.test(file));
 }
+function executableSourceFiles(base) {
+  return sourceFiles(base).filter((file) => !/\.(?:spec|test)\.[cm]?ts$/.test(file));
+}
 function relative(file) {
   return path.relative(root, file).replaceAll('\\', '/');
 }
@@ -217,8 +220,8 @@ for (const file of sourceFiles('sdui/ui-sdk')) {
   }
 }
 
-// Constitution §41: freeze must be impossible while development/mock authentication remains production behavior.
-for (const file of sourceFiles('domains/identity')) {
+// Constitution §41: inspect executable Identity production source, never test fixtures that intentionally mention insecure values.
+for (const file of executableSourceFiles('domains/identity')) {
   const content = fs.readFileSync(file, 'utf8');
   if (/\bmockOtp\b/.test(content)) violations.push(`${relative(file)}: production Identity exposes mock OTP behavior`);
   if (/otp\s*!==\s*['"](?:123456|111111)['"]|otp\s*===\s*['"](?:123456|111111)['"]/.test(content)) {
