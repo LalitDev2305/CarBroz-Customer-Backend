@@ -4,6 +4,7 @@ export * from '../domain/BookingStatus.js';
 export * from '../domain/BookingStatusHistoryItem.js';
 export * from '../domain/repositories/IBookingRepository.js';
 export * from '../application/BookingUseCases.js';
+export * from '../application/security/BookingAccessPolicy.js';
 export * from '../booking.module.js';
 export * from '../module.manifest.js';
 export * from '../application/use-cases/CancelBookingUseCase.js';
