@@ -9,6 +9,7 @@ import { PrismaBookingRepository } from '../../domains/booking/infrastructure/re
 const provider = new PrismaProvider();
 const prisma = provider.getClient();
 let createdBookingFixture = false;
+let createdBookingStatusFixture = false;
 
 const snapshots: BookingSnapshots = {
   service: {
@@ -45,6 +46,35 @@ const snapshots: BookingSnapshots = {
 beforeAll(async () => {
   await provider.connect();
 
+  const existingBookingStatus = await prisma.$queryRawUnsafe<Array<{ exists: boolean }>>(`
+    SELECT EXISTS (
+      SELECT 1
+      FROM pg_type AS type
+      INNER JOIN pg_namespace AS namespace
+        ON namespace.oid = type.typnamespace
+      WHERE namespace.nspname = 'public'
+        AND type.typname = 'BookingStatus'
+    ) AS exists
+  `);
+
+  if (!existingBookingStatus[0]?.exists) {
+    // Prisma serializes Booking.status through the schema enum even when CW4
+    // intentionally supplies an isolated persistence fixture. Reproduce that
+    // exact PostgreSQL contract so the proof reaches the transaction boundary.
+    await prisma.$executeRawUnsafe(`
+      CREATE TYPE "BookingStatus" AS ENUM (
+        'CREATED',
+        'CONFIRMED',
+        'ASSIGNED',
+        'IN_PROGRESS',
+        'COMPLETED',
+        'CANCELLED',
+        'EXPIRED'
+      )
+    `);
+    createdBookingStatusFixture = true;
+  }
+
   const existing = await prisma.$queryRawUnsafe<Array<{ relation: string | null }>>(
     "SELECT to_regclass('public.bookings')::text AS relation",
   );
@@ -63,7 +93,7 @@ beforeAll(async () => {
         "vehicle_id" INTEGER NOT NULL,
         "address_id" INTEGER NOT NULL,
         "service_id" INTEGER NOT NULL,
-        "status" TEXT NOT NULL DEFAULT 'CREATED',
+        "status" "BookingStatus" NOT NULL DEFAULT 'CREATED',
         "slot_start_time" TIMESTAMP(3) NOT NULL,
         "slot_end_time" TIMESTAMP(3) NOT NULL,
         "expiry_at" TIMESTAMP(3),
@@ -84,6 +114,9 @@ beforeAll(async () => {
 afterAll(async () => {
   if (createdBookingFixture) {
     await prisma.$executeRawUnsafe('DROP TABLE IF EXISTS "bookings"');
+  }
+  if (createdBookingStatusFixture) {
+    await prisma.$executeRawUnsafe('DROP TYPE IF EXISTS "BookingStatus"');
   }
   await provider.disconnect();
 });
