@@ -33,7 +33,7 @@ The bootstrap defines exactly four milestones. Compliance workstreams below subd
 | Milestone | Status | Exit evidence |
 |---|---|---|
 | M1 — Repository Foundation & AI Operating System | DONE | Bootstrap/freeze contract/live ledger/playbook and safe preflight exist. |
-| M2 — Repository Convergence | REOPENED FOR LITERAL COMPLIANCE | Earlier transformed topology passed an older incomplete gate; literal source/enforcement review found missing Constitution checks. |
+| M2 — Repository Convergence | IN PROGRESS — CW2 | Literal enforcement is established; checked-in physical topology is now being converged to the frozen taxonomy. |
 | M3 — Production Convergence | IN PROGRESS | Existing semantic/coverage work is retained; literal structure/ownership/security convergence must also complete before freeze. |
 | M4 — Production Freeze | NOT STARTED | Requires every mandatory Constitution rule, 100/100/100/100, final validation, cleanup and exact-final-SHA CI. |
 
@@ -42,7 +42,7 @@ The bootstrap defines exactly four milestones. Compliance workstreams below subd
 | Workstream | Status | Exit rule |
 |---|---|---|
 | CW1 — Constitution Gap Map & Enforcement | COMPLETE | §§1–56 mapped; governing docs cross-compared twice; classification/enforcement defects corrected; exact implementation SHA normal CI green; strengthened closeout gate reports only genuine later-workstream blockers. |
-| CW2 — Physical Structure Convergence | NEXT | Checked-in repository physically uses canonical taxonomy/workspace/API/domain structure without transitional authorities. |
+| CW2 — Physical Structure Convergence | IN PROGRESS | Checked-in repository physically uses canonical taxonomy/workspace/API/domain structure without transitional authorities. |
 | CW3 — Bounded-Context & Dependency Convergence | PENDING | Every business capability has one constitutional owner and cross-context access uses public boundaries. |
 | CW4 — Domain/Application Contract Convergence | PENDING | Domain invariants, application orchestration, ExecutionContext, transactions/Clock/idempotency/state ownership converge semantically. |
 | CW5 — Security/Infrastructure Production Hardening | PENDING | §37–45 production/security/config/PII/provider/financial/concurrency requirements proven. |
@@ -50,64 +50,33 @@ The bootstrap defines exactly four milestones. Compliance workstreams below subd
 
 ## 4. CW1 — user's Phase 1 double cross-check — CLOSED
 
-The first implementation pass established the compliance matrix, strengthened the closeout gate, removed an impossible KYC actor fixture and reopened historical M2 claims that were stronger than their executable proof.
+CW1 established the literal compliance matrix and executable Constitution enforcement, then cross-checked both twice against the Master Constitution, bootstrap, freeze contract, playbook, workspace and API topology.
 
-Two additional deep implementation passes then compared the implementation back to the governing sources and executable behavior. They found and corrected real defects rather than rubber-stamping the first result.
+Implementation SHA `13daef1fc653516208cd524e1a0b4fd19a87b318` passed normal CI #1357 / run `34019978147` / job `101450638321`: dependency installation, Prisma validate/generate/migrations, build, ESLint and full Vitest all succeeded.
 
-### Cross-check pass 1 — governing-source comparison
+Closeout #121 then intentionally stopped on genuine later-workstream blockers: transitional API context placement, Enterprise/Financials ownership, and insecure production Identity behavior. The earlier test-fixture auth false positive had been removed.
 
-Compared the Master Constitution, AI bootstrap, freeze contract, playbook, compliance matrix, live ledger, current workspace and current API root structure.
+**CW1 is CLOSED.**
 
-Corrections:
+## 5. CW2 — Physical Structure Convergence — ACTIVE
 
-1. The bootstrap explicitly defines exactly four milestones and forbids replacement phases. The accidental P1–P6 project-phase model was removed; CW1–CW6 are compliance workstreams nested inside M2/M3/M4.
-2. `REVIEW` was used without definition. It is now explicitly defined for Constitution `SHOULD`/applicability-dependent requirements.
-3. Mixed classifications such as `PASS/DEFERRED-CAPABILITY` and `PASS/TRANSITIONAL` were replaced by one primary classification per row.
-4. Matrix wording now distinguishes implemented ownership evidence from later executable/freeze proof instead of overstating PASS.
+CW2 started from direct comparison of Constitution §§5–9 with the checked-in branch.
 
-### Cross-check pass 2 — executable-enforcement review
+Initial physical evidence:
 
-Re-read the strengthened Constitution gate against §§5–9, §§24–36, §41, §49, §51, §52 and §54 and compared it with actual workspace/API structure.
+- `pnpm-workspace.yaml` still contains the forbidden transitional `packages/*` workspace root.
+- checked-in `apps/api/src` still contains legacy root authorities including `app.ts`, `app.routes.ts`, `server.ts`, `config`, `container`, `context`, `controllers`, `middlewares`, `modules`, `plugins` and `providers`.
+- the existing closeout transformer already produces much of the canonical `bootstrap/surfaces/transport/system` candidate, so CW2 must promote/fix that real convergence path rather than create a second architecture.
 
-Corrections:
+First physical convergence slice implemented:
 
-1. Workspace validation now parses every declared workspace entry and requires exactly the five canonical roots; arbitrary extra roots cannot escape validation.
-2. Final API enforcement rejects legacy root config/context/controllers/middlewares/plugins/modules/container/providers/repositories and root app/server/routes entry points.
-3. Final API enforcement requires canonical `bootstrap/app.ts` and `bootstrap/server.ts` plus bootstrap/surfaces/transport/system.
-4. Cross-domain validation permits legitimate `/public/...` subpaths while rejecting deep internal imports.
-5. Authentication-security scanning is scoped to executable Identity production source, so negative test fixtures may safely mention insecure values without being misclassified as production behavior.
+1. Canonical request-to-`ExecutionContext` ownership is now established at `apps/api/src/bootstrap/lifecycle/toExecutionContext.ts`, matching the Constitution's bootstrap/lifecycle placement.
+2. `apps/api/src/context/toExecutionContext.ts` no longer owns implementation; it is a temporary compatibility-only re-export to preserve checked-in consumers while they are migrated.
+3. The legacy `context` root is therefore no longer a duplicate implementation authority. Its shim remains explicitly temporary and must be deleted in CW2 after consumer import migration.
 
-### Executable validation
+CW2 is not complete. Next physical slices are consumer migration/removal of the context shim, canonical bootstrap entrypoint promotion, legacy API-root evacuation, and removal of `packages/*` after its remaining authorities/tests are moved to constitutional owners.
 
-Implementation SHA:
-
-`13daef1fc653516208cd524e1a0b4fd19a87b318`
-
-Normal CI #1357 / run `34019978147` / job `101450638321`: **SUCCESS**.
-
-Passed on that exact implementation SHA:
-
-- dependency installation;
-- Prisma validate;
-- Prisma generate;
-- PostgreSQL migrations;
-- monorepo build;
-- ESLint;
-- complete Vitest suite.
-
-Closeout #121 / run `34019978321` intentionally stopped at the newly strengthened Constitution gate. This is positive CW1 evidence because the gate now exposes genuine later-workstream violations rather than allowing them through:
-
-- `apps/api/src/context` remains transitional and belongs to CW2;
-- Enterprise still owns CorporateInvoice/GenerateCorporateInvoice/ReconcileCorporatePayment artifacts that belong to Financials — CW3;
-- Identity production source still contains mock/hardcoded OTP and timestamp-derived token material — CW5.
-
-The false-positive `AuthUseCases.spec.ts` finding observed in closeout #120 was corrected before closure and is absent from #121. Therefore the gate distinguishes test evidence from executable production auth behavior.
-
-Comparison from the original Phase-1 close point `fc98d083d63b736dfd459d6b97baed747dd287da` to final CW1 implementation SHA shows the second-pass changes are confined to the compliance matrix, live ledger and Constitution gate; no unrelated production behavior was modified.
-
-**CW1 / user's Phase 1 is now CLOSED.** This does not declare architecture freeze; it certifies that the gap map and enforcement foundation are internally consistent, twice cross-checked and executable-validation-backed.
-
-## 5. Frozen execution rules
+## 6. Frozen execution rules
 
 1. Read the Master Constitution before architecture-sensitive work.
 2. Constitution + current source evidence + executable validation must agree.
@@ -120,6 +89,6 @@ Comparison from the original Phase-1 close point `fc98d083d63b736dfd459d6b97baed
 9. Continue through CW2 → CW6 inside M2/M3/M4; CI confirms meaningful boundaries rather than replacing implementation/debugging.
 10. Architecture freeze is declared only after the actual checked-in final repository satisfies §54 and exact-final-SHA CI.
 
-## 6. First unfinished task
+## 7. First unfinished task
 
-**CW2 — Physical Structure Convergence:** converge the checked-in repository toward the canonical taxonomy, beginning from the now-executable findings (`packages/*`, legacy API root authorities including `apps/api/src/context`, and exact workspace/API structure), while preserving behavior and fixing true transformation producers rather than duplicating final implementations.
+**CW2 consumer migration:** update every checked-in API consumer to import the canonical bootstrap/lifecycle execution-context adapter, then delete the legacy `apps/api/src/context` shim. Continue with canonical bootstrap entrypoints and remaining legacy API roots before removing `packages/*`.
