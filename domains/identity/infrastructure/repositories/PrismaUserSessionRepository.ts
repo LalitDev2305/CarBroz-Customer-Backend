@@ -2,7 +2,7 @@ import type { PrismaClient } from '@prisma/client';
 import type { UserSession } from '../../domain/UserSession.js';
 import type { IUserSessionRepository } from '../../domain/repositories/IUserSessionRepository.js';
 
-/** Prisma adapter for Identity-owned device sessions. Refresh-token state lives in its dedicated repository. */
+/** Prisma session adapter. Refresh-token material is deliberately excluded from session rows. */
 export class PrismaUserSessionRepository implements IUserSessionRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -19,7 +19,7 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
       where: { deletedAt: null },
       include: { user: true },
     });
-    return sessions.map((session) => this.mapToDomain(session));
+    return sessions.map((session: any) => this.mapToDomain(session));
   }
 
   async create(data: Partial<UserSession>): Promise<UserSession> {
@@ -31,7 +31,7 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
         osVersion: data.osVersion,
         fcmToken: data.fcmToken,
         isRevoked: data.isRevoked ?? false,
-        lastActiveAt: data.lastActiveAt ?? new Date(),
+        lastActiveAt: data.lastActiveAt,
       },
       include: { user: true },
     });
@@ -62,7 +62,7 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
     try {
       await this.prisma.userSession.update({
         where: { id },
-        data: { deletedAt: new Date(), isRevoked: true },
+        data: { deletedAt: new Date() },
       });
       return true;
     } catch {
@@ -80,16 +80,14 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
   }
 
   async upsert(userId: number, deviceId: string, data: Partial<UserSession>): Promise<UserSession> {
-    const lastActiveAt = data.lastActiveAt ?? new Date();
     const session = await this.prisma.userSession.upsert({
       where: { userId_deviceId: { userId, deviceId } },
       update: {
         deviceModel: data.deviceModel,
         osVersion: data.osVersion,
         fcmToken: data.fcmToken,
-        lastActiveAt,
-        isRevoked: false,
-        deletedAt: null,
+        lastActiveAt: data.lastActiveAt ?? new Date(),
+        isRevoked: data.isRevoked ?? false,
       },
       create: {
         userId,
@@ -97,7 +95,8 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
         deviceModel: data.deviceModel,
         osVersion: data.osVersion,
         fcmToken: data.fcmToken,
-        lastActiveAt,
+        lastActiveAt: data.lastActiveAt,
+        isRevoked: data.isRevoked ?? false,
       },
       include: { user: true },
     });
@@ -111,21 +110,21 @@ export class PrismaUserSessionRepository implements IUserSessionRepository {
     });
   }
 
-  private mapToDomain(session: any): UserSession {
+  private mapToDomain(prismaSession: any): UserSession {
     return {
-      id: session.id,
-      publicId: session.publicId,
-      userId: session.userId,
-      deviceId: session.deviceId,
-      deviceModel: session.deviceModel,
-      osVersion: session.osVersion,
-      fcmToken: session.fcmToken,
-      isRevoked: session.isRevoked,
-      lastActiveAt: session.lastActiveAt,
-      createdAt: session.createdAt,
-      updatedAt: session.updatedAt,
-      deletedAt: session.deletedAt,
-      user: session.user,
+      id: prismaSession.id,
+      publicId: prismaSession.publicId,
+      userId: prismaSession.userId,
+      deviceId: prismaSession.deviceId,
+      deviceModel: prismaSession.deviceModel,
+      osVersion: prismaSession.osVersion,
+      fcmToken: prismaSession.fcmToken,
+      isRevoked: prismaSession.isRevoked,
+      lastActiveAt: prismaSession.lastActiveAt,
+      createdAt: prismaSession.createdAt,
+      updatedAt: prismaSession.updatedAt,
+      deletedAt: prismaSession.deletedAt,
+      user: prismaSession.user,
     };
   }
 }

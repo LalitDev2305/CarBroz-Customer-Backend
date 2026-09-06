@@ -11,7 +11,6 @@ const sessionRecord = (overrides: Record<string, unknown> = {}) => ({
   deviceModel: 'Pixel',
   osVersion: '16',
   fcmToken: 'fcm-1',
-  refreshToken: 'refresh-1',
   isRevoked: false,
   lastActiveAt: new Date('2026-09-06T00:00:00.000Z'),
   createdAt: new Date('2026-09-01T00:00:00.000Z'),
@@ -25,7 +24,6 @@ function fixture() {
   const userSession = {
     findUnique: vi.fn(),
     findMany: vi.fn(),
-    findFirst: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     upsert: vi.fn(),
@@ -52,18 +50,20 @@ describe('PrismaUserSessionRepository', () => {
     expect(userSession.findMany).toHaveBeenCalledWith({ where: { deletedAt: null }, include: { user: true } });
   });
 
-  it('creates and updates sessions through explicit persistence fields', async () => {
+  it('creates and updates sessions without any refresh credential field', async () => {
     const { repository, userSession } = fixture();
     userSession.create.mockResolvedValue(sessionRecord());
     userSession.update.mockResolvedValue(sessionRecord({ deviceModel: 'Pixel Pro', isRevoked: true }));
 
-    await expect(repository.create({ userId: 7, deviceId: 'device-1', refreshToken: 'refresh-1' })).resolves.toMatchObject({ id: 11 });
+    await expect(repository.create({ userId: 7, deviceId: 'device-1' })).resolves.toMatchObject({ id: 11 });
     expect(userSession.create).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ userId: 7, deviceId: 'device-1', refreshToken: 'refresh-1' }),
+      data: expect.objectContaining({ userId: 7, deviceId: 'device-1' }),
     }));
+    expect(userSession.create.mock.calls[0]?.[0]?.data).not.toHaveProperty('refreshToken');
 
     await expect(repository.update(11, { deviceModel: 'Pixel Pro', isRevoked: true })).resolves.toMatchObject({ deviceModel: 'Pixel Pro', isRevoked: true });
     expect(userSession.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 11 } }));
+    expect(userSession.update.mock.calls[0]?.[0]?.data).not.toHaveProperty('refreshToken');
   });
 
   it('save updates persisted sessions and creates new sessions', async () => {
@@ -98,29 +98,23 @@ describe('PrismaUserSessionRepository', () => {
     await expect(repository.findByDevice(7, 'device-1')).resolves.toMatchObject({ deviceId: 'device-1' });
   });
 
-  it('maps refresh-token sessions and their not-found variant', async () => {
+  it('upserts an active device session without storing refresh credentials', async () => {
     const { repository, userSession } = fixture();
-    userSession.findFirst.mockResolvedValueOnce(sessionRecord()).mockResolvedValueOnce(null);
-
-    await expect(repository.findByRefreshToken('refresh-1', 'device-1')).resolves.toMatchObject({ refreshToken: 'refresh-1' });
-    await expect(repository.findByRefreshToken('missing', 'device-1')).resolves.toBeNull();
-  });
-
-  it('upserts an active device session and maps the result', async () => {
-    const { repository, userSession } = fixture();
-    userSession.upsert.mockResolvedValue(sessionRecord({ refreshToken: 'refresh-2' }));
+    userSession.upsert.mockResolvedValue(sessionRecord());
 
     await expect(repository.upsert(7, 'device-1', {
-      deviceModel: 'Pixel', osVersion: '16', fcmToken: 'fcm-1', refreshToken: 'refresh-2',
-    })).resolves.toMatchObject({ refreshToken: 'refresh-2', isRevoked: false });
+      deviceModel: 'Pixel', osVersion: '16', fcmToken: 'fcm-1',
+    })).resolves.toMatchObject({ deviceId: 'device-1', isRevoked: false });
     expect(userSession.upsert).toHaveBeenCalledWith(expect.objectContaining({
       where: { userId_deviceId: { userId: 7, deviceId: 'device-1' } },
-      update: expect.objectContaining({ isRevoked: false, refreshToken: 'refresh-2' }),
-      create: expect.objectContaining({ userId: 7, deviceId: 'device-1', refreshToken: 'refresh-2' }),
+      update: expect.objectContaining({ isRevoked: false }),
+      create: expect.objectContaining({ userId: 7, deviceId: 'device-1', isRevoked: false }),
     }));
+    expect(userSession.upsert.mock.calls[0]?.[0]?.update).not.toHaveProperty('refreshToken');
+    expect(userSession.upsert.mock.calls[0]?.[0]?.create).not.toHaveProperty('refreshToken');
   });
 
-  it('revokes all user sessions without deleting them', async () => {
+  it('revokes all user sessions without deleting them or mutating token material', async () => {
     const { repository, userSession } = fixture();
     userSession.updateMany.mockResolvedValue({ count: 2 });
 
@@ -128,7 +122,7 @@ describe('PrismaUserSessionRepository', () => {
 
     expect(userSession.updateMany).toHaveBeenCalledWith({
       where: { userId: 7 },
-      data: { isRevoked: true, refreshToken: null },
+      data: { isRevoked: true },
     });
   });
 });

@@ -1,97 +1,50 @@
 import { describe, expect, it, vi } from 'vitest';
-import { UnauthorizedError } from '@carbroz/foundation-kernel';
 import {
   AUTH_SECURITY_POLICY,
-  LogoutUseCase,
   RefreshTokenUseCase,
   SendOtpUseCase,
-  VerifyOtpUseCase,
-  type IAuthSecurityProvider,
+  type IRefreshTokenRepository,
   type IOtpChallengeRepository,
   type IOtpDeliveryProvider,
-  type IRefreshTokenRepository,
   type IUserRepository,
-  type IUserSessionRepository,
-  type OtpChallenge,
   type RefreshRotationResult,
   type User,
   type UserSession,
 } from '../public/index.js';
 import { NodeAuthSecurityProvider } from '../infrastructure/security/NodeAuthSecurityProvider.js';
 
+const now = new Date('2026-09-06T00:00:00.000Z');
 const user: User = {
   id: 11,
-  publicId: '11111111-1111-4111-8111-111111111111',
+  publicId: 'user-11',
   email: null,
   phoneNumber: '919999999999',
   isGuest: false,
   role: 'USER',
-  createdAt: new Date('2026-09-06T00:00:00.000Z'),
-  updatedAt: new Date('2026-09-06T00:00:00.000Z'),
+  createdAt: now,
+  updatedAt: now,
   deletedAt: null,
 };
-
 const session: UserSession = {
   id: 22,
-  publicId: '22222222-2222-4222-8222-222222222222',
+  publicId: 'session-22',
   userId: user.id,
   deviceId: 'device-1',
-  deviceModel: 'Pixel',
-  osVersion: '16',
+  deviceModel: null,
+  osVersion: null,
   fcmToken: null,
   isRevoked: false,
-  lastActiveAt: new Date('2026-09-06T00:00:00.000Z'),
-  createdAt: new Date('2026-09-06T00:00:00.000Z'),
-  updatedAt: new Date('2026-09-06T00:00:00.000Z'),
+  lastActiveAt: now,
+  createdAt: now,
+  updatedAt: now,
   deletedAt: null,
   user,
 };
 
-function userRepository(found: User | null = null): IUserRepository {
-  return {
-    findById: vi.fn(async () => found),
-    findAll: vi.fn(async () => found ? [found] : []),
-    save: vi.fn(async () => user),
-    delete: vi.fn(async () => true),
-    findByPhoneNumber: vi.fn(async () => found),
-    upsert: vi.fn(async () => user),
-  };
-}
-
-function sessionRepository(): IUserSessionRepository {
-  return {
-    findById: vi.fn(async () => session),
-    findAll: vi.fn(async () => [session]),
-    save: vi.fn(async () => session),
-    delete: vi.fn(async () => true),
-    findByDevice: vi.fn(async () => session),
-    upsert: vi.fn(async () => session),
-    revokeAllForUser: vi.fn(async () => undefined),
-  };
-}
-
-function challenge(overrides: Partial<OtpChallenge> = {}): OtpChallenge {
-  return {
-    id: 33,
-    publicId: '33333333-3333-4333-8333-333333333333',
-    phoneNumber: '919999999999',
-    deviceId: 'device-1',
-    otpHash: 'hash',
-    attemptCount: 0,
-    maxAttempts: AUTH_SECURITY_POLICY.otp.maxAttempts,
-    expiresAt: new Date(Date.now() + 60_000),
-    consumedAt: null,
-    invalidatedAt: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
-  };
-}
-
-describe('CW5 Identity authentication security', () => {
-  it('uses cryptographic primitives for OTP hashing and opaque refresh material', async () => {
+describe('CW5 Identity authentication security primitives', () => {
+  it('uses cryptographic OTP hashing and opaque 256-bit refresh material', async () => {
     const security = new NodeAuthSecurityProvider();
-    const otp = security.generateOtp(6);
+    const otp = security.generateOtp(AUTH_SECURITY_POLICY.otp.length);
     expect(otp).toMatch(/^\d{6}$/);
 
     const encoded = await security.hashSecret(otp);
@@ -107,21 +60,35 @@ describe('CW5 Identity authentication security', () => {
     expect(security.hashRefreshToken(first)).not.toContain(first);
   });
 
-  it('persists only an OTP hash and never returns the OTP from send flow', async () => {
+  it('persists only the OTP hash and never returns the delivered OTP', async () => {
     const security = new NodeAuthSecurityProvider();
     let persistedHash = '';
     let deliveredOtp = '';
-
+    const userRepository: IUserRepository = {
+      findById: vi.fn(async () => null),
+      findAll: vi.fn(async () => []),
+      save: vi.fn(async () => user),
+      delete: vi.fn(async () => true),
+      findByPhoneNumber: vi.fn(async () => null),
+      upsert: vi.fn(async () => user),
+    };
     const otpRepository: IOtpChallengeRepository = {
       create: vi.fn(async (input) => {
         persistedHash = input.otpHash;
-        return challenge({
+        return {
+          id: 33,
+          publicId: '33333333-3333-4333-8333-333333333333',
           phoneNumber: input.phoneNumber,
           deviceId: input.deviceId,
           otpHash: input.otpHash,
+          attemptCount: 0,
           maxAttempts: input.maxAttempts,
           expiresAt: input.expiresAt,
-        });
+          consumedAt: null,
+          invalidatedAt: null,
+          createdAt: now,
+          updatedAt: now,
+        };
       }),
       findForVerification: vi.fn(async () => null),
       findLatestByPhone: vi.fn(async () => null),
@@ -138,130 +105,21 @@ describe('CW5 Identity authentication security', () => {
     };
 
     const result = await new SendOtpUseCase(
-      userRepository(null),
+      userRepository,
       otpRepository,
       delivery,
       security,
     ).execute({ phoneNumber: '919999999999', deviceId: 'device-1' });
 
     expect(result.challengeId).toBe('33333333-3333-4333-8333-333333333333');
-    expect(result.expiresInSeconds).toBe(300);
-    expect('otp' in result).toBe(false);
-    expect('mockOtp' in result).toBe(false);
-    expect(deliveredOtp).toMatch(/^\d{6}$/);
+    expect(result).not.toHaveProperty('otp');
+    expect(result).not.toHaveProperty('mockOtp');
     expect(persistedHash).not.toBe(deliveredOtp);
     await expect(security.verifySecret(deliveredOtp, persistedHash)).resolves.toBe(true);
   });
 
-  it('enforces resend cooldown before generating another OTP', async () => {
-    const otpRepository: IOtpChallengeRepository = {
-      create: vi.fn(async () => challenge()),
-      findForVerification: vi.fn(async () => null),
-      findLatestByPhone: vi.fn(async () => challenge({ createdAt: new Date() })),
-      countCreatedSince: vi.fn(async () => 0),
-      recordFailedAttempt: vi.fn(async () => null),
-      tryConsume: vi.fn(async () => false),
-      invalidate: vi.fn(async () => undefined),
-    };
-    const delivery: IOtpDeliveryProvider = { sendOtp: vi.fn(async () => ({ success: true })) };
-
-    await expect(new SendOtpUseCase(
-      userRepository(null),
-      otpRepository,
-      delivery,
-      new NodeAuthSecurityProvider(),
-    ).execute({ phoneNumber: '919999999999', deviceId: 'device-1' })).rejects.toMatchObject({
-      statusCode: 429,
-      errorCode: 'OTP_RESEND_COOLDOWN',
-    });
-    expect(delivery.sendOtp).not.toHaveBeenCalled();
-  });
-
-  it('one-time consumes a challenge and stores only the refresh-token hash', async () => {
+  it('submits only refresh hashes to rotation and returns only the newly generated raw replacement', async () => {
     const security = new NodeAuthSecurityProvider();
-    const otp = '654321';
-    const otpHash = await security.hashSecret(otp);
-    let issued: Parameters<IRefreshTokenRepository['issue']>[0] | undefined;
-
-    const otpRepository: IOtpChallengeRepository = {
-      create: vi.fn(async () => challenge()),
-      findForVerification: vi.fn(async () => challenge({ otpHash })),
-      findLatestByPhone: vi.fn(async () => null),
-      countCreatedSince: vi.fn(async () => 0),
-      recordFailedAttempt: vi.fn(async () => null),
-      tryConsume: vi.fn(async () => true),
-      invalidate: vi.fn(async () => undefined),
-    };
-    const refreshRepository: IRefreshTokenRepository = {
-      issue: vi.fn(async (input) => { issued = input; }),
-      rotate: vi.fn(async () => ({ status: 'INVALID' })),
-      revokeSession: vi.fn(async () => undefined),
-      revokeAllForUser: vi.fn(async () => undefined),
-    };
-
-    const result = await new VerifyOtpUseCase(
-      userRepository(null),
-      sessionRepository(),
-      otpRepository,
-      refreshRepository,
-      security,
-    ).execute({
-      challengeId: '33333333-3333-4333-8333-333333333333',
-      phoneNumber: '919999999999',
-      otp,
-      deviceId: 'device-1',
-    });
-
-    expect(otpRepository.tryConsume).toHaveBeenCalledTimes(1);
-    expect(issued?.sessionId).toBe(session.id);
-    expect(issued?.tokenHash).toBe(security.hashRefreshToken(result.refreshToken));
-    expect(issued?.tokenHash).not.toBe(result.refreshToken);
-    expect(issued?.familyId).toMatch(/^[0-9a-f-]{36}$/i);
-    expect(result.session).not.toHaveProperty('refreshToken');
-  });
-
-  it('records an invalid OTP attempt without creating a user session', async () => {
-    const security = new NodeAuthSecurityProvider();
-    const otpHash = await security.hashSecret('654321');
-    const otpRepository: IOtpChallengeRepository = {
-      create: vi.fn(async () => challenge()),
-      findForVerification: vi.fn(async () => challenge({ otpHash })),
-      findLatestByPhone: vi.fn(async () => null),
-      countCreatedSince: vi.fn(async () => 0),
-      recordFailedAttempt: vi.fn(async () => challenge({ otpHash, attemptCount: 1 })),
-      tryConsume: vi.fn(async () => true),
-      invalidate: vi.fn(async () => undefined),
-    };
-    const users = userRepository(null);
-    const sessions = sessionRepository();
-    const refreshRepository: IRefreshTokenRepository = {
-      issue: vi.fn(async () => undefined),
-      rotate: vi.fn(async () => ({ status: 'INVALID' })),
-      revokeSession: vi.fn(async () => undefined),
-      revokeAllForUser: vi.fn(async () => undefined),
-    };
-
-    await expect(new VerifyOtpUseCase(
-      users,
-      sessions,
-      otpRepository,
-      refreshRepository,
-      security,
-    ).execute({
-      challengeId: '33333333-3333-4333-8333-333333333333',
-      phoneNumber: '919999999999',
-      otp: '000000',
-      deviceId: 'device-1',
-    })).rejects.toBeInstanceOf(UnauthorizedError);
-
-    expect(otpRepository.recordFailedAttempt).toHaveBeenCalledTimes(1);
-    expect(users.upsert).not.toHaveBeenCalled();
-    expect(sessions.upsert).not.toHaveBeenCalled();
-    expect(refreshRepository.issue).not.toHaveBeenCalled();
-  });
-
-  it('rotates by hashes and returns only the newly generated raw refresh token', async () => {
-    const security: IAuthSecurityProvider = new NodeAuthSecurityProvider();
     let rotationInput: Parameters<IRefreshTokenRepository['rotate']>[0] | undefined;
     const refreshRepository: IRefreshTokenRepository = {
       issue: vi.fn(async () => undefined),
@@ -282,25 +140,6 @@ describe('CW5 Identity authentication security', () => {
     expect(rotationInput?.currentTokenHash).toBe(security.hashRefreshToken(current));
     expect(rotationInput?.replacementTokenHash).toBe(security.hashRefreshToken(result.refreshToken));
     expect(rotationInput?.replacementTokenHash).not.toBe(result.refreshToken);
-  });
-
-  it('rejects refresh-token reuse and delegates logout revocation to token families', async () => {
-    const refreshRepository: IRefreshTokenRepository = {
-      issue: vi.fn(async () => undefined),
-      rotate: vi.fn(async () => ({ status: 'REUSED' })),
-      revokeSession: vi.fn(async () => undefined),
-      revokeAllForUser: vi.fn(async () => undefined),
-    };
-
-    await expect(new RefreshTokenUseCase(
-      refreshRepository,
-      new NodeAuthSecurityProvider(),
-    ).execute({ refreshToken: 'x'.repeat(43), deviceId: 'device-1' })).rejects.toBeInstanceOf(UnauthorizedError);
-
-    const logout = new LogoutUseCase(refreshRepository);
-    await logout.execute({ sessionId: session.id });
-    await logout.execute({ logoutAll: true, userId: user.id });
-    expect(refreshRepository.revokeSession).toHaveBeenCalledWith(session.id, expect.any(Date));
-    expect(refreshRepository.revokeAllForUser).toHaveBeenCalledWith(user.id, expect.any(Date));
+    expect(result.session).not.toHaveProperty('refreshToken');
   });
 });

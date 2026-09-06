@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client';
+import type { Prisma, PrismaClient } from '@prisma/client';
 import type { UserSession } from '../../domain/UserSession.js';
 import type {
   IRefreshTokenRepository,
@@ -13,7 +13,7 @@ export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async issue(input: IssueRefreshTokenInput): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.refreshToken.updateMany({
         where: { sessionId: input.sessionId, revokedAt: null, consumedAt: null },
         data: { revokedAt: input.now },
@@ -34,7 +34,7 @@ export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
   }
 
   async rotate(input: RotateRefreshTokenInput): Promise<RefreshRotationResult> {
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const token = await tx.refreshToken.findUnique({
         where: { tokenHash: input.currentTokenHash },
         include: { session: { include: { user: true } } },
@@ -87,7 +87,7 @@ export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
   }
 
   async revokeSession(sessionId: number, now: Date): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.refreshToken.updateMany({
         where: { sessionId, revokedAt: null },
         data: { revokedAt: now },
@@ -100,12 +100,12 @@ export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
   }
 
   async revokeAllForUser(userId: number, now: Date): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const sessions = await tx.userSession.findMany({
         where: { userId, deletedAt: null },
         select: { id: true },
       });
-      const sessionIds = sessions.map((session) => session.id);
+      const sessionIds = sessions.map((session: { id: number }) => session.id);
       if (sessionIds.length > 0) {
         await tx.refreshToken.updateMany({
           where: { sessionId: { in: sessionIds }, revokedAt: null },
