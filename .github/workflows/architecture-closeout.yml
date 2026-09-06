@@ -10,6 +10,7 @@ on:
       - 'tools/architecture-closeout.mjs'
       - 'tools/architecture-closeout-constitution-gate.mjs'
       - 'tools/cw3-boundary-gate.mjs'
+      - 'tools/cw4-contract-gate.mjs'
       - 'tools/production-freeze/preflight.mjs'
       - 'pnpm-workspace.yaml'
       - 'pnpm-lock.yaml'
@@ -24,6 +25,7 @@ on:
       - 'tests/e2e/**'
       - 'docs/CW2-PHYSICAL-STRUCTURE-CLOSEOUT.md'
       - 'docs/CW3-BOUNDED-CONTEXT-DEPENDENCY-CLOSEOUT.md'
+      - 'docs/CW4-DOMAIN-APPLICATION-CONTRACT-CLOSEOUT.md'
       - 'docs/PRODUCTION_FREEZE_EXECUTION.md'
       - 'docs/PRODUCTION_FREEZE_PLAYBOOK.md'
       - 'docs/CONSTITUTION-COMPLIANCE-MATRIX.md'
@@ -86,6 +88,9 @@ jobs:
       - name: Verify CW3 bounded-context and dependency convergence
         run: node tools/cw3-boundary-gate.mjs
 
+      - name: Verify CW4 domain/application contract convergence
+        run: node tools/cw4-contract-gate.mjs
+
       - name: Validate Prisma
         run: pnpm exec prisma validate
 
@@ -111,7 +116,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: cw3-closeout-test-diagnostics
+          name: cw4-closeout-test-diagnostics
           path: closeout-test-output.txt
           if-no-files-found: ignore
           retention-days: 7
@@ -121,6 +126,9 @@ jobs:
 
       - name: Re-verify CW3 bounded-context and dependency convergence
         run: node tools/cw3-boundary-gate.mjs
+
+      - name: Re-verify CW4 domain/application contract convergence
+        run: node tools/cw4-contract-gate.mjs
 
       - name: Prove closeout verification is read-only
         run: |
