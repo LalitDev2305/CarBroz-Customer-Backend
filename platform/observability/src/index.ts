@@ -1,25 +1,95 @@
 import pino, { type LoggerOptions } from 'pino';
 
 export * from './ports/ILoggerProvider.js';
-const SENSITIVE_PATHS = [
+
+const REDACTED = '[REDACTED]';
+
+/**
+ * Sensitive metadata keys are normalized before matching so camelCase, snake_case and kebab-case
+ * variants resolve to the same privacy policy. Values under these keys never reach log output.
+ */
+const SENSITIVE_KEY_NAMES = new Set([
+  'authorization', 'proxyauthorization', 'cookie', 'setcookie',
+  'password', 'passcode', 'token', 'accesstoken', 'refreshtoken', 'idtoken',
+  'otp', 'mockotp',
+  'phonenumber', 'phone', 'mobile', 'mobiles', 'email', 'recipient', 'toemail', 'fcmtoken',
+  'address', 'formattedaddress', 'streetaddress', 'postaladdress',
+  'latitude', 'longitude', 'coordinates', 'location',
+  'cardnumber', 'cvv', 'cvc', 'upiid', 'paymentdetails', 'paymentmethoddetails',
+  'kyc', 'document', 'documentnumber', 'bankaccount', 'ifsc',
+  'secret', 'apikey', 'authkey', 'accesskey', 'secretkey', 'keysecret', 'clientsecret',
+  'webhooksecret', 'credential', 'credentials',
+  'body', 'payload', 'rawbody', 'requestbody', 'responsebody',
+]);
+
+export const SENSITIVE_PATHS = [
   'req.headers.authorization', 'req.headers.cookie', 'res.headers.set-cookie',
   'headers.authorization', 'headers.cookie', 'authorization', 'cookie',
   'password', '*.password', 'token', '*.token', 'accessToken', '*.accessToken',
   'refreshToken', '*.refreshToken', 'otp', '*.otp', 'mockOtp', '*.mockOtp',
-  'phoneNumber', '*.phoneNumber', 'email', '*.email', 'fcmToken', '*.fcmToken',
+  'phoneNumber', '*.phoneNumber', 'email', '*.email', 'recipient', '*.recipient',
+  'fcmToken', '*.fcmToken',
+  'address', '*.address', 'formattedAddress', '*.formattedAddress',
+  'latitude', '*.latitude', 'longitude', '*.longitude', 'coordinates', '*.coordinates',
   'cardNumber', '*.cardNumber', 'cvv', '*.cvv', 'upiId', '*.upiId',
   'kyc', '*.kyc', 'document', '*.document', 'documentNumber', '*.documentNumber',
-  'bankAccount', '*.bankAccount', 'ifsc', '*.ifsc', 'secret', '*.secret'
+  'bankAccount', '*.bankAccount', 'ifsc', '*.ifsc',
+  'secret', '*.secret', 'apiKey', '*.apiKey', 'authKey', '*.authKey',
+  'accessKey', '*.accessKey', 'secretKey', '*.secretKey', 'keySecret', '*.keySecret',
+  'clientSecret', '*.clientSecret', 'credentials', '*.credentials',
+  'body', '*.body', 'payload', '*.payload', 'rawBody', '*.rawBody',
 ] as const;
+
+function normalizedKey(key: string): string {
+  return key.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && !(value instanceof Date);
+}
+
+/**
+ * Recursively strips sensitive values before they reach Pino. This complements Pino path redaction
+ * and protects nested metadata whose depth is not known when the logger is configured.
+ */
+export function redactSensitiveMetadata(value: unknown): unknown {
+  if (value instanceof Error) {
+    return { name: value.name };
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => redactSensitiveMetadata(entry));
+  }
+  if (!isRecord(value)) return value;
+
+  const sanitized: Record<string, unknown> = {};
+  for (const [key, nestedValue] of Object.entries(value)) {
+    sanitized[key] = SENSITIVE_KEY_NAMES.has(normalizedKey(key))
+      ? REDACTED
+      : redactSensitiveMetadata(nestedValue);
+  }
+  return sanitized;
+}
+
+function sanitizeLogObject(object: Record<string, unknown>): Record<string, unknown> {
+  return redactSensitiveMetadata(object) as Record<string, unknown>;
+}
+
+function loggerOptions(level: string): LoggerOptions {
+  return {
+    level,
+    formatters: { log: sanitizeLogObject },
+    redact: { paths: [...SENSITIVE_PATHS], censor: REDACTED },
+  };
+}
 
 /** Creates the process logger with mandatory privacy redaction. */
 export function createLogger(level = process.env.LOG_LEVEL ?? 'info') {
-  return pino({ level, redact: { paths: [...SENSITIVE_PATHS], censor: '[REDACTED]' } });
+  return pino(loggerOptions(level));
 }
 
 /** Returns Fastify logger options using the same mandatory redaction policy. */
 export function getFastifyLoggerConfig(level = process.env.LOG_LEVEL ?? 'info'): LoggerOptions {
-  return { level, redact: { paths: [...SENSITIVE_PATHS], censor: '[REDACTED]' } };
+  return loggerOptions(level);
 }
 
 /** Safe metadata carried by application-flow log events. Payload bodies are intentionally unsupported. */

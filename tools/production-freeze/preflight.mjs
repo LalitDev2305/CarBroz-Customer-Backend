@@ -9,6 +9,10 @@ const checks = [
   ],
   ["cw3-bounded-context-dependency", "node", ["tools/cw3-boundary-gate.mjs"]],
   ["cw4-domain-application-contracts", "node", ["tools/cw4-contract-gate.mjs"]],
+  ["cw5-resource-ownership-public-ids", "node", ["tools/cw5-resource-ownership-gate.mjs"]],
+  ["cw5-error-semantics", "node", ["tools/cw5-error-semantics-gate.mjs"]],
+  ["cw5-runtime-config", "node", ["tools/cw5-runtime-config-gate.mjs"]],
+  ["cw5-observability-pii", "node", ["tools/cw5-observability-pii-gate.mjs"]],
   ["build", "pnpm", ["build"]],
   ["lint", "pnpm", ["lint"]],
   [
@@ -31,6 +35,26 @@ const checks = [
     "cw4-domain-application-contracts-post-validation",
     "node",
     ["tools/cw4-contract-gate.mjs"],
+  ],
+  [
+    "cw5-resource-ownership-public-ids-post-validation",
+    "node",
+    ["tools/cw5-resource-ownership-gate.mjs"],
+  ],
+  [
+    "cw5-error-semantics-post-validation",
+    "node",
+    ["tools/cw5-error-semantics-gate.mjs"],
+  ],
+  [
+    "cw5-runtime-config-post-validation",
+    "node",
+    ["tools/cw5-runtime-config-gate.mjs"],
+  ],
+  [
+    "cw5-observability-pii-post-validation",
+    "node",
+    ["tools/cw5-observability-pii-gate.mjs"],
   ],
 ];
 

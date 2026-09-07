@@ -85,6 +85,9 @@ jobs:
       - name: Verify CW5 runtime configuration and secret separation
         run: node tools/cw5-runtime-config-gate.mjs
 
+      - name: Verify CW5 observability and PII containment
+        run: node tools/cw5-observability-pii-gate.mjs
+
       - name: Prisma validate
         run: pnpm prisma validate
 
@@ -160,6 +163,9 @@ jobs:
 
       - name: Re-verify CW5 runtime configuration and secret separation
         run: node tools/cw5-runtime-config-gate.mjs
+
+      - name: Re-verify CW5 observability and PII containment
+        run: node tools/cw5-observability-pii-gate.mjs
 
       - name: Prove validation is non-mutating
         run: |
