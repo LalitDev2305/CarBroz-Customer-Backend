@@ -43,7 +43,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(fastifyStatic, { root: path.join(__dirname, '../../public'), prefix: '/' });
 
   app.setErrorHandler(globalErrorHandler);
-  app.setNotFoundHandler((request, reply) => reply.status(404).send(ResponseHelper.error('Route ' + request.method + ':' + request.url + ' not found', 'NOT_FOUND', request.traceId)));
+  app.setNotFoundHandler((request, reply) => reply.status(404).send(ResponseHelper.error('Route not found', 'NOT_FOUND', request.traceId)));
   app.addHook('onRequest', async (request) => {
     if (!request.headers.authorization) return;
     try { await request.jwtVerify(); } catch { /* protected routes enforce authorization explicitly */ }

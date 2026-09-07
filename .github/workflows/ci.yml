@@ -79,6 +79,9 @@ jobs:
       - name: Verify CW5 resource ownership and public IDs
         run: node tools/cw5-resource-ownership-gate.mjs
 
+      - name: Verify CW5 error semantics and leakage containment
+        run: node tools/cw5-error-semantics-gate.mjs
+
       - name: Prisma validate
         run: pnpm prisma validate
 
@@ -148,6 +151,9 @@ jobs:
 
       - name: Re-verify CW5 resource ownership and public IDs
         run: node tools/cw5-resource-ownership-gate.mjs
+
+      - name: Re-verify CW5 error semantics and leakage containment
+        run: node tools/cw5-error-semantics-gate.mjs
 
       - name: Prove validation is non-mutating
         run: |
