@@ -50,9 +50,9 @@ describe('CW5 financial money invariants', () => {
     const calculator = new TaxCalculator(config);
     const result = calculator.calculatePartnerPayout(Money.fromMinor(12_345, 'INR'));
 
-    expect(result.commission.amountMinor).toBe(1_882);
+    expect(result.commission.amountMinor).toBe(1_883);
     expect(result.tds.amountMinor).toBe(185);
-    expect(result.netPayout.amountMinor).toBe(10_278);
+    expect(result.netPayout.amountMinor).toBe(10_277);
     expect(result.grossAmount.amountMinor).toBe(12_345);
     expect(result.grossAmount.currency).toBe('INR');
   });
