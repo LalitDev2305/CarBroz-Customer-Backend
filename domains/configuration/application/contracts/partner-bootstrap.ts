@@ -1,4 +1,4 @@
-export type PartnerClientPlatform = 'ANDROID' | 'IOS';
+export type PartnerClientPlatform = 'ANDROID' | 'IOS' | 'DESKTOP';
 export type PartnerStartupAuthentication = 'NONE' | 'SESSION';
 
 /** Inputs required to evaluate Partner app startup configuration. */
