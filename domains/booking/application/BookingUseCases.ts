@@ -1,11 +1,17 @@
 import {
   DomainError,
+  applyBasisPointsToMinorUnits,
+  rateToBasisPoints,
   type ExecutionContext,
   type TransactionContext,
   systemClock,
 } from "@carbroz/foundation-kernel";
 import { Booking } from "../domain/Booking.js";
-import type { BookingSnapshots } from "../domain/BookingSnapshots.js";
+import {
+  BOOKING_QUOTE_CURRENCY,
+  CURRENT_PRICE_SNAPSHOT_VERSION,
+  type BookingSnapshots,
+} from "../domain/BookingSnapshots.js";
 import type { BookingStatus } from "../domain/BookingStatus.js";
 import type { IBookingRepository } from "../domain/repositories/IBookingRepository.js";
 import type { BookingAccessPolicy } from "./security/BookingAccessPolicy.js";
@@ -19,6 +25,8 @@ import type {
   IPricingRepository,
   ServiceAddon,
 } from "@carbroz/domain-catalog-pricing";
+
+const GST_BASIS_POINTS = 1_800;
 
 /** Booking-owned view of the universal transaction contract. */
 export interface IBookingTransactionPort {
@@ -138,9 +146,10 @@ export class CreateBookingUseCase {
         vehicle.fuelType,
       );
     const multiplierValue = vehicleMultiplier?.multiplier ?? 1;
+    const multiplierBasisPoints = rateToBasisPoints(multiplierValue);
 
     let addonsTotalPaise = 0;
-    const addonSnapshots: BookingSnapshots["addons"] = [];
+    const addonSnapshots: BookingSnapshots["addons"] extends readonly (infer T)[] ? T[] : never = [];
     if (input.addonIds?.length) {
       const activeAddons = await this.catalogRepository.findAddonsByServiceId(
         input.serviceId,
@@ -159,9 +168,15 @@ export class CreateBookingUseCase {
       }
     }
 
-    const subtotalPaise =
-      Math.round(basePricePaise * multiplierValue) + addonsTotalPaise;
-    const taxesPaise = Math.round(subtotalPaise * 0.18);
+    const adjustedBasePricePaise = applyBasisPointsToMinorUnits(
+      basePricePaise,
+      multiplierBasisPoints,
+    );
+    const subtotalPaise = adjustedBasePricePaise + addonsTotalPaise;
+    const taxesPaise = applyBasisPointsToMinorUnits(
+      subtotalPaise,
+      GST_BASIS_POINTS,
+    );
     const totalPricePaise = subtotalPaise + taxesPaise;
     const snapshots: BookingSnapshots = {
       service: {
@@ -172,9 +187,12 @@ export class CreateBookingUseCase {
       },
       addons: addonSnapshots,
       pricing: {
+        schemaVersion: CURRENT_PRICE_SNAPSHOT_VERSION,
+        currency: BOOKING_QUOTE_CURRENCY,
         basePricePaise,
         addonsTotalPaise,
         vehicleMultiplier: multiplierValue,
+        vehicleMultiplierBasisPoints: multiplierBasisPoints,
         subtotalPaise,
         taxesPaise,
         totalPricePaise,
