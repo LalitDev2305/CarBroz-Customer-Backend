@@ -1,4 +1,8 @@
-import { DomainError } from "@carbroz/foundation-kernel";
+import {
+  DomainError,
+  applyBasisPointsToMinorUnits,
+  rateToBasisPoints,
+} from "@carbroz/foundation-kernel";
 import type { ExecutionContext, IUseCase } from "@carbroz/foundation-kernel";
 import type { Service } from "../catalog/domain/Service.js";
 import type { ServiceCategory } from "../catalog/domain/ServiceCategory.js";
@@ -11,10 +15,7 @@ export interface CategoryWithServices extends ServiceCategory {
 }
 
 /** Returns the active Catalog/Pricing catalog without depending on HTTP transport. */
-export class GetCatalogUseCase implements IUseCase<
-  void,
-  CategoryWithServices[]
-> {
+export class GetCatalogUseCase implements IUseCase<void, CategoryWithServices[]> {
   constructor(private readonly catalogRepository: ICatalogRepository) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
@@ -23,9 +24,7 @@ export class GetCatalogUseCase implements IUseCase<
     return Promise.all(
       categories.map(async (category) => ({
         ...category,
-        services: await this.catalogRepository.findServicesByCategoryId(
-          category.id!,
-        ),
+        services: await this.catalogRepository.findServicesByCategoryId(category.id!),
       })),
     );
   }
@@ -45,6 +44,7 @@ export interface CalculatedPriceResult {
   vehicleType: string;
   basePrice: number;
   vehicleMultiplier: number;
+  vehicleMultiplierBasisPoints: number;
   adjustedBasePrice: number;
   addonsTotal: number;
   addons: Array<{ id: number; name: string; price: number }>;
@@ -62,9 +62,7 @@ export class CalculateServicePriceUseCase implements IUseCase<
   ) {}
 
   /** Executes this application operation through its declared ports and domain invariants. */
-  async execute(request: {
-    data: CalculatePriceRequest;
-  }): Promise<CalculatedPriceResult> {
+  async execute(request: { data: CalculatePriceRequest }): Promise<CalculatedPriceResult> {
     const { serviceId, vehicleType, addonIds = [] } = request.data;
     const service = await this.catalogRepository.findServiceById(serviceId);
     if (!service || !service.isActive) {
@@ -76,11 +74,14 @@ export class CalculateServicePriceUseCase implements IUseCase<
       serviceId,
       normalizedVehicleType,
     );
-    const vehicleMultiplier = multiplierEntity?.multiplier ?? 1.0;
-    const adjustedBasePrice = Math.round(service.basePrice * vehicleMultiplier);
+    const vehicleMultiplier = multiplierEntity?.multiplier ?? 1;
+    const vehicleMultiplierBasisPoints = rateToBasisPoints(vehicleMultiplier);
+    const adjustedBasePrice = applyBasisPointsToMinorUnits(
+      service.basePrice,
+      vehicleMultiplierBasisPoints,
+    );
     let addonsTotal = 0;
-    const selectedAddons: Array<{ id: number; name: string; price: number }> =
-      [];
+    const selectedAddons: Array<{ id: number; name: string; price: number }> = [];
 
     if (addonIds.length > 0) {
       const addons = await this.catalogRepository.findAddonsByIds(addonIds);
@@ -102,6 +103,7 @@ export class CalculateServicePriceUseCase implements IUseCase<
       vehicleType: normalizedVehicleType,
       basePrice: service.basePrice,
       vehicleMultiplier,
+      vehicleMultiplierBasisPoints,
       adjustedBasePrice,
       addonsTotal,
       addons: selectedAddons,
@@ -148,8 +150,7 @@ export class ManageCatalogUseCase implements IUseCase<
           payload as Parameters<ICatalogRepository["createCategory"]>[0],
         );
       case "UPDATE_CATEGORY":
-        if (!categoryId)
-          throw new DomainError("BAD_REQUEST: categoryId required");
+        if (!categoryId) throw new DomainError("BAD_REQUEST: categoryId required");
         return this.catalogRepository.updateCategory(
           categoryId,
           payload as Parameters<ICatalogRepository["updateCategory"]>[1],
@@ -159,8 +160,7 @@ export class ManageCatalogUseCase implements IUseCase<
           payload as Parameters<ICatalogRepository["createService"]>[0],
         );
       case "UPDATE_SERVICE":
-        if (!serviceId)
-          throw new DomainError("BAD_REQUEST: serviceId required");
+        if (!serviceId) throw new DomainError("BAD_REQUEST: serviceId required");
         return this.catalogRepository.updateService(
           serviceId,
           payload as Parameters<ICatalogRepository["updateService"]>[1],
@@ -214,10 +214,12 @@ export class ManagePricingTierUseCase implements IUseCase<
             "BAD_REQUEST: vehicleType and multiplier required",
           );
         }
+        const basisPoints = rateToBasisPoints(multiplier);
+        const normalizedMultiplier = basisPoints / 10_000;
         return this.pricingRepository.upsertVehicleMultiplier(
           serviceId,
           vehicleType.toUpperCase(),
-          multiplier,
+          normalizedMultiplier,
         );
       }
       default:
