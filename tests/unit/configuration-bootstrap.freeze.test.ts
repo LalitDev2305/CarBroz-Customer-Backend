@@ -2,8 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  ConfigProvider,
   GetInitConfigUseCase,
   type IConfigProvider,
+  type IConfigRepository,
   type IFeatureFlagProvider,
 } from '@carbroz/domain-configuration';
 
@@ -93,7 +95,32 @@ describe('Configuration frontend bootstrap freeze', () => {
     });
   });
 
-  it('interprets maintenance mode as enabled only for the canonical persisted true value', async () => {
+  it('honors the canonical boolean produced when ConfigProvider JSON-decodes persisted true', async () => {
+    const now = new Date('2026-09-07T00:00:00.000Z');
+    const configRepository = {
+      async findByKey(key: string) {
+        if (key !== 'maintenance.enabled') return null;
+        return {
+          id: 1,
+          publicId: 'cfg_maintenance_enabled',
+          key,
+          value: 'true',
+          description: null,
+          createdAt: now,
+          updatedAt: now,
+          deletedAt: null,
+        };
+      },
+    } as unknown as IConfigRepository;
+    const configProvider = new ConfigProvider(configRepository);
+    const { featureFlagProvider } = providers({});
+
+    expect(await configProvider.get<boolean>('maintenance.enabled', false)).toBe(true);
+    const result = await new GetInitConfigUseCase(configProvider, featureFlagProvider).execute();
+    expect(result.maintenance.enabled).toBe(true);
+  });
+
+  it('interprets maintenance mode as enabled only for canonical true values', async () => {
     const disabled = providers({ 'maintenance.enabled': 'TRUE' });
     const result = await new GetInitConfigUseCase(disabled.configProvider, disabled.featureFlagProvider).execute();
     expect(result.maintenance.enabled).toBe(false);
