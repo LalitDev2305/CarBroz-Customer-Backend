@@ -14,10 +14,11 @@ function context(actor: Record<string, unknown> | undefined) {
   } as any;
 }
 
+const legacyCustomerIdOnly = context({ id: 999, kind: 'CUSTOMER', roles: [], customerId: 7 });
 const selfById = context({ id: 7, kind: 'CUSTOMER', roles: [] });
 const adminKind = context({ id: 1, kind: 'ADMIN', roles: [] });
 const adminRole = context({ id: 1, kind: 'CUSTOMER', roles: ['ADMIN'] });
-const foreign = context({ id: 99, kind: 'CUSTOMER', roles: [] });
+const foreign = context({ id: 99, kind: 'CUSTOMER', roles: [], customerId: 99 });
 
 function profileRepo(existing: unknown = null) {
   return {
@@ -29,7 +30,7 @@ function profileRepo(existing: unknown = null) {
 function address(overrides: Record<string, unknown> = {}) {
   return {
     id: 5,
-    publicId: 'addr_test_5',
+    publicId: 'address-public-5',
     userId: 7,
     label: 'Home',
     addressLine1: 'Old line 1',
@@ -51,7 +52,6 @@ function addressRepo(existing: unknown = address()) {
   return {
     findByUserId: vi.fn().mockResolvedValue([address()]),
     findDefaultByUserId: vi.fn().mockResolvedValue(address({ isDefault: true })),
-    findById: vi.fn().mockResolvedValue(existing),
     findByPublicId: vi.fn().mockResolvedValue(existing),
     save: vi.fn(async (value) => value),
     delete: vi.fn().mockResolvedValue(true),
@@ -60,14 +60,14 @@ function addressRepo(existing: unknown = address()) {
 
 describe('Customer application behavior', () => {
   describe('customer access policy through profile use cases', () => {
-    it('rejects a missing actor and a foreign customer', async () => {
-      for (const ctx of [context(undefined), foreign]) {
+    it('rejects a missing actor, a foreign customer, and legacy customerId-only ownership', async () => {
+      for (const ctx of [context(undefined), foreign, legacyCustomerIdOnly]) {
         const uc = new GetCustomerProfileUseCase(profileRepo() as any);
         await expect(uc.execute({ context: ctx, data: { userId: 7 } })).rejects.toThrow('FORBIDDEN');
       }
     });
 
-    it('accepts ADMIN kind, ADMIN role and actor-id ownership', async () => {
+    it('accepts ADMIN kind, ADMIN role, and actor-id ownership', async () => {
       for (const ctx of [adminKind, adminRole, selfById]) {
         const existing = { userId: 7, firstName: 'Lalit' };
         const repo = profileRepo(existing);
@@ -153,8 +153,8 @@ describe('Customer application behavior', () => {
       for (const existing of [null, address({ userId: 8 })]) {
         const repo = addressRepo(existing);
         const uc = new ManageAddressUseCase(repo as any);
-        await expect(uc.execute({ context: selfById, data: { userId: 7, action: 'UPDATE', addressPublicId: 'addr_test_5', payload: {} } })).rejects.toThrow('Address not found');
-        expect(repo.findByPublicId).toHaveBeenCalledWith('addr_test_5');
+        await expect(uc.execute({ context: selfById, data: { userId: 7, action: 'UPDATE', addressPublicId: 'address-public-5', payload: {} } })).rejects.toThrow('Address not found');
+        expect(repo.findByPublicId).toHaveBeenCalledWith('address-public-5');
       }
     });
 
@@ -167,7 +167,7 @@ describe('Customer application behavior', () => {
         data: {
           userId: 7,
           action: 'UPDATE',
-          addressPublicId: 'addr_test_5',
+          addressPublicId: 'address-public-5',
           payload: {
             label: null,
             addressLine1: 'New line 1',
@@ -182,7 +182,7 @@ describe('Customer application behavior', () => {
           } as any,
         },
       });
-      expect(repo.findByPublicId).toHaveBeenCalledWith('addr_test_5');
+      expect(repo.findByPublicId).toHaveBeenCalledWith('address-public-5');
       expect(result).toMatchObject({
         label: null,
         addressLine1: 'New line 1',
@@ -202,23 +202,23 @@ describe('Customer application behavior', () => {
       const existing: any = address();
       const snapshot = { ...existing };
       const repo = addressRepo(existing);
-      await new ManageAddressUseCase(repo as any).execute({ context: selfById, data: { userId: 7, action: 'UPDATE', addressPublicId: 'addr_test_5' } });
-      expect(repo.findByPublicId).toHaveBeenCalledWith('addr_test_5');
+      await new ManageAddressUseCase(repo as any).execute({ context: selfById, data: { userId: 7, action: 'UPDATE', addressPublicId: 'address-public-5' } });
+      expect(repo.findByPublicId).toHaveBeenCalledWith('address-public-5');
       for (const key of ['label','addressLine1','addressLine2','city','state','postalCode','country','latitude','longitude','isDefault']) {
         expect(existing[key]).toEqual((snapshot as any)[key]);
       }
     });
 
-    it('validates DELETE public identity/ownership and deletes an owned address by internal ID', async () => {
+    it('validates DELETE public identity/ownership and deletes an owned address', async () => {
       await expect(new ManageAddressUseCase(addressRepo() as any).execute({ context: selfById, data: { userId: 7, action: 'DELETE' } })).rejects.toThrow('addressPublicId required for deletion');
       for (const existing of [null, address({ userId: 8 })]) {
         const repo = addressRepo(existing);
-        await expect(new ManageAddressUseCase(repo as any).execute({ context: selfById, data: { userId: 7, action: 'DELETE', addressPublicId: 'addr_test_5' } })).rejects.toThrow('Address not found');
-        expect(repo.findByPublicId).toHaveBeenCalledWith('addr_test_5');
+        await expect(new ManageAddressUseCase(repo as any).execute({ context: selfById, data: { userId: 7, action: 'DELETE', addressPublicId: 'address-public-5' } })).rejects.toThrow('Address not found');
+        expect(repo.findByPublicId).toHaveBeenCalledWith('address-public-5');
       }
       const repo = addressRepo();
-      await expect(new ManageAddressUseCase(repo as any).execute({ context: selfById, data: { userId: 7, action: 'DELETE', addressPublicId: 'addr_test_5' } })).resolves.toBe(true);
-      expect(repo.findByPublicId).toHaveBeenCalledWith('addr_test_5');
+      await expect(new ManageAddressUseCase(repo as any).execute({ context: selfById, data: { userId: 7, action: 'DELETE', addressPublicId: 'address-public-5' } })).resolves.toBe(true);
+      expect(repo.findByPublicId).toHaveBeenCalledWith('address-public-5');
       expect(repo.delete).toHaveBeenCalledWith(5);
     });
 
@@ -236,7 +236,7 @@ describe('Customer application behavior', () => {
       const profile = {
         firstName: 'Lalit', lastName: 'Naiya', dateOfBirth: new Date('1990-01-01'), gender: 'M', marketingOptIn: true, createdAt: new Date('2020-01-01'),
       };
-      const addresses = [address(), address({ id: 6, publicId: 'addr_test_6', label: 'Office', addressLine2: 'Floor 2', isDefault: true })];
+      const addresses = [address(), address({ id: 6, publicId: 'address-public-6', label: 'Office', addressLine2: 'Floor 2', isDefault: true })];
       const pRepo = profileRepo(profile);
       const aRepo = addressRepo();
       aRepo.findByUserId.mockResolvedValue(addresses as any);
