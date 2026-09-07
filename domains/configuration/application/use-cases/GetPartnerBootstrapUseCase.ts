@@ -73,7 +73,8 @@ export class GetPartnerBootstrapUseCase {
     );
 
     this.assertDocument(document);
-    const update = document.update[input.platform];
+    const update = document.update?.[input.platform] as PartnerPlatformUpdateConfig | undefined;
+    this.assertUpdate(update, input.platform);
     const minimumComparison = compareApplicationVersions(input.appVersion, update.minimumVersion);
     const latestComparison = compareApplicationVersions(input.appVersion, update.latestVersion);
 
@@ -102,14 +103,11 @@ export class GetPartnerBootstrapUseCase {
       throw new DomainError('Invalid Partner bootstrap configuration document');
     }
 
-    this.assertUpdate(document.update?.ANDROID, 'ANDROID');
-    this.assertUpdate(document.update?.IOS, 'IOS');
-    this.assertUpdate(document.update?.DESKTOP, 'DESKTOP');
     this.assertScreen(document.startup?.guest, 'guest');
     this.assertScreen(document.startup?.authenticated, 'authenticated');
   }
 
-  private assertUpdate(update: PartnerPlatformUpdateConfig | undefined, platform: string): void {
+  private assertUpdate(update: PartnerPlatformUpdateConfig | undefined, platform: string): asserts update is PartnerPlatformUpdateConfig {
     if (!update) throw new DomainError(`Missing Partner update configuration for ${platform}`);
     compareApplicationVersions(update.minimumVersion, update.latestVersion);
     if (compareApplicationVersions(update.latestVersion, update.minimumVersion) < 0) {
