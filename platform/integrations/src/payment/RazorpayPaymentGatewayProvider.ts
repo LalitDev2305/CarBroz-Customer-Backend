@@ -6,11 +6,43 @@ import type {
   PaymentGatewayWebhookEventPayload,
 } from '@carbroz/domain-financials';
 
+function isUnsafeProductionCredential(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  return normalized === 'mock'
+    || normalized === 'dummy'
+    || normalized === 'dummy_secret'
+    || normalized.startsWith('replace_with_')
+    || normalized.startsWith('change-me')
+    || normalized.startsWith('change_me');
+}
+
 export class RazorpayPaymentGatewayProvider implements IPaymentGatewayProvider {
+  private readonly keyId: string;
+  private readonly keySecret: string;
+
   constructor(
-    private readonly keyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_dummy',
-    private readonly keySecret = process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
-  ) {}
+    keyId = process.env.RAZORPAY_KEY_ID,
+    keySecret = process.env.RAZORPAY_KEY_SECRET,
+  ) {
+    const normalizedKeyId = keyId?.trim() ?? '';
+    const normalizedKeySecret = keySecret?.trim() ?? '';
+
+    if (process.env.NODE_ENV === 'production') {
+      if (!normalizedKeyId || !normalizedKeySecret) {
+        throw new Error('Production Razorpay configuration is incomplete');
+      }
+      if (
+        /^rzp_test_/i.test(normalizedKeyId)
+        || isUnsafeProductionCredential(normalizedKeyId)
+        || isUnsafeProductionCredential(normalizedKeySecret)
+      ) {
+        throw new Error('Production Razorpay configuration must use live credentials');
+      }
+    }
+
+    this.keyId = normalizedKeyId || 'rzp_test_dummy';
+    this.keySecret = normalizedKeySecret || 'dummy_secret';
+  }
 
   async createOrder(input: PaymentGatewayCreateOrderInput): Promise<PaymentGatewayOrderResult> {
     const providerOrderId = `order_${input.idempotencyKey.slice(0, 14)}`;

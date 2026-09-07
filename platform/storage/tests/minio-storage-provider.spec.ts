@@ -4,12 +4,6 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MinIOStorageProvider } from '../src/providers/MinIOStorageProvider.js';
 
-function createConfig(values: Record<string, string | undefined>) {
-  return {
-    get: vi.fn(async (key: string) => values[key]),
-  };
-}
-
 function createLogger() {
   return {
     info: vi.fn(),
@@ -30,27 +24,38 @@ function createClient(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function stubStorageEnv(values: {
+  endPoint?: string;
+  port?: string;
+  useSSL?: string;
+  accessKey?: string;
+  secretKey?: string;
+} = {}): void {
+  vi.stubEnv('MINIO_ENDPOINT', values.endPoint ?? '');
+  vi.stubEnv('MINIO_PORT', values.port ?? '');
+  vi.stubEnv('MINIO_USE_SSL', values.useSSL ?? 'false');
+  vi.stubEnv('MINIO_ACCESS_KEY', values.accessKey ?? '');
+  vi.stubEnv('MINIO_SECRET_KEY', values.secretKey ?? '');
+}
+
 describe('MinIOStorageProvider', () => {
   const mockRoot = path.join(os.tmpdir(), 'carbroz-mock-storage');
 
   beforeEach(() => {
     fs.rmSync(mockRoot, { recursive: true, force: true });
+    vi.stubEnv('NODE_ENV', 'test');
+    stubStorageEnv();
   });
 
   afterEach(() => {
     fs.rmSync(mockRoot, { recursive: true, force: true });
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
 
-  it('falls back to mock storage when credentials are missing and persists nested objects', async () => {
-    const config = createConfig({
-      MINIO_ENDPOINT: undefined,
-      MINIO_PORT: undefined,
-      MINIO_ACCESS_KEY: undefined,
-      MINIO_SECRET_KEY: undefined,
-    });
+  it('falls back to mock storage outside production when credentials are missing and persists nested objects', async () => {
     const logger = createLogger();
-    const provider = new MinIOStorageProvider(config as never, logger as never);
+    const provider = new MinIOStorageProvider(logger as never);
     const payload = Buffer.from('carbroz-image');
 
     const url = await provider.uploadFile('booking-proof', '2026/09/photo.jpg', payload, 'image/jpeg');
@@ -58,15 +63,21 @@ describe('MinIOStorageProvider', () => {
     expect(url).toBe('http://mock-storage/booking-proof/2026/09/photo.jpg');
     expect(logger.warn).toHaveBeenCalledWith('Storage credentials missing, falling back to mock storage');
     expect(fs.readFileSync(path.join(mockRoot, 'booking-proof', '2026', '09', 'photo.jpg'))).toEqual(payload);
-    expect(config.get).toHaveBeenCalledWith('MINIO_ENDPOINT');
-    expect(config.get).toHaveBeenCalledWith('MINIO_ACCESS_KEY');
-    expect(config.get).toHaveBeenCalledWith('MINIO_SECRET_KEY');
+  });
+
+  it('rejects missing storage credentials instead of entering mock mode in production', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const logger = createLogger();
+    const provider = new MinIOStorageProvider(logger as never);
+
+    await expect(provider.uploadFile('documents', 'invoice.pdf', Buffer.from('invoice'), 'application/pdf'))
+      .rejects.toThrow('Production storage configuration is incomplete');
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('reuses mock mode, returns mock file URLs, and deletes existing or absent objects safely', async () => {
-    const config = createConfig({});
     const logger = createLogger();
-    const provider = new MinIOStorageProvider(config as never, logger as never);
+    const provider = new MinIOStorageProvider(logger as never);
 
     await provider.uploadFile('documents', 'invoice.pdf', Buffer.from('invoice'), 'application/pdf');
     const stored = path.join(mockRoot, 'documents', 'invoice.pdf');
@@ -83,14 +94,16 @@ describe('MinIOStorageProvider', () => {
   });
 
   it('uploads through an existing real bucket without attempting bucket creation', async () => {
-    const config = createConfig({
-      MINIO_ENDPOINT: 'minio.internal',
-      MINIO_PORT: '9000',
-      MINIO_USE_SSL: 'false',
+    stubStorageEnv({
+      endPoint: 'minio.internal',
+      port: '9000',
+      useSSL: 'false',
+      accessKey: 'access',
+      secretKey: 'secret',
     });
     const logger = createLogger();
     const client = createClient({ bucketExists: vi.fn().mockResolvedValue(true) });
-    const provider = new MinIOStorageProvider(config as never, logger as never);
+    const provider = new MinIOStorageProvider(logger as never);
     Object.assign(provider, { client, isMockMode: false });
     const payload = Buffer.from('binary');
 
@@ -110,14 +123,16 @@ describe('MinIOStorageProvider', () => {
   });
 
   it('creates a missing real bucket and returns the configured HTTPS object URL', async () => {
-    const config = createConfig({
-      MINIO_ENDPOINT: 'storage.carbroz.test',
-      MINIO_PORT: '9443',
-      MINIO_USE_SSL: 'true',
+    stubStorageEnv({
+      endPoint: 'storage.carbroz.test',
+      port: '9443',
+      useSSL: 'true',
+      accessKey: 'access',
+      secretKey: 'secret',
     });
     const logger = createLogger();
     const client = createClient({ bucketExists: vi.fn().mockResolvedValue(false) });
-    const provider = new MinIOStorageProvider(config as never, logger as never);
+    const provider = new MinIOStorageProvider(logger as never);
     Object.assign(provider, { client, isMockMode: false });
 
     const url = await provider.uploadFile('kyc', 'partner/pan.jpg', Buffer.from('pan'), 'image/jpeg');
@@ -128,12 +143,16 @@ describe('MinIOStorageProvider', () => {
   });
 
   it('delegates real file URL generation to a one-hour presigned object URL', async () => {
-    const config = createConfig({});
+    stubStorageEnv({
+      endPoint: 'storage.internal',
+      accessKey: 'access',
+      secretKey: 'secret',
+    });
     const logger = createLogger();
     const client = createClient({
       presignedGetObject: vi.fn().mockResolvedValue('https://signed.example/booking/file.jpg?token=abc'),
     });
-    const provider = new MinIOStorageProvider(config as never, logger as never);
+    const provider = new MinIOStorageProvider(logger as never);
     Object.assign(provider, { client, isMockMode: false });
 
     await expect(provider.getFileUrl('booking', 'file.jpg'))
@@ -142,10 +161,14 @@ describe('MinIOStorageProvider', () => {
   });
 
   it('delegates real deletion to MinIO removeObject', async () => {
-    const config = createConfig({});
+    stubStorageEnv({
+      endPoint: 'storage.internal',
+      accessKey: 'access',
+      secretKey: 'secret',
+    });
     const logger = createLogger();
     const client = createClient();
-    const provider = new MinIOStorageProvider(config as never, logger as never);
+    const provider = new MinIOStorageProvider(logger as never);
     Object.assign(provider, { client, isMockMode: false });
 
     await expect(provider.deleteFile('booking', 'obsolete.jpg')).resolves.toBeUndefined();

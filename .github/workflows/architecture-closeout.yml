@@ -14,6 +14,7 @@ on:
       - 'tools/cw4-contract-gate.mjs'
       - 'tools/cw5-resource-ownership-gate.mjs'
       - 'tools/cw5-error-semantics-gate.mjs'
+      - 'tools/cw5-runtime-config-gate.mjs'
       - 'tools/production-freeze/preflight.mjs'
       - 'pnpm-workspace.yaml'
       - 'pnpm-lock.yaml'
@@ -101,6 +102,9 @@ jobs:
       - name: Verify CW5 error semantics and leakage containment
         run: node tools/cw5-error-semantics-gate.mjs
 
+      - name: Verify CW5 runtime configuration and secret separation
+        run: node tools/cw5-runtime-config-gate.mjs
+
       - name: Validate Prisma
         run: pnpm exec prisma validate
 
@@ -145,6 +149,9 @@ jobs:
 
       - name: Re-verify CW5 error semantics and leakage containment
         run: node tools/cw5-error-semantics-gate.mjs
+
+      - name: Re-verify CW5 runtime configuration and secret separation
+        run: node tools/cw5-runtime-config-gate.mjs
 
       - name: Prove closeout verification is read-only
         run: |
