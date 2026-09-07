@@ -1,3 +1,45 @@
+export const BASIS_POINTS_SCALE = 10_000;
+
+/** Converts a non-negative rate such as 1.25 to integer basis points (12_500). */
+export function rateToBasisPoints(rate: number): number {
+  if (!Number.isFinite(rate) || rate < 0) {
+    throw new Error(`Rate must be a finite non-negative number, received: ${rate}`);
+  }
+  const basisPoints = Math.round(rate * BASIS_POINTS_SCALE);
+  if (!Number.isSafeInteger(basisPoints)) {
+    throw new Error(`Rate exceeds maximum safe basis-point range: ${rate}`);
+  }
+  return basisPoints;
+}
+
+/**
+ * Applies an integer basis-point rate to an integer minor-unit amount using
+ * BigInt arithmetic and deterministic half-up rounding. Monetary arithmetic
+ * never passes through a floating-point intermediate.
+ */
+export function applyBasisPointsToMinorUnits(
+  amountMinor: number,
+  basisPoints: number,
+): number {
+  if (!Number.isSafeInteger(amountMinor)) {
+    throw new Error(`Minor-unit amount must be a safe integer, received: ${amountMinor}`);
+  }
+  if (!Number.isSafeInteger(basisPoints) || basisPoints < 0) {
+    throw new Error(`Basis points must be a non-negative safe integer, received: ${basisPoints}`);
+  }
+
+  const scale = BigInt(BASIS_POINTS_SCALE);
+  const numerator = BigInt(amountMinor) * BigInt(basisPoints);
+  const rounded = numerator >= 0n
+    ? (numerator + scale / 2n) / scale
+    : (numerator - scale / 2n) / scale;
+  const result = Number(rounded);
+  if (!Number.isSafeInteger(result)) {
+    throw new Error(`Calculated minor-unit amount exceeds maximum safe integer range: ${rounded}`);
+  }
+  return result;
+}
+
 /** Money is an exported foundation/kernel contract/implementation; see the owning README for lifecycle and extension rules. */
 export class Money {
   private readonly _amountMinor: number;
@@ -52,11 +94,16 @@ export class Money {
     return new Money(this._amountMinor - other._amountMinor, this._currency);
   }
 
+  /** Compatibility API: the rate is quantized first; the money calculation is integer-only. */
   multiply(multiplier: number): Money {
-    if (!Number.isFinite(multiplier) || multiplier < 0) {
-      throw new Error(`Money multiplier must be a finite non-negative number, received: ${multiplier}`);
-    }
-    return new Money(Math.round(this._amountMinor * multiplier), this._currency);
+    return this.multiplyBasisPoints(rateToBasisPoints(multiplier));
+  }
+
+  multiplyBasisPoints(basisPoints: number): Money {
+    return new Money(
+      applyBasisPointsToMinorUnits(this._amountMinor, basisPoints),
+      this._currency,
+    );
   }
 
   equals(other: Money): boolean {
