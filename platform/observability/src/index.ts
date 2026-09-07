@@ -4,6 +4,7 @@ export * from './ports/ILoggerProvider.js';
 
 const REDACTED = '[REDACTED]';
 const CIRCULAR = '[Circular]';
+const INTERNAL = '[Internal]';
 
 /**
  * Sensitive metadata keys are normalized before matching so camelCase, snake_case and kebab-case
@@ -21,6 +22,19 @@ const SENSITIVE_KEY_NAMES = new Set([
   'secret', 'apikey', 'authkey', 'accesskey', 'secretkey', 'keysecret', 'clientsecret',
   'webhooksecret', 'credential', 'credentials',
   'body', 'payload', 'rawbody', 'requestbody', 'responsebody',
+]);
+
+/**
+ * Framework/DI internals must never be traversed by the logging sanitizer. Some of these values are
+ * lazy proxies (for example Awilix request scopes/cradles), and enumerating them can resolve arbitrary
+ * application registrations as a side effect. They are implementation details and provide no useful
+ * production log context, so replace them before recursion reaches the underlying runtime object.
+ */
+const NON_LOGGABLE_RUNTIME_KEY_NAMES = new Set([
+  'discope',
+  'dicontainer',
+  'cradle',
+  'registrations',
 ]);
 
 export const SENSITIVE_PATHS = [
@@ -71,9 +85,12 @@ function redactSensitiveMetadataInternal(value: unknown, ancestors: WeakSet<obje
   try {
     const sanitized: Record<string, unknown> = {};
     for (const [key, nestedValue] of Object.entries(value)) {
-      sanitized[key] = SENSITIVE_KEY_NAMES.has(normalizedKey(key))
+      const normalized = normalizedKey(key);
+      sanitized[key] = SENSITIVE_KEY_NAMES.has(normalized)
         ? REDACTED
-        : redactSensitiveMetadataInternal(nestedValue, ancestors);
+        : NON_LOGGABLE_RUNTIME_KEY_NAMES.has(normalized)
+          ? INTERNAL
+          : redactSensitiveMetadataInternal(nestedValue, ancestors);
     }
     return sanitized;
   } finally {
