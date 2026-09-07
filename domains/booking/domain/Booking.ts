@@ -1,7 +1,10 @@
 import { DomainError, systemClock } from "@carbroz/foundation-kernel";
 import { BookingStatus } from "./BookingStatus.js";
 import { BookingStatusHistoryItem } from "./BookingStatusHistoryItem.js";
-import { BookingSnapshots } from "./BookingSnapshots.js";
+import {
+  normalizeBookingSnapshots,
+  type BookingSnapshots,
+} from "./BookingSnapshots.js";
 
 /** BookingProps is an exported domains/booking contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface BookingProps {
@@ -41,7 +44,7 @@ export class Booking {
   expiryAt: Date | null;
   totalPricePaise: number;
   cancellationReason: string | null;
-  snapshots: BookingSnapshots;
+  readonly snapshots: BookingSnapshots;
   statusHistory: BookingStatusHistoryItem[];
   corporateAccountId: number | null;
   corporateFleetVehicleId: number | null;
@@ -57,6 +60,9 @@ export class Booking {
     if (props.slotEndTime <= props.slotStartTime) {
       throw new DomainError("Slot end time must be after slot start time");
     }
+    if (!Number.isSafeInteger(props.totalPricePaise) || props.totalPricePaise < 0) {
+      throw new DomainError("Booking total price must be a non-negative integer in paise");
+    }
 
     this.id = props.id;
     this.publicId = props.publicId;
@@ -71,7 +77,10 @@ export class Booking {
     this.expiryAt = props.expiryAt ?? null;
     this.totalPricePaise = props.totalPricePaise;
     this.cancellationReason = props.cancellationReason ?? null;
-    this.snapshots = props.snapshots;
+    this.snapshots = normalizeBookingSnapshots(props.snapshots);
+    if (this.snapshots.pricing.totalPricePaise !== this.totalPricePaise) {
+      throw new DomainError("Booking total price must match immutable pricing snapshot");
+    }
     this.statusHistory = props.statusHistory ?? [
       {
         fromStatus: null,
