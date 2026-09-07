@@ -75,6 +75,50 @@ describe('observability privacy redaction', () => {
     expect(entry.rawBody).toBe('[REDACTED]');
   });
 
+  it('replaces direct circular references without weakening sensitive-field redaction', () => {
+    const metadata: Record<string, unknown> = {
+      correlationId: 'corr-cycle',
+      authorization: 'Bearer private-token',
+      phoneNumber: '+919876543210',
+      safeValue: 'preserved',
+    };
+    metadata.self = metadata;
+
+    const sanitized = redactSensitiveMetadata(metadata) as Record<string, unknown>;
+
+    expect(sanitized.correlationId).toBe('corr-cycle');
+    expect(sanitized.safeValue).toBe('preserved');
+    expect(sanitized.authorization).toBe('[REDACTED]');
+    expect(sanitized.phoneNumber).toBe('[REDACTED]');
+    expect(sanitized.self).toBe('[Circular]');
+  });
+
+  it('handles circular metadata in actual Pino output without overflowing the stack', () => {
+    const nested: Record<string, unknown> = { operation: 'request-log' };
+    const metadata: Record<string, unknown> = {
+      correlationId: 'corr-pino-cycle',
+      apiKey: 'private-api-key',
+      nested,
+    };
+    nested.parent = metadata;
+
+    const entry = captureOneLog(metadata);
+    const sanitizedNested = entry.nested as Record<string, unknown>;
+
+    expect(entry.correlationId).toBe('corr-pino-cycle');
+    expect(entry.apiKey).toBe('[REDACTED]');
+    expect(sanitizedNested.operation).toBe('request-log');
+    expect(sanitizedNested.parent).toBe('[Circular]');
+  });
+
+  it('does not treat repeated non-cyclic references as circular', () => {
+    const shared = { status: 'ok' };
+    const sanitized = redactSensitiveMetadata({ first: shared, second: shared }) as Record<string, unknown>;
+
+    expect(sanitized.first).toEqual({ status: 'ok' });
+    expect(sanitized.second).toEqual({ status: 'ok' });
+  });
+
   it('keeps defense-in-depth Pino paths for HTTP auth/cookies and core secrets', () => {
     expect(SENSITIVE_PATHS).toEqual(expect.arrayContaining([
       'req.headers.authorization',

@@ -3,6 +3,7 @@ import pino, { type LoggerOptions } from 'pino';
 export * from './ports/ILoggerProvider.js';
 
 const REDACTED = '[REDACTED]';
+const CIRCULAR = '[Circular]';
 
 /**
  * Sensitive metadata keys are normalized before matching so camelCase, snake_case and kebab-case
@@ -48,26 +49,45 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value) && !(value instanceof Date);
 }
 
-/**
- * Recursively strips sensitive values before they reach Pino. This complements Pino path redaction
- * and protects nested metadata whose depth is not known when the logger is configured.
- */
-export function redactSensitiveMetadata(value: unknown): unknown {
+function redactSensitiveMetadataInternal(value: unknown, ancestors: WeakSet<object>): unknown {
   if (value instanceof Error) {
     return { name: value.name };
   }
-  if (Array.isArray(value)) {
-    return value.map((entry) => redactSensitiveMetadata(entry));
-  }
-  if (!isRecord(value)) return value;
 
-  const sanitized: Record<string, unknown> = {};
-  for (const [key, nestedValue] of Object.entries(value)) {
-    sanitized[key] = SENSITIVE_KEY_NAMES.has(normalizedKey(key))
-      ? REDACTED
-      : redactSensitiveMetadata(nestedValue);
+  if (Array.isArray(value)) {
+    if (ancestors.has(value)) return CIRCULAR;
+    ancestors.add(value);
+    try {
+      return value.map((entry) => redactSensitiveMetadataInternal(entry, ancestors));
+    } finally {
+      ancestors.delete(value);
+    }
   }
-  return sanitized;
+
+  if (!isRecord(value)) return value;
+  if (ancestors.has(value)) return CIRCULAR;
+
+  ancestors.add(value);
+  try {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, nestedValue] of Object.entries(value)) {
+      sanitized[key] = SENSITIVE_KEY_NAMES.has(normalizedKey(key))
+        ? REDACTED
+        : redactSensitiveMetadataInternal(nestedValue, ancestors);
+    }
+    return sanitized;
+  } finally {
+    ancestors.delete(value);
+  }
+}
+
+/**
+ * Recursively strips sensitive values before they reach Pino. This complements Pino path redaction,
+ * protects nested metadata whose depth is not known when the logger is configured, and safely
+ * replaces circular references instead of recursively traversing them forever.
+ */
+export function redactSensitiveMetadata(value: unknown): unknown {
+  return redactSensitiveMetadataInternal(value, new WeakSet<object>());
 }
 
 function sanitizeLogObject(object: Record<string, unknown>): Record<string, unknown> {
