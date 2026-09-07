@@ -28,6 +28,11 @@ const DEFAULT_PARTNER_BOOTSTRAP_DOCUMENT: PartnerBootstrapDocument = {
       latestVersion: '1.0.0',
       storeUrl: null,
     },
+    DESKTOP: {
+      minimumVersion: '1.0.0',
+      latestVersion: '1.0.0',
+      storeUrl: null,
+    },
   },
   features: {
     registrationEnabled: true,
@@ -69,8 +74,8 @@ export class GetPartnerBootstrapUseCase {
 
     this.assertDocument(document);
     const update = document.update[input.platform];
-    const minimumComparison = compareNumericVersions(input.appVersion, update.minimumVersion);
-    const latestComparison = compareNumericVersions(input.appVersion, update.latestVersion);
+    const minimumComparison = compareApplicationVersions(input.appVersion, update.minimumVersion);
+    const latestComparison = compareApplicationVersions(input.appVersion, update.latestVersion);
 
     return {
       config: {
@@ -99,14 +104,15 @@ export class GetPartnerBootstrapUseCase {
 
     this.assertUpdate(document.update?.ANDROID, 'ANDROID');
     this.assertUpdate(document.update?.IOS, 'IOS');
+    this.assertUpdate(document.update?.DESKTOP, 'DESKTOP');
     this.assertScreen(document.startup?.guest, 'guest');
     this.assertScreen(document.startup?.authenticated, 'authenticated');
   }
 
   private assertUpdate(update: PartnerPlatformUpdateConfig | undefined, platform: string): void {
     if (!update) throw new DomainError(`Missing Partner update configuration for ${platform}`);
-    compareNumericVersions(update.minimumVersion, update.latestVersion);
-    if (compareNumericVersions(update.latestVersion, update.minimumVersion) < 0) {
+    compareApplicationVersions(update.minimumVersion, update.latestVersion);
+    if (compareApplicationVersions(update.latestVersion, update.minimumVersion) < 0) {
       throw new DomainError(`Invalid Partner update configuration for ${platform}: latestVersion is below minimumVersion`);
     }
   }
@@ -121,9 +127,14 @@ export class GetPartnerBootstrapUseCase {
   }
 }
 
-function compareNumericVersions(left: string, right: string): number {
-  const leftParts = parseNumericVersion(left);
-  const rightParts = parseNumericVersion(right);
+/**
+ * Update eligibility compares the numeric release core while preserving the full client version as identity.
+ * Flavor/prerelease/build suffixes such as `1.0.0-dev` or `1.0.0+42` are accepted but do not create a
+ * second client version or accidentally force an update solely because of the flavor suffix.
+ */
+function compareApplicationVersions(left: string, right: string): number {
+  const leftParts = parseApplicationVersionCore(left);
+  const rightParts = parseApplicationVersionCore(right);
   const length = Math.max(leftParts.length, rightParts.length);
 
   for (let index = 0; index < length; index += 1) {
@@ -136,10 +147,11 @@ function compareNumericVersions(left: string, right: string): number {
   return 0;
 }
 
-function parseNumericVersion(version: string): number[] {
+function parseApplicationVersionCore(version: string): number[] {
   const value = version?.trim();
-  if (!value || !/^\d+(?:\.\d+)*$/.test(value)) {
+  const match = /^(\d+(?:\.\d+)*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.exec(value ?? '');
+  if (!match) {
     throw new DomainError(`Invalid application version: ${version}`);
   }
-  return value.split('.').map((part) => Number(part));
+  return match[1]!.split('.').map((part) => Number(part));
 }
