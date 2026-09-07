@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 const root = process.cwd();
 const ignored = new Set(['node_modules', 'dist', 'coverage', 'generated', '.git']);
+const sensitiveLogValue = /\b(?:otp|refreshToken|accessToken|authorization|password|phone|email|cookie|token|api[_-]?key|secret)\b/i;
 
 function walk(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
@@ -16,6 +17,26 @@ function walk(dir: string): string[] {
 
 function relative(file: string): string {
   return path.relative(root, file).split(path.sep).join('/');
+}
+
+/**
+ * Returns logger calls whose payload may contain a sensitive value. A simple
+ * quoted first argument is treated as a static event identifier and excluded
+ * from the sensitive-value scan. Template literals are intentionally NOT
+ * excluded because they can interpolate credentials or PII.
+ */
+function unsafeSensitiveLogCalls(content: string): string[] {
+  const offenders: string[] = [];
+  const loggerCall = /(?:log|logger)\.(?:trace|debug|info|warn|error|fatal)\s*\(([\s\S]*?)\);/g;
+
+  for (const match of content.matchAll(loggerCall)) {
+    const args = match[1].trim();
+    const staticEvent = args.match(/^(?:'[^'\\]*(?:\\.[^'\\]*)*'|"[^"\\]*(?:\\.[^"\\]*)*")\s*,?/s);
+    const payload = staticEvent ? args.slice(staticEvent[0].length) : args;
+    if (sensitiveLogValue.test(payload)) offenders.push(match[0]);
+  }
+
+  return offenders;
 }
 
 const production = ['apps', 'domains', 'sdui', 'platform', 'foundation']
@@ -42,7 +63,7 @@ describe('Backend V3 engineering quality boundaries', () => {
   });
 
   it('forbids deep package imports and relative imports into another bounded context', () => {
-    const offenders = [];
+    const offenders: string[] = [];
     for (const file of production.filter((candidate) => relative(candidate).startsWith('domains/'))) {
       const sourceParts = relative(file).split('/');
       const sourceDomain = sourceParts[1];
@@ -63,8 +84,17 @@ describe('Backend V3 engineering quality boundaries', () => {
     expect(files.filter((file) => businessRepository.test(fs.readFileSync(file, 'utf8'))).map(relative)).toEqual([]);
   });
 
+  it('allows sensitive words in static event identifiers but never in log payload values', () => {
+    expect(unsafeSensitiveLogCalls('logger.warn("otp_configuration_missing", { provider, operation, errorCode });')).toEqual([]);
+    expect(unsafeSensitiveLogCalls('logger.info("otp_sent", { otp });')).toHaveLength(1);
+    expect(unsafeSensitiveLogCalls('logger.warn("request_failed", { authorization });')).toHaveLength(1);
+    expect(unsafeSensitiveLogCalls('logger.error(`otp_${otp}`, { provider });')).toHaveLength(1);
+  });
+
   it('forbids secret-bearing logs and raw authorization metadata in production source', () => {
-    const unsafe = /(?:log|logger)\.(?:trace|debug|info|warn|error|fatal)\([^\n]*(?:otp|refreshToken|accessToken|authorization|password|phone|email)/i;
-    expect(production.filter((file) => unsafe.test(fs.readFileSync(file, 'utf8'))).map(relative)).toEqual([]);
+    const offenders = production
+      .filter((file) => unsafeSensitiveLogCalls(fs.readFileSync(file, 'utf8')).length > 0)
+      .map(relative);
+    expect(offenders).toEqual([]);
   });
 });
