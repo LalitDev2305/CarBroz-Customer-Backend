@@ -1,4 +1,8 @@
-import { Money } from '@carbroz/foundation-kernel';
+import {
+  Money,
+  applyBasisPointsToMinorUnits,
+  percentToBasisPoints,
+} from '@carbroz/foundation-kernel';
 import { FinancialConfiguration, DEFAULT_FINANCIAL_CONFIG } from './FinancialConfiguration.js';
 
 /** TaxCalculationResult is an exported domains/financials contract/implementation; see the owning README for lifecycle and extension rules. */
@@ -32,7 +36,10 @@ export class TaxCalculator {
     const subtotalMinor = subtotalMoney.amountMinor;
 
     if (isInterstate) {
-      const igstMinor = Math.round((subtotalMinor * this.config.igstRatePercent) / 100);
+      const igstMinor = applyBasisPointsToMinorUnits(
+        subtotalMinor,
+        percentToBasisPoints(this.config.igstRatePercent),
+      );
       const totalTaxMinor = igstMinor;
       return {
         basePrice: subtotalMoney,
@@ -45,8 +52,14 @@ export class TaxCalculator {
       };
     }
 
-    const cgstMinor = Math.round((subtotalMinor * this.config.cgstRatePercent) / 100);
-    const sgstMinor = Math.round((subtotalMinor * this.config.sgstRatePercent) / 100);
+    const cgstMinor = applyBasisPointsToMinorUnits(
+      subtotalMinor,
+      percentToBasisPoints(this.config.cgstRatePercent),
+    );
+    const sgstMinor = applyBasisPointsToMinorUnits(
+      subtotalMinor,
+      percentToBasisPoints(this.config.sgstRatePercent),
+    );
     const totalTaxMinor = cgstMinor + sgstMinor;
     return {
       basePrice: subtotalMoney,
@@ -62,8 +75,14 @@ export class TaxCalculator {
   calculatePartnerPayout(grossMoney: Money): PayoutCalculationResult {
     const currency = grossMoney.currency;
     const grossMinor = grossMoney.amountMinor;
-    const commissionMinor = Math.round((grossMinor * this.config.platformCommissionPercent) / 100);
-    const tdsMinor = Math.round((grossMinor * this.config.tdsRatePercent) / 100);
+    const commissionMinor = applyBasisPointsToMinorUnits(
+      grossMinor,
+      percentToBasisPoints(this.config.platformCommissionPercent),
+    );
+    const tdsMinor = applyBasisPointsToMinorUnits(
+      grossMinor,
+      percentToBasisPoints(this.config.tdsRatePercent),
+    );
     const netPayoutMinor = grossMinor - commissionMinor - tdsMinor;
 
     return {
