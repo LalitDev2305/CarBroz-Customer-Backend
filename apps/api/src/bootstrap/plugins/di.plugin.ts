@@ -4,22 +4,22 @@ import { FastifyInstance } from 'fastify';
 import { getContainer } from '../container/index.js';
 
 export default fp(async (app: FastifyInstance) => {
-  // Initialize and register the global container
+  // Initialize the one canonical application container. The Fastify plugin must use this exact
+  // container so request.diScope inherits every app-level registration from the composition root.
   const container = getContainer();
 
-  // Register fastify-awilix to handle request-scoped containers
-  // This automatically binds request.diScope
   await app.register(fastifyAwilixPlugin, {
+    container,
     disposeOnClose: true,
     disposeOnResponse: true,
     strictBooleanEnforced: true,
-    injectionMode: 'CLASSIC',
   });
 
-  // Attach the root container for global access (optional, mainly for background jobs)
+  // fastify-awilix decorates app.diContainer when a container is supplied. Keep this guard only as
+  // a compatibility fallback for environments where that decorator is not present.
   if (!app.hasDecorator('diContainer')) {
     app.decorate('diContainer', container);
   }
 }, {
-  name: 'di-plugin'
+  name: 'di-plugin',
 });
