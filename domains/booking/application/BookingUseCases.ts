@@ -10,6 +10,7 @@ import { Booking } from "../domain/Booking.js";
 import {
   BOOKING_QUOTE_CURRENCY,
   CURRENT_PRICE_SNAPSHOT_VERSION,
+  type AddonSnapshot,
   type BookingSnapshots,
 } from "../domain/BookingSnapshots.js";
 import type { BookingStatus } from "../domain/BookingStatus.js";
@@ -149,7 +150,7 @@ export class CreateBookingUseCase {
     const multiplierBasisPoints = rateToBasisPoints(multiplierValue);
 
     let addonsTotalPaise = 0;
-    const addonSnapshots: BookingSnapshots["addons"] extends readonly (infer T)[] ? T[] : never = [];
+    const addonSnapshots: AddonSnapshot[] = [];
     if (input.addonIds?.length) {
       const activeAddons = await this.catalogRepository.findAddonsByServiceId(
         input.serviceId,
