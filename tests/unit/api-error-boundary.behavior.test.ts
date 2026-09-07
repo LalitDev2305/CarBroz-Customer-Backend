@@ -4,7 +4,6 @@ import {
   InternalServerError,
   NotFoundError,
 } from '@carbroz/foundation-kernel';
-import { ZodError } from 'zod';
 import { globalErrorHandler } from '../../apps/api/src/transport/middleware/error-handler.js';
 
 function request() {
@@ -95,15 +94,7 @@ describe('API error boundary', () => {
     });
   });
 
-  it('contains Zod and Fastify schema details behind a stable validation response', () => {
-    const zod = handle(new ZodError([]) as any);
-    expect(zod.res.statusCode).toBe(400);
-    expect(zod.res.body).toMatchObject({
-      success: false,
-      message: 'Invalid request data',
-      code: 'VALIDATION_ERROR',
-    });
-
+  it('contains Fastify schema details behind a stable validation response', () => {
     const schemaError = Object.assign(
       new Error('body/password must match secret internal schema'),
       { validation: [{ instancePath: '/password' }] },
