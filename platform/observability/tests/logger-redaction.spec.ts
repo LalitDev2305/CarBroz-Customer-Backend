@@ -119,6 +119,31 @@ describe('observability privacy redaction', () => {
     expect(sanitized.second).toEqual({ status: 'ok' });
   });
 
+  it('does not traverse DI runtime proxies while still redacting adjacent request metadata', () => {
+    const lazyDiProxy = new Proxy<Record<string, unknown>>({}, {
+      ownKeys() {
+        throw new Error('DI runtime proxy must not be enumerated by observability');
+      },
+    });
+
+    const sanitized = redactSensitiveMetadata({
+      req: {
+        headers: {
+          authorization: 'Bearer private-token',
+        },
+        diScope: lazyDiProxy,
+      },
+    }) as {
+      req: {
+        headers: { authorization: string };
+        diScope: string;
+      };
+    };
+
+    expect(sanitized.req.headers.authorization).toBe('[REDACTED]');
+    expect(sanitized.req.diScope).toBe('[Internal]');
+  });
+
   it('keeps defense-in-depth Pino paths for HTTP auth/cookies and core secrets', () => {
     expect(SENSITIVE_PATHS).toEqual(expect.arrayContaining([
       'req.headers.authorization',
