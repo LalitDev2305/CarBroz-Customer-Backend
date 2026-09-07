@@ -7,8 +7,14 @@ import { partnerBootstrapHeadersSchema } from '../dto/partner.bootstrap.dto.js';
 export class PartnerBootstrapController {
   public get = async (request: FastifyRequest, reply: FastifyReply) => {
     const headers = partnerBootstrapHeadersSchema.parse(request.headers);
-    const useCase = request.diScope.resolve<GetPartnerBootstrapUseCase>('getPartnerBootstrapUseCase');
 
+    // Bootstrap is public only when no bearer is supplied. If the client supplies a bearer,
+    // it must be valid so local session state cannot silently diverge from backend auth truth.
+    if (request.headers.authorization && !request.user) {
+      await request.jwtVerify();
+    }
+
+    const useCase = request.diScope.resolve<GetPartnerBootstrapUseCase>('getPartnerBootstrapUseCase');
     const result = await useCase.execute({
       platform: headers['x-carbroz-platform'],
       appVersion: headers['x-carbroz-app-version'],
