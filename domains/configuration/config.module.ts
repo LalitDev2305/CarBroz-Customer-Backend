@@ -34,9 +34,9 @@ export function registerConfigModule(container: AwilixContainer): void {
     featureFlagProvider: asFunction(
       (cradle: ConfigurationCradle) => new FeatureFlagProvider(cradle.featureFlagRepository),
     ).singleton(),
-    // Constructor parameter names intentionally match the stable provider registrations so this
-    // remains compatible with the API composition root's CLASSIC Awilix injection mode.
-    getInitConfigUseCase: asClass(GetInitConfigUseCase).singleton(),
-    getPartnerBootstrapUseCase: asClass(GetPartnerBootstrapUseCase).singleton(),
+    // These use cases use named constructor parameters; keep their injection mode explicit even
+    // though the shared container also hosts PROXY-style factory registrations above.
+    getInitConfigUseCase: asClass(GetInitConfigUseCase).classic().singleton(),
+    getPartnerBootstrapUseCase: asClass(GetPartnerBootstrapUseCase).classic().singleton(),
   });
 }
