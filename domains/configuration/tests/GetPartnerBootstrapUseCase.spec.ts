@@ -146,8 +146,17 @@ describe('GetPartnerBootstrapUseCase', () => {
   });
 
   it('rejects absolute startup endpoints stored in configuration', async () => {
-    const invalid = validDocument();
-    invalid.startup.guest.endpoint = 'https://example.com/login';
+    const base = validDocument();
+    const invalid: PartnerBootstrapDocument = {
+      ...base,
+      startup: {
+        ...base.startup,
+        guest: {
+          ...base.startup.guest,
+          endpoint: 'https://example.com/login',
+        },
+      },
+    };
     const useCase = new GetPartnerBootstrapUseCase(providerReturning(invalid));
 
     await expect(useCase.execute({ platform: 'ANDROID', appVersion: '1.0.0', authenticated: false }))
