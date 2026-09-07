@@ -145,6 +145,24 @@ describe('GetPartnerBootstrapUseCase', () => {
     expect(result.config.update.optional).toBe(false);
   });
 
+  it('keeps legacy persisted Android config usable while requiring Desktop policy only for Desktop', async () => {
+    const base = validDocument();
+    const legacy = {
+      ...base,
+      update: {
+        ANDROID: base.update.ANDROID,
+        IOS: base.update.IOS,
+      },
+    } as unknown as PartnerBootstrapDocument;
+    const useCase = new GetPartnerBootstrapUseCase(providerReturning(legacy));
+
+    const android = await useCase.execute({ platform: 'ANDROID', appVersion: '2.5.0', authenticated: false });
+    expect(android.config.update.optional).toBe(true);
+
+    await expect(useCase.execute({ platform: 'DESKTOP', appVersion: '1.0.0', authenticated: false }))
+      .rejects.toThrow('Missing Partner update configuration for DESKTOP');
+  });
+
   it('rejects absolute startup endpoints stored in configuration', async () => {
     const base = validDocument();
     const invalid: PartnerBootstrapDocument = {
