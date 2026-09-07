@@ -5,6 +5,7 @@ import type { IFeatureFlagRepository } from './domain/repositories/IFeatureFlagR
 import { ConfigProvider } from './application/ConfigProvider.js';
 import { FeatureFlagProvider } from './application/FeatureFlagProvider.js';
 import { GetInitConfigUseCase } from './application/use-cases/GetInitConfigUseCase.js';
+import { GetPartnerBootstrapUseCase } from './application/use-cases/GetPartnerBootstrapUseCase.js';
 import { PrismaConfigRepository } from './infrastructure/repositories/PrismaConfigRepository.js';
 import { PrismaFeatureFlagRepository } from './infrastructure/repositories/PrismaFeatureFlagRepository.js';
 
@@ -36,5 +37,6 @@ export function registerConfigModule(container: AwilixContainer): void {
     // Constructor parameter names intentionally match the stable provider registrations so this
     // remains compatible with the API composition root's CLASSIC Awilix injection mode.
     getInitConfigUseCase: asClass(GetInitConfigUseCase).singleton(),
+    getPartnerBootstrapUseCase: asClass(GetPartnerBootstrapUseCase).singleton(),
   });
 }
