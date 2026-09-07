@@ -194,7 +194,6 @@ export class PrismaBookingRepository implements IBookingRepository {
         status: booking.status,
         expiryAt: booking.expiryAt,
         cancellationReason: booking.cancellationReason,
-        snapshotsJson: booking.snapshots,
         statusHistoryJson: booking.statusHistory,
       },
     });
