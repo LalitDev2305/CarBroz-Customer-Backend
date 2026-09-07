@@ -1,4 +1,5 @@
 export const BASIS_POINTS_SCALE = 10_000;
+export const PERCENT_TO_BASIS_POINTS_SCALE = 100;
 
 /** Converts a non-negative rate such as 1.25 to integer basis points (12_500). */
 export function rateToBasisPoints(rate: number): number {
@@ -8,6 +9,18 @@ export function rateToBasisPoints(rate: number): number {
   const basisPoints = Math.round(rate * BASIS_POINTS_SCALE);
   if (!Number.isSafeInteger(basisPoints)) {
     throw new Error(`Rate exceeds maximum safe basis-point range: ${rate}`);
+  }
+  return basisPoints;
+}
+
+/** Converts a percentage such as 18 to integer basis points (1_800). */
+export function percentToBasisPoints(percent: number): number {
+  if (!Number.isFinite(percent) || percent < 0) {
+    throw new Error(`Percent must be a finite non-negative number, received: ${percent}`);
+  }
+  const basisPoints = Math.round(percent * PERCENT_TO_BASIS_POINTS_SCALE);
+  if (!Number.isSafeInteger(basisPoints)) {
+    throw new Error(`Percent exceeds maximum safe basis-point range: ${percent}`);
   }
   return basisPoints;
 }
