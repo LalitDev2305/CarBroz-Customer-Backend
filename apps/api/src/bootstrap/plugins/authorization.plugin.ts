@@ -4,7 +4,6 @@ import fp from 'fastify-plugin';
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
 
 
-
 declare module 'fastify' {
   interface FastifyInstance {
     requirePermission(permissionKey: string): (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
@@ -18,19 +17,19 @@ const authorizationPlugin: FastifyPluginAsync = async (fastify) => {
     try {
       await request.jwtVerify();
     } catch (err) {
-      return reply.code(401).send(ResponseHelper.error('Authentication required', 'UNAUTHORIZED'));
+      return reply.code(401).send(ResponseHelper.error(401, 'Authentication required', request.traceId));
     }
 
     const userId = request.user?.id;
     if (!userId) {
-      return reply.code(401).send(ResponseHelper.error('Invalid token payload', 'UNAUTHORIZED'));
+      return reply.code(401).send(ResponseHelper.error(401, 'Invalid token payload', request.traceId));
     }
 
     const provider = request.diScope.resolve<IAuthorizationProvider>('authorizationProvider');
     const hasAccess = await validator(provider, parseInt(userId, 10));
     
     if (!hasAccess) {
-      return reply.code(403).send(ResponseHelper.error('Insufficient permissions', 'FORBIDDEN'));
+      return reply.code(403).send(ResponseHelper.error(403, 'Insufficient permissions', request.traceId));
     }
   };
 
