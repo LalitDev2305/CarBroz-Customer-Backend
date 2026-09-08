@@ -19,7 +19,7 @@ ApiResponse<T>
 
 The actual HTTP response status and body `status` MUST agree. Controllers must not return HTTP 200 for a failed operation.
 
-## Frozen status mapping
+## Canonical status mapping
 
 | HTTP/body status | code | Meaning |
 | ---: | --- | --- |
@@ -30,7 +30,10 @@ The actual HTTP response status and body `status` MUST agree. Controllers must n
 | 404 | `NOT_FOUND` | Requested resource does not exist |
 | 409 | `CONFLICT` | Request conflicts with current resource/state |
 | 422 | `UNPROCESSABLE_ENTITY` | Validation or business-input failure |
+| 429 | `TOO_MANY_REQUESTS` | Existing API rate limit was exceeded |
 | 500 | `INTERNAL_SERVER_ERROR` | Unexpected server failure |
+
+`429` is retained because the existing Fastify rate-limit boundary already uses the standard HTTP rate-limit status. It is not a new business/API outcome invented for this change.
 
 The mapping is centralized in `ResponseHelper.ts`; product controllers must not create competing status-to-code maps.
 
