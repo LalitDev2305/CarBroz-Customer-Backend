@@ -90,11 +90,11 @@ export class AuthController {
   }
 
   public async me(request: FastifyRequest, reply: FastifyReply) {
-    if (!request.user) return reply.status(401).send(ResponseHelper.error('Unauthorized'));
+    if (!request.user) return reply.status(401).send(ResponseHelper.error(401, 'Unauthorized', request.traceId));
 
     const userRepository = request.diScope.resolve<import('@carbroz/domain-identity').IUserRepository>('userRepository');
     const user = await userRepository.findById((request.user as any).id);
-    if (!user) return reply.status(404).send(ResponseHelper.error('User not found'));
+    if (!user) return reply.status(404).send(ResponseHelper.error(404, 'User not found', request.traceId));
     return reply.send(ResponseHelper.success({ user }));
   }
 }
