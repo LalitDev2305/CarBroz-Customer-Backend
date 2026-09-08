@@ -7,6 +7,7 @@ import {
   emitHttpResponseDiagnostic,
   logFlow,
 } from '@carbroz/platform-observability';
+import { isDetailedDiagnosticLoggingEnabled } from '../config/diagnostic-mode.js';
 
 const startedAt = Symbol('carbroz.request.startedAt');
 const errorCode = Symbol('carbroz.request.errorCode');
@@ -26,13 +27,6 @@ function surfaceFor(url: string): 'partner' | 'customer' | 'admin' | 'system' {
 
 function safeRoute(request: { routeOptions?: { url?: string }; url: string }): string {
   return request.routeOptions?.url ?? request.url.split('?')[0] ?? '/';
-}
-
-function diagnosticConsoleEnabled(): boolean {
-  const environment = (process.env.CARBROZ_ENVIRONMENT ?? process.env.NODE_ENV ?? 'development')
-    .trim()
-    .toLowerCase();
-  return environment === 'development' || environment === 'staging';
 }
 
 function isApplicationApi(url: string): boolean {
@@ -72,7 +66,7 @@ function payloadForDiagnostics(payload: unknown): unknown {
  * Production: emits privacy-safe structured lifecycle events through Pino and never logs payload bodies.
  */
 export default fp(async function requestFlowPlugin(app: FastifyInstance) {
-  const detailed = diagnosticConsoleEnabled();
+  const detailed = isDetailedDiagnosticLoggingEnabled();
 
   app.addHook('onRequest', async (request) => {
     request[startedAt] = process.hrtime.bigint();
