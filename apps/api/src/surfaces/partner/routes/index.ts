@@ -8,8 +8,8 @@ import { registerPartnerSduiRoutes } from '../../../transport/sdui/partner-sdui.
 
 /** Registers only Partner-product HTTP routes. */
 export async function registerPartnerSurface(app: FastifyInstance): Promise<void> {
-  await app.register(partnerBootstrapRoutes);
-  await app.register(partnerLoginRoutes);
+  await app.register(partnerBootstrapRoutes, { prefix: '/config' });
+  await app.register(partnerLoginRoutes, { prefix: '/screen' });
   await app.register(registerPartnerAuthRoutes, { prefix: '/auth' });
   await app.register(partnerRoutes);
   await app.register(kycRoutes);
