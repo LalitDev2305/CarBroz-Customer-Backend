@@ -19,6 +19,7 @@ describe('ResponseHelper', () => {
     [404, 'NOT_FOUND'],
     [409, 'CONFLICT'],
     [422, 'UNPROCESSABLE_ENTITY'],
+    [429, 'TOO_MANY_REQUESTS'],
     [500, 'INTERNAL_SERVER_ERROR'],
   ] as const)('maps HTTP %s to %s', (status, code) => {
     expect(ResponseHelper.error(status, 'Request failed.', 'trace-2')).toEqual({
