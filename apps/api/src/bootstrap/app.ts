@@ -40,7 +40,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(fastifyRateLimit, {
     max: 100,
     timeWindow: '1 minute',
-    errorResponseBuilder: (request, context) => ResponseHelper.error('Rate limit exceeded, retry in ' + context.after, 'TOO_MANY_REQUESTS', request.traceId),
+    errorResponseBuilder: (request, context) =>
+      ResponseHelper.error(429, 'Too many requests. Please retry in ' + context.after + '.', request.traceId),
   });
   await app.register(shutdownPlugin);
   await app.register(diPlugin);
@@ -51,7 +52,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(fastifyStatic, { root: path.join(__dirname, '../../public'), prefix: '/' });
 
   app.setErrorHandler(globalErrorHandler);
-  app.setNotFoundHandler((request, reply) => reply.status(404).send(ResponseHelper.error('Route not found', 'NOT_FOUND', request.traceId)));
+  app.setNotFoundHandler((request, reply) =>
+    reply.status(404).send(ResponseHelper.error(404, 'The requested route could not be found.', request.traceId)),
+  );
   app.addHook('onRequest', async (request) => {
     if (!request.headers.authorization) return;
     try { await request.jwtVerify(); } catch { /* protected routes enforce authorization explicitly */ }
