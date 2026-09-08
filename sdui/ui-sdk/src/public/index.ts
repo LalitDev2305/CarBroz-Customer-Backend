@@ -1,4 +1,5 @@
 export * from '../contract/common.schema.js';
+export * from '../contract/action.schema.js';
 export * from '../contract/element.schema.js';
 export * from '../contract/group.schema.js';
 export * from '../contract/section.schema.js';
