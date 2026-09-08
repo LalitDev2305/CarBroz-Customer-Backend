@@ -25,7 +25,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** Builds the Fastify composition root; no business rules live in this executable layer. */
 export async function buildApp(): Promise<FastifyInstance> {
-  const app = Fastify({ logger: getFastifyLoggerConfig(LoggingConfig.logLevel) });
+  const app = Fastify({
+    logger: getFastifyLoggerConfig(LoggingConfig.logLevel),
+    // request-flow.plugin is the single HTTP lifecycle owner; Fastify's automatic lines would duplicate it.
+    disableRequestLogging: true,
+  });
   await app.register(fastifyMultipart, { limits: { fileSize: 5 * 1024 * 1024 } });
   await app.register(cors, { origin: SecurityConfig.corsOrigin, credentials: true });
   await app.register(helmet);
