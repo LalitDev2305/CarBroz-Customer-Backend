@@ -1,4 +1,4 @@
-import { ResponseHelper } from '../../../transport/response/ResponseHelper.js';
+import { ResponseHelper, type ApiErrorStatus } from '../../../transport/response/ResponseHelper.js';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import {
@@ -20,6 +20,16 @@ export class AdminCatalogController {
     private readonly managePricingTierUseCase: ManagePricingTierUseCase
   ) {}
 
+  private sendError(req: FastifyRequest, reply: FastifyReply, error: any) {
+    if (error instanceof z.ZodError) {
+      return reply.status(400).send(ResponseHelper.error(400, 'Validation failed', req.traceId));
+    }
+    req.log.error(error);
+    const statusCode: ApiErrorStatus = error.message.startsWith('FORBIDDEN') ? 403 : 500;
+    const message = statusCode === 500 ? 'Something went wrong. Please try again later.' : error.message;
+    return reply.status(statusCode).send(ResponseHelper.error(statusCode, message, req.traceId));
+  }
+
   async createCategory(req: FastifyRequest, reply: FastifyReply) {
     try {
       const parsed = createCategorySchema.parse(req.body);
@@ -29,12 +39,7 @@ export class AdminCatalogController {
       });
       return reply.status(201).send(ResponseHelper.success(result));
     } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return reply.status(400).send(ResponseHelper.error('Validation failed', (error as any).errors));
-      }
-      req.log.error(error);
-      const statusCode = error.message.startsWith('FORBIDDEN') ? 403 : 500;
-      return reply.status(statusCode).send(ResponseHelper.error(error.message));
+      return this.sendError(req, reply, error);
     }
   }
 
@@ -47,12 +52,7 @@ export class AdminCatalogController {
       });
       return reply.status(201).send(ResponseHelper.success(result));
     } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return reply.status(400).send(ResponseHelper.error('Validation failed', (error as any).errors));
-      }
-      req.log.error(error);
-      const statusCode = error.message.startsWith('FORBIDDEN') ? 403 : 500;
-      return reply.status(statusCode).send(ResponseHelper.error(error.message));
+      return this.sendError(req, reply, error);
     }
   }
 
@@ -65,12 +65,7 @@ export class AdminCatalogController {
       });
       return reply.status(201).send(ResponseHelper.success(result));
     } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return reply.status(400).send(ResponseHelper.error('Validation failed', (error as any).errors));
-      }
-      req.log.error(error);
-      const statusCode = error.message.startsWith('FORBIDDEN') ? 403 : 500;
-      return reply.status(statusCode).send(ResponseHelper.error(error.message));
+      return this.sendError(req, reply, error);
     }
   }
 
@@ -83,12 +78,7 @@ export class AdminCatalogController {
       });
       return reply.status(201).send(ResponseHelper.success(result));
     } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return reply.status(400).send(ResponseHelper.error('Validation failed', (error as any).errors));
-      }
-      req.log.error(error);
-      const statusCode = error.message.startsWith('FORBIDDEN') ? 403 : 500;
-      return reply.status(statusCode).send(ResponseHelper.error(error.message));
+      return this.sendError(req, reply, error);
     }
   }
 
@@ -101,12 +91,7 @@ export class AdminCatalogController {
       });
       return reply.send(ResponseHelper.success(result));
     } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return reply.status(400).send(ResponseHelper.error('Validation failed', (error as any).errors));
-      }
-      req.log.error(error);
-      const statusCode = error.message.startsWith('FORBIDDEN') ? 403 : 500;
-      return reply.status(statusCode).send(ResponseHelper.error(error.message));
+      return this.sendError(req, reply, error);
     }
   }
 }
