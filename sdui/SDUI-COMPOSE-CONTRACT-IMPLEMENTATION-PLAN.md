@@ -1,101 +1,148 @@
-# CarBroz SDUI Compose Contract & Implementation Plan
+# CarBroz SDUI Dynamic Composition Architecture & Implementation Guide
 
-> **Status:** DESIGN FREEZE CANDIDATE — documentation first; no implementation is authorized by this document alone.
+> **Status:** DESIGN FREEZE CANDIDATE — documentation first. Production implementation begins only after explicit approval.
 >
-> **Authority:** Subordinate to `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/ENGINEERING-DOCUMENTATION-STANDARD.md`. If this document conflicts with a higher authority, the higher authority wins and this document must be corrected before implementation.
+> **Authority:** Subordinate to `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/ENGINEERING-DOCUMENTATION-STANDARD.md`. If a conflict exists, the higher authority wins and this guide must be corrected before code changes.
 >
-> **Scope:** Generic SDUI language and the Partner Login screen as the first proving composition. This document does not define frontend implementation and does not authorize a parallel SDUI engine.
+> **Scope:** Purely generic Server-Driven UI composition. No product screen, feature, business flow, or application-specific UI is defined here.
 
 ---
 
 ## 1. Purpose
 
-This document freezes the intended evolution of the CarBroz Server-Driven UI contract before production code is changed. It answers:
+This is the canonical implementation guide for building and evolving CarBroz dynamic UI.
 
-- what Template, Component, Section, Group and Element mean;
-- which hierarchy paths are legal;
-- how the structural hierarchy maps conceptually to Jetpack Compose layout semantics;
-- which properties belong to a parent container and which belong to a child;
-- how leading/trailing accessories work without violating the terminal-Element invariant;
-- how generic SDUI definitions are registered and reused;
-- where runtime screen documents live and how they are published;
-- which backend artifacts may be changed or introduced;
-- what every proposed artifact owns, who calls it, what it may depend on and what it must never own;
-- the implementation sequence and executable proof required before the contract is considered production-ready.
+A developer should be able to read this document and quickly answer:
 
-The central design goal is **a small, reusable layout language**, not a collection of screen-specific types.
+- What is a Screen?
+- What is a Template?
+- What is a Component?
+- When should a Section be used?
+- When should a Group be used?
+- What is an Element?
+- How do these levels stack together?
+- Which hierarchy combinations are legal?
+- How do vertical and horizontal layouts work?
+- Where do alignment, arrangement, size, padding, weight, background, border and shape belong?
+- How do leading and trailing visual accessories work?
+- How is a complete dynamic JSON document composed?
+- How is the JSON validated, registered, persisted, published and retrieved?
+- How is a new Template, Component, Section, Group or Element type added?
+- How is an existing definition updated, deprecated or removed safely?
+- Which backend class/module owns each responsibility?
+- Which class calls which class and why?
+- What tests are required before a contract change is accepted?
+
+The objective is a **small generic UI language that can express many screens through configuration without creating screen-specific backend classes**.
 
 ---
 
-## 2. Non-negotiable architecture boundaries
+# 2. Architecture in one minute
 
-### 2.1 Existing ownership remains authoritative
+```text
+                         ┌──────────────────────────┐
+                         │          SCREEN          │
+                         │ identity + target + theme│
+                         └────────────┬─────────────┘
+                                      │
+                                      ▼
+                         ┌──────────────────────────┐
+                         │         TEMPLATE         │
+                         │ root composition policy  │
+                         └────────────┬─────────────┘
+                                      │
+                           one or more Components
+                                      │
+                                      ▼
+                         ┌──────────────────────────┐
+                         │        COMPONENT         │
+                         │ mandatory layout boundary│
+                         └────────────┬─────────────┘
+                                      │
+                    ┌─────────────────┴─────────────────┐
+                    │                                   │
+                 Elements                            Sections
+                                                        │
+                                         ┌──────────────┴──────────────┐
+                                         │                             │
+                                      Elements                       Groups
+                                                                        │
+                                                                     Elements
+```
+
+Only three structural paths are legal:
+
+```text
+Screen → Template → Component → Element
+Screen → Template → Component → Section → Element
+Screen → Template → Component → Section → Group → Element
+```
+
+Template and Component are mandatory.
+Section and Group are optional.
+Element is always terminal.
+
+---
+
+# 3. Package ownership
 
 ```text
 sdui/
-├── ui-sdk/      # generic SDUI language, composition, validation and serialization
-└── registry/    # runtime persistence, draft/publish/version/retrieval lifecycle
+├── ui-sdk/
+│   ├── contract/       # structural JSON contracts
+│   ├── properties/     # reusable property/value contracts
+│   ├── definitions/    # legal reusable UI type definitions
+│   ├── registry/       # in-memory definition registries
+│   ├── builder/        # safe programmatic composition
+│   ├── factory/        # definition-driven construction
+│   ├── validator/      # validation orchestration
+│   ├── serializer/     # trusted serialization boundary
+│   ├── versioning/     # schema compatibility policy
+│   └── public/         # supported external SDK surface
+│
+└── registry/
+    └── runtime persistence, draft/publish/archive/version/retrieval
 ```
 
-There MUST NOT be a second SDUI engine, Partner-specific SDK, Login SDK, renderer package, or screen-specific hierarchy.
-
-### 2.2 Generic language versus runtime document
+## Ownership rule
 
 ```text
-UI SDK
-  defines what is legal
-       ↓
-Registry
-  stores and publishes legal documents
-       ↓
-Runtime API
-  retrieves a published document for a target application
-       ↓
-Client
-  interprets the generic contract
+ui-sdk
+    owns the LANGUAGE
+
+sdui/registry
+    owns runtime DOCUMENT LIFECYCLE
+
+business domains
+    own BUSINESS BEHAVIOR
+
+API/application composition
+    exposes the published document
 ```
 
-`partner_login` is runtime/product data. It is **not** a reusable UI SDK definition type.
+No second SDUI engine may be created.
+No feature-specific SDK hierarchy may be created.
+No business behavior belongs inside generic UI definitions.
 
-Forbidden examples:
+---
 
-```text
-LoginTemplate
-PartnerLoginComponent
-MobileLoginGroup
-PhoneInputComponent
-PartnerTextElement
-```
+# 4. Core vocabulary: ID, Type and Properties
 
-Reusable examples:
+Every structural node separates three concerns:
 
 ```text
-stack_template
-stack_component
-stack_section
-stack_group
-text
-image
-icon
-button
-input
-divider
-spacer
-```
+id          instance identity
 
-### 2.3 Type, ID and configuration are different concepts
+type        reusable behavior definition
 
-```text
-TYPE          reusable behavior/layout capability
-ID            unique instance identity inside one screen document
-PROPERTIES    runtime configuration of that behavior
+properties  configuration of that behavior
 ```
 
 Example:
 
 ```json
 {
-  "id": "login_header",
+  "id": "primary_content",
   "type": "stack_component",
   "properties": {
     "orientation": "vertical"
@@ -103,123 +150,255 @@ Example:
 }
 ```
 
-`login_header` is screen-specific. `stack_component` is reusable. `vertical` is configuration, not another type.
+Interpretation:
+
+```text
+primary_content     = this particular instance
+stack_component     = reusable behavior
+vertical            = runtime configuration
+```
+
+Never create `vertical_component` and `horizontal_component` when one Stack behavior plus `orientation` expresses both.
 
 ---
 
-## 3. Canonical hierarchy
+# 5. Screen
 
-Template and Component are mandatory. Section and Group are optional. Element is always terminal.
+Screen is the root runtime document. It identifies what is being requested and contains exactly one Template.
 
-Only these paths are legal:
+Conceptual shape:
 
-```text
-Template → Component → Element
-Template → Component → Section → Element
-Template → Component → Section → Group → Element
+```json
+{
+  "screenId": "sample_screen",
+  "templateId": "sample_template",
+  "templateType": "stack_template",
+  "schemaVersion": "<version>",
+  "targetApp": "PARTNER",
+  "theme": {},
+  "template": {}
+}
 ```
 
-The following are illegal:
+## Screen responsibilities
+
+Screen owns:
+
+- screen identity;
+- template identity/type reference;
+- schema version;
+- rendering target scope;
+- optional theme;
+- optional metadata;
+- one Template document.
+
+Screen does not own:
+
+- business use cases;
+- persistence implementation;
+- renderer implementation;
+- domain logic.
+
+## Screen invariants
 
 ```text
-Template → Element
-Template → Section
-Component → Group
-Component → Element + Section simultaneously
-Section → Element + Group simultaneously
-Group → Group
-Group → Section
-Element → Element
-Element → any structural child
+template.id   == templateId
+template.type == templateType
+all structural IDs are unique within the screen
 ```
-
-### Structural invariants
-
-1. A Template MUST contain at least one Component.
-2. A Component MUST contain exactly one branch: `elements[]` OR `sections[]`.
-3. A Section MUST contain exactly one branch: `elements[]` OR `groups[]`.
-4. A Group MUST contain `elements[]` only.
-5. Element MUST never contain structural children.
-6. Structural IDs MUST be unique inside a screen.
-7. `template.id` MUST equal root `templateId`.
-8. `template.type` MUST equal root `templateType`.
-9. Runtime target scope remains `GLOBAL | PARTNER | CUSTOMER`.
 
 ---
 
-## 4. Meaning of every hierarchy level
+# 6. Template
 
-### 4.1 Template
+Template is the root composition policy inside a Screen.
 
-**Role:** root layout policy for one screen document.
+```text
+Screen
+  └── Template
+        ├── Component
+        ├── Component
+        └── Component
+```
 
-A Template answers questions such as:
+A Template answers:
 
-- how are top-level Components arranged?
-- what is the screen-level orientation?
-- what outer padding applies?
-- does content fill available width/height?
-- what alignment/arrangement policy applies between Components?
+- how top-level Components are arranged;
+- which reusable root behavior is used;
+- orientation;
+- root alignment/arrangement;
+- outer padding;
+- root measurement behavior;
+- root appearance where allowed.
 
-It does not own authentication, navigation business rules, persistence or screen-specific backend logic.
-
-Initial generic behavior:
+Initial generic type:
 
 ```text
 stack_template
 ```
 
-A stack template can be vertical or horizontal through configuration. We do not create `vertical_template` and `horizontal_template`.
+Example:
 
-### 4.2 Component
+```json
+{
+  "id": "sample_template",
+  "type": "stack_template",
+  "properties": {
+    "orientation": "vertical",
+    "verticalArrangement": {
+      "type": "spacedBy",
+      "spacing": 24
+    },
+    "horizontalAlignment": "center",
+    "fillMaxSize": true,
+    "padding": {
+      "start": 24,
+      "top": 20,
+      "end": 24,
+      "bottom": 20
+    }
+  },
+  "components": []
+}
+```
 
-**Role:** mandatory reusable composition boundary directly under Template.
+A Template MUST contain at least one Component.
 
-Create another Component when there is a genuine top-level layout/composition boundary. Do not create Components merely because content has a different semantic label such as "branding", "form" or "legal".
+---
 
-Initial generic behavior:
+# 7. Component
+
+Component is the mandatory composition boundary directly below Template.
+
+```text
+Template
+  └── Component
+```
+
+Initial generic type:
 
 ```text
 stack_component
 ```
 
-### 4.3 Section
+A Component may choose exactly one branch:
 
-**Role:** optional internal layout boundary inside a Component.
+```text
+Component → elements[]
+```
 
-Section is used when a Component needs a nested layout policy or when the legal hierarchy requires a transition from a Component into Groups.
+or:
 
-Initial generic behavior:
+```text
+Component → sections[]
+```
+
+Never both.
+
+## When to create another Component
+
+Create a new Component when a genuine top-level composition/layout boundary exists.
+
+Do not split Components simply because content has different semantic meaning.
+
+Good reason:
+
+```text
+Component A requires vertical layout
+Component B requires independent horizontal/root measurement behavior
+```
+
+Bad reason:
+
+```text
+these labels describe different business concepts
+```
+
+---
+
+# 8. Section
+
+Section is an optional internal composition boundary inside Component.
+
+```text
+Template
+  └── Component
+        └── Section
+```
+
+Initial generic type:
 
 ```text
 stack_section
 ```
 
-A Section is not mandatory merely for consistency.
-
-### 4.4 Group
-
-**Role:** final optional structural container for a local arrangement of Elements.
-
-A Group is useful for local Row/Column-like compositions such as:
+A Section may choose exactly one branch:
 
 ```text
-+91 | phone-number-input
+Section → elements[]
 ```
 
-Initial generic behavior:
+or:
+
+```text
+Section → groups[]
+```
+
+Never both.
+
+## When Section is useful
+
+Use Section when:
+
+- part of a Component requires another shared layout policy;
+- the hierarchy needs Groups beneath the Component;
+- multiple child items should share a nested arrangement/alignment/container policy.
+
+Do not add Section merely to make every JSON tree have the same depth.
+
+---
+
+# 9. Group
+
+Group is the final optional structural container before Elements.
+
+```text
+Template
+  └── Component
+        └── Section
+              └── Group
+                    ├── Element
+                    └── Element
+```
+
+Initial generic type:
 
 ```text
 stack_group
 ```
 
-Group may contain Elements only.
+Group contains Elements only.
 
-### 4.5 Element
+Use Group for a local composition of leaf items that must share another layout policy.
 
-**Role:** terminal visual/interactive leaf.
+Example:
 
-Examples:
+```text
+horizontal Group
+├── icon
+├── text
+└── button
+```
+
+Group must not contain another Group, Section or Component.
+
+---
+
+# 10. Element
+
+Element is the terminal visual or interactive leaf.
+
+Initial generic vocabulary:
 
 ```text
 text
@@ -231,37 +410,127 @@ divider
 spacer
 ```
 
-Elements may carry configuration, actions, analytics, accessibility, validation, binding, visibility and metadata where the canonical contract permits them, but never structural child nodes.
+Conceptually:
+
+```text
+Element
+├── id
+├── type
+├── properties
+├── optional actions
+├── optional validation
+├── optional accessibility
+├── optional binding
+└── optional metadata
+```
+
+Element MUST NOT contain structural children.
+
+```text
+Element → Element       ❌
+Element → Group         ❌
+Element → Section       ❌
+```
+
+New leaf behavior should be introduced as a new Element definition only when existing generic Elements cannot express it cleanly.
 
 ---
 
-## 5. Stack layout model and Compose semantics
+# 11. Legal and illegal hierarchy diagrams
 
-`stack_*` represents one generic sequential layout behavior. `orientation` determines whether it behaves conceptually like Compose `Column` or `Row`.
+## Legal A — direct Elements
 
-### 5.1 Vertical stack
+```text
+Screen
+└── Template
+    └── Component
+        ├── Element
+        ├── Element
+        └── Element
+```
+
+## Legal B — Sections
+
+```text
+Screen
+└── Template
+    └── Component
+        ├── Section
+        │   ├── Element
+        │   └── Element
+        └── Section
+            └── Element
+```
+
+## Legal C — Sections and Groups
+
+```text
+Screen
+└── Template
+    └── Component
+        ├── Section
+        │   └── Group
+        │       ├── Element
+        │       └── Element
+        └── Section
+            └── Group
+                ├── Element
+                └── Element
+```
+
+## Illegal examples
+
+```text
+Template → Element                         ❌
+Template → Section                         ❌
+Component → Group                          ❌
+Component → elements[] + sections[]        ❌
+Section → elements[] + groups[]            ❌
+Group → Group                              ❌
+Group → Section                            ❌
+Element → child structural node            ❌
+```
+
+---
+
+# 12. Stack behavior
+
+Stack is the initial generic sequential layout primitive.
+
+The hierarchy level tells us *where* it operates:
+
+```text
+stack_template
+stack_component
+stack_section
+stack_group
+```
+
+The properties tell us *how* it lays out children.
+
+## Vertical
 
 ```json
 {
   "orientation": "vertical",
   "verticalArrangement": {
     "type": "spacedBy",
-    "spacing": 24
+    "spacing": 16
   },
   "horizontalAlignment": "center"
 }
 ```
 
-Conceptual Compose equivalent:
+Conceptual Compose mapping:
 
 ```kotlin
 Column(
-    verticalArrangement = Arrangement.spacedBy(24.dp),
+    verticalArrangement = Arrangement.spacedBy(16.dp),
     horizontalAlignment = Alignment.CenterHorizontally
 )
 ```
 
-### 5.2 Horizontal stack
+## Horizontal
 
 ```json
 {
@@ -274,7 +543,7 @@ Column(
 }
 ```
 
-Conceptual Compose equivalent:
+Conceptual Compose mapping:
 
 ```kotlin
 Row(
@@ -283,9 +552,15 @@ Row(
 )
 ```
 
-### 5.3 Parent versus child responsibility
+The backend contract uses Compose-inspired semantics because they clearly separate orientation, arrangement, alignment and measurement. The backend does not depend on Compose classes.
 
-**Parent container owns relationships between siblings:**
+---
+
+# 13. Parent and child property ownership
+
+This rule prevents contradictory JSON.
+
+## Parent owns sibling relationships
 
 ```text
 orientation
@@ -293,110 +568,146 @@ horizontalArrangement
 verticalArrangement
 horizontalAlignment
 verticalAlignment
-spacing through arrangement
 container padding
 ```
 
-**Child owns its own measurement/appearance:**
+## Child owns itself
 
 ```text
 width
 height
-minWidth / maxWidth
-minHeight / maxHeight
+minWidth
+maxWidth
+minHeight
+maxHeight
 fillMaxWidth
 fillMaxHeight
 fillMaxSize
 weight
 aspectRatio
 offset
+alpha
+zIndex
 background
 border
 shape
-alpha
-zIndex
-optional scoped alignment override
+clip
 ```
 
-Rule:
+## Core rule
 
-> Parent determines how children are normally arranged and aligned. A child describes itself and overrides parent alignment only when the design genuinely requires it.
+> Parent defines the default relationship between children. Child defines its own measurement and appearance. Child-specific alignment is used only when it intentionally overrides the parent policy.
 
-Avoid introducing CSS-style `margin` as a foundational primitive. Prefer parent arrangement, padding, Spacer, weight, size constraints and offset because these map more naturally to Compose layout behavior.
-
-### 5.4 Alignment is not size
-
-For:
-
-```text
-+91 | 98765 43210
-```
-
-we may have:
-
-```text
-country code   wrap/natural width
-separator      fixed thickness/height
-phone input    weight = 1
-```
-
-Whether these children are top/center/bottom aligned is a separate concern from their widths.
+Do not make CSS-style margin a foundational layout mechanism. Prefer parent arrangement, padding, Spacer, weight, constraints and offset.
 
 ---
 
-## 6. Generic leading and trailing accessories
+# 14. Arrangement, alignment and size are independent
 
-### 6.1 Requirement
-
-A leaf may visually need content immediately before or after its primary content:
+Three questions must remain separate:
 
 ```text
-──── PARTNER ────
-+91 |
-Continue →
-₹ 499
-🔍 Search
-Search ×
+1. In which direction are children placed?
+   → orientation
+
+2. How are children distributed/aligned?
+   → arrangement + alignment
+
+3. How much space does each child consume?
+   → width/height/fill/weight/constraints
 ```
 
-Creating dedicated properties such as `leadingIcon`, `trailingDivider`, `prefixText`, `suffixImage`, `countryCode`, etc. would cause uncontrolled contract growth.
+Example:
 
-The generic vocabulary is therefore:
+```text
+horizontal stack
+├── child A: natural width
+├── child B: fixed width
+└── child C: weight 1
+```
+
+All three may still use:
+
+```text
+verticalAlignment = top | center | bottom
+```
+
+Different width does not imply different alignment.
+
+---
+
+# 15. Generic property families
+
+The target contract should type important reusable properties instead of allowing every critical layout value to remain arbitrary JSON.
+
+## Layout
+
+```text
+orientation
+horizontalArrangement
+verticalArrangement
+horizontalAlignment
+verticalAlignment
+padding
+width
+height
+minWidth
+maxWidth
+minHeight
+maxHeight
+fillMaxWidth
+fillMaxHeight
+fillMaxSize
+weight
+aspectRatio
+offset
+```
+
+## Appearance
+
+```text
+background
+border
+shape
+clip
+alpha
+zIndex
+color
+```
+
+## Content-specific examples
+
+```text
+text
+fontSize
+fontWeight
+letterSpacing
+lineHeight
+textAlign
+url
+contentScale
+placeholder
+keyboardType
+maxLength
+thickness
+```
+
+Properties must be validated by the definition/property contract that owns them. A node should not silently accept unrelated properties simply because they are JSON-compatible.
+
+---
+
+# 16. Leading and trailing accessories
+
+Some leaf content needs small visual content immediately before or after its primary content.
+
+Generic mechanism:
 
 ```text
 leading[]
 trailing[]
 ```
 
-### 6.2 Accessories are not structural Elements
-
-An accessory is a lightweight value object carried by an Element's properties. It MUST NOT become a normal hierarchy Element.
-
-This distinction preserves:
-
-```text
-Element = terminal leaf
-```
-
-Conceptually:
-
-```text
-Element
-├── primary content
-├── leading[]   # accessory values
-└── trailing[]  # accessory values
-```
-
-not:
-
-```text
-Element
-└── child Element   # forbidden
-```
-
-### 6.3 Initial accessory vocabulary
-
-The first supported accessory capabilities are intended to be:
+Initial accessory types:
 
 ```text
 text
@@ -405,49 +716,34 @@ image
 divider
 ```
 
-Each accessory contains a `type` and type-appropriate properties. It does not get structural children.
+Accessories are ordered.
 
 Example:
 
 ```json
 {
-  "type": "divider",
-  "properties": {
-    "orientation": "vertical",
-    "height": 24,
-    "thickness": 1,
-    "color": "#D4DEE1"
-  }
-}
-```
-
-### 6.4 `PARTNER` example
-
-```json
-{
-  "id": "brand_partner",
+  "id": "caption",
   "type": "text",
   "properties": {
-    "text": "PARTNER",
+    "text": "FEATURED",
     "leading": [
       {
         "type": "divider",
         "properties": {
           "orientation": "horizontal",
-          "width": 36,
-          "thickness": 2,
-          "color": "#13B8B5"
+          "width": 32,
+          "thickness": 1,
+          "color": "#999999"
         }
       }
     ],
     "trailing": [
       {
-        "type": "divider",
+        "type": "icon",
         "properties": {
-          "orientation": "horizontal",
-          "width": 36,
-          "thickness": 2,
-          "color": "#13B8B5"
+          "name": "arrow_forward",
+          "size": 16,
+          "color": "#999999"
         }
       }
     ]
@@ -455,99 +751,45 @@ Example:
 }
 ```
 
-### 6.5 Phone field example and ownership rule
+## Accessory invariant
 
-The country code and editable phone number are separate Elements. The divider visually extends the country-code Element, so it is its trailing accessory.
+Accessory is a value object, **not a structural Element**.
 
 ```text
-stack_group
-├── text: +91
-│   └── trailing accessory: vertical divider
-└── input: phone number
+Text Element
+├── primary text
+├── leading[] accessory values
+└── trailing[] accessory values
 ```
 
-Correct conceptual JSON:
+It does not create:
 
-```json
-{
-  "id": "mobile_number_group",
-  "type": "stack_group",
-  "properties": {
-    "orientation": "horizontal",
-    "verticalAlignment": "center",
-    "horizontalArrangement": {
-      "type": "spacedBy",
-      "spacing": 12
-    },
-    "fillMaxWidth": true,
-    "height": 56,
-    "padding": {
-      "start": 16,
-      "end": 16
-    },
-    "background": {
-      "color": "#FFFFFF"
-    },
-    "border": {
-      "width": 1,
-      "color": "#CCE0E3"
-    },
-    "shape": {
-      "type": "roundedCorner",
-      "cornerRadius": 16
-    }
-  },
-  "elements": [
-    {
-      "id": "country_code",
-      "type": "text",
-      "properties": {
-        "text": "+91",
-        "fontSize": 18,
-        "fontWeight": 600,
-        "color": "#101522",
-        "trailing": [
-          {
-            "type": "divider",
-            "properties": {
-              "orientation": "vertical",
-              "height": 24,
-              "thickness": 1,
-              "color": "#D4DEE1"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": "mobile_number",
-      "type": "input",
-      "properties": {
-        "fieldId": "mobileNumber",
-        "placeholder": "98765 43210",
-        "keyboardType": "phone",
-        "maxLength": 10,
-        "required": true,
-        "weight": 1
-      }
-    }
-  ]
-}
+```text
+Element
+└── Element
 ```
 
-Rule:
+Accessories must not have structural IDs, Sections, Groups or child Elements.
 
-> Attach a leading/trailing accessory to the Element whose visual content it actually extends. Do not use leading/trailing to hide a real sibling layout relationship.
+## When not to use an accessory
+
+If two items are independent siblings with independent sizing/layout behavior, represent them as separate Elements inside a Group.
+
+```text
+Group
+├── Element A
+└── Element B
+```
+
+Do not hide a real sibling relationship inside `leading[]` or `trailing[]` merely to reduce JSON size.
 
 ---
 
-## 7. Theme and appearance
+# 17. Theme
 
-Theme remains screen-level configuration.
+Theme is optional screen-level visual configuration.
 
-Back navigation MUST NOT be controlled by Theme. If a future screen has a Header component with a back action, that behavior belongs to the Header/component contract.
-
-Target shape:
+Conceptual generic example:
 
 ```json
 {
@@ -558,674 +800,106 @@ Target shape:
       "type": "linearGradient",
       "angle": 135,
       "colors": [
-        { "color": "#DDF8F6", "stop": 0.0 },
-        { "color": "#F7FEFD", "stop": 0.28 },
-        { "color": "#FFFFFF", "stop": 0.55 },
-        { "color": "#D9F7F4", "stop": 1.0 }
+        { "color": "#EAF9F8", "stop": 0.0 },
+        { "color": "#FFFFFF", "stop": 0.5 },
+        { "color": "#E5F7F6", "stop": 1.0 }
       ]
     }
   }
 }
 ```
 
-Colors use direct `#RRGGBB` values in runtime documents. No CarBroz-specific symbolic color token is required by this contract.
+Runtime colors use direct `#RRGGBB` values in this contract.
+
+Theme owns screen visual policy. It must not become a container for unrelated component behavior or business/navigation behavior.
 
 ---
 
-## 8. Initial generic production vocabulary
+# 18. Complete generic JSON example
 
-### Templates
-
-```text
-stack_template
-```
-
-### Components
-
-```text
-stack_component
-```
-
-### Sections
-
-```text
-stack_section
-```
-
-### Groups
-
-```text
-stack_group
-```
-
-### Elements
-
-```text
-text
-image
-icon
-button
-input
-divider
-spacer
-```
-
-This is an initial vocabulary, not a claim that every future layout is a stack. Future genuinely different reusable behaviors such as grid, overlay or carousel may be introduced through the same definition-extension mechanism when a real screen requires them.
-
----
-
-## 9. Proposed contract/property organization
-
-The existing structural schemas remain the authority for hierarchy. The implementation should add typed reusable property schemas rather than continuing to place every new layout concept directly into an unvalidated `Record<string, unknown>`.
-
-Proposed organization:
-
-```text
-sdui/ui-sdk/src/
-├── contract/
-│   ├── common.schema.ts
-│   ├── screen.schema.ts
-│   ├── template.schema.ts
-│   ├── component.schema.ts
-│   ├── section.schema.ts
-│   ├── group.schema.ts
-│   └── element.schema.ts
-│
-├── properties/
-│   ├── layout/
-│   │   ├── orientation.schema.ts
-│   │   ├── arrangement.schema.ts
-│   │   ├── alignment.schema.ts
-│   │   ├── spacing.schema.ts
-│   │   ├── size.schema.ts
-│   │   └── stack-properties.schema.ts
-│   ├── appearance/
-│   │   ├── color.schema.ts
-│   │   ├── background.schema.ts
-│   │   ├── border.schema.ts
-│   │   └── shape.schema.ts
-│   ├── accessory/
-│   │   └── accessory.schema.ts
-│   └── index.ts
-│
-├── definitions/
-│   ├── templates/
-│   ├── components/
-│   ├── sections/
-│   ├── groups/
-│   ├── elements/
-│   └── production-definitions.ts
-│
-├── registry/
-├── builder/
-├── factory/
-├── validator/
-├── serializer/
-├── versioning/
-└── public/
-```
-
-Do not create empty ceremonial folders. This structure is a target organization; create an artifact only when its implementation is required and tested.
-
----
-
-## 10. Proposed artifact responsibilities and call relationships
-
-The exact file split may be adjusted during source-first implementation if an existing artifact already owns the responsibility. No duplicate authority may be introduced.
-
-### 10.1 `orientation.schema.ts`
-
-**Owner:** `sdui/ui-sdk` generic property contract.
-
-**Job:** validate the stack axis (`vertical | horizontal`).
-
-**Called by:** stack property schema and any future generic layout definition that legitimately uses orientation.
-
-**May depend on:** Zod only/shared UI SDK contract primitives.
-
-**Must not know:** Login, Partner, Compose runtime classes, registry persistence.
-
-### 10.2 `arrangement.schema.ts`
-
-**Owner:** `sdui/ui-sdk`.
-
-**Job:** model parent distribution along the main axis, including fixed arrangements and `spacedBy` with explicit spacing.
-
-**Called by:** stack property validation.
-
-**Why separate:** arrangement is a reusable value concept and must not be duplicated in Template/Component/Section/Group definitions.
-
-### 10.3 `alignment.schema.ts`
-
-**Owner:** `sdui/ui-sdk`.
-
-**Job:** validate cross-axis alignment vocabulary and any approved scoped child alignment override.
-
-**Called by:** stack properties and approved child sizing/layout properties.
-
-**Must not:** infer alignment from screen semantics.
-
-### 10.4 `spacing.schema.ts`
-
-**Owner:** `sdui/ui-sdk`.
-
-**Job:** validate edge padding and reusable spacing values.
-
-**Called by:** stack/layout property contracts and appearance contracts where appropriate.
-
-**Must not:** introduce CSS margin semantics as the default layout model.
-
-### 10.5 `size.schema.ts`
-
-**Owner:** `sdui/ui-sdk`.
-
-**Job:** validate generic measurement behavior: width/height constraints, fill behavior, weight and aspect ratio where applicable.
-
-**Called by:** generic structural and leaf property contracts.
-
-**Why:** measurement is independent of parent alignment.
-
-### 10.6 `color.schema.ts`
-
-**Owner:** `sdui/ui-sdk` appearance vocabulary.
-
-**Job:** validate runtime color format, initially direct `#RRGGBB` values.
-
-**Called by:** text, border, background, divider, icon and other appearance contracts.
-
-### 10.7 `background.schema.ts`
-
-**Owner:** `sdui/ui-sdk` appearance vocabulary.
-
-**Job:** validate solid/approved gradient background descriptions.
-
-**Called by:** Theme and generic nodes that support backgrounds.
-
-**Must not:** contain CarBroz screen-specific gradients as defaults.
-
-### 10.8 `border.schema.ts`
-
-**Owner:** `sdui/ui-sdk`.
-
-**Job:** validate generic border width/color configuration.
-
-### 10.9 `shape.schema.ts`
-
-**Owner:** `sdui/ui-sdk`.
-
-**Job:** validate generic shape data such as rounded corners.
-
-### 10.10 `accessory.schema.ts`
-
-**Owner:** `sdui/ui-sdk` leaf-property vocabulary.
-
-**Job:** validate lightweight ordered leading/trailing accessory values.
-
-**Initial accessory types:** text, icon, image, divider.
-
-**Called by:** leaf property schemas that support leading/trailing presentation.
-
-**Critical invariant:** accessories are values, not structural Elements. This schema must never create an `Element -> Element` hierarchy.
-
-### 10.11 `stack-properties.schema.ts`
-
-**Owner:** `sdui/ui-sdk` layout vocabulary.
-
-**Job:** compose orientation, arrangement, alignment, spacing, size and approved appearance primitives into one reusable Stack property contract.
-
-**Called by:** `stack_template`, `stack_component`, `stack_section`, `stack_group` definition registration/validation.
-
-**Why:** one behavior contract prevents four drifting copies.
-
-### 10.12 `stack_template` definition
-
-**Owner:** `sdui/ui-sdk/src/definitions/templates`.
-
-**Job:** instantiate the reusable root Stack behavior and enforce Template → Component.
-
-**Called by:** UI SDK factory/builder/registry definition mechanism when composing a Template instance.
-
-**Must not:** know `partner_login`.
-
-### 10.13 `stack_component` definition
-
-**Owner:** `sdui/ui-sdk/src/definitions/components`.
-
-**Job:** instantiate Stack behavior at Component level while preserving the existing XOR branch invariant: Elements OR Sections.
-
-### 10.14 `stack_section` definition
-
-**Owner:** `sdui/ui-sdk/src/definitions/sections`.
-
-**Job:** instantiate Stack behavior at Section level while preserving Elements OR Groups.
-
-### 10.15 `stack_group` definition
-
-**Owner:** `sdui/ui-sdk/src/definitions/groups`.
-
-**Job:** instantiate Stack behavior at Group level while preserving Group → Element only.
-
-### 10.16 `divider` Element definition
-
-**Owner:** `sdui/ui-sdk/src/definitions/elements`.
-
-**Job:** add a generic terminal divider capability supporting horizontal/vertical orientation, thickness, color and legal size properties.
-
-**Called by:** ordinary Element composition and accessory composition.
-
-**Must not:** become phone-specific.
-
-### 10.17 Existing production definition bootstrap
-
-**Owner:** `sdui/ui-sdk/src/definitions/production-definitions.ts`.
-
-**Job after migration:** register all approved generic Template, Component, Section, Group and Element definitions exactly once/idempotently.
-
-**Called by:** existing UI SDK production bootstrap/import lifecycle.
-
-**Must not:** seed `partner_login` or other screen data.
-
-### 10.18 Structural schemas
-
-Existing Template/Component/Section/Group/Element schemas continue to own structural legality. Property typing is an evolution inside the same SDK, not a replacement hierarchy.
-
-### 10.19 Screen schema / Theme
-
-The screen contract continues to own root fields, target scope, Template ID/type consistency and structural duplicate-ID validation. Theme evolution belongs here or in a reusable Theme property schema consumed here.
-
-`showBackButton` is planned for removal from the canonical Theme contract because navigation UI belongs to a Header/component, not Theme. This is a migration and must be checked against existing published documents/tests before removal.
-
-### 10.20 SDUI Registry package
-
-**Owner:** `sdui/registry`.
-
-**Job:** persistence, draft/publish/archive/version lifecycle and published-screen retrieval.
-
-**Called by:** application/API composition through its existing public boundary.
-
-**Depends on:** the public/validated UI SDK contract as already permitted by architecture.
-
-**Must not:** redefine stack properties, Element types or structural schemas.
-
-### 10.21 Partner Login runtime document
-
-**Owner:** runtime SDUI content managed through Registry publication.
-
-**Job:** configure generic definitions into the Partner Login screen.
-
-**Must not be stored as:** a new generic SDK type/class.
-
----
-
-## 11. Definition registration flow
-
-Target conceptual flow:
-
-```text
-Application bootstrap/import
-        ↓
-registerProductionSduiDefinitions()
-        ↓
-register Element definitions
-        ↓
-register Group definitions
-        ↓
-register Section definitions
-        ↓
-register Component definitions
-        ↓
-register Template definitions
-        ↓
-Definition registries contain canonical reusable vocabulary
-```
-
-Registration remains idempotent.
-
-When a runtime document references:
-
-```json
-{ "type": "stack_group" }
-```
-
-the existing definition/factory/builder mechanism resolves that generic type. Screen-specific code is not selected.
-
----
-
-## 12. Runtime screen lifecycle
-
-The runtime lifecycle remains conceptually:
-
-```text
-Admin/content authoring
-        ↓
-DRAFT screen document
-        ↓
-UI SDK contract validation
-        ↓
-Registry persistence/versioning
-        ↓
-PUBLISH
-        ↓
-Published screen selected by screenId + targetApp
-        ↓
-Stored layout JSON parsed again through canonical UI SDK schema
-        ↓
-Validated SDUI screen returned through API boundary
-```
-
-Publishing must never allow invalid hierarchy/property data to become trusted runtime content.
-
----
-
-## 13. Action boundary
-
-SDUI describes an action; it does not own the business behavior executed by that action.
-
-Conceptually:
+This example intentionally demonstrates all three legal branches without representing any real product screen.
 
 ```json
 {
-  "actions": {
-    "onClick": {
-      "type": "request",
-      "payload": {
-        "method": "POST",
-        "endpoint": "/api/v1/partner/auth_login"
-      }
-    }
-  }
-}
-```
-
-The generic UI SDK may validate the action description. Authentication behavior remains owned by the Identity/Auth bounded context. The final action payload and endpoint must be verified against the actual auth contract before the Login document is published.
-
-Do not create authentication logic inside SDUI definitions.
-
----
-
-## 14. Partner Login proving composition
-
-The Login screen is the first production proof of the generic language, not the owner of the language.
-
-Target structure:
-
-```text
-partner_login
-└── stack_template
-    ├── stack_component
-    │   ├── image: brand logo
-    │   ├── text: CarBroz
-    │   ├── text: PARTNER
-    │   │   ├── leading accessory: horizontal divider
-    │   │   └── trailing accessory: horizontal divider
-    │   ├── text: tagline
-    │   ├── text: Welcome Partner!
-    │   └── text: Login to continue your journey
-    │
-    ├── stack_component
-    │   └── stack_section(s)
-    │       ├── stack_group: mobile field container
-    │       │   ├── text: +91
-    │       │   │   └── trailing accessory: vertical divider
-    │       │   └── input: mobile number (weight 1)
-    │       ├── button: Continue
-    │       │   └── trailing accessory: arrow icon
-    │       └── text: Terms / Privacy rich text
-    │
-    └── stack_component
-        └── image: car hero
-```
-
-The exact number of Sections must follow legal hierarchy and genuine layout boundaries. Do not add structural nodes only to make the tree visually symmetrical.
-
----
-
-## 15. Partner Login contract draft
-
-The following is a **design draft**, not yet guaranteed to parse against the current production schema. It intentionally uses target vocabulary that implementation will add/validate. Asset URLs, legal URLs, schema version and final auth action payload remain integration values to resolve before publication.
-
-```json
-{
-  "screenId": "partner_login",
-  "templateId": "partner_login_template",
+  "screenId": "sample_dynamic_screen",
+  "templateId": "sample_dynamic_template",
   "templateType": "stack_template",
-  "schemaVersion": "1.0",
+  "schemaVersion": "<version>",
   "targetApp": "PARTNER",
   "theme": {
     "theme": "light",
     "statusBar": "transparent",
     "properties": {
       "background": {
-        "type": "linearGradient",
-        "angle": 135,
-        "colors": [
-          { "color": "#DDF8F6", "stop": 0.0 },
-          { "color": "#F7FEFD", "stop": 0.28 },
-          { "color": "#FFFFFF", "stop": 0.55 },
-          { "color": "#D9F7F4", "stop": 1.0 }
-        ]
+        "color": "#FFFFFF"
       }
     }
   },
   "template": {
-    "id": "partner_login_template",
+    "id": "sample_dynamic_template",
     "type": "stack_template",
     "properties": {
       "orientation": "vertical",
       "verticalArrangement": {
         "type": "spacedBy",
-        "spacing": 24
+        "spacing": 20
       },
       "horizontalAlignment": "center",
       "fillMaxSize": true,
       "padding": {
         "start": 24,
-        "top": 20,
+        "top": 24,
         "end": 24,
-        "bottom": 20
+        "bottom": 24
       }
     },
     "components": [
       {
-        "id": "login_header",
+        "id": "direct_leaf_component",
         "type": "stack_component",
         "properties": {
           "orientation": "vertical",
           "verticalArrangement": {
             "type": "spacedBy",
-            "spacing": 6
+            "spacing": 8
           },
           "horizontalAlignment": "center",
           "fillMaxWidth": true
         },
         "elements": [
           {
-            "id": "brand_logo",
+            "id": "sample_title",
+            "type": "text",
+            "properties": {
+              "text": "Dynamic UI",
+              "fontSize": 24,
+              "fontWeight": 700,
+              "color": "#111111",
+              "textAlign": "center"
+            }
+          },
+          {
+            "id": "sample_image",
             "type": "image",
             "properties": {
-              "url": "<brand-logo-url>",
-              "width": 120,
+              "url": "https://example.com/image.png",
+              "width": 96,
               "height": 96,
               "contentScale": "fit"
-            }
-          },
-          {
-            "id": "brand_name",
-            "type": "text",
-            "properties": {
-              "fontSize": 44,
-              "fontWeight": 700,
-              "textAlign": "center",
-              "spans": [
-                { "text": "Car", "color": "#101522" },
-                { "text": "Broz", "color": "#13B8B5" }
-              ]
-            }
-          },
-          {
-            "id": "brand_partner",
-            "type": "text",
-            "properties": {
-              "text": "PARTNER",
-              "fontSize": 18,
-              "fontWeight": 600,
-              "letterSpacing": 4,
-              "color": "#13B8B5",
-              "textAlign": "center",
-              "leading": [
-                {
-                  "type": "divider",
-                  "properties": {
-                    "orientation": "horizontal",
-                    "width": 36,
-                    "thickness": 2,
-                    "color": "#13B8B5"
-                  }
-                }
-              ],
-              "trailing": [
-                {
-                  "type": "divider",
-                  "properties": {
-                    "orientation": "horizontal",
-                    "width": 36,
-                    "thickness": 2,
-                    "color": "#13B8B5"
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "id": "brand_tagline",
-            "type": "text",
-            "properties": {
-              "text": "Premium Car Care At Your Doorstep",
-              "fontSize": 14,
-              "fontWeight": 400,
-              "color": "#6B7078",
-              "textAlign": "center"
-            }
-          },
-          {
-            "id": "welcome_title",
-            "type": "text",
-            "properties": {
-              "fontSize": 32,
-              "fontWeight": 700,
-              "textAlign": "center",
-              "spans": [
-                { "text": "Welcome ", "color": "#101522" },
-                { "text": "Partner!", "color": "#13B8B5" }
-              ]
-            }
-          },
-          {
-            "id": "welcome_subtitle",
-            "type": "text",
-            "properties": {
-              "text": "Login to continue your journey",
-              "fontSize": 16,
-              "fontWeight": 400,
-              "color": "#6B7078",
-              "textAlign": "center"
             }
           }
         ]
       },
       {
-        "id": "login_content",
+        "id": "section_component",
         "type": "stack_component",
         "properties": {
           "orientation": "vertical",
-          "verticalArrangement": {
-            "type": "spacedBy",
-            "spacing": 14
-          },
-          "horizontalAlignment": "center",
           "fillMaxWidth": true
         },
         "sections": [
           {
-            "id": "mobile_number_section",
-            "type": "stack_section",
-            "properties": {
-              "orientation": "vertical",
-              "fillMaxWidth": true
-            },
-            "groups": [
-              {
-                "id": "mobile_number_group",
-                "type": "stack_group",
-                "properties": {
-                  "orientation": "horizontal",
-                  "verticalAlignment": "center",
-                  "horizontalArrangement": {
-                    "type": "spacedBy",
-                    "spacing": 12
-                  },
-                  "fillMaxWidth": true,
-                  "height": 56,
-                  "padding": {
-                    "start": 16,
-                    "end": 16
-                  },
-                  "background": {
-                    "color": "#FFFFFF"
-                  },
-                  "border": {
-                    "width": 1,
-                    "color": "#CCE0E3"
-                  },
-                  "shape": {
-                    "type": "roundedCorner",
-                    "cornerRadius": 16
-                  }
-                },
-                "elements": [
-                  {
-                    "id": "country_code",
-                    "type": "text",
-                    "properties": {
-                      "text": "+91",
-                      "fontSize": 18,
-                      "fontWeight": 600,
-                      "color": "#101522",
-                      "trailing": [
-                        {
-                          "type": "divider",
-                          "properties": {
-                            "orientation": "vertical",
-                            "height": 24,
-                            "thickness": 1,
-                            "color": "#D4DEE1"
-                          }
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "id": "mobile_number",
-                    "type": "input",
-                    "properties": {
-                      "fieldId": "mobileNumber",
-                      "placeholder": "98765 43210",
-                      "keyboardType": "phone",
-                      "maxLength": 10,
-                      "required": true,
-                      "weight": 1
-                    },
-                    "validation": {
-                      "pattern": "^[6-9][0-9]{9}$",
-                      "message": "Enter a valid 10-digit mobile number"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "id": "login_action_section",
+            "id": "direct_leaf_section",
             "type": "stack_section",
             "properties": {
               "orientation": "vertical",
@@ -1233,124 +907,91 @@ The following is a **design draft**, not yet guaranteed to parse against the cur
                 "type": "spacedBy",
                 "spacing": 12
               },
-              "horizontalAlignment": "center",
               "fillMaxWidth": true
             },
             "elements": [
               {
-                "id": "continue_button",
+                "id": "sample_input",
+                "type": "input",
+                "properties": {
+                  "fieldId": "sampleValue",
+                  "placeholder": "Enter value",
+                  "fillMaxWidth": true
+                }
+              },
+              {
+                "id": "sample_button",
                 "type": "button",
                 "properties": {
                   "text": "Continue",
                   "fillMaxWidth": true,
-                  "height": 56,
-                  "shape": {
-                    "type": "roundedCorner",
-                    "cornerRadius": 16
-                  },
-                  "fontSize": 18,
-                  "fontWeight": 600,
-                  "textColor": "#FFFFFF",
-                  "background": {
-                    "type": "linearGradient",
-                    "angle": 90,
-                    "colors": [
-                      { "color": "#28CBC7", "stop": 0.0 },
-                      { "color": "#10B6B3", "stop": 1.0 }
-                    ]
-                  },
                   "trailing": [
                     {
                       "type": "icon",
                       "properties": {
                         "name": "arrow_forward",
-                        "size": 22,
+                        "size": 18,
                         "color": "#FFFFFF"
                       }
                     }
                   ]
-                },
-                "actions": {
-                  "onClick": {
-                    "type": "request",
-                    "payload": {
-                      "method": "POST",
-                      "endpoint": "/api/v1/partner/auth_login",
-                      "authentication": "NONE",
-                      "validateForm": true
-                    }
-                  }
-                }
-              },
-              {
-                "id": "legal_text",
-                "type": "text",
-                "properties": {
-                  "fillMaxWidth": true,
-                  "fontSize": 13,
-                  "fontWeight": 400,
-                  "lineHeight": 19,
-                  "textAlign": "center",
-                  "spans": [
-                    {
-                      "text": "By continuing, you agree to our ",
-                      "color": "#6B7078"
-                    },
-                    {
-                      "text": "Terms & Conditions",
-                      "color": "#13B8B5",
-                      "textDecoration": "underline",
-                      "actionId": "terms"
-                    },
-                    {
-                      "text": " and ",
-                      "color": "#6B7078"
-                    },
-                    {
-                      "text": "Privacy Policy",
-                      "color": "#13B8B5",
-                      "textDecoration": "underline",
-                      "actionId": "privacy"
-                    }
-                  ]
-                },
-                "actions": {
-                  "terms": {
-                    "type": "openUrl",
-                    "payload": {
-                      "url": "<terms-url>"
-                    }
-                  },
-                  "privacy": {
-                    "type": "openUrl",
-                    "payload": {
-                      "url": "<privacy-policy-url>"
-                    }
-                  }
                 }
               }
             ]
-          }
-        ]
-      },
-      {
-        "id": "login_hero",
-        "type": "stack_component",
-        "properties": {
-          "orientation": "vertical",
-          "horizontalAlignment": "center",
-          "fillMaxWidth": true
-        },
-        "elements": [
+          },
           {
-            "id": "login_car",
-            "type": "image",
+            "id": "group_section",
+            "type": "stack_section",
             "properties": {
-              "url": "<car-image-url>",
-              "fillMaxWidth": true,
-              "maxWidth": 420,
-              "contentScale": "fit"
-            }
+              "orientation": "vertical",
+              "fillMaxWidth": true
+            },
+            "groups": [
+              {
+                "id": "sample_horizontal_group",
+                "type": "stack_group",
+                "properties": {
+                  "orientation": "horizontal",
+                  "horizontalArrangement": {
+                    "type": "spacedBy",
+                    "spacing": 12
+                  },
+                  "verticalAlignment": "center",
+                  "fillMaxWidth": true
+                },
+                "elements": [
+                  {
+                    "id": "sample_icon",
+                    "type": "icon",
+                    "properties": {
+                      "name": "info",
+                      "size": 20,
+                      "color": "#444444"
+                    }
+                  },
+                  {
+                    "id": "sample_description",
+                    "type": "text",
+                    "properties": {
+                      "text": "Example grouped content",
+                      "weight": 1,
+                      "fontSize": 14,
+                      "color": "#444444"
+                    }
+                  },
+                  {
+                    "id": "sample_divider",
+                    "type": "divider",
+                    "properties": {
+                      "orientation": "vertical",
+                      "height": 24,
+                      "thickness": 1,
+                      "color": "#DDDDDD"
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -1359,326 +1000,949 @@ The following is a **design draft**, not yet guaranteed to parse against the cur
 }
 ```
 
----
-
-## 16. Migration strategy for existing production vocabulary
-
-Current production vocabulary may already include definitions such as `default_template`, `form_template`, `content_component`, `form_component`, `content_section`, `row_group` and `column_group`.
-
-The implementation MUST first discover whether any persisted/published runtime screen, test, seed or consumer still references these types.
-
-Then choose one of two safe paths:
-
-### Path A — no live dependency
-
-If source and persistence evidence prove the old types are not consumed, replace them with the stack vocabulary and update tests atomically.
-
-### Path B — compatibility required
-
-If published/runtime data still references old types, do not break retrieval. Introduce stack definitions, define an explicit compatibility/deprecation period, migrate persisted documents, prove migration, then remove legacy definitions in a later controlled change.
-
-Never leave duplicate vocabularies indefinitely without an explicit compatibility reason.
-
----
-
-## 17. Implementation phases
-
-### Phase 0 — source and persistence impact audit
-
-Before editing:
-
-1. re-fetch `development` and record HEAD;
-2. inspect current UI SDK contracts, registries, factories, builders, validators, serializers and tests;
-3. inspect Registry public lifecycle and persistence model;
-4. search all source/tests/seeds for old production type usage;
-5. determine whether published data requires compatibility;
-6. inspect the real Identity/Auth action contract before freezing Login action payload;
-7. inspect schema-version policy before freezing `schemaVersion`;
-8. document any discovered conflict before changing code.
-
-No frontend inspection is required for this backend contract phase unless separately authorized.
-
-### Phase 1 — generic property vocabulary
-
-Implement and test reusable property schemas for:
-
-- orientation;
-- arrangement;
-- alignment;
-- spacing/padding;
-- size/weight/fill constraints;
-- color;
-- background/gradient;
-- border;
-- shape;
-- accessory.
-
-Do not bind these contracts to Login or Partner.
-
-### Phase 2 — Stack definitions
-
-Introduce `stack_template`, `stack_component`, `stack_section`, `stack_group` through the existing definition registries.
-
-Preserve all hierarchy invariants.
-
-### Phase 3 — leaf capability evolution
-
-Add generic `divider` Element and typed properties required by Text/Image/Input/Button/Divider/Spacer.
-
-Add ordered `leading[]` / `trailing[]` accessory support where valid.
-
-### Phase 4 — Theme evolution
-
-Add typed background/gradient support to Theme. Audit and remove/deprecate `showBackButton` only after compatibility proof.
-
-### Phase 5 — production definition migration
-
-Update canonical production definition registration. Migrate old definition names according to the Phase 0 result; do not silently break persisted documents.
-
-### Phase 6 — Partner Login composition
-
-Create the actual runtime document through the Registry lifecycle, using only generic production types. Resolve real asset URLs, legal URLs, schema version and auth action contract.
-
-### Phase 7 — runtime/API integration proof
-
-Prove:
+This example demonstrates:
 
 ```text
-published PARTNER partner_login
-        ↓
-registry retrieval with targetApp=PARTNER
-        ↓
-canonical parse/validation
-        ↓
-expected serialized SDUI document
+Template → Component → Element
+Template → Component → Section → Element
+Template → Component → Section → Group → Element
 ```
 
-Also verify that Partner retrieval cannot silently default to CUSTOMER.
-
-### Phase 8 — freeze verification
-
-Run focused tests, package tests/typecheck/lint/build as available, architecture gates and finally the repository freeze command.
-
-No "complete" claim is permitted until all applicable gates pass.
+in one document while preserving the XOR rule at each branching level.
 
 ---
 
-## 18. Required test matrix
-
-### Structural positive tests
-
-- Stack Template accepts one or more Components.
-- Stack Component accepts direct Elements.
-- Stack Component accepts Sections.
-- Stack Section accepts direct Elements.
-- Stack Section accepts Groups.
-- Stack Group accepts Elements.
-- Partner Login draft parses once all target contracts are implemented.
-
-### Structural negative tests
-
-- Template without Component fails.
-- Component with both Elements and Sections fails.
-- Empty Component fails.
-- Section with both Elements and Groups fails.
-- Empty Section fails.
-- Empty Group fails.
-- Group containing structural children is impossible/rejected.
-- Element structural children are impossible/rejected.
-- duplicate structural IDs fail.
-- Template root ID mismatch fails.
-- Template root type mismatch fails.
-
-### Layout property tests
-
-- valid vertical/horizontal orientation passes;
-- unknown orientation fails;
-- valid main-axis arrangements pass;
-- `spacedBy` requires valid spacing;
-- invalid alignment fails;
-- invalid negative/unsupported measurement values fail where prohibited;
-- weight contract is validated;
-- padding contract is validated.
-
-### Appearance tests
-
-- valid `#RRGGBB` color passes;
-- malformed color fails;
-- valid solid background passes;
-- valid linear gradient passes;
-- invalid gradient stops/shape fail according to frozen schema;
-- border/shape contracts reject malformed values.
-
-### Accessory tests
-
-- Text can carry valid divider leading/trailing accessories when its property schema allows them;
-- Button can carry a trailing icon accessory;
-- accessory ordering is preserved;
-- unsupported accessory type fails;
-- accessory cannot contain structural children;
-- nested accessory recursion is rejected;
-- accessory does not participate as a structural Element ID.
-
-### Divider tests
-
-- horizontal divider passes;
-- vertical divider passes;
-- invalid orientation fails;
-- invalid thickness/color fails.
-
-### Theme tests
-
-- light/dark values pass;
-- transparent/default status bar passes;
-- approved gradient background passes;
-- back-button UI is not part of the final Theme contract after compatibility migration.
-
-### Target and registry tests
-
-- `PARTNER` Login publication/retrieval succeeds;
-- `CUSTOMER` does not accidentally resolve Partner Login;
-- `ADMIN` is rejected as an SDUI rendering target;
-- invalid draft cannot publish;
-- published JSON is parsed through the canonical UI SDK before return;
-- historical/published compatibility is proved if legacy definitions are retained temporarily.
-
-### Regression tests
-
-Permanent regression coverage must protect every production defect discovered during implementation, especially target-app defaulting, hierarchy bypasses and legacy definition migration.
-
----
-
-## 19. Verification commands
-
-Exact focused commands MUST be updated after Phase 0 discovers the final test files. Documentation must not invent file names that do not exist yet.
-
-At minimum the completed implementation documentation must provide:
+# 19. End-to-end lifecycle
 
 ```text
-pnpm exec vitest run <each SDUI focused test file>
-pnpm --filter <ui-sdk-package-name> test
-pnpm --filter <ui-sdk-package-name> typecheck
-pnpm --filter <ui-sdk-package-name> lint
-pnpm --filter <ui-sdk-package-name> build
+┌────────────────────────────┐
+│ 1. Reusable type exists?   │
+└──────────────┬─────────────┘
+               │
+        yes ───┴─── no
+         │            │
+         │            ▼
+         │   Add generic definition
+         │   + property contract
+         │   + tests
+         │            │
+         └────────────┘
+               │
+               ▼
+┌────────────────────────────┐
+│ 2. Compose runtime JSON    │
+└──────────────┬─────────────┘
+               ▼
+┌────────────────────────────┐
+│ 3. Structural validation  │
+└──────────────┬─────────────┘
+               ▼
+┌────────────────────────────┐
+│ 4. Definition/property    │
+│    validation             │
+└──────────────┬─────────────┘
+               ▼
+┌────────────────────────────┐
+│ 5. Store as DRAFT         │
+└──────────────┬─────────────┘
+               ▼
+┌────────────────────────────┐
+│ 6. Validate for publish   │
+└──────────────┬─────────────┘
+               ▼
+┌────────────────────────────┐
+│ 7. PUBLISH version        │
+└──────────────┬─────────────┘
+               ▼
+┌────────────────────────────┐
+│ 8. Runtime retrieval      │
+│ screenId + targetApp      │
+└──────────────┬─────────────┘
+               ▼
+┌────────────────────────────┐
+│ 9. Parse again through    │
+│    canonical SDK schema   │
+└──────────────┬─────────────┘
+               ▼
+┌────────────────────────────┐
+│10. Serialize trusted JSON │
+└──────────────┬─────────────┘
+               ▼
+┌────────────────────────────┐
+│11. Client interprets UI   │
+└────────────────────────────┘
+```
+
+A persisted document is not trusted merely because it was valid when originally stored. Runtime retrieval must continue to respect canonical schema/version policy.
+
+---
+
+# 20. Definition registration flow
+
+Reusable types are registered once through the existing definition system.
+
+```text
+registerProductionSduiDefinitions()
+        │
+        ├── register Element definitions
+        │      text / image / icon / button / input / divider / spacer
+        │
+        ├── register Group definitions
+        │      stack_group
+        │
+        ├── register Section definitions
+        │      stack_section
+        │
+        ├── register Component definitions
+        │      stack_component
+        │
+        └── register Template definitions
+               stack_template
+```
+
+Registration must remain idempotent.
+
+The production definition bootstrap registers reusable language only. It must not register runtime screen documents.
+
+---
+
+# 21. Proposed property contract classes/files
+
+The exact split must be reconciled against existing source before implementation. Do not create a duplicate if an existing artifact already owns the responsibility.
+
+Target organization:
+
+```text
+sdui/ui-sdk/src/properties/
+├── layout/
+│   ├── orientation.schema.ts
+│   ├── arrangement.schema.ts
+│   ├── alignment.schema.ts
+│   ├── spacing.schema.ts
+│   ├── size.schema.ts
+│   └── stack-properties.schema.ts
+│
+├── appearance/
+│   ├── color.schema.ts
+│   ├── background.schema.ts
+│   ├── border.schema.ts
+│   └── shape.schema.ts
+│
+├── accessory/
+│   └── accessory.schema.ts
+│
+└── index.ts
+```
+
+Do not create empty folders merely to match this diagram.
+
+---
+
+# 22. Class/file responsibility matrix
+
+| Artifact | Owns | Called/consumed by | Must not own |
+|---|---|---|---|
+| `common.schema.ts` | shared primitive contract vocabulary | structural schemas/property schemas | feature behavior |
+| `screen.schema.ts` | root Screen shape, root invariants, target/theme linkage | parser/validator/public contract | persistence |
+| `template.schema.ts` | Template structural shape | screen schema, builders | runtime storage |
+| `component.schema.ts` | Component shape and Elements XOR Sections | template schema/builders | Group direct ownership |
+| `section.schema.ts` | Section shape and Elements XOR Groups | component schema/builders | business semantics |
+| `group.schema.ts` | Group → Elements-only shape | section schema/builders | nested structural containers |
+| `element.schema.ts` | terminal Element envelope | group/section/component schemas | structural children |
+| `orientation.schema.ts` | vertical/horizontal axis | stack properties | screen-specific behavior |
+| `arrangement.schema.ts` | main-axis distribution/spacedBy | stack properties | measurement |
+| `alignment.schema.ts` | cross-axis alignment | stack properties/layout contracts | business meaning |
+| `spacing.schema.ts` | padding/spacing value shapes | layout contracts | CSS layout model |
+| `size.schema.ts` | width/height/fill/constraints/weight | structural and leaf property contracts | sibling arrangement |
+| `color.schema.ts` | runtime color format | appearance/text/icon/divider contracts | theme business policy |
+| `background.schema.ts` | solid/gradient background shape | Theme and supported nodes | hardcoded screen background |
+| `border.schema.ts` | generic border shape | supported nodes | component semantics |
+| `shape.schema.ts` | generic shape/corner configuration | supported nodes | renderer implementation |
+| `accessory.schema.ts` | ordered lightweight leading/trailing values | supported leaf properties | structural Element hierarchy |
+| `stack-properties.schema.ts` | reusable Stack property composition | all `stack_*` definitions | hierarchy ownership |
+| Template definition registry | available Template behaviors | factory/builder/validation composition | runtime screens |
+| Component definition registry | available Component behaviors | factory/builder/validation composition | runtime screens |
+| Section definition registry | available Section behaviors | factory/builder/validation composition | runtime screens |
+| Group definition registry | available Group behaviors | factory/builder/validation composition | runtime screens |
+| Element definition registry | available terminal behaviors | factory/builder/validation composition | business logic |
+| `production-definitions.ts` | canonical reusable production registration | SDK bootstrap | runtime document data |
+| builder layer | safe programmatic construction | SDK consumers/factory as designed | persistence authority |
+| factory layer | definition-driven creation | builder/composition boundary | business decisions |
+| validator layer | orchestration of contract/definition validation | draft/publish/runtime boundaries | mutation of valid data |
+| serializer layer | trusted output serialization | runtime/public boundary | validation bypass |
+| versioning layer | compatibility/schema policy | parser/publish/runtime | screen semantics |
+| `sdui/registry` | draft/publish/archive/version/persistence/retrieval | application/API boundary | definition language |
+
+Every production class/function introduced during implementation must also receive TSDoc describing owner, role, callers, dependencies, non-responsibilities and invariants according to the engineering documentation standard.
+
+---
+
+# 23. Call relationship diagram
+
+```text
+                         UI SDK bootstrap
+                               │
+                               ▼
+                  Production Definition Registrar
+                               │
+             ┌─────────────────┼─────────────────┐
+             ▼                 ▼                 ▼
+      Definition Registries  Property Schemas  Structural Schemas
+             │                 │                 │
+             └──────────┬──────┴──────────┬──────┘
+                        │                 │
+                        ▼                 ▼
+                      Factory          Validator
+                        │                 ▲
+                        ▼                 │
+                      Builder ────────────┘
+                        │
+                        ▼
+                 Valid SDUI document
+                        │
+                        ▼
+                  Runtime Registry
+              draft/version/publish/store
+                        │
+                        ▼
+                Retrieval application
+                        │
+                        ▼
+                Canonical parse/validate
+                        │
+                        ▼
+                    Serializer
+                        │
+                        ▼
+                     API output
+```
+
+Actual source dependencies must follow the Master Constitution. This diagram describes responsibilities, not permission to introduce dependency cycles.
+
+---
+
+# 24. How to add a new Template type
+
+Use this process only when an existing Template behavior cannot express the required root composition.
+
+```text
+Requirement
+   ↓
+Can stack_template express it using properties?
+   ├── YES → do not create a new Template type
+   └── NO
+       ↓
+Identify genuinely different reusable layout behavior
+       ↓
+Define typed properties
+       ↓
+Create Template definition
+       ↓
+Register through Template definition registry
+       ↓
+Add positive + negative tests
+       ↓
+Update public documentation
+```
+
+Example future categories might include genuinely different behaviors such as grid or overlay. They must not be added speculatively.
+
+Checklist:
+
+```text
+[ ] reusable across more than one potential screen
+[ ] cannot be represented by existing behavior + properties
+[ ] generic name
+[ ] no feature/business terminology
+[ ] typed properties
+[ ] legal Template → Component structure
+[ ] registration test
+[ ] validation tests
+[ ] migration/version impact reviewed
+[ ] documentation updated
+```
+
+---
+
+# 25. How to add a new Component type
+
+```text
+Need new Component behavior
+   ↓
+Can stack_component + properties express it?
+   ├── YES → configure existing type
+   └── NO → define reusable Component behavior
+               ↓
+          property contract
+               ↓
+          definition registration
+               ↓
+          preserve Elements XOR Sections
+               ↓
+          tests + docs
+```
+
+Never create a Component type because one screen calls the area by a particular business name.
+
+---
+
+# 26. How to add a new Section type
+
+A new Section type requires a genuinely new reusable nested composition behavior.
+
+It must always preserve:
+
+```text
+Section → elements[]
+OR
+Section → groups[]
+```
+
+Never both.
+
+The same source-first, typed-property, registration, test and documentation process applies.
+
+---
+
+# 27. How to add a new Group type
+
+Group is a local Element container.
+
+A new Group type must preserve:
+
+```text
+Group → elements[] only
+```
+
+If Stack plus orientation/arrangement/alignment can express the requirement, reuse `stack_group`.
+
+Do not create `left_group`, `right_group`, `top_group`, `bottom_group`, `vertical_group`, or `horizontal_group` merely to encode configuration in a type name.
+
+---
+
+# 28. How to add a new Element type
+
+Create a new Element only for a genuinely new terminal visual/interactive capability.
+
+Process:
+
+```text
+Need leaf behavior
+   ↓
+Can existing Element + properties/accessories express it?
+   ├── YES → reuse existing Element
+   └── NO
+       ↓
+Define generic Element contract
+       ↓
+Define type-specific properties
+       ↓
+Register Element definition
+       ↓
+Prove terminal invariant
+       ↓
+Positive/negative tests
+       ↓
+Document renderer expectation without coupling backend to renderer
+```
+
+Element must never introduce structural children.
+
+---
+
+# 29. How to add or change a property
+
+Properties are part of the public SDUI contract and must be treated as versioned API vocabulary.
+
+## Additive compatible property
+
+Typical safe path:
+
+```text
+new optional property
+   ↓
+add typed schema
+   ↓
+add to owning property contract
+   ↓
+register/compose through existing definition
+   ↓
+positive + negative tests
+   ↓
+compatibility review
+   ↓
+document
+```
+
+## Required property
+
+Changing an optional property to required may break persisted documents and clients. Treat as a compatibility change, not a small refactor.
+
+## Rename property
+
+Do not simply rename in place if published documents may contain the old name.
+
+```text
+old property
+   ↓
+introduce new property/version policy
+   ↓
+compatibility/migration path
+   ↓
+migrate persisted documents
+   ↓
+prove old usage removed
+   ↓
+remove deprecated vocabulary later
+```
+
+## Delete property
+
+Deletion requires proof that:
+
+- no supported schema version needs it;
+- no published/persisted document needs it;
+- no public consumer depends on it;
+- migration is complete;
+- regression tests protect the new contract.
+
+---
+
+# 30. How to update an existing definition
+
+A definition change may alter every runtime document using that type.
+
+Required sequence:
+
+```text
+1. Search source references
+2. Search tests/seeds/fixtures
+3. Determine persisted/published usage
+4. Classify change:
+      additive compatible
+      behavior-compatible
+      breaking
+5. Update typed contract
+6. Update definition
+7. Add/update focused tests
+8. Validate representative documents
+9. Run package verification
+10. Run freeze verification
+11. Update this guide/README/TSDoc
+```
+
+Never change a definition merely until one sample JSON passes.
+
+---
+
+# 31. How to deprecate or delete a definition
+
+Deletion is a lifecycle operation.
+
+```text
+Definition marked for removal
+          ↓
+Find every source/test/runtime reference
+          ↓
+Any supported runtime document uses it?
+   ├── YES → cannot remove
+   │          migrate/version first
+   └── NO
+          ↓
+Remove registration
+          ↓
+Remove implementation
+          ↓
+Keep regression proving unsupported type is rejected
+          ↓
+Run full verification
+```
+
+Do not leave old and new definitions indefinitely as duplicate authorities. Compatibility aliases require an explicit migration purpose and removal plan.
+
+---
+
+# 32. Runtime document CRUD versus definition CRUD
+
+These are different operations and must never be confused.
+
+## Runtime document lifecycle
+
+Owned by `sdui/registry`:
+
+```text
+CREATE draft
+UPDATE draft
+VALIDATE draft
+PUBLISH version
+ARCHIVE version
+RETRIEVE published version
+```
+
+A published immutable/versioned artifact should not be silently mutated in place; follow the Registry's version lifecycle.
+
+## Definition lifecycle
+
+Owned by `sdui/ui-sdk` code:
+
+```text
+ADD reusable definition
+UPDATE definition with compatibility review
+DEPRECATE definition
+REMOVE definition after migration proof
+```
+
+Runtime admin operations must not dynamically redefine the meaning of core SDK types unless a separately approved architecture explicitly introduces that capability.
+
+---
+
+# 33. Validation layers
+
+Validation should answer progressively deeper questions.
+
+```text
+Layer 1 — JSON/structural
+Is the document shaped correctly?
+
+Layer 2 — hierarchy
+Are only legal parent/child relationships used?
+
+Layer 3 — definition
+Does each `type` exist at the correct hierarchy level?
+
+Layer 4 — property
+Are properties valid for that type?
+
+Layer 5 — invariant
+Are IDs unique? Do template ID/type match root references?
+
+Layer 6 — version/target
+Is the schema version supported and target valid?
+
+Layer 7 — publication
+Is this document safe to become a published runtime artifact?
+```
+
+Validation must reject invalid input; it should not silently reinterpret malformed contracts into a different UI.
+
+---
+
+# 34. Error philosophy
+
+Errors should identify:
+
+```text
+WHAT failed
+WHERE it failed
+WHY it is invalid
+WHICH invariant was violated
+```
+
+Useful conceptual error:
+
+```text
+component 'content_area': cannot contain both elements[] and sections[]
+```
+
+Poor error:
+
+```text
+invalid json
+```
+
+Do not expose sensitive implementation details through public API errors, but internal validation must remain diagnosable.
+
+---
+
+# 35. Versioning and compatibility
+
+SDUI is a distributed contract. Backend and multiple client versions may coexist.
+
+Therefore:
+
+```text
+schema change != local refactor
+```
+
+Every change must be classified:
+
+```text
+compatible additive
+compatible behavioral
+breaking structural
+breaking semantic
+```
+
+Breaking changes require an explicit schema/version and migration strategy consistent with the existing versioning architecture.
+
+Never guess a new `schemaVersion` merely because a file changed.
+
+---
+
+# 36. Initial implementation target
+
+The first implementation phase should establish generic vocabulary only:
+
+```text
+stack_template
+stack_component
+stack_section
+stack_group
+
+text
+image
+icon
+button
+input
+divider
+spacer
+
+orientation
+arrangement
+alignment
+spacing
+size
+background
+border
+shape
+color
+leading[]
+trailing[]
+```
+
+No product-specific document is required to define these capabilities.
+
+---
+
+# 37. Existing vocabulary migration rule
+
+If the current repository contains older generic definitions, implementation must first determine whether source, tests, fixtures, seeds or persisted/published documents still depend on them.
+
+Two safe paths exist.
+
+## No dependency
+
+```text
+prove unused
+   ↓
+replace atomically
+   ↓
+update tests/docs
+```
+
+## Compatibility required
+
+```text
+introduce new vocabulary
+   ↓
+retain explicit temporary compatibility
+   ↓
+migrate runtime documents
+   ↓
+prove migration
+   ↓
+remove legacy vocabulary in controlled change
+```
+
+Never maintain two equivalent vocabularies permanently without a real architectural reason.
+
+---
+
+# 38. Implementation phases
+
+## Phase 0 — forensic source audit
+
+Before editing production code:
+
+- re-fetch `development` and record HEAD;
+- inspect all current structural schemas;
+- inspect definition registries;
+- inspect factory/builder/validator/serializer/versioning;
+- inspect runtime Registry lifecycle;
+- discover all tests;
+- discover all current production definitions;
+- search old definition/property usage;
+- determine compatibility requirements;
+- identify existing owners before creating any new file.
+
+## Phase 1 — typed property foundation
+
+Implement reusable layout/appearance/accessory value contracts with focused tests.
+
+## Phase 2 — Stack definitions
+
+Implement/register `stack_template`, `stack_component`, `stack_section`, `stack_group` through existing registries.
+
+## Phase 3 — generic Elements
+
+Ensure initial Element definitions exist and add only missing generic capabilities such as Divider. Add typed properties and accessory support where valid.
+
+## Phase 4 — Theme contract
+
+Type generic Theme appearance properties and remove unrelated responsibilities only through compatibility-safe migration.
+
+## Phase 5 — migration
+
+Resolve legacy definition/property compatibility based on Phase 0 evidence.
+
+## Phase 6 — Registry integration proof
+
+Prove generic draft → validation → publish → retrieval → parse → serialization flow.
+
+## Phase 7 — architecture and freeze proof
+
+Run focused tests, package verification, architecture gates and final repository freeze command.
+
+---
+
+# 39. Required test matrix
+
+## Hierarchy positive
+
+```text
+Template → Component → Element passes
+Template → Component → Section → Element passes
+Template → Component → Section → Group → Element passes
+multiple Components pass
+multiple Sections pass
+multiple Groups pass
+multiple Elements pass
+```
+
+## Hierarchy negative
+
+```text
+Template without Component fails
+Template direct Element fails
+Component with Elements + Sections fails
+empty Component fails
+Component direct Group fails
+Section with Elements + Groups fails
+empty Section fails
+empty Group fails
+Group nested Group fails
+Element structural child fails
+duplicate structural ID fails
+template ID mismatch fails
+template type mismatch fails
+```
+
+## Stack properties
+
+```text
+vertical orientation passes
+horizontal orientation passes
+unknown orientation fails
+valid arrangements pass
+invalid arrangement fails
+spacedBy validates spacing
+alignment values validate
+weight validates
+size constraints validate
+padding validates
+```
+
+## Appearance
+
+```text
+valid #RRGGBB passes
+malformed color fails
+solid background passes
+supported gradient passes
+invalid gradient fails
+border validates
+shape validates
+```
+
+## Accessories
+
+```text
+leading text passes
+leading icon passes
+trailing image passes
+trailing divider passes
+multiple ordered accessories preserve order
+unsupported accessory fails
+accessory structural child fails
+nested accessory recursion fails
+accessory is not counted as structural node ID
+```
+
+## Definition registration
+
+```text
+all canonical definitions register
+registration is idempotent
+unknown type fails
+wrong hierarchy-level type fails
+removed/deprecated type follows version policy
+```
+
+## Registry lifecycle
+
+```text
+valid draft stores
+invalid draft cannot publish
+published version retrieves
+retrieved layout parses through canonical SDK
+archived/version behavior follows Registry policy
+target scope remains isolated
+```
+
+Every production bug found during implementation receives a permanent regression test.
+
+---
+
+# 40. Verification requirements
+
+Exact commands must be discovered from actual workspace scripts during implementation; do not invent unavailable commands.
+
+Completed documentation must list focused commands in this form where they actually exist:
+
+```text
+pnpm exec vitest run <focused-test-file>
+pnpm --filter <ui-sdk-workspace> test
+pnpm --filter <ui-sdk-workspace> typecheck
+pnpm --filter <ui-sdk-workspace> lint
+pnpm --filter <ui-sdk-workspace> build
 pnpm test:freeze
 ```
 
-Only commands that actually exist in workspace scripts may remain in the final implementation closeout.
+`pnpm test:freeze` remains the final repository-wide proof, but it does not replace focused tests.
 
 ---
 
-## 20. Change rules during implementation
-
-1. Re-fetch the branch before any write.
-2. Never overwrite unrelated local changes.
-3. Change the smallest existing owner that legitimately owns the behavior.
-4. Do not create a new abstraction when an existing registry/factory/validator already owns the responsibility.
-5. Do not move business logic into SDUI.
-6. Do not make UI SDK depend on Registry persistence.
-7. Do not put Partner/Customer screen semantics into generic definitions.
-8. Do not weaken strict schemas merely to make Login JSON pass.
-9. Do not retain `Record<string, unknown>` as the only validation for newly frozen critical layout concepts if typed validation can be introduced without breaking architecture.
-10. Do not add Section/Group/Component nodes for visual symmetry; add them only for legal hierarchy or real layout boundaries.
-11. Do not use leading/trailing accessories to conceal a real sibling relationship.
-12. Do not represent accessories as structural Element children.
-13. Do not claim migration safety without checking persisted/published usage.
-14. Every fixed production bug receives a permanent regression test.
-15. Update this document if implementation evidence changes the approved design.
-
----
-
-## 21. Extension model after this work
-
-A future screen should normally require only a new runtime document.
-
-Example:
+# 41. Fast decision guide
 
 ```text
-new screen
-   ↓
-Can existing generic definitions express it?
-   ├── yes → compose and publish runtime document; engine unchanged
-   └── no  → identify genuinely new reusable behavior
-              ↓
-            add one generic definition/property contract + tests
-              ↓
-            register through existing extension mechanism
-              ↓
-            compose screen
+Need new UI?
+   │
+   ├─ Can existing JSON types express it?
+   │      └─ YES → create/update runtime document only
+   │
+   └─ NO
+       │
+       ├─ New root layout behavior?      → Template definition
+       ├─ New major container behavior?  → Component definition
+       ├─ New nested container behavior? → Section definition
+       ├─ New local leaf layout?         → Group definition
+       └─ New terminal capability?       → Element definition
+
+Before creating any type:
+Can existing type + properties express it?
+   ├─ YES → reuse it
+   └─ NO  → add one generic reusable capability
 ```
 
-Do not add a new type simply because a new screen exists.
+---
 
-Potential future behaviors such as `grid_*`, `overlay_*` or `carousel_*` are added only when their layout semantics are genuinely different from Stack and a production requirement proves the need.
+# 42. Quick hierarchy selection guide
+
+```text
+Always need:
+Screen → Template → Component
+
+Need only leaf items in Component?
+Component → Elements
+
+Need another nested layout boundary?
+Component → Sections → Elements
+
+Need local grouping of leaf items inside Section?
+Component → Sections → Groups → Elements
+```
+
+Do not choose hierarchy depth based on visual complexity alone. Choose it based on actual layout boundaries and legal composition.
 
 ---
 
-## 22. Decisions frozen by this document
+# 43. Architecture rules for implementation
 
-Unless later architecture evidence requires an explicit amendment:
-
-- canonical hierarchy remains Template → Component → optional Section → optional Group → Element;
-- Template and Component are mandatory;
-- Element is terminal;
-- initial general layout behavior is Stack;
-- orientation is configuration, not a vertical/horizontal type split;
-- Stack vocabulary is `stack_template`, `stack_component`, `stack_section`, `stack_group`;
-- parent owns sibling arrangement/alignment;
-- child owns its measurement and appearance;
-- `weight` is independent of alignment;
-- direct hex colors are used by runtime documents;
-- Theme owns visual screen theme/background/status-bar policy, not back navigation;
-- image content uses URL-based runtime configuration;
-- `divider` is a generic leaf capability;
-- `leading[]` and `trailing[]` are ordered generic accessory values;
-- accessories are not structural Elements;
-- country code and phone input remain separate Elements inside a horizontal Group;
-- the country-code divider is a trailing accessory of the country-code Text;
-- the outer phone-field background/border/shape belongs to the Group containing country code and Input;
-- Login does not introduce Login-specific SDK classes;
-- UI SDK owns the generic language;
-- Registry owns runtime publication/version/retrieval;
-- business actions remain owned by their bounded contexts;
-- implementation begins only after source-first impact analysis and explicit approval.
-
----
-
-## 23. Open items that implementation must resolve from source
-
-These are deliberately not guessed in this design document:
-
-1. exact production `schemaVersion` to use for Partner Login;
-2. final authentication action type/payload and whether `/api/v1/partner/auth_login` is the actual action endpoint;
-3. real logo/car image URLs and hosting policy;
-4. Terms & Conditions and Privacy Policy URLs;
-5. whether old production SDUI definition names have persisted/published consumers and therefore require compatibility migration;
-6. exact typed-property integration point that causes the least disruption to the existing structural schemas/registries;
-7. exact focused test file names and workspace commands after implementation artifacts exist;
-8. whether current Registry/API target-app defaulting requires a regression fix as part of Partner Login publication.
-
-These items must be resolved by repository/persistence evidence before production publication.
+1. Source-first: inspect current owner before creating code.
+2. One authority per responsibility.
+3. UI SDK defines language; Registry owns runtime lifecycle.
+4. Business domains own business behavior.
+5. Template and Component are mandatory.
+6. Section and Group are optional.
+7. Element is terminal.
+8. Component uses Elements XOR Sections.
+9. Section uses Elements XOR Groups.
+10. Group contains Elements only.
+11. Orientation is configuration, not type proliferation.
+12. Parent owns sibling layout relationships.
+13. Child owns its measurement/appearance.
+14. Accessories are values, not structural children.
+15. Do not hide real sibling relationships inside accessories.
+16. Add generic behavior only when existing behavior cannot express the requirement.
+17. Treat property/type changes as versioned contract changes.
+18. Do not delete vocabulary without runtime compatibility proof.
+19. Do not weaken validation to make one JSON document pass.
+20. Every important new class/function gets architectural TSDoc.
+21. Every important behavior gets focused tests.
+22. Every fixed defect gets a permanent regression test.
+23. Update this guide when approved architecture changes.
+24. Do not declare completion until focused and freeze validation pass.
 
 ---
 
-## 24. Definition of done
+# 44. Definition of done for the generic SDUI foundation
 
-This SDUI evolution is complete only when all of the following are true:
+The foundation is complete only when:
 
-- this design remains consistent with the Master Constitution;
-- generic property contracts are implemented once and reused;
-- Stack definitions are registered through existing registries;
-- structural hierarchy invariants remain enforced;
-- divider and accessory capabilities are generic and validated;
-- no Element-child hierarchy was introduced;
-- Theme no longer owns back-button UI after any required compatibility migration;
-- old definition compatibility/migration is explicitly resolved;
-- Partner Login is stored/published as runtime Registry content rather than SDK code;
-- the real Auth boundary is used rather than invented SDUI business logic;
-- Partner target retrieval is proven and cannot silently resolve CUSTOMER content;
-- positive, negative and regression tests pass;
-- package validation passes;
-- architecture/freeze validation passes;
-- documentation and TSDoc are updated to the implemented state;
-- no unrelated architecture or local changes are overwritten.
+```text
+[ ] current source ownership has been audited
+[ ] structural hierarchy remains constitution-compliant
+[ ] typed reusable property contracts exist
+[ ] Stack definitions are generic and registered once
+[ ] generic Element vocabulary is validated
+[ ] leading/trailing accessories preserve terminal Element invariant
+[ ] Theme contains only appropriate screen visual policy
+[ ] legacy vocabulary compatibility is explicitly resolved
+[ ] definition registration is idempotent
+[ ] draft/publish/retrieval flow is proven
+[ ] runtime retrieval reparses through canonical contract
+[ ] version/target behavior is proven
+[ ] positive tests pass
+[ ] negative tests pass
+[ ] regression tests pass
+[ ] package build/typecheck/lint/tests pass where configured
+[ ] architecture gates pass
+[ ] `pnpm test:freeze` passes
+[ ] TSDoc and package documentation match implementation
+[ ] no duplicate SDUI authority was introduced
+```
 
-Until those conditions are satisfied, the implementation remains in progress.
+---
+
+# 45. Final mental model
+
+Remember the system as five simple questions:
+
+```text
+SCREEN
+What runtime UI document is this?
+
+TEMPLATE
+How are the major areas of the screen composed?
+
+COMPONENT
+What mandatory major layout boundaries exist?
+
+SECTION / GROUP
+Do we need additional nested/local layout boundaries?
+
+ELEMENT
+What terminal content is actually rendered or interacted with?
+```
+
+And remember the extension rule:
+
+```text
+CONFIGURE first
+REUSE second
+EXTEND only when necessary
+VERSION when compatibility requires it
+NEVER create screen-specific SDUI architecture
+```
+
+This document is the implementation blueprint for the generic CarBroz SDUI composition system. Production code must remain consistent with it and with the higher-level backend constitution.
