@@ -80,6 +80,28 @@ HTTP request
 
 `src/bootstrap/server.ts` starts the process. `src/bootstrap/app.ts` composes Fastify and the registered plugins/surfaces. Product transport is isolated under `/api/v1/partner/*`, `/api/v1/customer/*`, and `/api/v1/admin/*`; one surface must not import another surface's internals.
 
+## API route naming
+
+Public product routes follow the resource/capability shape:
+
+```text
+/api/v1/{surface}/{resource}[/{sub-resource}][/{action}]
+```
+
+`surface` identifies the client/product boundary (`partner`, `customer`, `admin`). The next segment identifies a public capability or resource such as `config`, `screen`, `auth`, `profile`, `bookings`, or `kyc`. Internal DDD terms such as `domain` must not appear merely to mirror backend module structure.
+
+Use HTTP methods and resource names to express ordinary CRUD semantics; do not add redundant path verbs such as `/list` or `/get`. Explicit action segments are reserved for genuine commands such as accepting or rejecting a booking.
+
+Current Partner examples:
+
+```text
+GET  /api/v1/partner/config/bootstrap
+GET  /api/v1/partner/screen/auth_login
+POST /api/v1/partner/auth/send-otp
+```
+
+Screen retrieval and business execution remain distinct: `/screen/*` returns an SDUI screen resource, while `/auth/*` and other capability routes execute their owning application behavior. Public route names do not change domain ownership or dependency direction.
+
 ## ExecutionContext
 
 There is one canonical application request context: `ExecutionContext`. API transport/framework details are adapted into it at the boundary; application use cases must not receive Fastify request objects or a parallel `IRequestContext` abstraction.
