@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { actionsSchema, idSchema, propertiesSchema, typeSchema } from './common.schema.js';
+import { actionsSchema } from './action.schema.js';
+import { idSchema, propertiesSchema, typeSchema } from './common.schema.js';
+
+export const elementBindingSchema = z.object({
+  key: idSchema,
+}).strict();
 
 export const elementSchema = z.object({
   id: idSchema,
@@ -9,10 +14,11 @@ export const elementSchema = z.object({
   analytics: z.record(z.string(), z.unknown()).optional(),
   accessibility: z.record(z.string(), z.unknown()).optional(),
   validation: z.record(z.string(), z.unknown()).optional(),
-  binding: z.record(z.string(), z.unknown()).optional(),
+  binding: elementBindingSchema.optional(),
   visibility: z.record(z.string(), z.unknown()).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 }).strict();
 
 /** SduiElement is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiElement = z.infer<typeof elementSchema>;
+export type SduiElementBinding = z.infer<typeof elementBindingSchema>;
