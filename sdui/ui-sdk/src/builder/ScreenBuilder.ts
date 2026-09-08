@@ -5,7 +5,7 @@ import type { SduiTemplate } from '../contract/template.schema.js';
 export interface ScreenBuilderInput {
   screenId: string;
   schemaVersion: string;
-  targetApp: 'CUSTOMER' | 'PARTNER' | 'ADMIN';
+  targetApp: 'CUSTOMER' | 'PARTNER';
   metadata?: Record<string, unknown>;
 }
 
@@ -23,8 +23,6 @@ export class ScreenBuilder {
     if (!this.template) throw new Error('Screen requires exactly one template');
     return screenSchema.parse({
       ...this.input,
-      templateId: this.template.id,
-      templateType: this.template.type,
       template: this.template,
       ...(this.theme ? { theme: this.theme } : {}),
     });
