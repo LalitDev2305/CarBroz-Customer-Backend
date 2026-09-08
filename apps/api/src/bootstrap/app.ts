@@ -7,6 +7,7 @@ import fastifyStatic from '@fastify/static';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getFastifyLoggerConfig } from '@carbroz/platform-observability';
+import { isDetailedDiagnosticLoggingEnabled } from './config/diagnostic-mode.js';
 import { SecurityConfig, LoggingConfig } from './config/runtime-config.js';
 import { globalErrorHandler } from '../transport/middleware/error-handler.js';
 import { ResponseHelper } from '../transport/response/ResponseHelper.js';
@@ -25,8 +26,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** Builds the Fastify composition root; no business rules live in this executable layer. */
 export async function buildApp(): Promise<FastifyInstance> {
+  const detailedDiagnostics = isDetailedDiagnosticLoggingEnabled();
   const app = Fastify({
-    logger: getFastifyLoggerConfig(LoggingConfig.logLevel),
+    // Development/Staging uses the curated FLOW/API console as the single presentation source.
+    // Production retains the privacy-safe structured Pino logger.
+    logger: detailedDiagnostics ? false : getFastifyLoggerConfig(LoggingConfig.logLevel),
     // request-flow.plugin is the single HTTP lifecycle owner; Fastify's automatic lines would duplicate it.
     disableRequestLogging: true,
   });
