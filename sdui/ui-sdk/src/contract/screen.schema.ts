@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { idSchema, propertiesSchema, targetAppSchema, typeSchema } from './common.schema.js';
+import { idSchema, propertiesSchema, targetAppSchema } from './common.schema.js';
 import { templateSchema, type SduiTemplate } from './template.schema.js';
 
 const themeSchema = z.object({
@@ -40,30 +40,12 @@ function collectNodeIds(template: SduiTemplate): string[] {
 
 export const screenSchema = z.object({
   screenId: idSchema,
-  templateId: idSchema,
-  templateType: typeSchema,
   schemaVersion: z.string().trim().min(1),
   targetApp: targetAppSchema,
   template: templateSchema,
   theme: themeSchema.optional(),
   metadata: propertiesSchema.optional(),
 }).strict().superRefine((screen, context) => {
-  if (screen.template.id !== screen.templateId) {
-    context.addIssue({
-      code: 'custom',
-      path: ['template', 'id'],
-      message: 'template.id must equal templateId',
-    });
-  }
-
-  if (screen.template.type !== screen.templateType) {
-    context.addIssue({
-      code: 'custom',
-      path: ['template', 'type'],
-      message: 'template.type must equal templateType',
-    });
-  }
-
   const seen = new Set<string>();
   for (const id of collectNodeIds(screen.template)) {
     if (seen.has(id)) {
