@@ -7,9 +7,11 @@ export type ApiResponseCode =
   | 'NOT_FOUND'
   | 'CONFLICT'
   | 'UNPROCESSABLE_ENTITY'
+  | 'TOO_MANY_REQUESTS'
   | 'INTERNAL_SERVER_ERROR';
 
-export type ApiResponseStatus = 200 | 400 | 401 | 403 | 404 | 409 | 422 | 500;
+export type ApiResponseStatus = 200 | 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500;
+export type ApiErrorStatus = Exclude<ApiResponseStatus, 200>;
 
 export interface ApiResponse<T = any> {
   status: ApiResponseStatus;
@@ -51,6 +53,7 @@ const RESPONSE_CODE_BY_STATUS: Record<ApiResponseStatus, ApiResponseCode> = {
   404: 'NOT_FOUND',
   409: 'CONFLICT',
   422: 'UNPROCESSABLE_ENTITY',
+  429: 'TOO_MANY_REQUESTS',
   500: 'INTERNAL_SERVER_ERROR',
 };
 
@@ -66,10 +69,7 @@ export class ResponseHelper {
     };
   }
 
-  /**
-   * Creation currently uses the frozen CarBroz success status contract (HTTP 200).
-   * Introduce 201 only through an intentional contract amendment so body status and HTTP status cannot diverge.
-   */
+  /** Creation currently uses the frozen CarBroz success status contract (HTTP 200). */
   static created<T>(data?: T, message: string = 'Resource created successfully.', traceId?: string): ApiResponse<T> {
     return ResponseHelper.success(data, message, traceId);
   }
@@ -82,11 +82,7 @@ export class ResponseHelper {
     return ResponseHelper.success(paginatedData, message, traceId);
   }
 
-  static error(
-    status: Exclude<ApiResponseStatus, 200>,
-    message: string,
-    traceId?: string,
-  ): ApiResponse<null> {
+  static error(status: ApiErrorStatus, message: string, traceId?: string): ApiResponse<null> {
     return {
       status,
       code: RESPONSE_CODE_BY_STATUS[status],
