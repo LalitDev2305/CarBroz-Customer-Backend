@@ -4,42 +4,27 @@ import type { SduiSection } from '../../contract/section.schema.js';
 import { sectionRegistry, type InstanceInput } from '../../registry/registries.js';
 
 /** Canonical product-neutral Section definition types available in production. */
-export const PRODUCTION_SECTION_TYPES = Object.freeze(['content_section'] as const);
+export const PRODUCTION_SECTION_TYPES = Object.freeze(['content_section', 'stack_section'] as const);
 
-/**
- * Enforces the two legal Section child branches.
- *
- * @returns Either direct Elements or Groups, never both.
- * @throws Error when the Section is empty or mixes both branches.
- *
- * @remarks
- * This preserves the canonical paths:
- * `Template -> Component -> Section -> Element` and
- * `Template -> Component -> Section -> Group -> Element`.
- */
-function content(input: InstanceInput): { elements: SduiElement[] } | { groups: SduiGroup[] } {
+function content(type: string, input: InstanceInput): { elements: SduiElement[] } | { groups: SduiGroup[] } {
   const hasElements = Boolean(input.elements?.length);
   const hasGroups = Boolean(input.groups?.length);
-  if (hasElements === hasGroups) {
-    throw new Error("SDUI definition 'content_section' requires exactly one branch: elements or groups");
-  }
+  if (hasElements === hasGroups) throw new Error(`SDUI definition '${type}' requires exactly one branch: elements or groups`);
   return hasElements ? { elements: input.elements! } : { groups: input.groups! };
 }
 
-/**
- * Registers the production Section vocabulary.
- *
- * @remarks
- * Sections are optional structural containers between Component and Element.
- * A Section may group Elements directly or through Groups, but may not expose
- * both branches simultaneously.
- */
-export function registerProductionSectionDefinitions(): void {
-  if (sectionRegistry.has('content_section')) return;
-  sectionRegistry.register('content_section', (input: InstanceInput): SduiSection => ({
+function registerSection(type: string, defaults: Record<string, unknown> = {}): void {
+  if (sectionRegistry.has(type)) return;
+  sectionRegistry.register(type, (input: InstanceInput): SduiSection => ({
     id: input.id,
-    type: 'content_section',
-    properties: input.properties,
-    ...content(input),
+    type,
+    properties: { ...defaults, ...input.properties },
+    ...content(type, input),
   }));
+}
+
+/** Registers product-neutral nested layout definitions. */
+export function registerProductionSectionDefinitions(): void {
+  registerSection('content_section');
+  registerSection('stack_section', { orientation: 'vertical' });
 }
