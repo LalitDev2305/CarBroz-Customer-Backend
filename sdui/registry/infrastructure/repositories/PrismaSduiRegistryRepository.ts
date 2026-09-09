@@ -1,6 +1,11 @@
 import { KernelError, KernelErrorCode } from '@carbroz/foundation-kernel';
 import {
+  PRODUCTION_COMPONENT_TYPES,
+  PRODUCTION_ELEMENT_TYPES,
+  PRODUCTION_GROUP_TYPES,
+  PRODUCTION_SECTION_TYPES,
   parseSduiScreen,
+  parseSduiScreenForPublication,
   targetAppSchema,
   templateSchema,
   type SduiScreen,
@@ -42,6 +47,22 @@ function conflict(message: string): KernelError {
 function parseScreenStatus(status: string): SduiScreenStatus {
   if (status === 'DRAFT' || status === 'PUBLISHED' || status === 'ARCHIVED') return status;
   throw invalidInput(`Unsupported SDUI screen status '${status}'`);
+}
+
+function assertLegacyRegistryDoesNotRedefineCoreType(input: RegistryNodeInput, nodeLevel: SduiNodeLevel): void {
+  const productionTypes: readonly string[] = nodeLevel === 'COMPONENT'
+    ? PRODUCTION_COMPONENT_TYPES
+    : nodeLevel === 'SECTION'
+      ? PRODUCTION_SECTION_TYPES
+      : nodeLevel === 'GROUP'
+        ? PRODUCTION_GROUP_TYPES
+        : PRODUCTION_ELEMENT_TYPES;
+
+  if (productionTypes.includes(input.componentType)) {
+    throw conflict(
+      `Runtime SDUI registry cannot redefine canonical ui-sdk ${nodeLevel.toLowerCase()} type '${input.componentType}'`,
+    );
+  }
 }
 
 /** PrismaSduiRegistryRepository is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
@@ -116,6 +137,8 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     targetApp: SduiTargetApp,
     layoutJson: SduiScreen,
   ): Promise<SduiScreenEntity> {
+    const publishableLayout = parseSduiScreenForPublication(layoutJson);
+
     return this.prismaClient.$transaction(async (tx) => {
       const latest = await tx.sduiScreen.findFirst({
         where: { screenId, targetApp },
@@ -134,7 +157,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
           targetApp,
           versionNumber,
           status: 'PUBLISHED',
-          layoutJson,
+          layoutJson: publishableLayout,
           lockVersion: 1,
           publishedAt: new Date(),
           publishedBy: 'system',
@@ -227,6 +250,8 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
       }
       if (targetVersion.status === 'PUBLISHED') return this.mapScreen(targetVersion);
 
+      parseSduiScreenForPublication(targetVersion.layoutJson);
+
       await tx.sduiScreen.updateMany({
         where: { screenId, targetApp, status: 'PUBLISHED' },
         data: { status: 'ARCHIVED' },
@@ -279,7 +304,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
         throw notFound(`Target rollback version ${targetVersionNumber} not found for screen '${screenId}'`);
       }
 
-      const canonicalLayout = parseSduiScreen(targetVersion.layoutJson);
+      const canonicalLayout = parseSduiScreenForPublication(targetVersion.layoutJson);
       const latest = await tx.sduiScreen.findFirst({
         where: { screenId, targetApp },
         orderBy: { versionNumber: 'desc' },
@@ -358,6 +383,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
   }
 
   private async upsertNodeRecord(input: RegistryNodeInput, nodeLevel: SduiNodeLevel): Promise<RegistryPersistenceRecord> {
+    assertLegacyRegistryDoesNotRedefineCoreType(input, nodeLevel);
     return this.prismaClient.sduiComponentRegistry.upsert({
       where: { name: input.name },
       update: {
