@@ -133,10 +133,7 @@ export interface VerifyOtpResult {
   user: User;
   session: UserSession;
   refreshToken: string;
-  nextScreen: {
-    template: string;
-    api: string;
-  };
+  nextScreen: AuthFlowDestination;
 }
 
 /** Verifies and one-time consumes an OTP challenge, then issues a hashed refresh-token family. */
@@ -203,8 +200,12 @@ export class VerifyOtpUseCase implements IUseCase<VerifyOtpInput, VerifyOtpResul
       session,
       refreshToken,
       nextScreen: {
-        template: 'dashboard_template',
-        api: 'home',
+        screenId: 'partner_dashboard',
+        templateId: 'partner_dashboard_template',
+        templateType: 'default_template',
+        endpoint: '/api/v1/partner/sdui/registry/partner_dashboard',
+        method: 'GET',
+        authentication: 'SESSION',
       },
     };
   }
