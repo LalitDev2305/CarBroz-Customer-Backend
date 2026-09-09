@@ -4,6 +4,10 @@ import { idSchema } from './common.schema.js';
 export const authenticationSchema = z.enum(['NONE', 'SESSION']);
 export const requestMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
 
+export type SduiAuthentication = z.infer<typeof authenticationSchema>;
+export type SduiRequestMethod = z.infer<typeof requestMethodSchema>;
+export type SduiRequestResponseMode = 'none' | 'destination';
+
 export const dynamicDestinationSchema = z.object({
   screenId: idSchema,
   templateId: idSchema,
