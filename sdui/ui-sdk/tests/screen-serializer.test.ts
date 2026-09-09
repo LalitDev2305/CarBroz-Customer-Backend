@@ -3,8 +3,6 @@ import { ScreenSerializer } from '../src/serializer/ScreenSerializer.js';
 
 const screen = {
   screenId: 'auth_login',
-  templateId: 't1',
-  templateType: 'auth',
   schemaVersion: '3.0.0',
   targetApp: 'CUSTOMER' as const,
   template: {
