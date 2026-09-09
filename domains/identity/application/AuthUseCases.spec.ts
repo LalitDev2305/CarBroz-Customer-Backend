@@ -89,6 +89,7 @@ function sessions(): IUserSessionRepository {
 function challenges(current: OtpChallenge | null = challenge): IOtpChallengeRepository {
   return {
     create: vi.fn(async () => challenge),
+    tryCreateWithinRateLimit: vi.fn(async () => current ?? challenge),
     findForVerification: vi.fn(async () => current),
     findLatestByPhone: vi.fn(async () => null),
     countCreatedSince: vi.fn(async () => 0),
