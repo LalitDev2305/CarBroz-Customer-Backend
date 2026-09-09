@@ -1,6 +1,6 @@
 # Partner Authentication + SDUI + Redis Implementation Plan
 
-> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–5 complete and repository-verified; Phase 6 Send OTP canonical destination result is next. Phase 5 Partner Login request alignment is frozen on the existing generic request/reference architecture.
+> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–5 complete and repository-verified; Phase 6 Send OTP canonical destination implementation is complete and final same-HEAD repository/architecture verification is pending. Phase 7+ production behavior remains untouched.
 >
 > **Branch:** `development`
 >
@@ -171,7 +171,7 @@ The detailed frozen Phase 5 contract is `sdui/PHASE-5-PARTNER-LOGIN-REQUEST-CONT
 
 Legacy `{ template, api }` navigation metadata is not canonical.
 
-Target result semantics:
+Frozen Phase 6 result semantics:
 
 ```json
 {
@@ -181,18 +181,18 @@ Target result semantics:
   "isNewUser": true,
   "nextScreen": {
     "screenId": "partner_otp",
-    "templateId": "<otp-template-id>",
-    "templateType": "<otp-template-type>",
-    "endpoint": "/api/v1/partner/screen/<otp-route>",
+    "templateId": "tpl_partner_otp_v1",
+    "templateType": "form_template",
+    "endpoint": "/api/v1/partner/screen/auth_otp",
     "method": "GET",
     "authentication": "NONE"
   }
 }
 ```
 
-`nextScreen` must use the same semantic Destination contract as bootstrap/navigation. Identity must not depend on `sdui/ui-sdk` merely to reuse a Zod schema; reuse a neutral lower-level contract if one exists, otherwise keep the smallest application value contract and validate/map at boundaries.
+`nextScreen` uses the same semantic Destination contract as bootstrap/navigation. Identity does not depend on `sdui/ui-sdk` merely to reuse a Zod schema; because no legal neutral lower-level Destination type exists, Identity owns only the smallest readonly auth-flow destination value shape and the API/SDUI boundary validates it with the existing `dynamicDestinationSchema`.
 
-Concrete OTP destination identity is frozen only when the OTP screen exists.
+Phase 6 freezes the concrete OTP destination identity as `partner_otp` / `tpl_partner_otp_v1` / `form_template` at `GET /api/v1/partner/screen/auth_otp` with `authentication = NONE`. Phase 8 must implement that exact reserved screen/route identity; it must not silently invent different values.
 
 ---
 
@@ -501,9 +501,21 @@ No duplicate DTO, controller, use case, request mapper, action type, device fiel
 
 Phase 5 passed the canonical repository verification requirements without changing Phase 6 navigation/result behavior.
 
-## Phase 6 — Send OTP canonical destination result — NOT STARTED
+## Phase 6 — Send OTP canonical destination result — IMPLEMENTED / FINAL VERIFICATION PENDING
 
-Replace legacy `{template, api}` result with canonical Destination semantics while preserving all security/business rules. Concrete OTP destination is finalized with the actual OTP screen.
+Completed implementation scope:
+
+- froze the detailed contract before production changes in `domains/identity/PHASE-6-SEND-OTP-DESTINATION-CONTRACT.md` and `sdui/PARTNER-AUTH-SDUI-CONTRACT.md`;
+- kept Identity transport-neutral with the smallest readonly `AuthFlowDestination` value shape and no dependency on `sdui/ui-sdk`, Configuration or API transport;
+- replaced only `SendOtpResult.nextScreen` legacy `{ template, api }` metadata;
+- reserved the exact destination `partner_otp` / `tpl_partner_otp_v1` / `form_template` / `GET /api/v1/partner/screen/auth_otp` / `NONE` for Phase 8;
+- preserved Send OTP challenge generation, hashing, cooldown, atomic rate limiting, Redis/Prisma composition, provider delivery, invalidation, error codes and envelope behavior;
+- added real-use-case Identity regression proof for exact destination fields, no legacy fields and no OTP leakage;
+- extended the existing Partner HTTP route regression to prove the canonical response envelope and `dynamicDestinationSchema` compatibility at the legal API/SDUI boundary;
+- corrected the boundary test to structurally narrow Fastify's broad JSON union rather than weakening TypeScript safety;
+- intentionally left Verify OTP navigation, OTP screen/route creation and Dashboard routing for later phases.
+
+Phase 6 becomes COMPLETE + FROZEN only after both canonical Backend CI and independent Architecture Closeout succeed on the same final documentation-complete `development` HEAD.
 
 ## Phase 7 — Send OTP error/security regression — NOT STARTED
 
