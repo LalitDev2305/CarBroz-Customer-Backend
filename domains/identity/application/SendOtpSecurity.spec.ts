@@ -29,10 +29,10 @@ function userRepository(): IUserRepository {
   return {
     findById: vi.fn(async () => null),
     findAll: vi.fn(async () => []),
-    save: vi.fn(async () => { throw new Error('not used'); }),
+    save: vi.fn(async () => { throw new ApplicationError('not used', 500, 'TEST_NOT_USED'); }),
     delete: vi.fn(async () => false),
     findByPhoneNumber: vi.fn(async () => null),
-    upsert: vi.fn(async () => { throw new Error('not used'); }),
+    upsert: vi.fn(async () => { throw new ApplicationError('not used', 500, 'TEST_NOT_USED'); }),
   };
 }
 
@@ -120,7 +120,7 @@ describe('SendOtpUseCase security regressions', () => {
   it('invalidates a persisted challenge and normalizes provider exceptions', async () => {
     const repository = otpRepository();
     const delivery: IOtpDeliveryProvider = {
-      sendOtp: vi.fn(async () => { throw new Error('provider-internal-secret'); }),
+      sendOtp: vi.fn(async () => { throw new TypeError('provider-internal-secret'); }),
     };
 
     await expect(useCase(repository, delivery).execute({ phoneNumber, deviceId }))
@@ -131,7 +131,7 @@ describe('SendOtpUseCase security regressions', () => {
 
   it('fails closed when OTP persistence is unavailable and never calls the delivery provider', async () => {
     const repository = otpRepository({
-      tryCreateWithinRateLimit: vi.fn(async () => { throw new Error('redis unavailable'); }),
+      tryCreateWithinRateLimit: vi.fn(async () => { throw new TypeError('redis unavailable'); }),
     });
     const delivery = deliveryProvider();
 
