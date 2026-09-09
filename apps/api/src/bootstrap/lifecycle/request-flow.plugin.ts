@@ -33,23 +33,6 @@ function isApplicationApi(url: string): boolean {
   return url.startsWith('/api/');
 }
 
-function diagnosticHeaders(headers: Record<string, unknown>): Record<string, unknown> {
-  const allowed = new Set([
-    'authorization',
-    'content-type',
-    'accept',
-    'idempotency-key',
-    'x-carbroz-platform',
-    'x-carbroz-app-version',
-    'x-carbroz-build-number',
-    'x-correlation-id',
-    'x-request-id',
-  ]);
-  return Object.fromEntries(
-    Object.entries(headers).filter(([name]) => allowed.has(name.toLowerCase())),
-  );
-}
-
 function durationSince(start: bigint | undefined): number | undefined {
   return start ? Number(process.hrtime.bigint() - start) / 1_000_000 : undefined;
 }
@@ -62,8 +45,8 @@ function payloadForDiagnostics(payload: unknown): unknown {
 /**
  * Single correlation-aware HTTP lifecycle owner.
  *
- * Development/Staging: emits only curated FLOW + API request/response/error console blocks.
- * Production: emits privacy-safe structured lifecycle events through Pino and never logs payload bodies.
+ * Request diagnostics are metadata-only in every environment. Production uses structured lifecycle
+ * logs; Development/Staging adds readable FLOW/API blocks without reading request headers/bodies/query.
  */
 export default fp(async function requestFlowPlugin(app: FastifyInstance) {
   const detailed = isDetailedDiagnosticLoggingEnabled();
@@ -93,8 +76,6 @@ export default fp(async function requestFlowPlugin(app: FastifyInstance) {
       correlationId,
       method: request.method,
       url: request.url,
-      headers: diagnosticHeaders(request.headers as Record<string, unknown>),
-      body: request.body,
     });
   });
 
