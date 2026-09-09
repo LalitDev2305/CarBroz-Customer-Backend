@@ -72,24 +72,26 @@ describe('CW5 Identity authentication security primitives', () => {
       findByPhoneNumber: vi.fn(async () => null),
       upsert: vi.fn(async () => user),
     };
+    const createChallenge = async (input: Parameters<IOtpChallengeRepository['create']>[0]) => {
+      persistedHash = input.otpHash;
+      return {
+        id: 33,
+        publicId: '33333333-3333-4333-8333-333333333333',
+        phoneNumber: input.phoneNumber,
+        deviceId: input.deviceId,
+        otpHash: input.otpHash,
+        attemptCount: 0,
+        maxAttempts: input.maxAttempts,
+        expiresAt: input.expiresAt,
+        consumedAt: null,
+        invalidatedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      };
+    };
     const otpRepository: IOtpChallengeRepository = {
-      create: vi.fn(async (input) => {
-        persistedHash = input.otpHash;
-        return {
-          id: 33,
-          publicId: '33333333-3333-4333-8333-333333333333',
-          phoneNumber: input.phoneNumber,
-          deviceId: input.deviceId,
-          otpHash: input.otpHash,
-          attemptCount: 0,
-          maxAttempts: input.maxAttempts,
-          expiresAt: input.expiresAt,
-          consumedAt: null,
-          invalidatedAt: null,
-          createdAt: now,
-          updatedAt: now,
-        };
-      }),
+      create: vi.fn(createChallenge),
+      tryCreateWithinRateLimit: vi.fn(async (input) => createChallenge(input)),
       findForVerification: vi.fn(async () => null),
       findLatestByPhone: vi.fn(async () => null),
       countCreatedSince: vi.fn(async () => 0),
