@@ -1,0 +1,37 @@
+name: SDUI Lockfile Sync
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - 'sdui/engine/package.json'
+      - '.github/workflows/sdui-lockfile-sync.yml'
+
+jobs:
+  generate-lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate repository pnpm version
+        run: corepack prepare pnpm@11.9.0 --activate
+
+      - name: Generate canonical lockfile
+        run: pnpm install --lockfile-only --no-frozen-lockfile
+
+      - name: Upload generated lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdui-generated-lockfile
+          path: pnpm-lock.yaml
+          if-no-files-found: error
