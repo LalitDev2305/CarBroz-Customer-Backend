@@ -11,7 +11,9 @@
     "@carbroz/domain-communications": "workspace:*",
     "@carbroz/domain-configuration": "workspace:*",
     "@carbroz/domain-financials": "workspace:*",
+    "@carbroz/domain-identity": "workspace:*",
     "@carbroz/domain-operations": "workspace:*",
+    "@carbroz/platform-cache": "workspace:*",
     "@carbroz/platform-observability": "workspace:*"
   },
   "devDependencies": {
