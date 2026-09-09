@@ -38,8 +38,6 @@ describe('SDUI Registry application lifecycle', () => {
 
   const validLayoutJson = {
     screenId: 'auth_login',
-    templateId: 't1',
-    templateType: 'auth',
     schemaVersion: '3.0.0',
     targetApp: 'CUSTOMER' as const,
     template: {
