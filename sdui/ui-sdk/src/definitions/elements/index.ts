@@ -1,17 +1,29 @@
 import type { SduiElement } from '../../contract/element.schema.js';
 import { elementRegistry, type InstanceInput } from '../../registry/registries.js';
+import { buttonPropertiesSchema } from './button/button.properties.js';
+import { dividerPropertiesSchema } from './divider/divider.properties.js';
+import { iconPropertiesSchema } from './icon/icon.properties.js';
+import { imagePropertiesSchema } from './image/image.properties.js';
+import { inputPropertiesSchema } from './input/input.properties.js';
+import { spacerPropertiesSchema } from './spacer/spacer.properties.js';
+import { textPropertiesSchema } from './text/text.properties.js';
 
-/** Canonical product-neutral Element definition types available in production. */
 export const PRODUCTION_ELEMENT_TYPES = Object.freeze([
   'text', 'image', 'icon', 'button', 'input', 'divider', 'spacer',
 ] as const);
 
-function registerElement(type: string, defaults: Record<string, unknown>): void {
+type PropertySchema = { parse(input: unknown): unknown };
+
+function registerElement(
+  type: string,
+  schema: PropertySchema,
+  defaults: Record<string, unknown>,
+): void {
   if (elementRegistry.has(type)) return;
   elementRegistry.register(type, (input: InstanceInput): SduiElement => ({
     id: input.id,
     type,
-    properties: { ...defaults, ...input.properties },
+    properties: schema.parse({ ...defaults, ...(input.properties ?? {}) }) as Record<string, unknown>,
     ...(input.actions ? { actions: input.actions } : {}),
     ...(input.analytics ? { analytics: input.analytics } : {}),
     ...(input.accessibility ? { accessibility: input.accessibility } : {}),
@@ -22,13 +34,12 @@ function registerElement(type: string, defaults: Record<string, unknown>): void 
   }));
 }
 
-/** Registers product-neutral terminal leaf definitions. */
 export function registerProductionElementDefinitions(): void {
-  registerElement('text', { semanticRole: 'text' });
-  registerElement('image', { semanticRole: 'image' });
-  registerElement('icon', { semanticRole: 'icon' });
-  registerElement('button', { semanticRole: 'action' });
-  registerElement('input', { semanticRole: 'input' });
-  registerElement('divider', { semanticRole: 'divider' });
-  registerElement('spacer', { semanticRole: 'spacing' });
+  registerElement('text', textPropertiesSchema, { semanticRole: 'text' });
+  registerElement('image', imagePropertiesSchema, { semanticRole: 'image' });
+  registerElement('icon', iconPropertiesSchema, { semanticRole: 'icon' });
+  registerElement('button', buttonPropertiesSchema, { semanticRole: 'action' });
+  registerElement('input', inputPropertiesSchema, { semanticRole: 'input' });
+  registerElement('divider', dividerPropertiesSchema, { semanticRole: 'divider' });
+  registerElement('spacer', spacerPropertiesSchema, { semanticRole: 'spacing' });
 }

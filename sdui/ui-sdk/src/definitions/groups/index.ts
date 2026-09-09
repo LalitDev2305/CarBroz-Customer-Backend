@@ -1,28 +1,35 @@
 import type { SduiElement } from '../../contract/element.schema.js';
 import type { SduiGroup } from '../../contract/group.schema.js';
 import { groupRegistry, type InstanceInput } from '../../registry/registries.js';
+import { columnGroupPropertiesSchema } from './column/column-group.properties.js';
+import { rowGroupPropertiesSchema } from './row/row-group.properties.js';
+import { stackGroupPropertiesSchema } from './stack/stack-group.properties.js';
 
-/** Canonical product-neutral Group definition types available in production. */
 export const PRODUCTION_GROUP_TYPES = Object.freeze(['row_group', 'column_group', 'stack_group'] as const);
+
+type PropertySchema = { parse(input: unknown): unknown };
 
 function requireElements(type: string, input: InstanceInput): SduiElement[] {
   if (!input.elements?.length) throw new Error(`SDUI definition '${type}' requires at least one element`);
   return input.elements;
 }
 
-function registerGroup(type: string, defaults: Record<string, unknown>): void {
+function registerGroup(
+  type: string,
+  schema: PropertySchema,
+  defaults: Record<string, unknown>,
+): void {
   if (groupRegistry.has(type)) return;
   groupRegistry.register(type, (input: InstanceInput): SduiGroup => ({
     id: input.id,
     type,
-    properties: { ...defaults, ...input.properties },
+    properties: schema.parse({ ...defaults, ...(input.properties ?? {}) }) as Record<string, unknown>,
     elements: requireElements(type, input),
   }));
 }
 
-/** Registers product-neutral local layout definitions. */
 export function registerProductionGroupDefinitions(): void {
-  registerGroup('row_group', { axis: 'horizontal' });
-  registerGroup('column_group', { axis: 'vertical' });
-  registerGroup('stack_group', { orientation: 'vertical' });
+  registerGroup('row_group', rowGroupPropertiesSchema, { axis: 'horizontal', orientation: 'horizontal' });
+  registerGroup('column_group', columnGroupPropertiesSchema, { axis: 'vertical', orientation: 'vertical' });
+  registerGroup('stack_group', stackGroupPropertiesSchema, { orientation: 'vertical' });
 }

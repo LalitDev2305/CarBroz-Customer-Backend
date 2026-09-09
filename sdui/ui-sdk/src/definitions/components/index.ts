@@ -2,9 +2,13 @@ import type { SduiComponent } from '../../contract/component.schema.js';
 import type { SduiElement } from '../../contract/element.schema.js';
 import type { SduiSection } from '../../contract/section.schema.js';
 import { componentRegistry, type InstanceInput } from '../../registry/registries.js';
+import { contentComponentPropertiesSchema } from './content/content-component.properties.js';
+import { formComponentPropertiesSchema } from './form/form-component.properties.js';
+import { stackComponentPropertiesSchema } from './stack/stack-component.properties.js';
 
-/** Canonical product-neutral Component definition types available in production. */
 export const PRODUCTION_COMPONENT_TYPES = Object.freeze(['content_component', 'form_component', 'stack_component'] as const);
+
+type PropertySchema = { parse(input: unknown): unknown };
 
 function content(type: string, input: InstanceInput): { elements: SduiElement[] } | { sections: SduiSection[] } {
   const hasElements = Boolean(input.elements?.length);
@@ -13,19 +17,22 @@ function content(type: string, input: InstanceInput): { elements: SduiElement[] 
   return hasElements ? { elements: input.elements! } : { sections: input.sections! };
 }
 
-function registerComponent(type: string, defaults: Record<string, unknown> = {}): void {
+function registerComponent(
+  type: string,
+  schema: PropertySchema,
+  defaults: Record<string, unknown> = {},
+): void {
   if (componentRegistry.has(type)) return;
   componentRegistry.register(type, (input: InstanceInput): SduiComponent => ({
     id: input.id,
     type,
-    properties: { ...defaults, ...input.properties },
+    properties: schema.parse({ ...defaults, ...(input.properties ?? {}) }) as Record<string, unknown>,
     ...content(type, input),
   }));
 }
 
-/** Registers product-neutral composition definitions. */
 export function registerProductionComponentDefinitions(): void {
-  registerComponent('content_component');
-  registerComponent('form_component', { semanticRole: 'form' });
-  registerComponent('stack_component', { orientation: 'vertical' });
+  registerComponent('content_component', contentComponentPropertiesSchema);
+  registerComponent('form_component', formComponentPropertiesSchema, { semanticRole: 'form' });
+  registerComponent('stack_component', stackComponentPropertiesSchema, { orientation: 'vertical' });
 }

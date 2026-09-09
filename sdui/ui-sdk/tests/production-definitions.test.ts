@@ -75,7 +75,7 @@ describe('production SDUI definitions', () => {
   });
 
   it('enforces exactly one legal section branch', () => {
-    const text = ElementFactory.create('text', { id: 'label' });
+    const text = ElementFactory.create('text', { id: 'label', properties: { text: 'Label' } });
     const row = GroupFactory.create('row_group', { id: 'row', elements: [text] });
 
     expect(SectionFactory.create('content_section', { id: 'elements_section', elements: [text] })).toHaveProperty('elements');
@@ -85,7 +85,7 @@ describe('production SDUI definitions', () => {
   });
 
   it('enforces exactly one legal component branch', () => {
-    const text = ElementFactory.create('text', { id: 'label' });
+    const text = ElementFactory.create('text', { id: 'label', properties: { text: 'Label' } });
     const section = SectionFactory.create('content_section', { id: 'section', elements: [text] });
 
     expect(ComponentFactory.create('content_component', { id: 'elements_component', elements: [text] })).toHaveProperty('elements');
@@ -95,7 +95,7 @@ describe('production SDUI definitions', () => {
   });
 
   it('requires templates to receive at least one component', () => {
-    const text = ElementFactory.create('text', { id: 'label' });
+    const text = ElementFactory.create('text', { id: 'label', properties: { text: 'Label' } });
     const component = ComponentFactory.create('form_component', { id: 'form', elements: [text] });
     const template = TemplateFactory.create('form_template', { id: 'form_template_instance', components: [component] });
 

@@ -11,6 +11,7 @@ export * from '../registry/DefinitionRegistry.js';
 export * from '../registry/registries.js';
 export * from '../definitions/production-definitions.js';
 export * from '../definitions/property-contracts.js';
+export * from '../definitions/builders.js';
 export * from '../factory/NodeFactories.js';
 export * from '../builder/HierarchyBuilders.js';
 export * from '../builder/ScreenBuilder.js';
