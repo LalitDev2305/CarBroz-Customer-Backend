@@ -4,8 +4,6 @@ import { isValidSduiScreen, targetAppSchema } from '../src/public/index.js';
 function validScreen(targetApp: 'GLOBAL' | 'PARTNER' | 'CUSTOMER') {
   return {
     screenId: `scope_${targetApp.toLowerCase()}`,
-    templateId: 'default_template_instance',
-    templateType: 'default_template',
     schemaVersion: '3.0.0',
     targetApp,
     template: {
