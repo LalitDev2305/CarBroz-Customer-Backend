@@ -5,8 +5,6 @@ describe('SDUI V3 canonical terminology', () => {
   it('accepts the canonical Template -> Component -> Section -> Group -> Element hierarchy', () => {
     const screen = {
       screenId: 'mapping-test',
-      templateId: 'mapping-template',
-      templateType: 'default',
       schemaVersion: '3.0',
       targetApp: 'CUSTOMER',
       template: {
