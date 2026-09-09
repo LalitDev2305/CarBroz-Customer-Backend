@@ -111,7 +111,7 @@ export class Msg91SmsProvider implements ISmsProvider {
     const variableName = process.env.MSG91_OTP_VARIABLE_NAME;
     if (!templateId || !variableName) {
       const errorCode = 'MSG91_OTP_NOT_CONFIGURED';
-      this.logger.warn('provider.sms.msg91.otp_configuration_missing', {
+      this.logger.warn('provider.sms.msg91.delivery_configuration_missing', {
         provider: 'MSG91',
         operation: 'sendOtp',
         errorCode,
