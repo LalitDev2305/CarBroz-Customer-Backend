@@ -6,5 +6,5 @@ export interface ScreenComposer {
   readonly screenId: string;
   readonly targetApp: SduiTargetApp;
 
-  compose(context: ScreenContext): SduiScreen;
+  build(context: ScreenContext): SduiScreen;
 }
