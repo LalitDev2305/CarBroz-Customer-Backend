@@ -3,6 +3,9 @@ import { dynamicDestinationSchema } from '@carbroz/ui-sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { registerPartnerAuthRoutes } from '../partner-auth.routes.js';
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 describe('Partner Auth Phase 5/6 route contract', () => {
   const apps: Array<ReturnType<typeof Fastify>> = [];
 
@@ -59,12 +62,18 @@ describe('Partner Auth Phase 5/6 route contract', () => {
       deviceId: 'device-123',
     });
 
-    const envelope = response.json();
+    const envelope: unknown = response.json();
+    expect(isRecord(envelope)).toBe(true);
+    if (!isRecord(envelope)) throw new Error('Expected a response envelope object');
+
     expect(envelope.status).toBe(200);
     expect(envelope.code).toBe('SUCCESS');
-    expect(envelope.data.nextScreen).toEqual(nextScreen);
-    expect(() => dynamicDestinationSchema.parse(envelope.data.nextScreen)).not.toThrow();
-    expect(envelope.data.nextScreen).not.toHaveProperty('template');
-    expect(envelope.data.nextScreen).not.toHaveProperty('api');
+    expect(isRecord(envelope.data)).toBe(true);
+    if (!isRecord(envelope.data)) throw new Error('Expected response envelope data object');
+
+    const parsedDestination = dynamicDestinationSchema.parse(envelope.data.nextScreen);
+    expect(parsedDestination).toEqual(nextScreen);
+    expect(parsedDestination).not.toHaveProperty('template');
+    expect(parsedDestination).not.toHaveProperty('api');
   });
 });
