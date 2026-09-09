@@ -1,11 +1,8 @@
 import fp from 'fastify-plugin';
 import type { FastifyInstance } from 'fastify';
 import type { ICacheProvider, IRedisClient } from '@carbroz/platform-cache';
-import {
-  AUTH_SECURITY_POLICY,
-  RedisOtpChallengeRepository,
-  type IOtpChallengeRepository,
-} from '@carbroz/domain-identity';
+import { AUTH_SECURITY_POLICY, type IOtpChallengeRepository } from '@carbroz/domain-identity';
+import { RedisOtpChallengeRepository } from '@carbroz/domain-identity/infrastructure/repositories/RedisOtpChallengeRepository.js';
 import { asFunction, type AwilixContainer } from 'awilix';
 import { createCacheProvider, createRedisClient } from '../cache/create-cache-provider.js';
 import { AppConfig } from '../config/runtime-config.js';
