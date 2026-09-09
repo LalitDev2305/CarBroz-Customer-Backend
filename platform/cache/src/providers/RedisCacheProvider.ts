@@ -8,7 +8,7 @@ const DEFAULT_SCAN_COUNT = 100;
 /** Canonical Redis-backed implementation of the domain-neutral cache contract. */
 export class RedisCacheProvider implements ICacheProvider {
   private readonly keyPrefix: string;
-  private readonly defaultTtlSeconds?: number;
+  private readonly defaultTtlSeconds: number | undefined;
 
   constructor(
     private readonly client: IRedisClient,
