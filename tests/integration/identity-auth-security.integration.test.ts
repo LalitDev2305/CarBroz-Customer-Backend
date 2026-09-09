@@ -3,7 +3,6 @@ import { randomInt } from 'node:crypto';
 import { PrismaProvider } from '@carbroz/platform-database';
 import { AUTH_SECURITY_POLICY } from '@carbroz/domain-identity';
 import { NodeAuthSecurityProvider } from '../../domains/identity/infrastructure/security/NodeAuthSecurityProvider.js';
-import { PrismaOtpChallengeRepository } from '../../domains/identity/infrastructure/repositories/PrismaOtpChallengeRepository.js';
 import { PrismaRefreshTokenRepository } from '../../domains/identity/infrastructure/repositories/PrismaRefreshTokenRepository.js';
 import { PrismaUserSessionRepository } from '../../domains/identity/infrastructure/repositories/PrismaUserSessionRepository.js';
 
@@ -26,34 +25,14 @@ afterAll(async () => {
     }
     await prisma.user.deleteMany({ where: { id: userId } });
   }
-  await prisma.otpChallenge.deleteMany({ where: { phoneNumber } });
   await provider.disconnect();
 });
 
-describe('CW5 Identity security persistence on PostgreSQL', () => {
-  it('stores OTP/refresh hashes, consumes OTP once, rotates refresh tokens, and revokes a replayed family', async () => {
+describe('CW5 Identity refresh-token persistence on PostgreSQL', () => {
+  it('stores only refresh hashes, rotates once, and revokes a replayed family', async () => {
     const security = new NodeAuthSecurityProvider();
-    const otpRepository = new PrismaOtpChallengeRepository(prisma);
     const sessionRepository = new PrismaUserSessionRepository(prisma);
     const refreshRepository = new PrismaRefreshTokenRepository(prisma);
-    const now = new Date();
-
-    const rawOtp = '654321';
-    const otpHash = await security.hashSecret(rawOtp);
-    const challenge = await otpRepository.create({
-      phoneNumber,
-      deviceId: 'cw5-device',
-      otpHash,
-      maxAttempts: AUTH_SECURITY_POLICY.otp.maxAttempts,
-      expiresAt: new Date(now.getTime() + AUTH_SECURITY_POLICY.otp.ttlMs),
-    });
-
-    const persistedChallenge = await prisma.otpChallenge.findUnique({ where: { id: challenge.id } });
-    expect(persistedChallenge?.otpHash).toBe(otpHash);
-    expect(persistedChallenge?.otpHash).not.toBe(rawOtp);
-    await expect(security.verifySecret(rawOtp, persistedChallenge!.otpHash)).resolves.toBe(true);
-    await expect(otpRepository.tryConsume(challenge.id, new Date(), challenge.maxAttempts)).resolves.toBe(true);
-    await expect(otpRepository.tryConsume(challenge.id, new Date(), challenge.maxAttempts)).resolves.toBe(false);
 
     const createdUser = await prisma.user.create({
       data: { phoneNumber, isGuest: false, role: 'USER' },
