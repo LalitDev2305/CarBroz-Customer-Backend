@@ -1,24 +1,54 @@
 import fp from 'fastify-plugin';
 import type { FastifyInstance } from 'fastify';
-import type { ICacheProvider } from '@carbroz/platform-cache';
+import type { ICacheProvider, IRedisClient } from '@carbroz/platform-cache';
+import {
+  AUTH_SECURITY_POLICY,
+  RedisOtpChallengeRepository,
+  type IOtpChallengeRepository,
+} from '@carbroz/domain-identity';
 import { asFunction, type AwilixContainer } from 'awilix';
-import { createCacheProvider } from '../cache/create-cache-provider.js';
+import { createCacheProvider, createRedisClient } from '../cache/create-cache-provider.js';
+import { AppConfig } from '../config/runtime-config.js';
 import { getContainer, type Cradle } from '../container/index.js';
 
 type CacheInfrastructureCradle = Cradle & {
   cacheProvider: ICacheProvider;
+  redisClient: IRedisClient;
+  otpChallengeRepository: IOtpChallengeRepository;
 };
 
 /**
- * Registers and owns startup/shutdown lifecycle for the single application-level
- * cache provider. Registration is idempotent because buildApp can be created more
- * than once in deterministic tests while the canonical Awilix root is process-wide.
+ * Owns the single application Redis client and cache lifecycle.
+ * Development/production also bind Identity OTP persistence to that same client.
+ * Tests retain deterministic in-memory cache + Prisma OTP persistence.
  */
 export default fp(async (app: FastifyInstance) => {
   const container = getContainer() as AwilixContainer<CacheInfrastructureCradle>;
 
-  if (!container.hasRegistration('cacheProvider')) {
-    container.register('cacheProvider', asFunction(createCacheProvider).singleton());
+  if (AppConfig.env === 'test') {
+    if (!container.hasRegistration('cacheProvider')) {
+      container.register('cacheProvider', asFunction(() => createCacheProvider()).singleton());
+    }
+  } else {
+    if (!container.hasRegistration('redisClient')) {
+      container.register('redisClient', asFunction(createRedisClient).singleton());
+    }
+    if (!container.hasRegistration('cacheProvider')) {
+      container.register(
+        'cacheProvider',
+        asFunction((cradle: CacheInfrastructureCradle) => createCacheProvider(cradle.redisClient)).singleton(),
+      );
+    }
+
+    container.register(
+      'otpChallengeRepository',
+      asFunction(
+        (cradle: CacheInfrastructureCradle) => new RedisOtpChallengeRepository(
+          cradle.redisClient,
+          { rateLimitWindowMs: AUTH_SECURITY_POLICY.otp.rateLimitWindowMs },
+        ),
+      ).singleton(),
+    );
   }
 
   const cacheProvider = container.resolve('cacheProvider');
