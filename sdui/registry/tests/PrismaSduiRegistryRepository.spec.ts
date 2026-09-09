@@ -5,8 +5,6 @@ import { PrismaSduiRegistryRepository } from '../infrastructure/repositories/Pri
 const now = new Date('2026-03-01T00:00:00.000Z');
 const validLayout = {
   screenId: 'auth_login',
-  templateId: 't1',
-  templateType: 'auth',
   schemaVersion: '3.0.0',
   targetApp: 'CUSTOMER' as const,
   template: {
