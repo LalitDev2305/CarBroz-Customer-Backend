@@ -1,6 +1,6 @@
+import type { ICacheProvider } from '@carbroz/platform-cache';
 import { IDatabaseProvider } from '@carbroz/platform-database';
 import { FastifyReply, FastifyRequest } from 'fastify';
-
 
 /** HealthController is an exported apps/api contract/implementation; see the owning README for lifecycle and extension rules. */
 export class HealthController {
@@ -18,7 +18,7 @@ export class HealthController {
 
   /**
    * Readiness Probe
-   * Verifies connectivity to core dependencies: Database, Storage, Maps, Push, SMS, Email.
+   * Verifies connectivity to core dependencies required to serve traffic.
    */
   async readiness(request: FastifyRequest, reply: FastifyReply) {
     const checks: Record<string, 'ok' | 'error'> = {};
@@ -38,15 +38,29 @@ export class HealthController {
       isOverallHealthy = false;
     }
 
-    // 2. Storage Provider Probe
+    // 2. Redis/cache Probe
+    try {
+      const cacheProvider = request.diScope.resolve('cacheProvider') as ICacheProvider;
+      const isCacheHealthy = await Promise.race([
+        cacheProvider.health?.() ?? Promise.resolve(true),
+        new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 3000)),
+      ]);
+      checks['redis'] = isCacheHealthy ? 'ok' : 'error';
+      if (!isCacheHealthy) isOverallHealthy = false;
+    } catch {
+      checks['redis'] = 'error';
+      isOverallHealthy = false;
+    }
+
+    // 3. Storage Provider Probe
     try {
       const storageProvider = request.diScope.resolve('storageProvider');
       checks['storage'] = storageProvider ? 'ok' : 'error';
     } catch {
-      checks['storage'] = 'ok'; // Graceful fallback
+      checks['storage'] = 'ok'; // Graceful fallback for non-critical provider registration.
     }
 
-    // 3. Maps Provider Probe
+    // 4. Maps Provider Probe
     try {
       const mapsProvider = request.diScope.resolve('mapsProvider');
       checks['maps'] = mapsProvider ? 'ok' : 'error';
@@ -54,7 +68,7 @@ export class HealthController {
       checks['maps'] = 'ok';
     }
 
-    // 4. Notification Providers Probes
+    // 5. Notification Providers Probe
     try {
       const notificationProvider = request.diScope.resolve('notificationProvider');
       checks['notifications'] = notificationProvider ? 'ok' : 'error';
