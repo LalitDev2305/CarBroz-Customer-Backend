@@ -13,6 +13,7 @@ export type StackTemplateProperties = z.infer<typeof stackTemplatePropertiesSche
 export const StackTemplateDefinition: NodeDefinition<StackTemplateProperties> = {
   type: STACK_TEMPLATE,
   level: 'template',
+  defaults: { orientation: 'vertical' },
   properties: stackTemplatePropertiesSchema,
   children: 'components',
 };
