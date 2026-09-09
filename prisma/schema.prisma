@@ -115,25 +115,6 @@ model UserSession {
   @@unique([userId, deviceId])
 }
 
-model OtpChallenge {
-  id            Int       @id @default(autoincrement())
-  publicId      String    @unique @default(uuid())
-  phoneNumber   String
-  deviceId      String
-  otpHash       String
-  attemptCount  Int       @default(0)
-  maxAttempts   Int
-  expiresAt     DateTime
-  consumedAt    DateTime?
-  invalidatedAt DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  @@index([phoneNumber, createdAt])
-  @@index([phoneNumber, deviceId, createdAt])
-  @@index([expiresAt])
-}
-
 model SystemConfig {
   id          Int       @id @default(autoincrement())
   publicId    String    @unique @default(uuid())
@@ -421,20 +402,20 @@ model Vehicle {
   customerId         Int           @map("customer_id")
   make               String
   model              String
-  variant            String?
-  year               Int
-  registrationNumber String        @map("registration_number")
-  fuelType           String        @map("fuel_type")
-  color              String?
-  nickname           String?
-  isDefault          Boolean       @default(false) @map("is_default")
-  status             VehicleStatus @default(ACTIVE)
-  createdAt          DateTime      @default(now()) @map("created_at")
-  updatedAt          DateTime      @updatedAt @map("updated_at")
-  deletedAt          DateTime?     @map("deleted_at")
+  variant             String?
+  year                Int
+  registrationNumber  String        @map("registration_number")
+  fuelType            String        @map("fuel_type")
+  color               String?
+  nickname            String?
+  isDefault           Boolean       @default(false) @map("is_default")
+  status              VehicleStatus @default(ACTIVE)
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+  deletedAt           DateTime?     @map("deleted_at")
 
-  customer CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  bookings Booking[]
+  customer      CustomerProfile         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  bookings      Booking[]
   fleetVehicles CorporateFleetVehicle[]
 
   @@unique([customerId, registrationNumber])
@@ -557,17 +538,17 @@ model Payment {
 }
 
 model PaymentWebhook {
-  id               Int      @id @default(autoincrement())
-  publicId         String   @unique @default(uuid())
+  id               Int       @id @default(autoincrement())
+  publicId         String    @unique @default(uuid())
   provider         String
-  eventId          String   @map("event_id")
-  eventType        String   @map("event_type")
-  payloadHash      String   @map("payload_hash")
-  processingStatus String   @default("PENDING") @map("processing_status")
-  receivedAt       DateTime @default(now()) @map("received_at")
+  eventId          String    @map("event_id")
+  eventType        String    @map("event_type")
+  payloadHash      String    @map("payload_hash")
+  processingStatus String    @default("PENDING") @map("processing_status")
+  receivedAt       DateTime  @default(now()) @map("received_at")
   processedAt      DateTime? @map("processed_at")
-  failureReason    String?  @map("failure_reason")
-  retryCount       Int      @default(0) @map("retry_count")
+  failureReason    String?   @map("failure_reason")
+  retryCount       Int       @default(0) @map("retry_count")
 
   @@unique([provider, eventId])
   @@index([processingStatus, receivedAt])
@@ -862,14 +843,14 @@ model CorporateAccount {
   companyName         String                 @map("company_name")
   legalName           String                 @map("legal_name")
   gstin               String                 @unique
-  pan                 String
-  billingAddress      Json                   @map("billing_address")
-  creditLimitPaise    BigInt                 @default(0) @map("credit_limit_paise")
-  utilisedCreditPaise BigInt                 @default(0) @map("utilised_credit_paise")
-  status              CorporateAccountStatus @default(PENDING_APPROVAL)
-  paymentTermsDays    Int                    @default(30) @map("payment_terms_days")
-  createdAt           DateTime               @default(now()) @map("created_at")
-  updatedAt           DateTime               @updatedAt @map("updated_at")
+  pan                  String
+  billingAddress       Json                   @map("billing_address")
+  creditLimitPaise     BigInt                 @default(0) @map("credit_limit_paise")
+  utilisedCreditPaise  BigInt                 @default(0) @map("utilised_credit_paise")
+  status               CorporateAccountStatus @default(PENDING_APPROVAL)
+  paymentTermsDays     Int                    @default(30) @map("payment_terms_days")
+  createdAt            DateTime               @default(now()) @map("created_at")
+  updatedAt            DateTime               @updatedAt @map("updated_at")
 
   members       CorporateMember[]
   fleetVehicles CorporateFleetVehicle[]
