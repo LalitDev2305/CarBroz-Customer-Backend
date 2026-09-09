@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client';
+import type { Prisma, PrismaClient } from '@prisma/client';
 import type { OtpChallenge } from '../../domain/OtpChallenge.js';
 import type {
   CreateOtpChallengeInput,
@@ -27,7 +27,7 @@ export class PrismaOtpChallengeRepository implements IOtpChallengeRepository {
     input: CreateOtpChallengeInput,
     guard: OtpChallengeRateLimitGuard,
   ): Promise<OtpChallenge | null> {
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const recentChallenges = await tx.otpChallenge.count({
         where: {
           phoneNumber: input.phoneNumber,
