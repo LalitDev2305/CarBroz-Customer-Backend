@@ -1,6 +1,6 @@
 import {
-  BaseSduiScreenBuilder,
   CURRENT_SDUI_SCHEMA_VERSION,
+  SduiScreenBuilder,
   type SduiScreen,
   type StackComponentBuilder,
   type StackTemplateBuilder,
@@ -8,28 +8,25 @@ import {
 
 export class PartnerOtpScreenBuilder {
   build(): SduiScreen {
-    const screen = new BaseSduiScreenBuilder({
-      screenId: 'partner_otp',
-      schemaVersion: CURRENT_SDUI_SCHEMA_VERSION,
-      targetApp: 'PARTNER',
-    });
+    const screen = new SduiScreenBuilder();
 
-    screen.withTheme({
-      theme: 'light',
-      statusBar: 'transparent',
-      properties: {
-        gradient: {
-          type: 'linear',
-          angle: 135,
-          colors: [
-            { color: '#DDF8F6', stop: 0 },
-            { color: '#F7FEFD', stop: 0.28 },
-            { color: '#FFFFFF', stop: 0.55 },
-            { color: '#D9F7F4', stop: 1 },
-          ],
-        },
-      },
-    });
+    screen
+      .id('partner_otp')
+      .schemaVersion(CURRENT_SDUI_SCHEMA_VERSION)
+      .targetApp('PARTNER');
+
+    const theme = screen.theme();
+    theme
+      .light()
+      .statusBarTransparent();
+
+    const gradient = theme.linearGradient();
+    gradient
+      .angle(135)
+      .addColor('#DDF8F6', 0)
+      .addColor('#F7FEFD', 0.28)
+      .addColor('#FFFFFF', 0.55)
+      .addColor('#D9F7F4', 1);
 
     const template = screen.addFormTemplate('tpl_partner_otp_v1');
     template
@@ -49,13 +46,17 @@ export class PartnerOtpScreenBuilder {
     const header = template.addStackComponent('otp_header');
     header.vertical().spacing(8).horizontalAlignment('center').fillMaxWidth();
 
-    header.addText('otp_title', 'Verify OTP')
+    const title = header.addText('otp_title');
+    title
+      .value('Verify OTP')
       .fontSize(30)
       .fontWeight(700)
       .color('#101522')
       .textAlign('center');
 
-    header.addText('otp_subtitle', 'Enter the 6-digit code sent to your mobile number')
+    const subtitle = header.addText('otp_subtitle');
+    subtitle
+      .value('Enter the 6-digit code sent to your mobile number')
       .fontSize(15)
       .fontWeight(400)
       .color('#6B7078')
@@ -75,7 +76,8 @@ export class PartnerOtpScreenBuilder {
     const section = component.addStackSection('otp_input_section');
     section.vertical().horizontalAlignment('center').fillMaxWidth();
 
-    section.addInput('otp_input')
+    const otpInput = section.addInput('otp_input');
+    otpInput
       .placeholder('000000')
       .number()
       .maxLength(6)
@@ -91,7 +93,9 @@ export class PartnerOtpScreenBuilder {
     const section = component.addStackSection('otp_action_section');
     section.vertical().spacing(12).horizontalAlignment('center').fillMaxWidth();
 
-    section.addButton('verify_otp_button', 'Verify & Continue')
+    const verifyButton = section.addButton('verify_otp_button');
+    verifyButton
+      .text('Verify & Continue')
       .fillMaxWidth()
       .height(56)
       .fontSize(18)
@@ -105,22 +109,20 @@ export class PartnerOtpScreenBuilder {
           { color: '#28CBC7', stop: 0 },
           { color: '#10B6B3', stop: 1 },
         ],
-      })
-      .onClick({
-        type: 'request',
-        payload: {
-          method: 'POST',
-          endpoint: '/api/v1/partner/auth/verify_otp',
-          authentication: 'NONE',
-          validate: true,
-          body: {
-            challengeId: { $response: 'data.challengeId' },
-            phoneNumber: { $context: 'authFlow.phoneNumber' },
-            otp: { $binding: 'otp' },
-            deviceId: { $context: 'deviceId' },
-          },
-          responseMode: 'destination',
-        },
       });
+
+    const request = verifyButton.onClickRequest();
+    request
+      .method('POST')
+      .endpoint('/api/v1/partner/auth/verify_otp')
+      .authentication('NONE')
+      .validate(true)
+      .responseMode('destination');
+
+    const body = request.body();
+    body.response('challengeId', 'data.challengeId');
+    body.context('phoneNumber', 'authFlow.phoneNumber');
+    body.binding('otp', 'otp');
+    body.context('deviceId', 'deviceId');
   }
 }
