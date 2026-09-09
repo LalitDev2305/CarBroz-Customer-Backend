@@ -41,11 +41,13 @@ IOtpChallengeRepository
 Identity infrastructure adapter
              ↓
 platform/cache Redis infrastructure
+             ↓
+Redis client supplied by apps/api
 ```
 
 The Redis adapter must preserve the existing repository/business semantics: challenge creation, latest-by-phone lookup, rate-window counting, failed-attempt recording, atomic one-time consumption and invalidation.
 
-Redis technical connection/configuration lifecycle belongs to `platform/cache`; Redis key/serialization logic specific to OTP challenge persistence belongs to the Identity infrastructure adapter implementing `IOtpChallengeRepository`.
+`platform/cache` owns the domain-neutral Redis/cache provider behavior and the injected Redis client surface. The executable `apps/api` composition root owns `REDIS_URL`, concrete `ioredis` construction/vendor options, singleton DI registration, Fastify startup/shutdown orchestration and readiness integration. Redis key/serialization logic specific to OTP challenge persistence belongs to the Identity infrastructure adapter implementing `IOtpChallengeRepository`.
 
 Do not call Redis directly from Identity use cases.
 
