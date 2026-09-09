@@ -87,7 +87,7 @@ local raw = redis.call('GET', KEYS[1])
 if not raw then return nil end
 local record = cjson.decode(raw)
 local maxAttempts = tonumber(ARGV[1])
-if record.consumedAt ~= nil or record.invalidatedAt ~= nil then return nil end
+if record.consumedAt ~= cjson.null or record.invalidatedAt ~= cjson.null then return nil end
 if tonumber(record.attemptCount) >= maxAttempts then return nil end
 record.attemptCount = tonumber(record.attemptCount) + 1
 record.updatedAt = ARGV[2]
@@ -108,7 +108,7 @@ if not raw then return 0 end
 local record = cjson.decode(raw)
 local nowMs = tonumber(ARGV[1])
 local maxAttempts = tonumber(ARGV[2])
-if record.consumedAt ~= nil or record.invalidatedAt ~= nil then return 0 end
+if record.consumedAt ~= cjson.null or record.invalidatedAt ~= cjson.null then return 0 end
 if tonumber(record.attemptCount) >= maxAttempts then return 0 end
 local expiresAtMs = tonumber(ARGV[3])
 if expiresAtMs <= nowMs then return 0 end
@@ -129,7 +129,7 @@ const INVALIDATE_SCRIPT = `
 local raw = redis.call('GET', KEYS[1])
 if not raw then return 0 end
 local record = cjson.decode(raw)
-if record.consumedAt ~= nil or record.invalidatedAt ~= nil then return 0 end
+if record.consumedAt ~= cjson.null or record.invalidatedAt ~= cjson.null then return 0 end
 record.invalidatedAt = ARGV[1]
 record.updatedAt = ARGV[1]
 local encoded = cjson.encode(record)
