@@ -14,6 +14,7 @@ export type StackComponentProperties = z.infer<typeof stackComponentPropertiesSc
 export const StackComponentDefinition: NodeDefinition<StackComponentProperties> = {
   type: STACK_COMPONENT,
   level: 'component',
+  defaults: { orientation: 'vertical' },
   properties: stackComponentPropertiesSchema,
   children: 'elements-or-sections',
 };
