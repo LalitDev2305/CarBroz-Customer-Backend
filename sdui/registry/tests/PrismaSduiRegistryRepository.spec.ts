@@ -9,12 +9,14 @@ const validLayout = {
   targetApp: 'CUSTOMER' as const,
   template: {
     id: 't1',
-    type: 'auth',
+    type: 'stack_template',
+    properties: { orientation: 'vertical' as const },
     components: [
       {
         id: 'c1',
-        type: 'layout',
-        elements: [{ id: 'e1', type: 'text', properties: {} }],
+        type: 'stack_component',
+        properties: { orientation: 'vertical' as const },
+        elements: [{ id: 'e1', type: 'text', properties: { text: 'Hello' } }],
       },
     ],
   },
@@ -344,5 +346,19 @@ describe('PrismaSduiRegistryRepository', () => {
     expect((await (repository[getMethod] as any)(record.name))?.nodeLevel).toBe(level);
     await expect((repository[getMethod] as any)('missing')).resolves.toBeNull();
     expect((await (repository[listMethod] as any)()).map((item: any) => item.nodeLevel)).toEqual([level]);
+  });
+
+  it.each([
+    ['createComponent', 'stack_component'],
+    ['createSection', 'stack_section'],
+    ['createGroup', 'stack_group'],
+    ['createElement', 'text'],
+  ] as const)('prevents legacy %s catalogue from redefining canonical ui-sdk type %s', async (method, componentType) => {
+    await expect((repository[method] as any)({
+      name: `legacy_${componentType}`,
+      componentType,
+      schemaJson: { type: 'object' },
+    })).rejects.toMatchObject({ code: KernelErrorCode.CONFLICT, statusCode: 409 });
+    expect(client.sduiComponentRegistry.upsert).not.toHaveBeenCalled();
   });
 });
