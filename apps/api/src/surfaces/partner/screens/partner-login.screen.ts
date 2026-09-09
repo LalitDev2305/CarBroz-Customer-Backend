@@ -92,7 +92,11 @@ export function createPartnerLoginScreen(): SduiScreen {
                       type: 'request',
                       payload: {
                         method: 'POST', endpoint: '/api/v1/partner/auth/send_otp', authentication: 'NONE', validate: true,
-                        body: { mobileNumber: { $binding: 'mobileNumber' } }, responseMode: 'destination',
+                        body: {
+                          phoneNumber: { $binding: 'mobileNumber' },
+                          deviceId: { $context: 'deviceId' },
+                        },
+                        responseMode: 'destination',
                       },
                     },
                   },
