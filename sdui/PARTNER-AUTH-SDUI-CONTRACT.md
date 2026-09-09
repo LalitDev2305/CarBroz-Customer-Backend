@@ -1,0 +1,252 @@
+# Partner Authentication SDUI Contract Addendum
+
+> **Status:** FROZEN for the Partner Login → OTP backend implementation.
+>
+> **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` remain higher-level execution authorities.
+>
+> **Purpose:** Correct and freeze the SDUI-specific contracts required by the current Partner authentication work without duplicating the generic SDUI implementation guide.
+
+---
+
+## 1. Loaded Screen identity
+
+The canonical loaded `SduiScreen` shape is the current `screenSchema` implementation:
+
+```json
+{
+  "screenId": "partner_login",
+  "schemaVersion": "3.0.0",
+  "targetApp": "PARTNER",
+  "theme": {},
+  "metadata": {},
+  "template": {
+    "id": "tpl_7K2M9Q",
+    "type": "stack_template",
+    "components": []
+  }
+}
+```
+
+Root-level `templateId` and `templateType` do **not** belong to a loaded Screen and are rejected by the strict schema.
+
+Canonical identity is:
+
+```text
+screen.screenId
+screen.template.id
+screen.template.type
+```
+
+Any older SDUI documentation example that shows root `templateId/templateType` on a loaded Screen is stale for current V3 implementation and must not be copied into new code.
+
+---
+
+## 2. Destination metadata is a different contract
+
+Before a screen is fetched, navigation/startup/request results may carry a destination:
+
+```json
+{
+  "screenId": "partner_otp",
+  "templateId": "<template-id>",
+  "templateType": "<template-type>",
+  "endpoint": "/api/v1/partner/screen/<route>",
+  "method": "GET",
+  "authentication": "NONE"
+}
+```
+
+This duplication is intentional because the template has not yet been loaded.
+
+The existing `dynamicDestinationSchema` remains canonical. No Partner-specific destination type should be introduced in `sdui/ui-sdk`.
+
+---
+
+## 3. Destination-to-Screen verification
+
+When a destination is fetched, the runtime contract must be able to enforce:
+
+```text
+destination.screenId     == loaded.screenId
+destination.templateId   == loaded.template.id
+destination.templateType == loaded.template.type
+```
+
+Authentication requirements must also be satisfied before performing an authenticated destination fetch.
+
+Backend tests must guarantee that published destination metadata and the served screen stay consistent.
+
+---
+
+## 4. Generic REQUEST action remains canonical
+
+The existing request action supports the Partner Login/OTP flow and must be reused.
+
+Supported reference sources already include:
+
+```text
+$binding
+$context
+$response
+$literal
+```
+
+The Partner authentication implementation must not add:
+
+```text
+LoginContinueAction
+OtpVerifyAction
+LoginOnSuccessAction
+OtpNavigationAction
+second ActionEngine
+```
+
+unless a repository-wide generic capability gap is first proven and documented.
+
+---
+
+## 5. `responseMode: destination`
+
+For a request action configured with:
+
+```json
+{
+  "responseMode": "destination"
+}
+```
+
+the frozen semantic sequence is:
+
+```text
+validate form state
+      ↓
+resolve generic references
+      ↓
+perform HTTP request
+      ↓
+HTTP/application failure? ── yes ──> expose error; DO NOT navigate
+      │
+      no
+      ↓
+read canonical next destination
+      ↓
+validate destination
+      ↓
+navigate/fetch destination
+```
+
+The backend response must therefore return canonical destination metadata rather than the legacy `{ template, api }` shape.
+
+---
+
+## 6. Partner Login request contract
+
+The current Login screen is reused.
+
+Current canonical screen identity:
+
+```text
+screenId      = partner_login
+template.id   = tpl_7K2M9Q
+template.type = stack_template
+targetApp     = PARTNER
+```
+
+The Continue action will continue using generic request semantics.
+
+Target request-body mapping:
+
+```json
+{
+  "phoneNumber": { "$binding": "mobileNumber" },
+  "deviceId": { "$context": "deviceId" }
+}
+```
+
+`phoneNumber` is user-entered form state.
+`deviceId` is runtime context and must not be modeled as a visible SDUI field merely to satisfy the HTTP DTO.
+
+The exact client runtime context-key registry belongs to the frontend/runtime contract. The backend schema only owns generic `$context` validation.
+
+---
+
+## 7. OTP screen creation rule
+
+No OTP-specific generic SDK type is authorized.
+
+When the OTP Partner screen is implemented, it must first attempt to express the design using existing generic:
+
+```text
+Template
+Component
+Section
+Group
+Element
+request action
+binding/context/response references
+```
+
+A new generic Element/behavior type is allowed only if existing primitives objectively cannot express the required reusable behavior and the new type is product-neutral.
+
+The product composition belongs under:
+
+```text
+apps/api/src/surfaces/partner/screens/
+```
+
+not inside `sdui/ui-sdk` definitions as a Partner-specific class.
+
+---
+
+## 8. OTP runtime-state inputs
+
+The OTP verification request is expected to resolve generic state/context approximately as:
+
+```text
+challengeId ← previous Send OTP response/navigation state
+phoneNumber ← retained flow state/context
+otp         ← OTP input binding
+deviceId    ← runtime context
+optional device metadata ← runtime context
+```
+
+No hidden server-side assumption should be required for values that the client/runtime must explicitly preserve across the flow.
+
+---
+
+## 9. MVI/UDF compatibility
+
+Frontend MVI/UDF is not implemented in this backend package.
+
+The SDUI/backend contract supports MVI/UDF by remaining:
+
+- deterministic;
+- action-driven;
+- explicit about input references;
+- explicit about success destinations;
+- explicit about failure/no-navigation semantics;
+- immutable at the contract boundary;
+- free of screen-specific hidden side effects.
+
+The frontend will consume these contracts through its existing ActionEngine/store/reducer architecture after backend freeze.
+
+---
+
+## 10. Implementation sequencing
+
+The authoritative phase ordering is maintained in:
+
+```text
+docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md
+```
+
+For SDUI specifically:
+
+1. keep current loaded Screen schema;
+2. keep current generic action/destination schema unless a proven gap exists;
+3. align Login request references;
+4. align Send OTP backend destination result;
+5. only then create the OTP Partner screen/route;
+6. validate destination ↔ fetched Screen identity;
+7. align Verify OTP request/result;
+8. defer authenticated Dashboard routing until a real Dashboard Screen exists.
