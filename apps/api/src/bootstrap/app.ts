@@ -12,6 +12,7 @@ import { SecurityConfig, LoggingConfig } from './config/runtime-config.js';
 import { globalErrorHandler } from '../transport/middleware/error-handler.js';
 import { ResponseHelper } from '../transport/response/ResponseHelper.js';
 import diPlugin from './plugins/di.plugin.js';
+import redisCachePlugin from './plugins/redis-cache.plugin.js';
 import requestContextPlugin from './plugins/request-context.js';
 import shutdownPlugin from './plugins/shutdown.plugin.js';
 import jwtPlugin from './plugins/jwt.plugin.js';
@@ -45,6 +46,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
   await app.register(shutdownPlugin);
   await app.register(diPlugin);
+  await app.register(redisCachePlugin);
   await app.register(requestContextPlugin);
   await app.register(jwtPlugin);
   await app.register(authorizationPlugin);
