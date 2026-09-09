@@ -4,6 +4,7 @@
  * The concrete vendor client is supplied by the executable composition root.
  * This keeps platform/cache independently testable without exposing vendor types
  * through domain/application layers. New methods must remain domain-neutral.
+ * Phase 4 adds only generic sorted-set counting and script evaluation primitives for technical adapters.
  */
 export interface IRedisClient {
   readonly status: string;
