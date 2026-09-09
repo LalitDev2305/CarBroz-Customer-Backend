@@ -4,3 +4,4 @@ export * from './src/payment/RazorpayPaymentGatewayProvider.js';
 export * from './src/communications/FirebasePushProvider.js';
 export * from './src/communications/Msg91SmsProvider.js';
 export * from './src/communications/ResendEmailProvider.js';
+export * from './src/identity/RedisOtpChallengeRepository.js';
