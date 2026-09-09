@@ -100,7 +100,7 @@ for (const marker of [
   'provider.sms.msg91.invalid_response',
   'provider.sms.msg91.provider_rejected',
   'provider.sms.msg91.unavailable',
-  'provider.sms.msg91.otp_configuration_missing',
+  'provider.sms.msg91.delivery_configuration_missing',
   "provider: 'MSG91'",
   "operation: 'sendSms'",
   'errorCode',
