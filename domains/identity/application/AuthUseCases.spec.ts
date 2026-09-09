@@ -180,7 +180,7 @@ describe('Identity authentication use cases', () => {
     expect(otpRepository.recordFailedAttempt).toHaveBeenCalledWith(challenge.id, challenge.maxAttempts);
   });
 
-  it('consumes a valid challenge and creates a hashed refresh-token family', async () => {
+  it('consumes a valid challenge, creates a hashed refresh-token family, and returns the canonical authenticated destination', async () => {
     const userRepository = users(null);
     const sessionRepository = sessions();
     const otpRepository = challenges();
@@ -206,7 +206,20 @@ describe('Identity authentication use cases', () => {
       fcmToken: 'fcm-1',
     });
 
-    expect(result).toMatchObject({ user, session, nextScreen: { template: 'dashboard_template', api: 'home' } });
+    expect(result).toMatchObject({
+      user,
+      session,
+      nextScreen: {
+        screenId: 'partner_dashboard',
+        templateId: 'partner_dashboard_template',
+        templateType: 'default_template',
+        endpoint: '/api/v1/partner/sdui/registry/partner_dashboard',
+        method: 'GET',
+        authentication: 'SESSION',
+      },
+    });
+    expect(result.nextScreen).not.toHaveProperty('template');
+    expect(result.nextScreen).not.toHaveProperty('api');
     expect(result.refreshToken).toBe('raw-refresh-token-with-enough-entropy-material');
     expect(otpRepository.tryConsume).toHaveBeenCalledWith(challenge.id, expect.any(Date), challenge.maxAttempts);
     expect(refreshRepository.issue).toHaveBeenCalledWith(expect.objectContaining({
