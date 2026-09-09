@@ -13,6 +13,8 @@ type DomainErrorResponse = {
 const DOMAIN_ERROR_PREFIX = /^([A-Z][A-Z0-9_]+):\s*(.*)$/s;
 const SAFE_VALIDATION_MESSAGE = 'The request contains invalid information.';
 const SAFE_INTERNAL_MESSAGE = 'Something went wrong. Please try again later.';
+const SAFE_UNAUTHORIZED_MESSAGE = 'Authentication is required.';
+const SAFE_FORBIDDEN_MESSAGE = 'Access is forbidden.';
 
 function statusForDomainCode(code: string): ApiErrorStatus {
   if (code === 'UNAUTHORIZED' || code.endsWith('_UNAUTHORIZED')) return 401;
@@ -114,6 +116,17 @@ export const globalErrorHandler = (
     return reply.status(400).send(
       ResponseHelper.error(400, SAFE_VALIDATION_MESSAGE, traceId, 'VALIDATION_ERROR'),
     );
+  }
+
+  // Fastify authentication plugins (including @fastify/jwt) surface transport-owned 401/403
+  // errors rather than Foundation AppError instances. Preserve the transport status while keeping
+  // plugin/internal error details out of the public envelope.
+  if (error.statusCode === 401 || error.statusCode === 403) {
+    const status = error.statusCode;
+    const code = status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN';
+    const message = status === 401 ? SAFE_UNAUTHORIZED_MESSAGE : SAFE_FORBIDDEN_MESSAGE;
+    if (structuredErrorLogging) request.log.warn({ err: error, traceId }, 'Transport Authorization Error');
+    return reply.status(status).send(ResponseHelper.error(status, message, traceId, code));
   }
 
   if (structuredErrorLogging) request.log.error({ err: error, traceId }, 'Unhandled Internal Server Error');
