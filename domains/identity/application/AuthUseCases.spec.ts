@@ -124,7 +124,7 @@ const delivery = (): IOtpDeliveryProvider => ({
 });
 
 describe('Identity authentication use cases', () => {
-  it('reports new/existing users without disclosing OTP material', async () => {
+  it('reports new/existing users with the canonical Phase 6 destination contract and without OTP material', async () => {
     const userRepository = users(null);
     const otpRepository = challenges();
     const otpDelivery = delivery();
@@ -132,10 +132,21 @@ describe('Identity authentication use cases', () => {
 
     const first = await useCase.execute({ phoneNumber: '9999999999', deviceId: 'device-1' });
     expect(first).toMatchObject({
+      message: 'OTP sent successfully',
       challengeId: challenge.publicId,
       isNewUser: true,
-      nextScreen: { template: 'form_template', api: 'auth/auth_otp' },
+      nextScreen: {
+        screenId: 'partner_otp',
+        templateId: 'tpl_partner_otp_v1',
+        templateType: 'form_template',
+        endpoint: '/api/v1/partner/screen/auth_otp',
+        method: 'GET',
+        authentication: 'NONE',
+      },
     });
+    expect(first.expiresInSeconds).toBeGreaterThan(0);
+    expect(first.nextScreen).not.toHaveProperty('template');
+    expect(first.nextScreen).not.toHaveProperty('api');
     expect(first).not.toHaveProperty('mockOtp');
     expect(first).not.toHaveProperty('otp');
 
