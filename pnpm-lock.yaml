@@ -696,9 +696,6 @@ importers:
       '@carbroz/foundation-kernel':
         specifier: workspace:*
         version: link:../../foundation/kernel
-      '@carbroz/platform-cache':
-        specifier: workspace:*
-        version: link:../../platform/cache
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -786,9 +783,15 @@ importers:
       '@carbroz/domain-financials':
         specifier: workspace:*
         version: link:../../domains/financials
+      '@carbroz/domain-identity':
+        specifier: workspace:*
+        version: link:../../domains/identity
       '@carbroz/domain-operations':
         specifier: workspace:*
         version: link:../../domains/operations
+      '@carbroz/platform-cache':
+        specifier: workspace:*
+        version: link:../cache
       '@carbroz/platform-observability':
         specifier: workspace:*
         version: link:../observability
