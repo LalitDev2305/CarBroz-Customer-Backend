@@ -1,18 +1,30 @@
 import Fastify from 'fastify';
+import { dynamicDestinationSchema } from '@carbroz/ui-sdk';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { registerPartnerAuthRoutes } from '../partner-auth.routes.js';
 
-describe('Partner Auth Phase 5 route contract', () => {
+describe('Partner Auth Phase 5/6 route contract', () => {
   const apps: Array<ReturnType<typeof Fastify>> = [];
 
   afterEach(async () => {
     await Promise.all(apps.splice(0).map(async (app) => app.close()));
   });
 
-  it('mounts Send OTP at the exact Partner URL and forwards the canonical request body', async () => {
+  it('mounts Send OTP at the exact Partner URL, forwards the canonical body, and returns a valid destination', async () => {
+    const nextScreen = {
+      screenId: 'partner_otp',
+      templateId: 'tpl_partner_otp_v1',
+      templateType: 'form_template',
+      endpoint: '/api/v1/partner/screen/auth_otp',
+      method: 'GET' as const,
+      authentication: 'NONE' as const,
+    };
     const execute = vi.fn().mockResolvedValue({
+      message: 'OTP sent successfully',
       challengeId: 'challenge-123',
-      nextScreen: { template: 'form_template', api: 'auth/auth_otp' },
+      expiresInSeconds: 300,
+      isNewUser: true,
+      nextScreen,
     });
 
     const app = Fastify();
@@ -46,5 +58,13 @@ describe('Partner Auth Phase 5 route contract', () => {
       phoneNumber: '9876543210',
       deviceId: 'device-123',
     });
+
+    const envelope = response.json();
+    expect(envelope.status).toBe(200);
+    expect(envelope.code).toBe('SUCCESS');
+    expect(envelope.data.nextScreen).toEqual(nextScreen);
+    expect(() => dynamicDestinationSchema.parse(envelope.data.nextScreen)).not.toThrow();
+    expect(envelope.data.nextScreen).not.toHaveProperty('template');
+    expect(envelope.data.nextScreen).not.toHaveProperty('api');
   });
 });
