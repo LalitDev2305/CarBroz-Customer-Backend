@@ -1,5 +1,6 @@
-import { parseSduiScreen, type SduiScreen, type SduiTargetApp } from '@carbroz/ui-sdk';
+import type { SduiScreen, SduiTargetApp } from '@carbroz/ui-sdk';
 import type { ScreenContext } from './core/ScreenContext.js';
+import { SduiValidator } from './core/SduiValidator.js';
 import { ScreenRegistry } from './registry/ScreenRegistry.js';
 
 export interface BuildScreenRequest {
@@ -10,11 +11,14 @@ export interface BuildScreenRequest {
 
 /** Single application-facing façade for dynamic SDUI screen composition. */
 export class SduiService {
-  constructor(private readonly registry: ScreenRegistry) {}
+  constructor(
+    private readonly registry: ScreenRegistry,
+    private readonly validator: SduiValidator,
+  ) {}
 
   buildScreen(request: BuildScreenRequest): SduiScreen {
-    const composer = this.registry.resolve(request.targetApp, request.screenId);
-    const screen = composer.compose(request.context ?? {});
+    const composer = this.registry.get(request.targetApp, request.screenId);
+    const screen = composer.build(request.context ?? {});
 
     if (screen.screenId !== request.screenId) {
       throw new Error(
@@ -28,6 +32,6 @@ export class SduiService {
       );
     }
 
-    return parseSduiScreen(screen);
+    return this.validator.validate(screen);
   }
 }
