@@ -1,7 +1,12 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { asValue } from 'awilix';
+import { asValue, type AwilixContainer } from 'awilix';
+import type { ICacheProvider } from '@carbroz/platform-cache';
 import { buildApp } from '../app.js';
-import { getContainer } from './index.js';
+import { getContainer, type Cradle } from './index.js';
+
+type TestCradle = Cradle & {
+  cacheProvider: ICacheProvider;
+};
 
 let app: Awaited<ReturnType<typeof buildApp>> | undefined;
 
@@ -27,13 +32,19 @@ describe('DI Container', () => {
     const rootPartnerBootstrapUseCase = container.resolve('getPartnerBootstrapUseCase');
 
     app = await buildApp();
+
+    const cacheContainer = container as AwilixContainer<TestCradle>;
+    const rootCacheProvider = cacheContainer.resolve('cacheProvider');
+
     app.get('/__test/di-scope', async (request) => {
       const scopedDatabaseProvider = request.diScope.resolve('databaseProvider');
       const scopedPartnerBootstrapUseCase = request.diScope.resolve('getPartnerBootstrapUseCase');
+      const scopedCacheProvider = (request.diScope as AwilixContainer<TestCradle>).resolve('cacheProvider');
 
       return {
         sameDatabaseProvider: scopedDatabaseProvider === rootDatabaseProvider,
         samePartnerBootstrapUseCase: scopedPartnerBootstrapUseCase === rootPartnerBootstrapUseCase,
+        sameCacheProvider: scopedCacheProvider === rootCacheProvider,
       };
     });
 
@@ -43,6 +54,7 @@ describe('DI Container', () => {
     expect(response.json()).toEqual({
       sameDatabaseProvider: true,
       samePartnerBootstrapUseCase: true,
+      sameCacheProvider: true,
     });
   });
 });
