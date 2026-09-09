@@ -23,5 +23,6 @@ export * from '../application/use-cases/LogoutUseCase.js';
 export * from '../application/use-cases/RefreshTokenUseCase.js';
 export * from '../application/use-cases/SendOtpUseCase.js';
 export * from '../application/use-cases/VerifyOtpUseCase.js';
+export * from '../infrastructure/repositories/RedisOtpChallengeRepository.js';
 export * from '../identity.module.js';
 export * from '../module.manifest.js';
