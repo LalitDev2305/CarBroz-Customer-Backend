@@ -14,6 +14,7 @@ export * from '../definitions/property-contracts.js';
 export * from '../definitions/builders.js';
 export * from '../factory/NodeFactories.js';
 export * from '../builder/HierarchyBuilders.js';
+export * from '../builder/BaseSduiScreenBuilder.js';
 export * from '../builder/ScreenBuilder.js';
 export * from '../validator/validate-screen.js';
 export * from '../serializer/ScreenSerializer.js';
