@@ -2,6 +2,10 @@
 
 This folder owns the canonical HTTP response envelope for `apps/api`. It is a transport concern and does not move business, domain, persistence or SDUI ownership into the API layer. The normative architecture authority remains `docs/MASTER-BACKEND-CONSTITUTION.md`.
 
+## Phase 2 status
+
+Repository-wide response/error reconciliation is implemented and frozen here. This folder is the single transport owner for response envelopes and error mapping; product surfaces must reuse it rather than define local response helpers or status maps. Phase 2 acceptance requires the canonical backend CI to pass error/PII architecture gates, Prisma checks, monorepo build, ESLint, full Vitest, post-test re-verification and the non-mutating validation proof on the documentation-complete HEAD.
+
 ## Canonical envelope
 
 Successful and mapped failed JSON responses use one transport shape:
