@@ -133,9 +133,12 @@ The current guest destination already uses the new Login values; implementation 
 
 Configuration owns the data snapshot, not the global HTTP envelope.
 
-The Partner bootstrap controller/`ResponseHelper` own the transport envelope. The current backend-wide response/error contract will be reconciled in Phase 2 of:
+The Partner bootstrap controller reuses the canonical transport envelope owned by `apps/api/src/transport/response/ResponseHelper.ts` and the global Fastify error handler. Phase 2 of the canonical implementation plan completed and froze that backend-wide response/error contract.
+
+The current contract is documented in:
 
 ```text
+apps/api/src/transport/response/README.md
 docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md
 ```
 
