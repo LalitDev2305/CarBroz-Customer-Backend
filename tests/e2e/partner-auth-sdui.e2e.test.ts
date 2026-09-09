@@ -4,7 +4,7 @@ import type { FastifyInstance } from 'fastify';
 import type { IOtpDeliveryProvider } from '@carbroz/domain-identity';
 import { buildApp } from '../../apps/api/src/bootstrap/app.js';
 import { getContainer } from '../../apps/api/src/bootstrap/container/index.js';
-import { buildPartnerDashboardScreen } from '../../apps/api/src/surfaces/partner/screens/partner-dashboard.screen.js';
+import { createPartnerDashboardScreen } from '../../apps/api/src/surfaces/partner/screens/partner-dashboard.screen.js';
 
 const bootstrapHeaders = {
   'x-carbroz-platform': 'ANDROID',
@@ -39,7 +39,7 @@ beforeAll(async () => {
   container.register('smsProvider', { resolve: () => deliveryProvider });
 
   const prisma = container.resolve('prismaProvider').getClient();
-  const dashboard = buildPartnerDashboardScreen();
+  const dashboard = createPartnerDashboardScreen();
   await prisma.sduiScreen.deleteMany({ where: { screenId: dashboard.screenId, targetApp: 'PARTNER' } });
   await prisma.sduiScreen.create({
     data: {
