@@ -1,13 +1,11 @@
 import type { SduiComponent } from '../../../contract/component.schema.js';
-import type { SduiElement } from '../../../contract/element.schema.js';
-import type { SduiSection } from '../../../contract/section.schema.js';
-import { TypedPropertyBuilder } from '../../../builder/TypedPropertyBuilder.js';
+import { ElementParentBuilder } from '../../../builder/ElementParentBuilder.js';
 import { ComponentFactory } from '../../../factory/NodeFactories.js';
+import { StackSectionBuilder } from '../../sections/stack/stack-section.builder.js';
 import type { StackComponentProperties } from './stack-component.properties.js';
 
-export class StackComponentBuilder extends TypedPropertyBuilder<StackComponentProperties> {
-  private readonly elements: SduiElement[] = [];
-  private readonly sections: SduiSection[] = [];
+export class StackComponentBuilder extends ElementParentBuilder<StackComponentProperties> {
+  private readonly sectionBuilders: StackSectionBuilder[] = [];
   private orientation: 'vertical' | 'horizontal' = 'vertical';
 
   constructor(private readonly id: string) { super(); }
@@ -24,25 +22,38 @@ export class StackComponentBuilder extends TypedPropertyBuilder<StackComponentPr
       ? this.setProperty('horizontalAlignment', 'center')
       : this.setProperty('verticalAlignment', 'center');
   }
+  horizontalAlignment(value: StackComponentProperties['horizontalAlignment']): this { return this.setProperty('horizontalAlignment', value); }
+  verticalAlignment(value: StackComponentProperties['verticalAlignment']): this { return this.setProperty('verticalAlignment', value); }
   padding(value: StackComponentProperties['padding']): this { return this.setProperty('padding', value); }
+  width(value: StackComponentProperties['width']): this { return this.setProperty('width', value); }
+  height(value: StackComponentProperties['height']): this { return this.setProperty('height', value); }
+  maxWidth(value: StackComponentProperties['maxWidth']): this { return this.setProperty('maxWidth', value); }
+  weight(value: StackComponentProperties['weight']): this { return this.setProperty('weight', value); }
   fillMaxWidth(value = true): this { return this.setProperty('fillMaxWidth', value); }
   fillMaxHeight(value = true): this { return this.setProperty('fillMaxHeight', value); }
   fillMaxSize(value = true): this { return this.setProperty('fillMaxSize', value); }
+  background(value: StackComponentProperties['background']): this { return this.setProperty('background', value); }
+  border(value: StackComponentProperties['border']): this { return this.setProperty('border', value); }
+  shape(value: StackComponentProperties['shape']): this { return this.setProperty('shape', value); }
 
-  addElement(element: SduiElement): this {
-    if (this.sections.length) throw new Error('StackComponentBuilder cannot contain both elements and sections');
-    this.elements.push(element);
-    return this;
+  protected override beforeAddElement(): void {
+    if (this.sectionBuilders.length > 0) {
+      throw new Error('StackComponentBuilder cannot contain both elements and sections');
+    }
   }
 
-  addSection(section: SduiSection): this {
-    if (this.elements.length) throw new Error('StackComponentBuilder cannot contain both elements and sections');
-    this.sections.push(section);
-    return this;
+  addStackSection(id: string): StackSectionBuilder {
+    if (this.hasElements()) throw new Error('StackComponentBuilder cannot contain both elements and sections');
+    const section = new StackSectionBuilder(id);
+    this.sectionBuilders.push(section);
+    return section;
   }
 
   build(): SduiComponent {
-    const content = this.sections.length ? { sections: this.sections } : { elements: this.elements };
+    const content = this.sectionBuilders.length > 0
+      ? { sections: this.sectionBuilders.map((builder) => builder.build()) }
+      : { elements: this.buildElements() };
+
     return ComponentFactory.create('stack_component', {
       id: this.id,
       properties: this.propertiesSnapshot(),
