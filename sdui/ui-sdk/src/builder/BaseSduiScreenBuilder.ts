@@ -1,3 +1,4 @@
+import type { SduiTargetApp } from '../contract/common.schema.js';
 import type { SduiScreen, SduiTheme } from '../contract/screen.schema.js';
 import type { SduiTemplate } from '../contract/template.schema.js';
 import { DefaultTemplateBuilder } from '../definitions/templates/default/default-template.builder.js';
@@ -8,7 +9,7 @@ import { parseSduiScreen } from '../validator/validate-screen.js';
 export interface ScreenBuilderInput {
   screenId: string;
   schemaVersion: string;
-  targetApp: 'CUSTOMER' | 'PARTNER' | 'ADMIN';
+  targetApp: SduiTargetApp;
   metadata?: Record<string, unknown>;
 }
 
