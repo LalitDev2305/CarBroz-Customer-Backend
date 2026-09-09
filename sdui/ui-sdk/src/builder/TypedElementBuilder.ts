@@ -1,10 +1,12 @@
 import type { SduiAction } from '../contract/action.schema.js';
 import type { SduiElement } from '../contract/element.schema.js';
 import type { InstanceInput } from '../registry/registries.js';
+import { RequestActionBuilder, type ActionBuildable } from './ActionBuilders.js';
 import { TypedPropertyBuilder } from './TypedPropertyBuilder.js';
 
 export abstract class TypedElementBuilder<P extends object> extends TypedPropertyBuilder<P> {
   private actions?: SduiElement['actions'];
+  private readonly actionBuilders = new Map<string, ActionBuildable>();
   private analytics?: SduiElement['analytics'];
   private accessibility?: SduiElement['accessibility'];
   private validation?: SduiElement['validation'];
@@ -14,12 +16,28 @@ export abstract class TypedElementBuilder<P extends object> extends TypedPropert
 
   protected constructor(protected readonly id: string) { super(); }
 
-  withActions(actions: SduiElement['actions']): this { this.actions = actions; return this; }
+  withActions(actions: SduiElement['actions']): this {
+    this.actions = actions;
+    this.actionBuilders.clear();
+    return this;
+  }
+
   action(event: string, action: SduiAction): this {
+    this.actionBuilders.delete(event);
     this.actions = { ...(this.actions ?? {}), [event]: action };
     return this;
   }
-  onClick(action: SduiAction): this { return this.action('onClick', action); }
+
+  onClick(action: SduiAction): this {
+    return this.action('onClick', action);
+  }
+
+  onClickRequest(): RequestActionBuilder {
+    const builder = new RequestActionBuilder();
+    this.actionBuilders.set('onClick', builder);
+    return builder;
+  }
+
   withAnalytics(analytics: SduiElement['analytics']): this { this.analytics = analytics; return this; }
   withAccessibility(accessibility: SduiElement['accessibility']): this { this.accessibility = accessibility; return this; }
   withValidation(validation: SduiElement['validation']): this { this.validation = validation; return this; }
@@ -31,11 +49,23 @@ export abstract class TypedElementBuilder<P extends object> extends TypedPropert
   withVisibility(visibility: SduiElement['visibility']): this { this.visibility = visibility; return this; }
   withMetadata(metadata: SduiElement['metadata']): this { this.metadata = metadata; return this; }
 
+  private buildActions(): SduiElement['actions'] | undefined {
+    if (!this.actions && this.actionBuilders.size === 0) return undefined;
+
+    const builtActions: Record<string, SduiAction> = { ...(this.actions ?? {}) };
+    for (const [event, builder] of this.actionBuilders.entries()) {
+      builtActions[event] = builder.build();
+    }
+    return builtActions;
+  }
+
   protected elementInput(): InstanceInput {
+    const actions = this.buildActions();
+
     return {
       id: this.id,
       properties: this.propertiesSnapshot(),
-      ...(this.actions ? { actions: this.actions } : {}),
+      ...(actions ? { actions } : {}),
       ...(this.analytics ? { analytics: this.analytics } : {}),
       ...(this.accessibility ? { accessibility: this.accessibility } : {}),
       ...(this.validation ? { validation: this.validation } : {}),
