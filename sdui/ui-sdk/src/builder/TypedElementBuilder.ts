@@ -1,3 +1,4 @@
+import type { SduiAction } from '../contract/action.schema.js';
 import type { SduiElement } from '../contract/element.schema.js';
 import type { InstanceInput } from '../registry/registries.js';
 import { TypedPropertyBuilder } from './TypedPropertyBuilder.js';
@@ -14,9 +15,18 @@ export abstract class TypedElementBuilder<P extends object> extends TypedPropert
   protected constructor(protected readonly id: string) { super(); }
 
   withActions(actions: SduiElement['actions']): this { this.actions = actions; return this; }
+  action(event: string, action: SduiAction): this {
+    this.actions = { ...(this.actions ?? {}), [event]: action };
+    return this;
+  }
+  onClick(action: SduiAction): this { return this.action('onClick', action); }
   withAnalytics(analytics: SduiElement['analytics']): this { this.analytics = analytics; return this; }
   withAccessibility(accessibility: SduiElement['accessibility']): this { this.accessibility = accessibility; return this; }
   withValidation(validation: SduiElement['validation']): this { this.validation = validation; return this; }
+  protected validationRule(key: string, value: unknown): this {
+    this.validation = { ...(this.validation ?? {}), [key]: value };
+    return this;
+  }
   bind(key: string): this { this.binding = { key }; return this; }
   withVisibility(visibility: SduiElement['visibility']): this { this.visibility = visibility; return this; }
   withMetadata(metadata: SduiElement['metadata']): this { this.metadata = metadata; return this; }
