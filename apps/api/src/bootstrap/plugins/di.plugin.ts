@@ -1,23 +1,14 @@
 import fp from 'fastify-plugin';
 import { fastifyAwilixPlugin } from '@fastify/awilix';
 import type { FastifyInstance } from 'fastify';
-import { asFunction, type AwilixContainer } from 'awilix';
-import type { ICacheProvider } from '@carbroz/platform-cache';
-import { getContainer, type Cradle } from '../container/index.js';
-import { createCacheProvider } from '../cache/create-cache-provider.js';
-
-type CacheInfrastructureCradle = Cradle & {
-  cacheProvider: ICacheProvider;
-};
+import { getContainer } from '../container/index.js';
 
 export default fp(async (app: FastifyInstance) => {
   // Initialize the one canonical application container. The Fastify plugin must use this exact
   // container so request.diScope inherits every app-level registration from the composition root.
+  // Infrastructure providers such as Redis/cache are intentionally registered by their owning
+  // infrastructure plugin after this container has been attached to Fastify.
   const container = getContainer();
-  const cacheContainer = container as AwilixContainer<CacheInfrastructureCradle>;
-  cacheContainer.register({
-    cacheProvider: asFunction(createCacheProvider).singleton(),
-  });
 
   await app.register(fastifyAwilixPlugin, {
     container,
