@@ -1,6 +1,6 @@
 # Partner Authentication + SDUI + Redis Implementation Plan
 
-> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–4 complete and repository-verified; Phase 5 Login request alignment is implemented and awaiting documentation-complete repository closeout. Phase 6 remains next only after Phase 5 closeout is green.
+> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–5 complete and repository-verified; Phase 6 Send OTP canonical destination result is next. Phase 5 Partner Login request alignment is frozen on the existing generic request/reference architecture.
 >
 > **Branch:** `development`
 >
@@ -145,7 +145,7 @@ No `LoginContinueAction`, `OtpVerifyAction`, screen-specific `onSuccess`, second
 
 ## 6. Login → Send OTP input contract
 
-Phase 5 implemented request payload:
+Phase 5 frozen request payload:
 
 ```json
 {
@@ -479,9 +479,9 @@ Completed and repository-verified:
 - corrected the initial illegal domain→platform adapter placement instead of weakening CW gates;
 - passed canonical CI and the independent architecture closeout verifier on the same documentation-complete Phase 4 baseline before Phase 5.
 
-## Phase 5 — Login request alignment — IMPLEMENTED; CLOSEOUT PENDING
+## Phase 5 — Login request alignment — COMPLETE
 
-Implemented only on the existing Partner Login generic request action:
+Completed and repository-verified on the existing Partner Login generic request action:
 
 ```text
 phoneNumber ← $binding(mobileNumber)
@@ -499,7 +499,7 @@ responseMode = destination
 
 No duplicate DTO, controller, use case, request mapper, action type, device field or navigation framework was introduced. `SendOtpSchema` remains the shared transport owner for `{ phoneNumber, deviceId }`. Focused verification is in `apps/api/src/surfaces/partner/screens/partner-login.screen.spec.ts`; the detailed frozen Phase 5 contract is `sdui/PHASE-5-PARTNER-LOGIN-REQUEST-CONTRACT.md`.
 
-Phase 5 may be marked COMPLETE only after the documentation-complete HEAD passes canonical CI and the independent architecture closeout verifier.
+Phase 5 passed the canonical repository verification requirements without changing Phase 6 navigation/result behavior.
 
 ## Phase 6 — Send OTP canonical destination result — NOT STARTED
 
