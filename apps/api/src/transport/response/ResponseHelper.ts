@@ -8,14 +8,15 @@ export type ApiResponseCode =
   | 'CONFLICT'
   | 'UNPROCESSABLE_ENTITY'
   | 'TOO_MANY_REQUESTS'
-  | 'INTERNAL_SERVER_ERROR';
+  | 'INTERNAL_SERVER_ERROR'
+  | 'SERVICE_UNAVAILABLE';
 
-export type ApiResponseStatus = 200 | 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500;
+export type ApiResponseStatus = 200 | 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500 | 503;
 export type ApiErrorStatus = Exclude<ApiResponseStatus, 200>;
 
 export interface ApiResponse<T = any> {
   status: ApiResponseStatus;
-  code: ApiResponseCode;
+  code: string;
   message: string;
   data?: T;
   traceId?: string;
@@ -55,6 +56,7 @@ const RESPONSE_CODE_BY_STATUS: Record<ApiResponseStatus, ApiResponseCode> = {
   422: 'UNPROCESSABLE_ENTITY',
   429: 'TOO_MANY_REQUESTS',
   500: 'INTERNAL_SERVER_ERROR',
+  503: 'SERVICE_UNAVAILABLE',
 };
 
 /** ResponseHelper is the canonical API transport envelope factory. */
@@ -82,16 +84,22 @@ export class ResponseHelper {
     return ResponseHelper.success(paginatedData, message, traceId);
   }
 
-  static error(status: ApiErrorStatus, message: string, traceId?: string): ApiResponse<null> {
+  static error(
+    status: ApiErrorStatus,
+    message: string,
+    traceId?: string,
+    code: string = RESPONSE_CODE_BY_STATUS[status],
+  ): ApiResponse<null> {
     return {
       status,
-      code: RESPONSE_CODE_BY_STATUS[status],
+      code,
       message,
       data: null,
       traceId,
     };
   }
 
+  /** HTTP 204 intentionally carries no envelope body. */
   static noContent(): void {
     return;
   }
