@@ -23,6 +23,8 @@ function fakeRedis(initialStatus = 'ready') {
       const prefix = pattern.endsWith('*') ? pattern.slice(0, -1) : pattern;
       return ['0', [...values.keys()].filter((key) => key.startsWith(prefix))];
     }),
+    zcount: vi.fn(async () => 0),
+    eval: vi.fn(async () => null),
   };
 
   return { client, values };
