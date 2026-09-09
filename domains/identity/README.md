@@ -101,11 +101,26 @@ domains/identity/PHASE-4-REDIS-OTP-CONTRACT.md
 
 Identity does not own SDUI structure. Authentication application results may expose transport-neutral next-destination metadata required by the caller, but Identity must not depend on `sdui/ui-sdk` merely to reuse a Zod schema.
 
-The current legacy auth navigation result shape `{ template, api }` is scheduled to migrate to canonical destination semantics as defined in:
+Phase 6 migrates the Send OTP success result from legacy `{ template, api }` metadata to the smallest Identity-owned transport-neutral destination value contract:
 
 ```text
-docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md
+screenId       = partner_otp
+templateId     = tpl_partner_otp_v1
+templateType   = form_template
+endpoint       = /api/v1/partner/screen/auth_otp
+method         = GET
+authentication = NONE
 ```
+
+This value is returned by `SendOtpUseCase` and is validated against the existing `sdui/ui-sdk` `dynamicDestinationSchema` only at the API/SDUI boundary. Identity production code does not import the SDUI schema or Configuration destination types. The concrete Partner OTP screen/GET route remain intentionally deferred to Phase 8 and must implement this exact reserved identity.
+
+The detailed Phase 6 contract is:
+
+```text
+domains/identity/PHASE-6-SEND-OTP-DESTINATION-CONTRACT.md
+```
+
+`VerifyOtpUseCase` still carries its pre-Phase-7 navigation result. Phase 6 intentionally does not migrate Verify OTP or create Dashboard/OTP screen composition.
 
 The actual Partner Login/OTP screen compositions remain owned by the Partner API surface and the generic SDUI vocabulary remains owned by `sdui/ui-sdk`.
 
@@ -121,6 +136,7 @@ The actual Partner Login/OTP screen compositions remain owned by the Partner API
 - No Prisma+Redis dual write.
 - Concurrency/replay behavior must be covered by tests.
 - Concrete infrastructure adapters are not exported through the Identity public boundary.
+- Auth-flow destination values remain transport-neutral; SDUI runtime validation stays outside Identity.
 - Frontend MVI/UDF is a client concern; backend results must remain deterministic and reducer-friendly without introducing frontend state-machine classes here.
 
 ## Current execution authority
@@ -129,4 +145,4 @@ For the Partner Login → OTP → Verify OTP migration, the canonical phased imp
 
 `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`.
 
-Phase 4 Redis OTP persistence is formally complete and repository-verified on the Constitution-compliant `platform/integrations` boundary. Phase 5 Login request alignment is the next authorized phase.
+Phases 0–5 are complete and repository-verified. Phase 6 Send OTP canonical destination implementation is in place and undergoing final same-HEAD repository/architecture verification. Phase 7+ production behavior remains intentionally untouched until Phase 6 is formally frozen.
