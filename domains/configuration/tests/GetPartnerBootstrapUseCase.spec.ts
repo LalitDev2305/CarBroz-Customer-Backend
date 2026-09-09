@@ -31,7 +31,7 @@ describe('GetPartnerBootstrapUseCase', () => {
     } });
   });
 
-  it('keeps authenticated startup unchanged until its published screen route is migrated', async () => {
+  it('returns the frozen authenticated Partner Dashboard destination', async () => {
     const result = await new GetPartnerBootstrapUseCase(providerReturning()).execute({ platform: 'IOS', appVersion: '1.0.0', authenticated: true });
     expect(result.startup.nextScreen).toEqual({ screenId: 'partner_dashboard', templateId: 'partner_dashboard_template', templateType: 'default_template', endpoint: '/api/v1/partner/sdui/registry/partner_dashboard', method: 'GET', authentication: 'SESSION' });
   });
