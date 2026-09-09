@@ -1,41 +1,82 @@
 # API Response Contract
 
-This folder owns the canonical HTTP response envelope for `apps/api`. It is a transport concern and does not move business or SDUI ownership into the API layer. The normative architecture authority remains `docs/MASTER-BACKEND-CONSTITUTION.md`.
+This folder owns the canonical HTTP response envelope for `apps/api`. It is a transport concern and does not move business, domain, persistence or SDUI ownership into the API layer. The normative architecture authority remains `docs/MASTER-BACKEND-CONSTITUTION.md`.
 
-## Envelope
+## Canonical envelope
 
-Successful and failed JSON responses use the same transport fields:
+Successful and mapped failed JSON responses use one transport shape:
 
 ```text
 ApiResponse<T>
-├── status   HTTP status repeated in the body for client consumption
-├── code     stable string derived from the HTTP status
-├── message  human-readable operation/result message
+├── status   actual HTTP status repeated in the body
+├── code     stable machine-readable result/error code
+├── message  client-safe human-readable message
 ├── data     successful resource; null for mapped failures
 └── traceId  request correlation identifier when available
 ```
 
-`message` is presentation/debug information for humans. Client business logic MUST NOT branch on message text.
+Rules:
 
-The actual HTTP response status and body `status` MUST agree. Controllers must not return HTTP 200 for a failed operation.
+- actual HTTP status and body `status` MUST be identical;
+- clients MUST branch on `status`/`code`, never message text;
+- successful JSON responses use `data` for the result;
+- mapped failures use `data: null`;
+- `traceId` is propagated whenever request context provides it;
+- no controller/product surface may define a competing response envelope or status map.
 
-## Canonical status mapping
+## Status policy
 
-| HTTP/body status | code | Meaning |
+| HTTP/body status | default code | Meaning |
 | ---: | --- | --- |
-| 200 | `SUCCESS` | Request completed successfully |
-| 400 | `BAD_REQUEST` | Invalid or malformed request |
-| 401 | `UNAUTHORIZED` | Authentication is missing or invalid |
-| 403 | `FORBIDDEN` | Authenticated caller is not permitted |
-| 404 | `NOT_FOUND` | Requested resource does not exist |
-| 409 | `CONFLICT` | Request conflicts with current resource/state |
-| 422 | `UNPROCESSABLE_ENTITY` | Validation or business-input failure |
-| 429 | `TOO_MANY_REQUESTS` | Existing API rate limit was exceeded |
+| 200 | `SUCCESS` | Successful request, including the currently frozen creation contract |
+| 400 | `BAD_REQUEST` | Malformed/invalid transport input |
+| 401 | `UNAUTHORIZED` | Authentication missing or invalid |
+| 403 | `FORBIDDEN` | Authenticated caller not permitted |
+| 404 | `NOT_FOUND` | Requested resource/route does not exist |
+| 409 | `CONFLICT` | Current state conflicts with request |
+| 422 | `UNPROCESSABLE_ENTITY` | Valid transport shape but domain/business input cannot be processed |
+| 429 | `TOO_MANY_REQUESTS` | Transport/API rate limit exceeded |
 | 500 | `INTERNAL_SERVER_ERROR` | Unexpected server failure |
+| 503 | `SERVICE_UNAVAILABLE` | Required infrastructure/provider dependency unavailable |
 
-`429` is retained because the existing Fastify rate-limit boundary already uses the standard HTTP rate-limit status. It is not a new business/API outcome invented for this change.
+`ResponseHelper.error()` owns the default HTTP-status-to-code mapping. A typed `ApplicationError` or `DomainError` may preserve its more-specific stable code while keeping the same envelope and HTTP status. Transport must not rewrite a domain/application code into message text.
 
-The mapping is centralized in `ResponseHelper.ts`; product controllers must not create competing status-to-code maps.
+## Creation and no-content policy
+
+The current CarBroz creation contract remains **HTTP 200**, so `ResponseHelper.created()` deliberately delegates to `success()`. Introducing HTTP 201 is a separate API-version/contract decision and must not happen implicitly.
+
+HTTP 204 means **no response body**. `ResponseHelper.noContent()` returns `void`; callers that select status 204 must not send an envelope body.
+
+## Error boundary
+
+`apps/api/src/transport/middleware/error-handler.ts` is the single global error mapper.
+
+Mapping rules:
+
+- `ApplicationError`/`AppError`: use its supported status; preserve its stable `errorCode`/`code`; client-safe 4xx messages may pass through; 5xx details are suppressed;
+- `DomainError`: preserve its stable domain code; map `_UNAUTHORIZED` → 401, `_FORBIDDEN` → 403, `_NOT_FOUND` → 404, `_CONFLICT` → 409; other domain/business validation failures default to 422;
+- Zod/Fastify validation: 400 + `VALIDATION_ERROR`, with one generic safe message and no reflected schema details;
+- unknown/unhandled exception: 500 + `INTERNAL_SERVER_ERROR`, with one generic safe message;
+- required dependency/provider failures represented by typed application errors may map to 503 + their stable application code;
+- raw validation details, stack traces, SQL/provider errors, secrets, tokens, OTPs and unnecessary PII MUST never be reflected to clients.
+
+Server-side logging may contain structured error objects subject to the repository observability/PII rules; client containment must never depend on `NODE_ENV`.
+
+## Route-not-found behavior
+
+The Fastify not-found handler uses the same `ResponseHelper` envelope:
+
+```json
+{
+  "status": 404,
+  "code": "NOT_FOUND",
+  "message": "The requested route could not be found.",
+  "data": null,
+  "traceId": "request-trace-id"
+}
+```
+
+The raw request URL is not reflected in the client message.
 
 ## Example success
 
@@ -55,18 +96,30 @@ The mapping is centralized in `ResponseHelper.ts`; product controllers must not 
 }
 ```
 
-For SDUI responses, `data` is the screen resource. `theme` therefore remains owned by the screen document; the API envelope does not own or reinterpret SDUI structure.
-
-## Example failure
+## Example typed domain failure
 
 ```json
 {
-  "status": 404,
-  "code": "NOT_FOUND",
-  "message": "The requested screen could not be found.",
+  "status": 409,
+  "code": "BOOKING_SLOT_CONFLICT",
+  "message": "Selected service slot is no longer available",
   "data": null,
   "traceId": "request-trace-id"
 }
 ```
 
-Do not expose stack traces, SQL/provider errors, secrets, tokens, OTPs, or unnecessary PII through `message`.
+## Verification requirements
+
+Phase/release validation must prove:
+
+- every supported status maps to the expected default code;
+- specific application/domain codes are preserved;
+- HTTP status equals body `status`;
+- `data` is null for mapped failures;
+- validation details are contained;
+- unhandled/server-error details are contained;
+- 503 is supported for required dependency failure;
+- `created()` remains 200 under the frozen contract;
+- 204 carries no envelope body;
+- unknown routes are non-reflective;
+- the CW5 executable gate validates the current canonical contract rather than a removed legacy `{ success: false }` envelope.
