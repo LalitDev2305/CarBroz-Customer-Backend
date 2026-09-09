@@ -153,7 +153,7 @@ Before adding any new Redis capability:
 2. extend `ICacheProvider` only when the operation is genuinely domain-neutral;
 3. keep domain-specific persistence semantics in the owning infrastructure adapter;
 4. never instantiate Redis clients inside use cases/repositories per request;
-5. never create another backend Redis connection/provider mechanism.
+5. never create another generic backend Redis cache/provider mechanism.
 
 ## Phase 3 verification matrix
 
@@ -175,11 +175,11 @@ Before adding any new Redis capability:
 
 ## Gate status
 
-Phase 3 source/documentation parity is evaluated independently from the repository-wide production closeout sequence.
+Phase 3 source/documentation parity and repository-wide closeout are complete.
 
-The first closeout run for Phase 3 reached and passed CW2 topology, CW1/CW2 constitution, CW3 dependency convergence, CW4 domain/application convergence and CW5 resource/public-ID checks, then stopped at the pre-existing **CW5 error-semantics/leakage gate**. Because that global error contract is Phase 2 work and Phase 2 was intentionally skipped before starting Phase 3, later workflow steps (runtime-config gate, Prisma, full build, lint, tests and re-verification) did not execute in that run.
+The canonical `CarBroz Backend CI` run `34332500412` on `development` SHA `609584236f4479f7388296fc51ea1c1dd8844e29` completed successfully after Phase 2 reconciliation. It passed the architecture/Constitution gates, CW3/CW4/CW5 ownership/error/runtime-config/observability gates, Prisma validation/generation/migrations/schema-convergence checks, monorepo build, ESLint, full Vitest, repeated post-test gates and the non-mutating validation proof.
 
-This gate must **not** be weakened or bypassed. Phase 3 must not modify global HTTP error semantics merely to make an unrelated gate pass. Repository-wide closeout can become fully green only after the documented Phase 2 response/error reconciliation is completed, followed by a fresh full closeout run.
+No gate was weakened or bypassed to obtain that result.
 
 ## Current Partner authentication migration
 
@@ -187,4 +187,4 @@ The canonical cross-phase implementation plan remains:
 
 `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`.
 
-Phase 3 establishes only the Redis platform infrastructure. Phase 4 will implement the Identity-owned Redis OTP adapter behind the existing `IOtpChallengeRepository`; OTP business rules remain intentionally unchanged in Phase 3.
+Phase 3 establishes only the Redis platform infrastructure and is complete. Phase 4 will implement the Identity-owned Redis OTP adapter behind the existing `IOtpChallengeRepository`; OTP business rules remain intentionally unchanged in Phase 3.
