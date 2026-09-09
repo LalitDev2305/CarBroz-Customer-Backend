@@ -1,38 +1,26 @@
 # CarBroz SDUI Dynamic Composition Architecture & Implementation Guide
 
-> **Status:** ARCHITECTURE DECISION FROZEN FOR IMPLEMENTATION. This freezes the target architecture only; production SDUI composition remains open until source convergence and verification are complete.
+> **Status:** ARCHITECTURE DECISION FROZEN FOR IMPLEMENTATION. This freezes the target architecture only; production SDUI composition remains open until source convergence, documentation, canonical CI, Architecture Closeout, and the final forensic audit are complete on the same SHA.
 
 ## 1. Purpose
 
-This document is the canonical implementation contract for CarBroz backend SDUI composition. It replaces the earlier assumption that product screens may manually construct the final nested SDUI JSON and then call `screenSchema.parse(...)`.
+This document is the canonical implementation contract for CarBroz backend SDUI composition.
 
-The final architecture preserves the existing hierarchy and the valid responsibilities already present in `ui-sdk` and the runtime registry, but makes typed object-graph Builders the canonical authoring path for screen-specific composition.
+It replaces the earlier assumption that product screens may manually construct the final nested SDUI JSON tree and then call `screenSchema.parse(...)`. The final architecture preserves the existing hierarchy and legitimate `ui-sdk` / runtime Registry ownership while making typed object-graph Builders the canonical screen-authoring path.
 
-No migrated production screen should manually assemble the final SDUI JSON tree.
+No migrated production screen may manually assemble the final `components`, `sections`, `groups`, or `elements` arrays.
 
-## 2. Goals
+Implementation follows:
 
-The backend must describe screens through one strongly typed reusable SDUI language without forcing each product screen to know or reproduce the serialized hierarchy.
+```text
+KEEP → EXTEND → MODIFY → CREATE
+```
 
-The architecture must provide:
+Existing legitimate owners are strengthened. A parallel SDUI engine, second validator framework, duplicate definition registry, duplicate serializer, or screen-specific primitive framework is forbidden.
 
-- one canonical hierarchy;
-- generic reusable definitions;
-- shared atomic property schemas;
-- definition-specific property contracts;
-- definition-specific typed builders;
-- hierarchy-safe parent/child composition;
-- screen-specific builders in the owning domain;
-- canonical validation before publication;
-- runtime draft/publish/version/retrieve through the registry;
-- no duplicate SDUI engine;
-- no screen-specific primitive definitions;
-- no production reliance on arbitrary `Record<string, unknown>` properties for known definitions;
-- no giant manually nested JSON as the production authoring model.
+## 2. Canonical Hierarchy
 
-## 3. Canonical Hierarchy
-
-The hierarchy remains unchanged:
+The hierarchy is frozen:
 
 ```text
 Screen
@@ -58,26 +46,33 @@ Mandatory invariants:
 
 1. Screen has exactly one Template.
 2. Template has one or more Components.
-3. Component contains Elements OR Sections, never both.
-4. Section contains Elements OR Groups, never both.
+3. Component contains Elements **OR** Sections, never both.
+4. Section contains Elements **OR** Groups, never both.
 5. Group contains Elements only.
 6. Element is terminal.
 7. Component cannot directly contain Group.
-8. Template cannot directly contain Section, Group or Element.
+8. Template cannot directly contain Section, Group, or Element.
 9. Group cannot contain Group or Section.
 10. Element cannot contain children.
 
-The Builder API must make valid hierarchy natural and invalid hierarchy impossible or immediately rejected.
+The two XOR rules are mandatory:
 
-## 4. Core Semantic Contract
+```text
+Component → Elements XOR Sections
+Section   → Elements XOR Groups
+```
 
-Every runtime node follows:
+They must be enforced by the Builder API and again by final canonical validation.
+
+## 3. Core Semantic Model
+
+Every node follows:
 
 ```text
 id          = instance identity
 type        = reusable behavior definition
-properties  = configuration values for this instance
-children    = hierarchy owned by this instance where permitted
+properties  = values for this instance
+children    = hierarchy owned by this instance when allowed
 ```
 
 Example:
@@ -87,27 +82,21 @@ id   = login_content
 type = stack_component
 ```
 
-`login_content` is screen-specific identity. `stack_component` is reusable behavior.
-
-Do not create `login_stack_component`, `otp_stack_component`, `dashboard_stack_component`, etc. merely because instance values differ.
-
-## 5. Reuse Principle
-
-The backend reuses the SDUI language and behavior. Each screen owns its own instance data.
-
-Login, OTP and Dashboard may all use `stack_component` with different values:
+Do not create screen-specific reusable primitive types such as:
 
 ```text
-Login      → vertical, spacing 16
-OTP        → vertical, spacing 20
-Dashboard  → horizontal, spacing 12
+login_stack_component
+otp_stack_component
+dashboard_stack_component
+login_text
+otp_button
 ```
 
-There is one reusable `stack_component` definition and one reusable `StackComponentProperties` contract. Each screen-specific builder supplies its instance values.
+Reusable type remains generic. Screen-specific values remain in the screen-specific Builder.
 
-## 6. Final Ownership Model
+## 4. Ownership Model
 
-### 6.1 UI SDK owns the reusable SDUI language
+### 4.1 `ui-sdk` owns HOW SDUI is built
 
 `ui-sdk` owns:
 
@@ -115,454 +104,641 @@ There is one reusable `stack_component` definition and one reusable `StackCompon
 - shared atomic property schemas;
 - reusable definitions and definition registries;
 - definition-specific property contracts;
-- definition-specific typed node builders;
-- factories where they remain legitimate existing owners;
-- base screen/hierarchy builder primitives;
-- hierarchy/property/canonical validation;
+- typed reusable node Builders;
+- the root Screen Builder;
+- hierarchy/object-graph ownership;
+- factories where legitimately required;
+- hierarchy/property/definition/invariant/version validation;
+- publication validation support;
+- action/binding/value-reference vocabulary;
+- typed action authoring Builders;
+- typed theme authoring Builders;
 - serializer;
-- versioning;
+- schema compatibility/versioning;
 - public exports.
 
-`ui-sdk` must not know about Login, OTP, Dashboard, Booking or other business screens.
+`ui-sdk` must not know business screens such as Partner Login, OTP, Dashboard, Booking, or Catalog screens.
 
-### 6.2 Owning domain owns screen-specific composition
+### 4.2 Owning domain/surface owns WHAT the screen contains
 
-The owning domain/surface owns:
+A screen-specific Builder owns:
 
-- screen ID and node instance IDs;
-- selected reusable node types;
+- screen ID;
+- node instance IDs;
+- reusable type selection through typed methods;
 - screen-specific property values;
-- content/text;
+- text/content;
 - actions and bindings;
 - validation values;
 - analytics/accessibility values where applicable;
-- exact screen composition.
+- exact composition.
 
-This is expressed through screen-specific composition builders such as `PartnerLoginScreenBuilder`, `PartnerOtpScreenBuilder` and `PartnerDashboardScreenBuilder` in their correct owners.
+Examples:
 
-These are orchestration classes only. They are not a second SDUI framework and must consume the reusable `ui-sdk` builders/contracts.
+```text
+PartnerLoginScreenBuilder
+PartnerOtpScreenBuilder
+PartnerDashboardScreenBuilder
+```
 
-### 6.3 Runtime Registry owns document lifecycle
+These are orchestration classes only. They must consume the reusable `ui-sdk` authoring language and must not become a second SDUI framework.
 
-The runtime registry owns:
+### 4.3 Runtime Registry owns document lifecycle
+
+The runtime Registry owns:
 
 ```text
 CREATE draft
 UPDATE draft
 VALIDATE draft
-PUBLISH version
-ARCHIVE version
+PUBLISH
+ARCHIVE
 RETRIEVE published version
+VERSION HISTORY
+ROLLBACK when already legitimately supported
 ```
 
-It does not dynamically redefine the meaning of core SDK types.
+The Registry must not redefine canonical `ui-sdk` Template, Component, Section, Group, or Element behavior.
 
-## 7. Property Architecture
+## 5. Property Architecture
 
-### 7.1 Shared atomic property schemas
+### 5.1 Shared atomic property vocabulary
 
-Reusable atomic concepts remain centralized:
+Reusable atomic concepts live centrally under:
 
 ```text
 sdui/ui-sdk/src/properties/
-├── layout/
-│   ├── orientation.schema.ts
-│   ├── arrangement.schema.ts
-│   ├── alignment.schema.ts
-│   ├── spacing.schema.ts
-│   └── size.schema.ts
-├── appearance/
-│   ├── color.schema.ts
-│   ├── background.schema.ts
-│   ├── border.schema.ts
-│   └── shape.schema.ts
-├── accessory/
-│   └── accessory.schema.ts
-└── index.ts
 ```
 
-These files define reusable atomic vocabulary only: Orientation, Arrangement, Alignment, Spacing, Size, Color, Background, Border, Shape, Accessory, etc.
-
-### 7.2 No global final `stack-properties.schema.ts`
-
-A global `stack-properties.schema.ts` must not own the final property contract for Template, Component, Section and Group.
-
-Although those definitions share atomic concepts, their valid property sets may evolve independently. The final composed property contract therefore lives beside the definition that owns it.
-
-Target organization:
+Examples include:
 
 ```text
-sdui/ui-sdk/src/definitions/
-├── templates/
-│   └── stack/
-│       ├── stack-template.definition.ts
-│       ├── stack-template.properties.ts
-│       ├── stack-template.builder.ts
-│       └── index.ts
-├── components/
-│   └── stack/
-│       ├── stack-component.definition.ts
-│       ├── stack-component.properties.ts
-│       ├── stack-component.builder.ts
-│       └── index.ts
-├── sections/
-│   └── stack/
-│       ├── stack-section.definition.ts
-│       ├── stack-section.properties.ts
-│       ├── stack-section.builder.ts
-│       └── index.ts
-├── groups/
-│   └── stack/
-│       ├── stack-group.definition.ts
-│       ├── stack-group.properties.ts
-│       ├── stack-group.builder.ts
-│       └── index.ts
-└── elements/
-    ├── text/
-    │   ├── text.definition.ts
-    │   ├── text.properties.ts
-    │   ├── text.builder.ts
-    │   └── index.ts
-    ├── image/
-    ├── icon/
-    ├── input/
-    ├── button/
-    ├── divider/
-    └── spacer/
+layout:
+- orientation
+- arrangement
+- alignment
+- spacing
+- size
+
+appearance:
+- color
+- background
+- border
+- shape
+
+accessory:
+- accessory
 ```
 
-Exact migration paths must follow `KEEP → EXTEND → MODIFY → CREATE`; existing legitimate owners are extended rather than duplicated.
+### 5.2 Definition-specific final property contracts
 
-### 7.3 Property ownership rule
+There is no single global final `stack-properties.schema.ts` contract.
+
+Final property contracts live with the reusable definition that owns them:
 
 ```text
-Atomic property schema
-    = reusable primitive vocabulary
-
-Definition-specific properties
-    = exact properties accepted by that definition
-
-Screen-specific builder
-    = actual values used by a particular screen instance
+StackTemplateProperties
+StackComponentProperties
+StackSectionProperties
+StackGroupProperties
+TextProperties
+ImageProperties
+IconProperties
+InputProperties
+ButtonProperties
+DividerProperties
+SpacerProperties
 ```
 
-For example `orientation.schema.ts` can be reused by `StackTemplateProperties`, `StackComponentProperties`, `StackSectionProperties` and `StackGroupProperties`, while each definition independently decides which atomic properties it accepts.
+Atomic schemas may be reused by several definitions, but each definition independently owns the exact final property set it accepts.
 
-## 8. Builder Architecture — Object Graph, Not Raw JSON
+### 5.3 No arbitrary property bag as normal authoring API
 
-The Builder layer is the canonical screen-authoring mechanism.
+Known production definitions must expose semantic typed methods instead of making a generic `setProperties({...})` or arbitrary `Record<string, unknown>` bag the normal screen API.
 
-The builder model is an object graph. It is not one global stateful fluent chain and not a raw JSON wrapper.
-
-Each parent builder object owns and creates its children:
-
-```text
-ScreenBuilder
-    └── TemplateBuilder
-        ├── ComponentBuilder
-        │   ├── ElementBuilder(s)
-        │   └── OR SectionBuilder(s)
-        │       ├── ElementBuilder(s)
-        │       └── OR GroupBuilder(s)
-        │           └── ElementBuilder(s)
-        └── ComponentBuilder
-            └── ...
-```
-
-### 8.1 Parent object is the relationship
-
-Normal composition must not depend on a global `currentComponent`, hidden mutable parent state, parent-ID lookup, or manually nested arrays.
-
-Instead:
-
-```text
-screen.addTemplate(...)
-template.addComponent(...)
-component.addSection(...)
-component.addElement(...)
-section.addGroup(...)
-section.addElement(...)
-group.addElement(...)
-```
-
-The actual parent builder object establishes ownership. This is a frozen design rule.
-
-## 9. Typed Node Builders
-
-Reusable definitions expose typed builders appropriate to their behavior, for example:
-
-```text
-StackTemplateBuilder
-StackComponentBuilder
-StackSectionBuilder
-StackGroupBuilder
-TextBuilder
-ImageBuilder
-IconBuilder
-InputBuilder
-ButtonBuilder
-DividerBuilder
-SpacerBuilder
-```
-
-Builders expose semantic methods instead of forcing screen code to know serialized property shape:
+Preferred examples:
 
 ```ts
+.vertical()
+.horizontal()
+.spacing(16)
+.padding(...)
+.fillMaxWidth()
+.fillMaxSize()
+.alignCenter()
+.background(...)
+.border(...)
+.shape(...)
+.fontSize(...)
+.fontWeight(...)
+.value(...)
+.placeholder(...)
+.required()
+.maxLength(...)
+```
+
+Internally, Builders may store typed property state. Screen-specific composition code must not manipulate arbitrary known-definition property bags.
+
+## 6. Final Builder Architecture — Returned Object References
+
+### 6.1 Returned Builder objects are the PRIMARY API
+
+The canonical screen-authoring style is returned-object composition.
+
+Root configuration is explicit and fluent:
+
+```ts
+const screen = new SduiScreenBuilder();
+
+screen
+  .id('partner_login')
+  .schemaVersion(CURRENT_SDUI_SCHEMA_VERSION)
+  .targetApp('PARTNER');
+```
+
+Template creation returns the exact Template Builder:
+
+```ts
+const template = screen.addStackTemplate('partner_login_template');
+
+template
+  .vertical()
+  .fillMaxSize()
+  .padding({ start: 24, top: 20, end: 24, bottom: 20 });
+```
+
+Multiple Components may be created first and configured later:
+
+```ts
+const component1 = template.addStackComponent('brand_component');
+const component2 = template.addStackComponent('login_component');
+const component3 = template.addStackComponent('footer_component');
+
+component1.vertical().spacing(8).alignCenter();
+component2.vertical().spacing(16).fillMaxWidth();
+component3.horizontal().spacing(12).alignCenter();
+```
+
+There is no requirement that configuration must immediately follow creation.
+
+### 6.2 Builder object instance owns its state
+
+The exact Builder object stores:
+
+- its instance identity;
+- typed properties;
+- its owned child Builder references when children are legal;
+- definition-specific state required for semantic methods.
+
+Configuration order does not define hierarchy.
+
+Object reference defines hierarchy.
+
+These are both valid:
+
+```ts
+const component = template.addStackComponent('login_component');
+component.vertical().spacing(16);
+```
+
+and:
+
+```ts
+const component1 = template.addStackComponent('one');
+const component2 = template.addStackComponent('two');
+const component3 = template.addStackComponent('three');
+
+component1.vertical();
+component2.horizontal();
+component3.vertical();
+```
+
+### 6.3 Object reference defines parentage
+
+Example:
+
+```ts
+const component1 = template.addStackComponent('component_1');
+const component2 = template.addStackComponent('component_2');
+
+const section1 = component1.addStackSection('section_1');
+const section2 = component2.addStackSection('section_2');
+```
+
+`section1` belongs to `component1` because `component1` created and owns it.
+
+`section2` belongs to `component2` because `component2` created and owns it.
+
+Normal composition must not use:
+
+```text
+currentComponent
+currentSection
+currentGroup
+global mutable composition cursor
+parent-ID lookup
+manually managed child arrays
+```
+
+### 6.4 Configuration may occur before or after child creation
+
+Properties and children are independent Builder state until finalization.
+
+All of the following is valid when hierarchy/XOR rules are respected:
+
+```ts
+const component = template.addStackComponent('login');
+component.vertical();
+
+const section = component.addStackSection('mobile');
+
+component.spacing(16);
+section.vertical();
+```
+
+and:
+
+```ts
+const section = component.addStackSection('mobile');
+section.vertical();
+
 component
   .vertical()
-  .spacing(16)
-  .alignCenter()
-  .fillMaxWidth();
+  .spacing(16);
 ```
 
-rather than manually constructing a `properties` object.
+## 7. Method Name Defines Reusable Type
 
-The builder translates semantic calls into the canonical definition-specific property contract. If serialized representation changes later, the generic builder can change while screen-specific composition remains stable.
+When a typed creation method exists, screen-specific code supplies the instance ID only.
 
-## 10. Hierarchy-Safe Builder API
-
-Valid public operations include:
-
-```text
-screen.addTemplate()
-template.addComponent()
-component.addElement()
-component.addSection()
-section.addElement()
-section.addGroup()
-group.addElement()
-```
-
-Invalid relationships must not be normal API operations:
-
-```text
-screen.addComponent()       INVALID
-template.addSection()       INVALID
-component.addGroup()        INVALID
-group.addSection()          INVALID
-group.addGroup()            INVALID
-element.addElement()        INVALID
-```
-
-XOR rules are mandatory:
-
-```text
-Component → Elements OR Sections
-Section   → Elements OR Groups
-```
-
-Once a Component selects direct Elements, adding Sections must fail. Once it selects Sections, adding direct Elements must fail. The same applies to Section with Elements versus Groups.
-
-Compile-time modeling is preferred where practical; runtime enforcement remains mandatory defense in depth.
-
-## 11. Screen-Specific Builder Pattern
-
-A screen-specific builder lives with the domain/surface that owns the screen. It should be compact and read like the high-level screen structure.
-
-Example conceptual organization:
-
-```text
-domains/identity/
-└── presentation/
-    └── sdui/
-        └── builders/
-            ├── partner-login-screen.builder.ts
-            └── partner-otp-screen.builder.ts
-```
-
-Other screens belong to their correct owner rather than being forced into Identity.
-
-Recommended style:
+Do not write:
 
 ```ts
-build(): SduiScreen {
-  const screen = this.createScreen();
-  const template = this.createTemplate(screen);
-
-  this.addBrandComponent(template);
-  this.addLoginComponent(template);
-  this.addFooterComponent(template);
-
-  return screen.build();
-}
+template.addComponent('login_component', 'stack_component');
 ```
 
-Recommended granularity:
-
-```text
-build()
-    = screen-level flow
-
-private component methods
-    = major screen blocks
-
-private section methods
-    = complex subsections only
-
-simple elements
-    = created directly inside their owning parent method
-```
-
-Do not split every element into a class/method when it adds no clarity.
-
-## 12. Canonical Object-Graph Example
-
-The following is illustrative; exact API names must be reconciled with existing source before implementation.
+Use:
 
 ```ts
-const screen = new ScreenBuilder({
-  screenId: 'partner_login',
-  targetApp: 'PARTNER',
-  schemaVersion: '3.0.0',
+template.addStackComponent('login_component');
+```
+
+The method name determines the reusable type:
+
+```text
+screen.addStackTemplate(...)    → stack_template
+template.addStackComponent(...) → stack_component
+component.addStackSection(...)  → stack_section
+section.addStackGroup(...)      → stack_group
+group.addText(...)              → text
+group.addInput(...)             → input
+group.addButton(...)            → button
+```
+
+The same rule applies to other typed Template and Element methods such as `addFormTemplate`, `addDefaultTemplate`, `addImage`, `addIcon`, `addDivider`, and `addSpacer`.
+
+## 8. Hierarchy-Safe Public APIs
+
+### Template
+
+Template may create Components only.
+
+Valid:
+
+```ts
+template.addStackComponent(...)
+```
+
+Template must not expose direct Section, Group, or Element creation APIs under the frozen hierarchy.
+
+### Component
+
+Component exposes direct Elements **OR** Sections.
+
+Valid examples:
+
+```ts
+component.addText(...)
+component.addInput(...)
+component.addButton(...)
+component.addStackSection(...)
+```
+
+Invalid:
+
+```ts
+component.addStackGroup(...)
+```
+
+Once direct Elements exist, adding a Section must fail. Once Sections exist, adding a direct Element must fail.
+
+### Section
+
+Section exposes direct Elements **OR** Groups.
+
+Valid examples:
+
+```ts
+section.addText(...)
+section.addButton(...)
+section.addStackGroup(...)
+```
+
+Once direct Elements exist, adding a Group must fail. Once Groups exist, adding a direct Element must fail.
+
+### Group
+
+Group exposes Elements only.
+
+It must not expose Section or Group creation.
+
+### Element
+
+Element is terminal and exposes no child-adding API.
+
+## 9. Element Builder Return Style
+
+Element creation also returns the exact typed Builder:
+
+```ts
+const title = component.addText('title');
+
+title
+  .value('CarBroz Partner')
+  .fontSize(28)
+  .fontWeight(700);
+```
+
+Likewise:
+
+```ts
+const image = component.addImage('logo');
+const input = group.addInput('mobile_number');
+const button = section.addButton('continue');
+const divider = component.addDivider('divider');
+const spacer = component.addSpacer('space');
+```
+
+Convenience constructor values may remain where already legitimate, but the returned object remains the primary ownership/configuration model.
+
+## 10. Typed Action Builder
+
+The existing canonical action contract remains authoritative. Do not create a second action language.
+
+However, production screen composition must not require giant nested raw request objects such as:
+
+```ts
+.onClick({
+  type: 'request',
+  payload: {
+    method: 'POST',
+    endpoint: '/api/v1/partner/auth/send_otp',
+    authentication: 'NONE',
+    validate: true,
+    body: {
+      phoneNumber: { $binding: 'mobileNumber' },
+      deviceId: { $context: 'deviceId' },
+    },
+    responseMode: 'destination',
+  },
 });
-
-const template = screen.addStackTemplate('tpl_partner_login');
-
-template.vertical().fillMaxSize();
-
-const brand = template.addStackComponent('brand_component');
-brand.vertical().alignCenter().spacing(8);
-brand.addImage('brand_logo').source('carbroz_partner_logo');
-brand.addText('brand_title').value('CarBroz Partner');
-
-const form = template.addStackComponent('login_component');
-form.vertical().fillMaxWidth().spacing(16);
-
-const mobileSection = form.addStackSection('mobile_section');
-const mobileGroup = mobileSection.addStackGroup('mobile_group');
-mobileGroup.horizontal().spacing(8);
-mobileGroup.addText('country_code').value('+91');
-mobileGroup
-  .addInput('mobile_number')
-  .binding('mobileNumber')
-  .phone()
-  .required()
-  .maxLength(10);
-
-const actionSection = form.addStackSection('action_section');
-actionSection
-  .addButton('continue_button')
-  .text('Continue')
-  .action('send_otp');
-
-const result = screen.build();
 ```
 
-The screen code never manually creates final `components: []`, `sections: []`, `groups: []` or `elements: []` arrays. The object graph owns those relationships.
-
-## 13. Multiple Components and Exact Child Ownership
-
-A Template may contain many Components:
-
-```text
-Template
-├── Component 1
-├── Component 2
-└── Component 3
-```
-
-Each returned Component builder is a distinct object reference:
+The typed semantic authoring direction is:
 
 ```ts
-const component1 = template.addStackComponent('brand');
-const component2 = template.addStackComponent('form');
-const component3 = template.addStackComponent('footer');
+const request = continueButton.onClickRequest();
+
+request
+  .method('POST')
+  .endpoint('/api/v1/partner/auth/send_otp')
+  .authentication('NONE')
+  .validate(true)
+  .responseMode('destination');
+
+const body = request.body();
+body.binding('phoneNumber', 'mobileNumber');
+body.context('deviceId', 'deviceId');
 ```
 
-Children are added to the exact intended parent:
+The action Builder must serialize to the existing canonical `SduiAction` contract.
 
-```ts
-component1.addText(...);
+Screen-specific code must not need to know that references serialize as:
 
-const section = component2.addStackSection(...);
-section.addButton(...);
-
-component3.addText(...);
+```json
+{ "$binding": "mobileNumber" }
 ```
 
-There is no ambiguity about which Component owns a Section, Group or Element. Parent-object ownership is mandatory.
+or:
 
-## 14. Base Builder vs Screen Builder
+```json
+{ "$context": "deviceId" }
+```
 
-### UI SDK reusable/base builders — HOW SDUI is built
+The typed body Builder owns that translation.
 
-They own:
-
-- node creation;
-- typed properties;
-- hierarchy ownership;
-- XOR enforcement;
-- definition lookup;
-- canonical node creation;
-- recursive final construction;
-- integration with validation.
-
-### Domain screen-specific builder — WHAT the screen contains
-
-It owns:
-
-- screen identity;
-- instance IDs;
-- selected reusable types;
-- property values;
-- content;
-- actions;
-- bindings;
-- screen-specific validation values;
-- exact composition.
-
-This separation is mandatory.
-
-## 15. Definition and Builder Flow
-
-The intended internal flow is:
+Required typed body source helpers include the existing canonical value-reference concepts where used by production flows:
 
 ```text
-Domain Screen-Specific Builder
-        ↓
-Reusable Typed Node Builders
-        ↓
-Definition-Specific Properties
-        ↓
-Reusable Definitions / Definition Registries
-        ↓
-Existing Factories where legitimately required
-        ↓
-Canonical Node Contracts
-        ↓
-Canonical Hierarchy
-        ↓
-Layered Validator
-        ↓
+binding
+context
+response
+literal
+```
+
+The implementation must remain small and reuse the existing action/value-reference schemas.
+
+## 11. Typed Theme Builder
+
+Production screen composition must not require a giant nested raw theme object such as:
+
+```ts
+screen.withTheme({
+  theme: 'light',
+  statusBar: 'transparent',
+  properties: {
+    gradient: {
+      type: 'linear',
+      angle: 135,
+      colors: [...]
+    }
+  }
+});
+```
+
+The canonical screen API exposes a typed Theme Builder:
+
+```ts
+const theme = screen.theme();
+
+theme
+  .light()
+  .statusBarTransparent();
+
+const gradient = theme.linearGradient();
+
+gradient
+  .angle(135)
+  .addColor('#DDF8F6', 0)
+  .addColor('#F7FEFD', 0.28)
+  .addColor('#FFFFFF', 0.55)
+  .addColor('#D9F7F4', 1);
+```
+
+Exact internal representation remains compatible with the existing serialized theme contract. Raw nested theme objects are not the normal production composition API.
+
+## 12. Root Screen Builder
+
+The canonical root authoring API is a no-argument Builder with explicit fluent configuration:
+
+```ts
+const screen = new SduiScreenBuilder();
+
+screen
+  .id('partner_login')
+  .schemaVersion(CURRENT_SDUI_SCHEMA_VERSION)
+  .targetApp('PARTNER');
+```
+
+The root Builder:
+
+- owns exactly one Template Builder;
+- owns optional typed Theme Builder state;
+- owns screen identity/version/target state;
+- recursively finalizes the object graph;
+- rejects missing required root state;
+- invokes canonical layered validation before returning `SduiScreen`.
+
+A compatibility wrapper/subclass may remain temporarily only when source usage proves it is required. It must delegate to the canonical root Builder and must not remain the preferred production screen API.
+
+## 13. Final `screen.build()` Responsibility
+
+`screen.build()` is the recursive finalization point:
+
+```text
+screen.build()
+    ↓
+template.build()
+    ↓
+components build
+    ↓
+sections build
+    ↓
+groups build
+    ↓
+elements build
+    ↓
+canonical contracts
+    ↓
+layered validation
+    ↓
 SduiScreen
 ```
 
-Builders must not bypass reusable definitions/property contracts by creating arbitrary unvalidated property bags.
+Screen-specific code never manually creates final child arrays.
 
-## 16. Validation Model
+## 14. Canonical Screen Example
 
-Validation remains layered:
+The following demonstrates the final authoring style. Exact visual values remain screen-owned.
+
+```ts
+export class PartnerLoginScreenBuilder {
+  build(): SduiScreen {
+    const screen = new SduiScreenBuilder();
+
+    screen
+      .id('partner_login')
+      .schemaVersion(CURRENT_SDUI_SCHEMA_VERSION)
+      .targetApp('PARTNER');
+
+    const theme = screen.theme();
+    theme.light().statusBarTransparent();
+
+    const gradient = theme.linearGradient();
+    gradient
+      .angle(135)
+      .addColor('#DDF8F6', 0)
+      .addColor('#F7FEFD', 0.28)
+      .addColor('#FFFFFF', 0.55)
+      .addColor('#D9F7F4', 1);
+
+    const template = screen.addStackTemplate('tpl_partner_login');
+    template.vertical().fillMaxSize();
+
+    const brand = template.addStackComponent('brand_component');
+    const form = template.addStackComponent('login_component');
+
+    brand.vertical().alignCenter().spacing(8);
+
+    const title = brand.addText('brand_title');
+    title
+      .value('CarBroz Partner')
+      .fontSize(28)
+      .fontWeight(700);
+
+    form.vertical().spacing(16).fillMaxWidth();
+
+    const mobileSection = form.addStackSection('mobile_section');
+    const mobileGroup = mobileSection.addStackGroup('mobile_group');
+    mobileGroup.horizontal().spacing(8).alignCenter();
+
+    const countryCode = mobileGroup.addText('country_code');
+    countryCode.value('+91');
+
+    const mobile = mobileGroup.addInput('mobile_number');
+    mobile
+      .bind('mobileNumber')
+      .phone()
+      .required()
+      .maxLength(10);
+
+    const actionSection = form.addStackSection('action_section');
+    const continueButton = actionSection.addButton('continue_button');
+    continueButton.text('Continue').fillMaxWidth();
+
+    const request = continueButton.onClickRequest();
+    request
+      .method('POST')
+      .endpoint('/api/v1/partner/auth/send_otp')
+      .authentication('NONE')
+      .validate(true)
+      .responseMode('destination');
+
+    const body = request.body();
+    body.binding('phoneNumber', 'mobileNumber');
+    body.context('deviceId', 'deviceId');
+
+    return screen.build();
+  }
+}
+```
+
+## 15. Validation Model
+
+Validation is defense in depth and remains authoritative even when Builders are hierarchy-safe.
+
+Required layers:
 
 1. **JSON / structural** — canonical shape and required fields.
 2. **Hierarchy** — legal parent/child relationships and XOR branches.
-3. **Definition** — every `type` resolves to a registered reusable definition.
-4. **Property** — properties satisfy the exact definition-specific schema.
-5. **Invariant** — cross-field and semantic invariants.
-6. **Version / target** — schema version, target application and compatibility.
-7. **Publication** — all publication requirements before activation.
+3. **Definition existence** — every reusable `type` resolves to a registered canonical definition.
+4. **Definition-specific properties** — properties satisfy the exact strict schema for that definition.
+5. **Semantic/invariant validation** — cross-field and semantic constraints.
+6. **Schema version / target app** — compatibility and target validation.
+7. **Publication validation** — publication requirements before activation.
 
-Builder safety does not replace final validation. The validator remains the authoritative defense-in-depth boundary.
+The same canonical validation path must protect runtime Registry publication/retrieval boundaries.
 
-## 17. Registry Lifecycle
+## 16. Registry Lifecycle Boundary
 
-After a screen-specific builder produces a canonical screen:
+The intended runtime flow is:
 
 ```text
 Domain Screen Builder
         ↓
 Canonical SduiScreen
         ↓
-Validator
+Canonical Validator
         ↓
 Registry Draft
         ↓
@@ -579,163 +755,246 @@ Serializer
 API Response
 ```
 
-The runtime registry manages documents; it is not a second UI-definition registry.
+Runtime Registry node-catalog compatibility APIs may remain only where source usage proves they are required. They must not redefine canonical production `ui-sdk` types.
 
-## 18. Explicitly Rejected Anti-Patterns
+Existing Registry safeguards that prevent runtime redefinition of canonical `ui-sdk` Component, Section, Group, and Element types must be preserved.
 
-### Giant raw JSON screen constructors
+## 17. Partner Auth Compatibility
 
-Product code must not manually reproduce the final nested canonical tree and merely call `screenSchema.parse(...)`.
+This SDUI campaign must not redesign frozen Partner Auth business behavior.
 
-### Screen-specific primitive definitions
+OTP challenge storage remains Redis-only. Prisma OTP persistence must not be reintroduced.
 
-Do not create:
+Frozen destination contracts remain compatible.
 
-```text
-login_stack_component
-otp_stack_component
-dashboard_stack_component
-login_text
-otp_button
-```
-
-Use generic definitions with screen-specific values.
-
-### Screen-specific property classes duplicating SDK contracts
-
-Do not create `LoginStackComponentProperties`, `OtpStackComponentProperties`, etc. There is one reusable `StackComponentProperties`; screen builders provide different values.
-
-### Hidden current-parent state
-
-Do not make `currentComponent`, `currentSection` or `currentGroup` the primary composition mechanism. Use explicit parent object references.
-
-### Parent-ID based normal composition
-
-Do not make `addElement({ parentId: '...' })` the normal authoring path. The parent object owns the child.
-
-### One global final Stack properties contract
-
-Do not centralize final Stack behavior into `properties/layout/stack-properties.schema.ts`. Final Template/Component/Section/Group property contracts live beside their definitions.
-
-## 19. Current Known Gap
-
-The current source already contains valuable pieces including canonical hierarchy schemas, definition registries, node factories, hierarchy builders, screen builder, serializer/versioning and runtime registry infrastructure.
-
-However, current production Partner screens manually construct large nested JSON documents and call structural parsing directly. The common property contract is also too open for the target architecture (`Record<string, unknown>` behavior), and current validation is shallower than the layered model defined here.
-
-Implementation must therefore converge existing source toward this contract rather than create a parallel framework.
-
-## 20. Migration Strategy
-
-All implementation follows:
+Send OTP destination:
 
 ```text
-KEEP → EXTEND → MODIFY → CREATE
+screenId       partner_otp
+templateId     tpl_partner_otp_v1
+templateType   form_template
+endpoint       /api/v1/partner/screen/auth_otp
+method         GET
+authentication NONE
 ```
 
-Before adding a new artifact:
-
-1. inspect the current owner;
-2. KEEP it if it already satisfies the responsibility;
-3. EXTEND it if incomplete;
-4. MODIFY it if the abstraction is correct but behavior is wrong;
-5. CREATE only when no legitimate owner exists.
-
-### Phase A — Source reconciliation
-
-Audit contracts, properties, definitions, registries, factories, builders, validator, serializer, versioning, runtime registry and Login/OTP/Dashboard composition. Produce exact KEEP / EXTEND / MODIFY / CREATE decisions.
-
-### Phase B — Property contracts
-
-Introduce/complete shared atomic property schemas; colocate definition-specific property contracts; remove production reliance on arbitrary property bags for known definitions while preserving required compatibility.
-
-### Phase C — Typed reusable node builders
-
-Make Stack Template/Component/Section/Group builders property-aware; add typed Element builders; expose only legal child APIs; enforce Component and Section XOR branches.
-
-### Phase D — Base object-graph builder
-
-Screen owns Template; Template owns Components; Component owns Elements OR Sections; Section owns Elements OR Groups; Group owns Elements. Final `build()` recursively produces canonical nodes and invokes validation.
-
-### Phase E — Login golden reference
-
-Migrate Partner Login first. It becomes the golden reference for domain screen-builder style, parent-object ownership, typed properties, validation, registry publication/retrieval and API compatibility.
-
-Do not copy the migration to OTP/Dashboard until Login architecture is proven.
-
-### Phase F — OTP migration
-
-Migrate Partner OTP using the proven Login pattern without duplicate abstractions.
-
-### Phase G — Dashboard migration
-
-Migrate Partner Dashboard using the same canonical SDK builders and its own screen-specific composition builder.
-
-### Phase H — Retire obsolete raw composition
-
-After migrated screens are proven, remove obsolete raw construction paths and compatibility-only artifacts that have no remaining legitimate owner.
-
-### Phase I — Full verification and refreeze
-
-Run unit, integration, architecture and canonical repository gates; update documentation; only then refreeze SDUI composition implementation.
-
-## 21. Testing Requirements
-
-Tests must prove behavior rather than only snapshot giant JSON literals. Required coverage includes:
-
-- atomic property schemas;
-- definition-specific property validation;
-- semantic builder-method mapping;
-- Template → Component ownership;
-- Component direct-element branch;
-- Component section branch;
-- Component elements/sections XOR rejection;
-- Section direct-element branch;
-- Section group branch;
-- Section elements/groups XOR rejection;
-- Group element ownership;
-- invalid hierarchy rejection;
-- unknown definition rejection;
-- canonical screen build validation;
-- screen identity/destination contracts;
-- actions and bindings;
-- registry draft/publish/retrieve;
-- serialized API compatibility;
-- Login/OTP/Dashboard end-to-end behavior.
-
-Tests and architecture gates must never be weakened to make migration pass.
-
-## 22. Naming Rules
-
-Generic reusable names belong in `ui-sdk`:
+Authenticated destination:
 
 ```text
-stack_template
-stack_component
-stack_section
-stack_group
-text
-image
-icon
-input
-button
-divider
-spacer
+screenId       partner_dashboard
+templateId     partner_dashboard_template
+templateType   default_template
+endpoint       /api/v1/partner/sdui/registry/partner_dashboard
+method         GET
+authentication SESSION
 ```
 
-Screen-specific names belong only to runtime instances/composition builders:
+Existing wrapper functions may remain stable for API compatibility:
 
 ```text
-PartnerLoginScreenBuilder
-partner_login
-login_component
-mobile_section
-mobile_group
-mobile_number
-continue_button
+createPartnerLoginScreen()
+createPartnerOtpScreen()
+createPartnerDashboardScreen()
 ```
 
-Do not encode product screen names into reusable primitives unless a genuinely new reusable behavior exists.
+Internally they must delegate to their screen-specific Builders.
+
+## 18. Screen Migration Rule
+
+Partner Login remains the design-quality golden reference.
+
+Within the continuous campaign:
+
+1. make Login conform fully to the final Builder language;
+2. apply exactly the same authoring language to OTP;
+3. apply exactly the same authoring language to Dashboard;
+4. do not invent per-screen Builder variants.
+
+Different screens supply different values. The reusable Builder language stays the same.
+
+## 19. Rejected Anti-Patterns
+
+The following are explicitly rejected:
+
+- giant raw production screen JSON constructors;
+- `screenSchema.parse({ giant nested object })` as screen composition;
+- screen-specific primitive definitions;
+- screen-specific duplicates of SDK property contracts;
+- one global final Stack property contract;
+- generic arbitrary `setProperties({...})` as the normal known-definition API;
+- hidden current-parent state;
+- parent-ID based normal composition;
+- manually owned final child arrays in screen-specific code;
+- callbacks as the mandatory/primary child composition style;
+- direct raw nested request objects in migrated production screens;
+- direct raw nested theme-gradient objects in migrated production screens;
+- Registry redefining canonical SDK types;
+- a second action engine;
+- a second hierarchy framework;
+- a second serializer or validator framework;
+- façade-on-façade APIs that make screen authoring harder instead of simpler.
+
+## 20. Continuous Implementation Campaign
+
+Phase A source reconciliation, Phase B typed atomic/definition properties, and Phase C typed reusable builders are historical verified milestones.
+
+The remaining work is one continuous implementation campaign. Internal sequencing may be used for engineering discipline, but implementation must not stop for approval after every stage.
+
+Current campaign order:
+
+```text
+canonical document convergence
+        ↓
+root returned-object Screen Builder
+        ↓
+typed Theme Builder
+        ↓
+typed Request / RequestBody Builder
+        ↓
+Login golden-reference convergence
+        ↓
+OTP convergence
+        ↓
+Dashboard convergence
+        ↓
+validator convergence
+        ↓
+Registry lifecycle / compatibility convergence
+        ↓
+retire or justify obsolete raw paths
+        ↓
+module documentation
+        ↓
+unit + integration + E2E verification
+        ↓
+canonical Backend CI
+        ↓
+Architecture Closeout on exact same SHA
+        ↓
+second-pass forensic audit
+```
+
+## 21. Test Requirements
+
+Tests must prove behavior rather than merely snapshot giant JSON literals.
+
+### Atomic properties
+
+Cover valid/invalid orientation, spacing, size, alignment, arrangement, appearance contracts, and strict unknown-property rejection.
+
+### Definition-specific properties
+
+Cover:
+
+```text
+StackTemplateProperties
+StackComponentProperties
+StackSectionProperties
+StackGroupProperties
+TextProperties
+ImageProperties
+IconProperties
+InputProperties
+ButtonProperties
+DividerProperties
+SpacerProperties
+```
+
+### Returned-object Builder behavior
+
+Prove:
+
+- returned Template Builder;
+- returned Component Builder;
+- returned Section Builder;
+- returned Group Builder;
+- returned Element Builders;
+- configure a node after creation;
+- configure several siblings later in arbitrary order;
+- exact parent object ownership;
+- multiple Components belong to the correct Template;
+- multiple Sections belong to the correct Component;
+- multiple Groups belong to the correct Section;
+- Elements belong to the exact owning object.
+
+### Hierarchy/XOR
+
+Prove:
+
+- Template → Component valid;
+- Component → Element valid;
+- Component → Section valid;
+- Component cannot mix Elements and Sections;
+- Section → Element valid;
+- Section → Group valid;
+- Section cannot mix Elements and Groups;
+- Group → Element valid;
+- Component → Group unavailable/invalid;
+- Group → Section unavailable/invalid;
+- Group → Group unavailable/invalid;
+- Element has no child API.
+
+### Method-name type ownership
+
+Prove typed methods create canonical types without callers passing raw type strings.
+
+### Action Builder
+
+Cover request method, endpoint, authentication, validation flag, binding source, context source, response source where used, literal source where used, response mode, and exact serialized compatibility with the existing action contract.
+
+### Theme Builder
+
+Cover light/dark state where supported, transparent/default status bar, linear gradient, angle, gradient stops, and serialized compatibility.
+
+### Root Screen Builder
+
+Cover required ID/version/target state, exactly one Template, recursive build, canonical validation, schema version, target app, and serialized output.
+
+### Partner screens
+
+Cover Login, OTP, and Dashboard IDs, template IDs/types, hierarchy, bindings/actions, destination compatibility, and Registry retrieval compatibility.
+
+### Registry
+
+Cover draft create/update, publication validation, publish, retrieve, archive/version behavior, rollback if supported, canonical-type redefinition protection, and validation after retrieval.
+
+### Auth/E2E
+
+Preserve tests for Login screen API, Send OTP, OTP screen, Verify OTP, authenticated Dashboard, Registry Dashboard retrieval, 401/403 behavior, and Redis OTP behavior.
+
+Tests, architecture gates, lint, TypeScript strictness, and validation must not be weakened to make migration pass.
+
+## 22. Documentation Ownership
+
+Documentation follows code ownership.
+
+Canonical architecture:
+
+```text
+sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md
+```
+
+Source reconciliation history:
+
+```text
+sdui/PHASE-A-SOURCE-RECONCILIATION.md
+```
+
+UI SDK behavior:
+
+```text
+sdui/ui-sdk/README.md
+```
+
+Registry lifecycle:
+
+```text
+sdui/registry/README.md
+```
+
+Partner-specific implementation notes, if needed, belong with the correct Partner/API/domain owner.
+
+Do not move Registry-specific truth into unrelated API docs, and do not make Partner docs the source of truth for generic `ui-sdk` contracts.
 
 ## 23. Frozen Responsibility Matrix
 
@@ -745,78 +1004,93 @@ Do not encode product screen names into reusable primitives unless a genuinely n
 | Atomic property vocabulary | `ui-sdk/properties` |
 | Definition-specific properties | definition package |
 | Reusable node behavior | definition package |
-| Reusable typed node builder | definition package / canonical builder owner |
-| Hierarchy object graph | `ui-sdk` base builders |
-| Screen-specific composition | owning domain screen builder |
-| Screen-specific property values | owning domain screen builder |
-| Screen-specific actions/bindings/content | owning domain screen builder |
+| Reusable typed node Builder | definition package / canonical builder owner |
+| Root Screen Builder | `ui-sdk` |
+| Hierarchy object graph | `ui-sdk` Builders |
+| Typed Theme Builder | `ui-sdk` |
+| Typed action/request/body Builder | `ui-sdk`, reusing canonical action contract |
+| Screen-specific composition | owning domain/surface Builder |
+| Screen-specific values/content | owning domain/surface Builder |
 | Final canonical validation | `ui-sdk` validator |
 | Serialization | `ui-sdk` serializer |
 | Schema compatibility/versioning | `ui-sdk` versioning |
-| Draft/publish/archive/retrieve | runtime SDUI registry |
+| Draft/publish/archive/retrieve | runtime SDUI Registry |
 | HTTP transport | API/surface layer |
 | Rendering | frontend SDUI renderer |
 
-## 24. Frozen Architecture Summary
+## 24. Final Forensic Audit
+
+Before completion, perform a second-pass audit against this document and create a requirement-to-source verification table.
+
+Each requirement must identify:
 
 ```text
-Shared Atomic Properties
-        ↓
-Definition-Specific Properties
-        ↓
-Reusable SDUI Definitions
-        ↓
-Typed Definition-Specific Node Builders
-        ↓
-Base Hierarchy/Object-Graph Builders
-        ↓
-Domain Screen-Specific Builder
-        ↓
-Canonical SduiScreen
-        ↓
-Layered Validator
-        ↓
-Runtime Registry
-        ↓
-Serializer
-        ↓
-API
-        ↓
-Frontend Renderer
+requirement
+source owner
+implementation file
+test proof
+status
 ```
 
-Frozen implementation rules:
+Allowed status values:
 
-1. Final SDUI hierarchy does not change.
-2. UI SDK remains the single reusable SDUI language/engine.
-3. Shared atomic properties stay centralized.
-4. Definition-specific property contracts live beside their definitions.
-5. There is no global final `stack-properties` contract.
-6. Screen-specific builders live with the owning domain.
-7. Parent builder objects own and create their children.
-8. Object references establish hierarchy; hidden current-parent state does not.
-9. Typed builder methods hide final JSON property representation from screen code.
-10. Screen builders describe screen intent/composition, not raw JSON structure.
-11. Definitions remain generic; instance values remain screen-specific.
-12. Builder safety is backed by final canonical validation.
-13. Registry remains responsible for runtime document lifecycle.
-14. No duplicate SDUI framework may be introduced.
-15. Login is the first golden-reference migration before OTP and Dashboard.
+```text
+PASS
+JUSTIFIED COMPATIBILITY
+FAIL
+```
 
-## 25. Freeze Gate
+There must be no unexplained FAIL.
 
-This document freezes the **target architecture**, not the current implementation state.
+The audit must explicitly search for:
 
-The current SDUI composition implementation remains open until source has converged to this contract and verification is complete.
+- raw manually nested production screen JSON;
+- `screenSchema.parse({ giant object })` production constructors;
+- generic arbitrary property bags for known definitions;
+- duplicate Stack property contracts;
+- duplicate SDUI engines;
+- hidden current-parent state;
+- parent-ID composition;
+- Registry redefining SDK types;
+- screen-specific primitive definitions;
+- inconsistent Builder styles across Login/OTP/Dashboard;
+- direct raw request action objects in migrated production screen Builders;
+- direct raw theme-gradient objects in migrated production screen Builders;
+- invalid hierarchy APIs;
+- missing XOR enforcement;
+- missing final validator layers;
+- missing Registry publication validation;
+- stale documentation.
 
-The SDUI composition campaign may be declared **COMPLETE + FROZEN** only after:
+## 25. COMPLETE + FROZEN Gate
 
-1. implementation conforms to this document;
-2. Login, OTP and Dashboard use the canonical builder path;
-3. obsolete raw composition paths are retired or explicitly justified;
-4. documentation matches final source;
-5. full canonical Backend CI is green on the documentation-complete `development` HEAD;
-6. independent Architecture Closeout is green on the exact same SHA;
-7. a second-pass forensic architecture audit finds no material drift or duplicate ownership.
+This document freezes the target architecture, not the current source state.
 
-Until those conditions are satisfied, this document is the frozen implementation target and SDUI composition source remains under migration.
+The SDUI composition campaign may be declared:
+
+```text
+SDUI COMPOSITION CAMPAIGN — COMPLETE + FROZEN
+```
+
+only when all conditions are true:
+
+1. Source matches this canonical contract.
+2. Login uses the canonical returned-object Builder path.
+3. OTP uses the same canonical returned-object Builder path.
+4. Dashboard uses the same canonical returned-object Builder path.
+5. Method-name-defines-type is implemented.
+6. Theme Builder is typed.
+7. Action/Request/Body Builder is typed.
+8. Known definition properties are typed.
+9. No production Partner screen giant nested JSON remains.
+10. Obsolete raw paths are retired or explicitly justified.
+11. Registry owns document lifecycle only; any retained compatibility catalog boundary is documented and cannot redefine canonical SDK types.
+12. `ui-sdk` owns reusable definition meaning.
+13. Layered validator is authoritative.
+14. Tests cover the critical Builder/hierarchy/property/Registry/Auth flows.
+15. Documentation matches final source.
+16. Full canonical Backend CI is green on the documentation-complete `development` HEAD.
+17. Independent Architecture Closeout is green on the **exact same SHA**.
+18. Second-pass forensic audit finds no material architectural drift or duplicate ownership.
+
+Only then may the final report provide the exact final SHA, Backend CI run/status, Architecture Closeout run/status, important implementation commits, final documentation paths, test summary, forensic-audit summary, and intentionally retained compatibility boundaries.
