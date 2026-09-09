@@ -8,7 +8,10 @@ const session = read('domains/identity/domain/UserSession.ts');
 const schema = read('prisma/schema.prisma');
 const transport = read('apps/api/src/transport/auth/auth.controller.ts');
 const runtimeConfig = read('apps/api/src/bootstrap/config/runtime-config.ts');
-const migration = read('prisma/migrations/20260906193000_cw5_identity_security/migration.sql');
+const identitySecurityMigration = read('prisma/migrations/20260906193000_cw5_identity_security/migration.sql');
+const otpRetirementMigration = read('prisma/migrations/20260909134500_retire_prisma_otp_challenge/migration.sql');
+const redisComposition = read('apps/api/src/bootstrap/plugins/redis-cache.plugin.ts');
+const identityModule = read('domains/identity/identity.module.ts');
 
 describe('CW5 Identity §41 architecture regression policy', () => {
   it('rejects mock OTPs and predictable refresh-token construction', () => {
@@ -32,22 +35,20 @@ describe('CW5 Identity §41 architecture regression policy', () => {
     expect(transport).toContain('refreshToken: result.refreshToken');
   });
 
-  it('requires persisted OTP challenge lifecycle and an additive legacy-token invalidation migration', () => {
-    for (const marker of [
-      'model OtpChallenge',
-      'otpHash',
-      'attemptCount',
-      'maxAttempts',
-      'expiresAt',
-      'consumedAt',
-      'invalidatedAt',
-    ]) expect(schema).toContain(marker);
+  it('requires Redis-only production OTP persistence and preserves additive legacy-token migration history', () => {
+    expect(schema).not.toContain('model OtpChallenge');
+    expect(identityModule).not.toContain('PrismaOtpChallengeRepository');
+    expect(identityModule).not.toContain('otpChallengeRepository:');
+    expect(redisComposition).toContain('new RedisOtpChallengeRepository(');
+    expect(redisComposition).toContain('cradle.redisClient');
+    expect(redisComposition).toContain('new InMemoryOtpChallengeRepository()');
 
-    expect(migration).toContain('UPDATE "UserSession"');
-    expect(migration).toContain('"isRevoked" = true');
-    expect(migration).toContain('DROP COLUMN "refreshToken"');
-    expect(migration).toContain('RENAME COLUMN "token" TO "tokenHash"');
-    expect(migration).toContain('CREATE TABLE "OtpChallenge"');
+    expect(identitySecurityMigration).toContain('UPDATE "UserSession"');
+    expect(identitySecurityMigration).toContain('"isRevoked" = true');
+    expect(identitySecurityMigration).toContain('DROP COLUMN "refreshToken"');
+    expect(identitySecurityMigration).toContain('RENAME COLUMN "token" TO "tokenHash"');
+    expect(identitySecurityMigration).toContain('CREATE TABLE "OtpChallenge"');
+    expect(otpRetirementMigration).toContain('DROP TABLE IF EXISTS "OtpChallenge"');
   });
 
   it('requires production OTP provider configuration rather than a development fallback', () => {
