@@ -63,13 +63,23 @@ export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResult> {
     const user = await this.userRepository.findByPhoneNumber(input.phoneNumber);
     const otp = this.authSecurityProvider.generateOtp(AUTH_SECURITY_POLICY.otp.length);
     const otpHash = await this.authSecurityProvider.hashSecret(otp);
-    const challenge = await this.otpChallengeRepository.create({
-      phoneNumber: input.phoneNumber,
-      deviceId: input.deviceId,
-      otpHash,
-      maxAttempts: AUTH_SECURITY_POLICY.otp.maxAttempts,
-      expiresAt: new Date(now.getTime() + AUTH_SECURITY_POLICY.otp.ttlMs),
-    });
+    const challenge = await this.otpChallengeRepository.tryCreateWithinRateLimit(
+      {
+        phoneNumber: input.phoneNumber,
+        deviceId: input.deviceId,
+        otpHash,
+        maxAttempts: AUTH_SECURITY_POLICY.otp.maxAttempts,
+        expiresAt: new Date(now.getTime() + AUTH_SECURITY_POLICY.otp.ttlMs),
+      },
+      {
+        now,
+        windowStart: rateWindowStart,
+        maxChallenges: AUTH_SECURITY_POLICY.otp.maxChallengesPerWindow,
+      },
+    );
+    if (!challenge) {
+      throw new ApplicationError('OTP request limit exceeded', 429, 'OTP_RATE_LIMITED');
+    }
 
     try {
       const delivery = await this.smsProvider.sendOtp({ phoneNumber: input.phoneNumber, otp });
@@ -257,34 +267,33 @@ export class RefreshTokenUseCase implements IUseCase<RefreshTokenInput, RefreshT
       replacementExpiresAt: new Date(now.getTime() + AUTH_SECURITY_POLICY.refresh.ttlMs),
       now,
     });
-
-    if (rotation.status !== 'ROTATED' || !rotation.session?.user) throw refreshFailure();
+    if (!rotation) throw refreshFailure();
 
     return {
-      user: rotation.session.user,
+      user: rotation.user,
       session: rotation.session,
       refreshToken: replacementToken,
     };
   }
 }
 
-/** Input for revoking one Identity session or all sessions belonging to a user. */
+/** Input for logging out a specific device session. */
 export interface LogoutInput {
-  sessionId?: number;
-  userId?: number;
-  logoutAll?: boolean;
+  userId: number;
+  deviceId: string;
 }
 
-/** Revokes the session and every hashed refresh token in its token family. */
+/** Revokes the current device session and all refresh-token families owned by it. */
 export class LogoutUseCase implements IUseCase<LogoutInput, void> {
-  constructor(private readonly refreshTokenRepository: IRefreshTokenRepository) {}
+  constructor(
+    private readonly userSessionRepository: IUserSessionRepository,
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
+  ) {}
 
   async execute(input: LogoutInput): Promise<void> {
-    const now = systemClock.now();
-    if (input.logoutAll && input.userId) {
-      await this.refreshTokenRepository.revokeAllForUser(input.userId, now);
-      return;
-    }
-    if (input.sessionId) await this.refreshTokenRepository.revokeSession(input.sessionId, now);
+    const session = await this.userSessionRepository.findActiveByUserAndDevice(input.userId, input.deviceId);
+    if (!session) return;
+    await this.refreshTokenRepository.revokeBySession(session.id, systemClock.now());
+    await this.userSessionRepository.revoke(session.id, systemClock.now());
   }
 }
