@@ -268,3 +268,5 @@ function emitDiagnosticBlock(color: string, title: string, lines: string[], erro
   for (const line of lines) writer.write(`${color}│${ANSI.reset} ${line}\n`);
   writer.write(`${color}╰────────────────────────────────────────────────────────${ANSI.reset}\n`);
 }
+
+export * from './adapters/LoggerProvider.js';
