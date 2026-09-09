@@ -1,8 +1,8 @@
 # Partner Auth + SDUI Backend → Frontend MVI/UDF Handoff
 
-**Status:** Phase 13 implementation contract
+**Status:** Phase 13 implementation contract — synchronized with the implemented Partner auth + SDUI backend flow.
 
-This document is the stable handoff for the Partner frontend. It describes the backend contracts that frontend MVI/UDF consumes; it does not move reducer, Store, ViewModel, navigation-state, or rendering ownership into the backend.
+This document is the stable handoff for the Partner frontend. It describes backend contracts the frontend MVI/UDF runtime consumes; it does not move reducer, Store, ViewModel, navigation-state, or rendering ownership into the backend.
 
 ## 1. Ownership boundary
 
@@ -21,7 +21,7 @@ Frontend owns:
 - reducer/store lifecycle;
 - one-way state updates;
 - navigation execution after a successful backend destination;
-- resolution/retention of runtime values referenced by SDUI actions;
+- resolution and retention of runtime values referenced by SDUI actions;
 - loading/error presentation.
 
 The backend must never require a frontend-specific ViewModel, reducer, Store implementation, or mutable client state model.
@@ -95,15 +95,24 @@ method         = GET
 authentication = SESSION
 ```
 
+The authenticated Dashboard registry document is provisioned through a forward Prisma migration. Production availability must not depend on manually running `prisma db seed`.
+
 ## 5. Login screen → Send OTP
 
-The Login screen is fetched from the guest startup destination. Its request action invokes the existing Send OTP endpoint.
-
-### Send OTP request
+The Login screen is fetched from the guest startup destination. Its existing generic request action invokes:
 
 ```text
 POST /api/v1/partner/auth/send_otp
 ```
+
+The loaded Login screen resolves the request body using the canonical SDUI value-reference vocabulary:
+
+```text
+phoneNumber ← { $binding: "mobileNumber" }
+deviceId    ← { $context: "deviceId" }
+```
+
+Resolved request body:
 
 ```json
 {
@@ -112,7 +121,7 @@ POST /api/v1/partner/auth/send_otp
 }
 ```
 
-### Send OTP success data
+Send OTP success data contains:
 
 ```text
 message
@@ -135,11 +144,48 @@ authentication = NONE
 
 OTP plaintext and OTP hash are never part of this response.
 
-## 6. OTP screen → Verify OTP
+## 6. Transient auth-flow state required before OTP navigation
+
+The generic SDUI SDK intentionally does not invent screen-specific state-transfer actions. Therefore the frontend runtime must preserve the values required by the next screen as part of its existing MVI/UDF flow state.
+
+After a successful Send OTP request and before executing/fetching its destination, the frontend must retain:
+
+```text
+authFlow.phoneNumber = resolved Send OTP request body phoneNumber
+lastSuccessfulResponse = complete successful Send OTP response envelope
+```
+
+This enables the OTP screen's existing references:
+
+```text
+challengeId ← { $response: "data.challengeId" }
+phoneNumber ← { $context: "authFlow.phoneNumber" }
+otp         ← { $binding: "otp" }
+deviceId    ← { $context: "deviceId" }
+```
+
+`$response` on the OTP screen therefore refers to the previous successful request response that produced the destination. `$context: "authFlow.phoneNumber"` refers to transient frontend auth-flow context retained from the resolved Send OTP request.
+
+The transient Send OTP response/auth-flow values should be cleared after successful Verify OTP, explicit cancellation/back navigation that abandons the flow, logout/reset, or a new authentication flow. OTP plaintext must not be retained as reusable application state after verification.
+
+## 7. Canonical generic SDUI reference vocabulary
+
+The current backend SDK supports exactly these generic value-reference forms:
+
+```text
+{ $binding: "..." }
+{ $context: "..." }
+{ $response: "..." }
+{ $literal: <value> }
+```
+
+There is no `$form`, `$payload`, or `$state` value-reference namespace in the current backend contract. Frontend implementations must not depend on those names unless the generic SDK is deliberately extended in a future separately-reviewed change.
+
+## 8. OTP screen → Verify OTP
 
 The OTP screen uses the existing generic SDUI `request` action. No OTP-specific action language exists.
 
-Canonical request:
+Canonical action configuration:
 
 ```text
 POST /api/v1/partner/auth/verify_otp
@@ -148,28 +194,7 @@ validate       = true
 responseMode   = destination
 ```
 
-Canonical value references:
-
-```text
-challengeId ← $response.data.challengeId
-phoneNumber ← $payload.phoneNumber
-otp         ← $form.otp
-deviceId    ← $context.deviceId
-```
-
-The generic runtime reference namespaces remain:
-
-```text
-$state
-$payload
-$response
-$form
-$context
-```
-
-Frontend must retain/resolve the values required by this action through its own MVI/UDF state/runtime layer. Backend must not invent hidden client state or a second reference mechanism.
-
-### Verify OTP request body
+Resolved request body:
 
 ```json
 {
@@ -183,7 +208,9 @@ Frontend must retain/resolve the values required by this action through its own 
 }
 ```
 
-### Verify OTP success data
+The current OTP screen sends the four required fields. Optional device metadata may be added only through the same generic context/reference mechanism when the frontend runtime supplies it.
+
+Verify OTP success data contains:
 
 ```text
 user
@@ -195,16 +222,35 @@ nextScreen
 
 The authenticated `nextScreen` is exactly the Partner Dashboard destination defined above.
 
-Security ordering is backend-owned: a session/access token/refresh token is issued only after the OTP challenge is valid, phone/device binding is valid, the secret matches, and atomic one-time consume succeeds.
+Security ordering is backend-owned: a user/session/access token/refresh-token family is established only after the challenge is valid, phone/device binding is valid, the secret matches, and atomic one-time consume succeeds.
 
-## 7. Authenticated Dashboard retrieval
+## 9. Generic `responseMode: destination` runtime rule
+
+For an SDUI request configured with `responseMode: destination`, frontend runtime behavior is:
+
+```text
+validate current form/bindings
+  → resolve $binding/$context/$response/$literal values
+  → execute HTTP request
+  → failure: reduce/expose error; do not navigate
+  → success: preserve required flow state/response
+  → validate returned destination
+  → enforce SESSION credential requirement when applicable
+  → fetch destination screen
+  → verify loaded screen identity
+  → navigate/render
+```
+
+No second action engine or Partner-specific navigation callback is required.
+
+## 10. Authenticated Dashboard retrieval
 
 ```text
 GET /api/v1/partner/sdui/registry/partner_dashboard
 Authorization: Bearer <access token>
 ```
 
-This route is SESSION-protected and Partner-scoped. The loaded document must satisfy:
+This route is SESSION-protected and hard-scoped by the backend to `targetApp: PARTNER`. The loaded document must satisfy:
 
 ```text
 loaded.screenId       == destination.screenId
@@ -212,25 +258,27 @@ loaded.template.id    == destination.templateId
 loaded.template.type  == destination.templateType
 ```
 
-The frontend should reject/navigation-fail safely if this identity parity is violated rather than rendering an unexpected screen under a trusted destination.
+The frontend should fail navigation safely if this identity parity is violated rather than render an unexpected screen under a trusted destination.
 
-## 8. MVI/UDF mapping
+## 11. MVI/UDF mapping
 
 Recommended state transition contract:
 
 ```text
 User Intent
   → Store accepts intent
-  → use case/repository issues backend request
+  → ActionEngine/repository resolves SDUI request references
+  → backend request
   → envelope parsed
   → reducer produces new immutable state
-  → optional Destination becomes one-time navigation effect
+  → flow context/previous response retained when required
+  → optional Destination emitted as one-time navigation effect
   → destination screen fetched
   → screen identity validated
   → SDUI renderer consumes immutable screen document
 ```
 
-Suggested intent/effect semantics, without prescribing class names:
+Possible intent/result/effect semantics, without prescribing class names:
 
 ```text
 EnterPhone / SubmitPhone
@@ -244,22 +292,22 @@ ScreenLoaded(screen)
 ScreenLoadFailed(error)
 ```
 
-Navigation is an effect of a successful backend result, not a reducer-side network call and not a backend-maintained UI state.
+Navigation is an effect of a successful backend result, not a reducer-side network call and not backend-maintained UI state.
 
-## 9. Credential handling
+## 12. Credential handling
 
 - Access token is supplied as `Authorization: Bearer <token>` for SESSION destinations.
 - Refresh token is sensitive client credential material; persist it only in the frontend platform's secure-storage abstraction.
 - Never log OTP, OTP hash, access token, or refresh token.
-- A Verify OTP replay or concurrent losing verification must be handled as an auth failure; the frontend must not synthesize a local session from previous optimistic state.
+- A Verify OTP replay or concurrent losing verification must be handled as an auth failure; the frontend must not synthesize a local session from optimistic state.
 
-## 10. Error handling
+## 13. Error handling
 
 Frontend should map backend error envelopes into feature errors without matching human-readable messages as business logic. Preserve the typed backend `code` and `traceId` for safe diagnostics.
 
 Important OTP errors include cooldown/rate-limit/delivery failures and invalid-or-expired verification failures. The backend remains authoritative; the frontend may display timers or retry affordances but must not bypass server cooldown/rate state.
 
-## 11. Contract parity rules
+## 14. Contract parity rules
 
 The following must remain true across backend and frontend integration:
 
@@ -271,6 +319,6 @@ VerifyOtp.nextScreen == Partner Dashboard screen identity
 
 No legacy `{ template, api }` navigation shape is legal in this Partner auth flow.
 
-## 12. Change-management rule
+## 15. Change-management rule
 
 Future auth/SDUI changes must preserve the existing hierarchy and generic contracts first. Reuse or extend current Destination, Screen, action, reference, envelope, auth, and repository contracts. Introduce a new abstraction only when the existing owner cannot legally express the requirement and the architecture document is updated before implementation.
