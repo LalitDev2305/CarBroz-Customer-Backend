@@ -1,6 +1,6 @@
 import {
-  BaseSduiScreenBuilder,
   CURRENT_SDUI_SCHEMA_VERSION,
+  SduiScreenBuilder,
   type SduiScreen,
   type StackComponentBuilder,
   type StackTemplateBuilder,
@@ -8,28 +8,25 @@ import {
 
 export class PartnerLoginScreenBuilder {
   build(): SduiScreen {
-    const screen = new BaseSduiScreenBuilder({
-      screenId: 'partner_login',
-      schemaVersion: CURRENT_SDUI_SCHEMA_VERSION,
-      targetApp: 'PARTNER',
-    });
+    const screen = new SduiScreenBuilder();
 
-    screen.withTheme({
-      theme: 'light',
-      statusBar: 'transparent',
-      properties: {
-        gradient: {
-          type: 'linear',
-          angle: 135,
-          colors: [
-            { color: '#DDF8F6', stop: 0 },
-            { color: '#F7FEFD', stop: 0.28 },
-            { color: '#FFFFFF', stop: 0.55 },
-            { color: '#D9F7F4', stop: 1 },
-          ],
-        },
-      },
-    });
+    screen
+      .id('partner_login')
+      .schemaVersion(CURRENT_SDUI_SCHEMA_VERSION)
+      .targetApp('PARTNER');
+
+    const theme = screen.theme();
+    theme
+      .light()
+      .statusBarTransparent();
+
+    const gradient = theme.linearGradient();
+    gradient
+      .angle(135)
+      .addColor('#DDF8F6', 0)
+      .addColor('#F7FEFD', 0.28)
+      .addColor('#FFFFFF', 0.55)
+      .addColor('#D9F7F4', 1);
 
     const template = screen.addStackTemplate('tpl_7K2M9Q');
     template
@@ -50,17 +47,23 @@ export class PartnerLoginScreenBuilder {
     const brand = template.addStackComponent('brand_content');
     brand.vertical().spacing(6).horizontalAlignment('center').fillMaxWidth();
 
-    brand.addImage('brand_logo', '/images/carbroz_logo.png')
+    const logo = brand.addImage('brand_logo');
+    logo
+      .source('/images/carbroz_logo.png')
       .size(120, 96)
       .contentScale('fit');
 
-    brand.addText('brand_name', 'CarBroz')
+    const brandName = brand.addText('brand_name');
+    brandName
+      .value('CarBroz')
       .fontSize(44)
       .fontWeight(700)
       .color('#101522')
       .textAlign('center');
 
-    brand.addText('partner_label', 'PARTNER')
+    const partnerLabel = brand.addText('partner_label');
+    partnerLabel
+      .value('PARTNER')
       .fontSize(18)
       .fontWeight(600)
       .letterSpacing(4)
@@ -69,19 +72,25 @@ export class PartnerLoginScreenBuilder {
       .leadingDivider({ orientation: 'horizontal', width: 36, thickness: 2, color: '#13B8B5' })
       .trailingDivider({ orientation: 'horizontal', width: 36, thickness: 2, color: '#13B8B5' });
 
-    brand.addText('brand_tagline', 'Premium Car Care At Your Doorstep')
+    const tagline = brand.addText('brand_tagline');
+    tagline
+      .value('Premium Car Care At Your Doorstep')
       .fontSize(14)
       .fontWeight(400)
       .color('#6B7078')
       .textAlign('center');
 
-    brand.addText('welcome_title', 'Welcome Partner!')
+    const welcomeTitle = brand.addText('welcome_title');
+    welcomeTitle
+      .value('Welcome Partner!')
       .fontSize(32)
       .fontWeight(700)
       .color('#101522')
       .textAlign('center');
 
-    brand.addText('welcome_subtitle', 'Login to continue your journey')
+    const welcomeSubtitle = brand.addText('welcome_subtitle');
+    welcomeSubtitle
+      .value('Login to continue your journey')
       .fontSize(16)
       .fontWeight(400)
       .color('#6B7078')
@@ -112,13 +121,16 @@ export class PartnerLoginScreenBuilder {
       .border({ width: 1, color: '#CCE0E3' })
       .shape({ type: 'roundedCorner', cornerRadius: 16 });
 
-    group.addText('country_code', '+91')
+    const countryCode = group.addText('country_code');
+    countryCode
+      .value('+91')
       .fontSize(18)
       .fontWeight(600)
       .color('#101522')
       .trailingDivider({ orientation: 'vertical', height: 24, thickness: 1, color: '#D4DEE1' });
 
-    group.addInput('mobile_number')
+    const mobileInput = group.addInput('mobile_number');
+    mobileInput
       .placeholder('98765 43210')
       .phone()
       .maxLength(10)
@@ -132,7 +144,9 @@ export class PartnerLoginScreenBuilder {
     const section = component.addStackSection('action_section');
     section.vertical().spacing(12).horizontalAlignment('center').fillMaxWidth();
 
-    section.addButton('continue_button', 'Continue')
+    const continueButton = section.addButton('continue_button');
+    continueButton
+      .text('Continue')
       .fillMaxWidth()
       .height(56)
       .fontSize(18)
@@ -147,23 +161,23 @@ export class PartnerLoginScreenBuilder {
           { color: '#10B6B3', stop: 1 },
         ],
       })
-      .trailingIcon({ name: 'arrow_forward', size: 22, color: '#FFFFFF' })
-      .onClick({
-        type: 'request',
-        payload: {
-          method: 'POST',
-          endpoint: '/api/v1/partner/auth/send_otp',
-          authentication: 'NONE',
-          validate: true,
-          body: {
-            phoneNumber: { $binding: 'mobileNumber' },
-            deviceId: { $context: 'deviceId' },
-          },
-          responseMode: 'destination',
-        },
-      });
+      .trailingIcon({ name: 'arrow_forward', size: 22, color: '#FFFFFF' });
 
-    section.addText('legal_text', 'By continuing, you agree to our Terms & Conditions and Privacy Policy')
+    const request = continueButton.onClickRequest();
+    request
+      .method('POST')
+      .endpoint('/api/v1/partner/auth/send_otp')
+      .authentication('NONE')
+      .validate(true)
+      .responseMode('destination');
+
+    const body = request.body();
+    body.binding('phoneNumber', 'mobileNumber');
+    body.context('deviceId', 'deviceId');
+
+    const legalText = section.addText('legal_text');
+    legalText
+      .value('By continuing, you agree to our Terms & Conditions and Privacy Policy')
       .fillMaxWidth()
       .fontSize(13)
       .fontWeight(400)
@@ -176,7 +190,9 @@ export class PartnerLoginScreenBuilder {
     const hero = template.addStackComponent('hero_content');
     hero.vertical().horizontalAlignment('center').fillMaxWidth();
 
-    hero.addImage('hero_car', '/images/img_splash_car.png')
+    const heroCar = hero.addImage('hero_car');
+    heroCar
+      .source('/images/img_splash_car.png')
       .fillMaxWidth()
       .maxWidth(420)
       .contentScale('fit');
