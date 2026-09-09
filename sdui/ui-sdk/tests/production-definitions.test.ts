@@ -32,7 +32,19 @@ describe('production SDUI definitions', () => {
     const first = ElementFactory.create('button', {
       id: 'continue',
       properties: { text: 'Continue' },
-      actions: { click: { type: 'navigate', targetId: 'next' } },
+      actions: {
+        click: {
+          type: 'navigate',
+          payload: {
+            screenId: 'next_screen',
+            templateId: 'next_template',
+            templateType: 'default_template',
+            endpoint: '/api/v1/partner/screen/next_screen',
+            method: 'GET',
+            authentication: 'NONE',
+          },
+        },
+      },
       accessibility: { label: 'Continue' },
     });
     const second = ElementFactory.create('button', {
@@ -46,7 +58,10 @@ describe('production SDUI definitions', () => {
     expect(second.type).toBe('button');
     expect(first.properties.semanticRole).toBe('action');
     expect(first.properties.text).toBe('Continue');
-    expect(first.actions?.click.targetId).toBe('next');
+    expect(first.actions?.click).toMatchObject({
+      type: 'navigate',
+      payload: { screenId: 'next_screen' },
+    });
     expect(first.accessibility?.label).toBe('Continue');
   });
 
