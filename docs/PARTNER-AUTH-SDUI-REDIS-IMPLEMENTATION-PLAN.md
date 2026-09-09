@@ -1,6 +1,6 @@
 # Partner Authentication + SDUI + Redis Implementation Plan
 
-> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–5 complete and repository-verified; Phase 6 Send OTP canonical destination implementation is complete and final same-HEAD repository/architecture verification is pending. Phase 7+ production behavior remains untouched.
+> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–6 COMPLETE + FROZEN. Phase 6 closure is valid only with canonical Backend CI and independent Architecture Closeout green on the same documentation-complete `development` HEAD. Phase 7+ production behavior remains untouched.
 >
 > **Branch:** `development`
 >
@@ -501,21 +501,23 @@ No duplicate DTO, controller, use case, request mapper, action type, device fiel
 
 Phase 5 passed the canonical repository verification requirements without changing Phase 6 navigation/result behavior.
 
-## Phase 6 — Send OTP canonical destination result — IMPLEMENTED / FINAL VERIFICATION PENDING
+## Phase 6 — Send OTP canonical destination result — COMPLETE + FROZEN
 
-Completed implementation scope:
+Completed and verified scope:
 
 - froze the detailed contract before production changes in `domains/identity/PHASE-6-SEND-OTP-DESTINATION-CONTRACT.md` and `sdui/PARTNER-AUTH-SDUI-CONTRACT.md`;
 - kept Identity transport-neutral with the smallest readonly `AuthFlowDestination` value shape and no dependency on `sdui/ui-sdk`, Configuration or API transport;
 - replaced only `SendOtpResult.nextScreen` legacy `{ template, api }` metadata;
 - reserved the exact destination `partner_otp` / `tpl_partner_otp_v1` / `form_template` / `GET /api/v1/partner/screen/auth_otp` / `NONE` for Phase 8;
 - preserved Send OTP challenge generation, hashing, cooldown, atomic rate limiting, Redis/Prisma composition, provider delivery, invalidation, error codes and envelope behavior;
-- added real-use-case Identity regression proof for exact destination fields, no legacy fields and no OTP leakage;
-- extended the existing Partner HTTP route regression to prove the canonical response envelope and `dynamicDestinationSchema` compatibility at the legal API/SDUI boundary;
-- corrected the boundary test to structurally narrow Fastify's broad JSON union rather than weakening TypeScript safety;
+- synchronized the Identity unit regression with the exact canonical destination fields and explicitly rejected legacy destination fields and OTP leakage;
+- proved the existing Partner HTTP route returns the canonical response envelope and that `dynamicDestinationSchema.parse(nextScreen)` succeeds at the legal API/SDUI boundary;
+- corrected cache/Redis DI ownership so the generic DI plugin does not pre-bind `cacheProvider`; development/production cache and OTP persistence are composed by the Redis infrastructure plugin through the same singleton `redisClient`;
+- strengthened the existing Redis composition regression to prevent duplicate/premature cache registration and to preserve fail-closed non-test behavior;
+- passed canonical Backend CI and the independent Architecture Closeout verifier together on the Phase 6 implementation candidate;
 - intentionally left Verify OTP navigation, OTP screen/route creation and Dashboard routing for later phases.
 
-Phase 6 becomes COMPLETE + FROZEN only after both canonical Backend CI and independent Architecture Closeout succeed on the same final documentation-complete `development` HEAD.
+The repository-level Phase 6 freeze is valid only when the final documentation-complete `development` HEAD also passes both canonical Backend CI and independent Architecture Closeout on that exact same SHA. Any later Phase 6 regression reopens this phase and requires the same closeout gates again.
 
 ## Phase 7 — Send OTP error/security regression — NOT STARTED
 
