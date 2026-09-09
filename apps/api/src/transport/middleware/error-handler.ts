@@ -125,7 +125,7 @@ export const globalErrorHandler = (
     const status = error.statusCode;
     const code = status === 401 ? 'UNAUTHORIZED' : 'FORBIDDEN';
     const message = status === 401 ? SAFE_UNAUTHORIZED_MESSAGE : SAFE_FORBIDDEN_MESSAGE;
-    if (structuredErrorLogging) request.log.warn({ err: error, traceId }, 'Transport Authorization Error');
+    if (structuredErrorLogging) request.log.warn({ err: error, traceId }, 'Transport Access Error');
     return reply.status(status).send(ResponseHelper.error(status, message, traceId, code));
   }
 
