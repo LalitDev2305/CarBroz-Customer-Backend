@@ -12,26 +12,26 @@ import {
   CURRENT_SDUI_SCHEMA_VERSION,
 } from '../src/public/index.js';
 
-const element = (id: string, type = 'text') => ElementFactory.raw({ id, type, properties: {} });
+const element = (id: string, type = 'text') => ElementFactory.raw({ id, type, properties: { text: id } });
 
 describe('SDUI composition engine', () => {
   it('supports all three legal component branches in one template', () => {
-    const direct = new ComponentBuilder({ id: 'direct', type: 'direct_component' })
+    const direct = new ComponentBuilder({ id: 'direct', type: 'content_component' })
       .addElement(element('direct_text')).build();
 
-    const section = new SectionBuilder({ id: 'simple_section', type: 'simple_section' })
+    const section = new SectionBuilder({ id: 'simple_section', type: 'content_section' })
       .addElement(element('section_text')).build();
-    const sectioned = new ComponentBuilder({ id: 'sectioned', type: 'sectioned_component' })
+    const sectioned = new ComponentBuilder({ id: 'sectioned', type: 'content_component' })
       .addSection(section).build();
 
-    const group = new GroupBuilder({ id: 'info_group', type: 'info_group' })
+    const group = new GroupBuilder({ id: 'info_group', type: 'row_group' })
       .addElement(element('group_text')).build();
-    const groupedSection = new SectionBuilder({ id: 'grouped_section', type: 'grouped_section' })
+    const groupedSection = new SectionBuilder({ id: 'grouped_section', type: 'content_section' })
       .addGroup(group).build();
-    const grouped = new ComponentBuilder({ id: 'grouped', type: 'grouped_component' })
+    const grouped = new ComponentBuilder({ id: 'grouped', type: 'content_component' })
       .addSection(groupedSection).build();
 
-    const template = new TemplateBuilder({ id: 'dashboard_template_instance', type: 'dashboard_template' })
+    const template = new TemplateBuilder({ id: 'dashboard_template_instance', type: 'default_template' })
       .addComponent(direct).addComponent(sectioned).addComponent(grouped).build();
 
     const screen = new ScreenBuilder({
@@ -42,14 +42,14 @@ describe('SDUI composition engine', () => {
   });
 
   it('rejects mixed component branches', () => {
-    const builder = new ComponentBuilder({ id: 'mixed', type: 'mixed' }).addElement(element('a'));
-    const section = new SectionBuilder({ id: 's', type: 's' }).addElement(element('b')).build();
+    const builder = new ComponentBuilder({ id: 'mixed', type: 'content_component' }).addElement(element('a'));
+    const section = new SectionBuilder({ id: 's', type: 'content_section' }).addElement(element('b')).build();
     expect(() => builder.addSection(section)).toThrow(/both elements and sections/);
   });
 
   it('rejects mixed section branches', () => {
-    const builder = new SectionBuilder({ id: 'mixed_section', type: 'mixed_section' }).addElement(element('a'));
-    const group = new GroupBuilder({ id: 'g', type: 'g' }).addElement(element('b')).build();
+    const builder = new SectionBuilder({ id: 'mixed_section', type: 'content_section' }).addElement(element('a'));
+    const group = new GroupBuilder({ id: 'g', type: 'row_group' }).addElement(element('b')).build();
     expect(() => builder.addGroup(group)).toThrow(/both elements and groups/);
   });
 
