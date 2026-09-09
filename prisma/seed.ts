@@ -108,7 +108,7 @@ async function main() {
   const permissions = [
     { key: 'users.manage', module: 'Users', description: 'Manage all users' },
     { key: 'partners.manage', module: 'Partners', description: 'Manage all partners' },
-    { key: 'bookings.manage', module: 'Bookings', description: 'Manage all bookings' },
+    { key: 'bookings.manage', module: 'Bookings', description: 'Manage bookings' },
     { key: 'pricing.manage', module: 'Pricing', description: 'Manage pricing rules' },
     { key: 'services.manage', module: 'Services', description: 'Manage catalog services' },
     { key: 'analytics.view', module: 'Analytics', description: 'View analytics' },
@@ -150,6 +150,64 @@ async function main() {
       });
     }
   }
+
+  // 7. Provision the reserved authenticated Partner startup screen as a published registry document.
+  const partnerDashboard = {
+    screenId: 'partner_dashboard',
+    schemaVersion: '3.0.0',
+    targetApp: 'PARTNER',
+    theme: { theme: 'light', statusBar: 'transparent' },
+    template: {
+      id: 'partner_dashboard_template',
+      type: 'default_template',
+      properties: {
+        orientation: 'vertical',
+        fillMaxSize: true,
+        padding: { start: 24, top: 24, end: 24, bottom: 24 },
+      },
+      components: [{
+        id: 'dashboard_shell',
+        type: 'stack_component',
+        properties: {
+          orientation: 'vertical',
+          verticalArrangement: { type: 'spacedBy', spacing: 8 },
+          fillMaxWidth: true,
+        },
+        elements: [
+          { id: 'dashboard_title', type: 'text', properties: { text: 'Partner Dashboard', fontSize: 28, fontWeight: 700, color: '#101522' } },
+          { id: 'dashboard_status', type: 'text', properties: { text: 'Your workspace is ready.', fontSize: 15, fontWeight: 400, color: '#6B7078' } },
+        ],
+      }],
+    },
+  };
+
+  await prisma.sduiScreen.upsert({
+    where: {
+      screenId_targetApp_versionNumber: {
+        screenId: 'partner_dashboard',
+        targetApp: 'PARTNER',
+        versionNumber: 1,
+      },
+    },
+    update: {
+      status: 'PUBLISHED',
+      layoutJson: partnerDashboard,
+      publishedAt: new Date(),
+      publishedBy: 'system-seed',
+      changeDescription: 'Canonical authenticated Partner startup shell',
+    },
+    create: {
+      screenId: 'partner_dashboard',
+      targetApp: 'PARTNER',
+      versionNumber: 1,
+      status: 'PUBLISHED',
+      layoutJson: partnerDashboard,
+      lockVersion: 1,
+      publishedAt: new Date(),
+      publishedBy: 'system-seed',
+      changeDescription: 'Canonical authenticated Partner startup shell',
+    },
+  });
 
   console.log('Seed completed successfully.');
 }
