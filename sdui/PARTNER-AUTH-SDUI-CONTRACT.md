@@ -5,6 +5,8 @@
 > **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` remain higher-level execution authorities.
 >
 > **Purpose:** Correct and freeze the SDUI-specific contracts required by the current Partner authentication work without duplicating the generic SDUI implementation guide.
+>
+> **Closeout rule:** The repository-level Phase 6 freeze is bound to the exact documentation-complete `development` HEAD on which both canonical Backend CI and the independent Architecture Closeout verifier succeed.
 
 ---
 
