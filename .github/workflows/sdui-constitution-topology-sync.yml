@@ -1,0 +1,44 @@
+name: SDUI Constitution Topology Sync
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - '.github/workflows/sdui-constitution-topology-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout development
+        uses: actions/checkout@v4
+        with:
+          ref: development
+
+      - name: Add SDUI engine to exact canonical workspace list
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('tools/architecture-closeout-constitution-gate.mjs')
+          source = path.read_text()
+          old = "  'sdui/ui-sdk', 'sdui/registry',"
+          new = "  'sdui/engine', 'sdui/ui-sdk', 'sdui/registry',"
+          count = source.count(old)
+          if count != 1:
+              raise SystemExit(f'expected exactly one canonical SDUI workspace marker, found {count}')
+          path.write_text(source.replace(old, new, 1))
+          PY
+
+      - name: Commit exact topology update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/architecture-closeout-constitution-gate.mjs
+          git commit -m "arch(sdui): admit engine in constitution workspace topology"
+          git push origin HEAD:development
