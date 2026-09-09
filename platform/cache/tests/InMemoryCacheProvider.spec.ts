@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { InMemoryCacheProvider } from '../src/providers/InMemoryCacheProvider.js';
 
 describe('InMemoryCacheProvider', () => {
   let cache: InMemoryCacheProvider;
 
   beforeEach(() => {
+    vi.useRealTimers();
     cache = new InMemoryCacheProvider();
   });
 
@@ -20,9 +21,12 @@ describe('InMemoryCacheProvider', () => {
   });
 
   it('should handle TTL expiry', async () => {
-    await cache.set('key_ttl', 'value_ttl', -1); // expired immediately
-    const result = await cache.get<string>('key_ttl');
-    expect(result).toBeNull();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+    await cache.set('key_ttl', 'value_ttl', 1);
+    await vi.advanceTimersByTimeAsync(1_001);
+    expect(await cache.get<string>('key_ttl')).toBeNull();
+    vi.useRealTimers();
   });
 
   it('should delete keys', async () => {
