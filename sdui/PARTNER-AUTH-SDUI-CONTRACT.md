@@ -1,6 +1,6 @@
 # Partner Authentication SDUI Contract Addendum
 
-> **Status:** FROZEN for the Partner Login → OTP backend implementation.
+> **Status:** FROZEN for the Partner Login → OTP backend implementation. Phase 5 Partner Login request alignment is implemented; repository closeout verification is pending before Phase 5 is marked complete.
 >
 > **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` remain higher-level execution authorities.
 >
@@ -139,11 +139,11 @@ The backend response must therefore return canonical destination metadata rather
 
 ---
 
-## 6. Partner Login request contract
+## 6. Partner Login request contract — PHASE 5 IMPLEMENTED
 
-The current Login screen is reused.
+The existing Login screen is reused unchanged except for its request-body field mapping.
 
-Current canonical screen identity:
+Canonical screen identity remains:
 
 ```text
 screenId      = partner_login
@@ -152,9 +152,17 @@ template.type = stack_template
 targetApp     = PARTNER
 ```
 
-The Continue action will continue using generic request semantics.
+The Continue action still uses the existing generic request semantics:
 
-Target request-body mapping:
+```text
+method         = POST
+endpoint       = /api/v1/partner/auth/send_otp
+authentication = NONE
+validate       = true
+responseMode   = destination
+```
+
+Implemented request-body mapping:
 
 ```json
 {
@@ -163,8 +171,22 @@ Target request-body mapping:
 }
 ```
 
-`phoneNumber` is user-entered form state.
-`deviceId` is runtime context and must not be modeled as a visible SDUI field merely to satisfy the HTTP DTO.
+`phoneNumber` is user-entered form state resolved from the existing `mobileNumber` binding.
+`deviceId` is runtime context and is not modeled as a visible or hidden product-specific SDUI field merely to satisfy the HTTP DTO.
+
+The shared transport `SendOtpSchema` continues to own the resolved HTTP shape `{ phoneNumber, deviceId }`; Phase 5 does not create or modify a Partner-specific DTO, mapper, controller, use case, action type, or navigation mechanism.
+
+Focused source proof lives in:
+
+```text
+apps/api/src/surfaces/partner/screens/partner-login.screen.spec.ts
+```
+
+The detailed Phase 5 frozen implementation contract is:
+
+```text
+sdui/PHASE-5-PARTNER-LOGIN-REQUEST-CONTRACT.md
+```
 
 The exact client runtime context-key registry belongs to the frontend/runtime contract. The backend schema only owns generic `$context` validation.
 
@@ -244,8 +266,8 @@ For SDUI specifically:
 
 1. keep current loaded Screen schema;
 2. keep current generic action/destination schema unless a proven gap exists;
-3. align Login request references;
-4. align Send OTP backend destination result;
+3. align Login request references — Phase 5 implemented, closeout pending;
+4. align Send OTP backend destination result — Phase 6;
 5. only then create the OTP Partner screen/route;
 6. validate destination ↔ fetched Screen identity;
 7. align Verify OTP request/result;
