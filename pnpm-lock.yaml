@@ -856,6 +856,9 @@ importers:
       '@carbroz/ui-sdk':
         specifier: workspace:*
         version: link:../ui-sdk
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       typescript:
         specifier: ^6.0.3
