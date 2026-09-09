@@ -1,95 +1,90 @@
 # Partner Authentication + SDUI + Redis Implementation Plan
 
-> **Status:** APPROVED IMPLEMENTATION CONTRACT — documentation-first gate.
+> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phase 1 complete; Phase 3 infrastructure implemented and parity-reviewed; repository-wide closeout remains blocked by pending Phase 2 response/error reconciliation.
 >
-> **Branch baseline:** `development`.
+> **Branch:** `development`
 >
-> **Authority:** This plan is subordinate to `MASTER-BACKEND-CONSTITUTION.md`, `PRODUCTION_FREEZE_CONSTITUTION.md`, `ENGINEERING-DOCUMENTATION-STANDARD.md`, and `FORENSIC-CHANGE-GATE.md`. If a conflict is found, implementation stops and the higher-authority document wins.
+> **Authority:** Subordinate to `MASTER-BACKEND-CONSTITUTION.md`, `PRODUCTION_FREEZE_CONSTITUTION.md`, `ENGINEERING-DOCUMENTATION-STANDARD.md`, and `FORENSIC-CHANGE-GATE.md`. If a conflict exists, the higher-authority document wins and implementation stops until the conflict is resolved.
 >
-> **Scope:** Partner Login → Send OTP → OTP Screen → Verify OTP → authenticated destination, including SDUI request/destination contracts, API envelope/error handling, Redis-backed OTP challenge persistence, tests, documentation and verification. Frontend implementation is explicitly out of scope until the backend contract is frozen and green.
+> **Scope:** Partner Login → Send OTP → OTP Screen → Verify OTP → authenticated destination, including SDUI contracts, API response/error semantics, Redis-backed OTP challenge persistence, tests, documentation and final backend-to-frontend handoff. Frontend implementation remains out of scope until backend freeze.
 
 ---
 
 ## 1. Non-negotiable engineering rules
 
-Every implementation phase MUST follow these rules.
-
-1. **Reuse before create.** Search the repository and extend the canonical owner before introducing a file, abstraction, schema, provider, DTO, route, action or utility.
-2. **Single ownership.** Every responsibility has exactly one canonical owner. Compatibility re-exports are allowed only when intentionally temporary and documented.
-3. **Clean Architecture + DDD.** Domain/application code depends on ports/contracts, never Fastify, Redis clients, Prisma clients, environment variables or transport DTOs.
-4. **Dependency inversion.** Infrastructure implements domain/application-owned ports. Use cases do not know which persistence technology is behind a port.
-5. **Single responsibility.** Route = registration; controller = HTTP adaptation; schema/DTO = transport validation; use case = application orchestration/business rules; repository port = persistence contract; infrastructure adapter = technology-specific persistence; SDUI SDK = generic UI language.
-6. **Open/closed design.** Extend existing generic SDUI actions, references, destinations and cache abstractions. Do not create Login-specific or OTP-specific action engines.
-7. **No duplicate frameworks.** No second SDUI engine, response envelope, cache abstraction, Redis wrapper, authentication stack, navigation contract or validation system.
-8. **One-way data flow.** Backend request handling follows `HTTP input → validated transport input → application use case → ports → infrastructure → application result → HTTP envelope`. No transport/domain feedback loops.
-9. **MVI/UDF compatibility.** Backend contracts MUST be deterministic and reducer-friendly for the frontend MVI/UDF runtime: immutable response semantics, explicit destinations, explicit state/action results, no hidden screen-specific behavior. MVI/UDF itself remains frontend architecture and MUST NOT be incorrectly implemented as backend domain classes.
-10. **Documentation before implementation.** A phase may modify code only after its target contract and ownership are documented here or in its canonical owning document.
-11. **Tests before promotion.** New/changed contracts require focused tests and regression tests before the phase is considered complete.
-12. **Frontend untouched.** No frontend repository/code changes are part of this backend execution plan.
+1. **Source first.** Inspect current `development` HEAD and canonical owners before every phase.
+2. **Reuse before create.** Order of preference: KEEP → EXTEND → MODIFY → CREATE. CREATE is last.
+3. **Single ownership.** Every responsibility has one canonical owner.
+4. **Clean Architecture + DDD.** Domain/application code never depends on Fastify, Redis vendor APIs, Prisma clients, environment variables or transport DTOs.
+5. **Dependency inversion.** Application/domain owns ports; infrastructure implements them.
+6. **SRP.** Route = registration; controller = HTTP adaptation; DTO/schema = transport validation; use case = orchestration/business policy; repository port = persistence contract; infrastructure adapter = technology; `sdui/ui-sdk` = generic UI language.
+7. **No duplicate frameworks.** No second SDUI engine, cache abstraction, Redis wrapper, response envelope, navigation contract, ActionEngine or authentication stack.
+8. **One-way data flow.** HTTP input → validated transport input → application use case → ports → infrastructure → application result → HTTP envelope.
+9. **Open/closed design.** Extend generic actions/references/cache contracts rather than introducing Login/OTP-specific framework types.
+10. **MVI/UDF compatibility.** Backend outputs must be deterministic, immutable in semantics and reducer-friendly. MVI/UDF itself remains frontend architecture; backend must not introduce frontend reducers/stores.
+11. **Documentation before implementation.** A code phase may start only after its contract/ownership is documented here or in the canonical owning README/contract document.
+12. **Tests before promotion.** Focused tests + affected regression/build gates are required.
+13. **No gate weakening.** A failing architecture/security/error gate is fixed at its canonical owner, never bypassed for convenience.
+14. **Frontend untouched** until Phase 13 handoff and explicit frontend approval.
 
 ---
 
-## 2. Current canonical state that must be reused
-
-The following already exists on `development` and MUST be extended rather than reimplemented:
+## 2. Canonical assets that must be reused
 
 - `sdui/ui-sdk/src/contract/screen.schema.ts`
-  - loaded Screen has `screenId`, `schemaVersion`, `targetApp`, `template`, optional `theme`, optional `metadata`;
-  - root `templateId/templateType` are already removed;
-  - strict validation rejects duplicate root fields;
-  - structural IDs are unique within a screen.
+  - loaded Screen: `screenId`, `schemaVersion`, `targetApp`, `template`, optional `theme`, optional `metadata`;
+  - no root `templateId/templateType`;
+  - strict validation and structural ID uniqueness.
 - `sdui/ui-sdk/src/contract/action.schema.ts`
   - generic actions: `request`, `navigate`, `present`, `dismiss`, `state`, `external_uri`, `sequence`;
-  - references: `$binding`, `$literal`, `$response`, `$context`;
+  - generic references: `$binding`, `$literal`, `$response`, `$context`;
   - `responseMode: none | destination`;
-  - canonical dynamic destination with `screenId`, `templateId`, `templateType`, `endpoint`, `method`, `authentication`.
+  - canonical DynamicDestination.
 - `apps/api/src/surfaces/partner/screens/partner-login.screen.ts`
-  - canonical Partner Login SDUI screen;
+  - `screenId = partner_login`;
   - template `tpl_7K2M9Q` / `stack_template`;
-  - generic Continue `request` action already exists.
-- `domains/configuration/.../partner-bootstrap.ts` and `GetPartnerBootstrapUseCase.ts`
-  - guest bootstrap already points to the current Partner Login destination.
-- `apps/api/src/transport/auth/*`
-  - shared Identity auth routes are reused by Partner surface;
-  - canonical routes remain `POST /send_otp` and `POST /verify_otp`.
+  - generic Continue request action.
+- `domains/configuration` Partner Bootstrap
+  - guest destination already points to current Partner Login.
+- shared Identity auth transport
+  - `POST /api/v1/partner/auth/send_otp`;
+  - `POST /api/v1/partner/auth/verify_otp`.
 - `domains/identity/application/AuthUseCases.ts`
-  - OTP generation, hashing, cooldown, rate-limit policy, attempts, expiry, invalidation, one-time consumption, session creation, refresh-token family and provider abstraction already exist.
+  - existing OTP generation/hash/cooldown/rate-limit/attempt/expiry/invalidation/provider/session/token behavior must be preserved.
 - `domains/identity/domain/repositories/IOtpChallengeRepository.ts`
-  - canonical OTP challenge persistence port.
+  - canonical OTP persistence port.
 - `platform/cache/src/ports/ICacheProvider.ts`
   - canonical generic cache abstraction.
-- `apps/api/src/transport/response/ResponseHelper.ts`
-  - canonical common API envelope owner.
+- `apps/api/src/transport/response/ResponseHelper.ts` + global error handling
+  - canonical API envelope owner.
 
-No phase may replace the above without an explicit architecture amendment.
+Nothing above may be replaced without an explicit architecture amendment.
 
 ---
 
 ## 3. Frozen ownership matrix
 
-| Concern | Canonical owner | Rule |
+| Concern | Owner | Rule |
 | --- | --- | --- |
-| Loaded SDUI Screen contract | `sdui/ui-sdk` | No root `templateId/templateType` |
-| Destination metadata | `sdui/ui-sdk` | Generic navigation/request result contract |
-| Partner Login screen JSON | Partner API surface | Product-specific composition only |
-| OTP screen JSON | Partner API surface | Created only after backend result contract is frozen |
-| Auth business rules | `domains/identity` | No Fastify/Redis/Prisma dependencies |
-| OTP persistence port | `domains/identity` | Existing `IOtpChallengeRepository` remains canonical |
-| Redis connection/provider mechanics | `platform/cache` | Technical infrastructure only |
-| Redis OTP repository adapter | Identity infrastructure | Implements Identity port using canonical cache/Redis infrastructure |
-| HTTP validation | `apps/api/src/transport/auth/dto` | Maps transport shape to application input |
-| HTTP auth controller | `apps/api/src/transport/auth` | Adapter only |
-| API response envelope | `ResponseHelper` + global error handling | One envelope everywhere |
-| Partner startup routing | `domains/configuration` | Does not own SDUI structure/auth business state |
-| Frontend navigation state | frontend MVI/UDF | Not implemented in backend |
+| Loaded Screen contract | `sdui/ui-sdk` | No root template identity duplication |
+| Destination contract | `sdui/ui-sdk` | Generic pre-fetch navigation metadata |
+| Partner Login/OTP screen composition | Partner API surface | Product composition only; generic SDUI primitives |
+| Auth business/security rules | `domains/identity` | No Fastify/Redis/Prisma vendor dependency |
+| OTP persistence port | `domains/identity` | Keep `IOtpChallengeRepository` |
+| Generic cache behavior | `platform/cache` | Domain-neutral only |
+| Concrete Redis client creation/options | `apps/api` composition root | Existing `ioredis`; runtime config only |
+| Redis OTP adapter | Identity infrastructure | Implements Identity port; owns OTP Redis keys/atomic persistence semantics |
+| HTTP auth validation | `apps/api/src/transport/auth/dto` | Transport boundary only |
+| HTTP auth controller | shared auth transport | Adapter only |
+| API response/error envelope | `ResponseHelper` + global handler | One response contract |
+| Partner startup destination | `domains/configuration` | Startup routing only |
+| Frontend state/navigation execution | frontend MVI/UDF + existing ActionEngine | Never reimplemented in backend |
 
 ---
 
-## 4. Frozen loaded Screen vs Destination contract
+## 4. Loaded Screen vs Destination
 
-### 4.1 Loaded Screen
-
-A fetched/renderable SDUI document has one canonical template identity location:
+### Loaded Screen
 
 ```json
 {
@@ -104,11 +99,9 @@ A fetched/renderable SDUI document has one canonical template identity location:
 }
 ```
 
-The loaded Screen MUST NOT duplicate `templateId` or `templateType` at root.
+Loaded Screen MUST NOT contain root `templateId` or `templateType`.
 
-### 4.2 Destination
-
-A destination is metadata used before a screen is fetched:
+### Destination
 
 ```json
 {
@@ -121,57 +114,38 @@ A destination is metadata used before a screen is fetched:
 }
 ```
 
-Destination metadata is intentionally different from a loaded Screen.
+On fetch, runtime must be able to verify:
 
-### 4.3 Destination verification
-
-When a destination is followed and its Screen is fetched, the consuming runtime MUST be able to verify:
-
-- destination `screenId` equals fetched `screen.screenId`;
-- destination `templateId` equals fetched `screen.template.id`;
-- destination `templateType` equals fetched `screen.template.type`;
-- authentication requirement is respected before the fetch.
-
-The backend MUST return internally consistent destination metadata. Tests will protect this invariant.
-
----
-
-## 5. Frozen generic request-action semantics
-
-The existing generic `request` action remains the only request mechanism for this flow.
-
-For `responseMode: "destination"`:
-
-1. validate bound form state when `validate: true`;
-2. resolve request values from generic references (`$binding`, `$context`, `$literal`, `$response`);
-3. issue the HTTP request;
-4. on non-success, expose the error state and **do not navigate**;
-5. on success, read one canonical destination from the response payload;
-6. navigate/fetch only after destination validation succeeds.
-
-No Login-specific `onSuccess`, OTP-specific navigation command, or second action engine will be added.
-
----
-
-## 6. Frozen Login → Send OTP request mapping
-
-Current mismatch must be corrected using existing reference mechanisms.
-
-Application/transport input remains conceptually:
-
-```json
-{
-  "phoneNumber": "9876543210",
-  "deviceId": "runtime-device-id"
-}
+```text
+destination.screenId     == screen.screenId
+destination.templateId   == screen.template.id
+destination.templateType == screen.template.type
 ```
 
-Ownership:
+Authentication requirement must be enforced before/following fetch as defined by the runtime contract.
 
-- `phoneNumber` comes from the Login form binding;
-- `deviceId` comes from runtime/application context, not from a visible form field.
+---
 
-Target generic SDUI request body:
+## 5. Generic request action
+
+The existing generic `request` action remains the only request mechanism.
+
+For `responseMode: destination`:
+
+1. validate bound form state when requested;
+2. resolve `$binding/$context/$literal/$response` references;
+3. send HTTP request;
+4. on failure, expose error state and do not navigate;
+5. on success, read the canonical destination from result payload;
+6. validate destination then fetch/navigate.
+
+No `LoginContinueAction`, `OtpVerifyAction`, screen-specific `onSuccess`, second ActionEngine or backend navigation framework may be created.
+
+---
+
+## 6. Login → Send OTP input contract
+
+Target request payload:
 
 ```json
 {
@@ -180,17 +154,22 @@ Target generic SDUI request body:
 }
 ```
 
-The exact context-key registry is owned by the frontend/runtime contract; the backend SDUI schema only validates the generic `$context` reference. Backend code MUST NOT create a `DeviceIdElement` or Login-specific request mapper.
+Ownership:
+
+```text
+phoneNumber ← visible Login binding
+deviceId    ← runtime/application context
+```
+
+No fake Device ID input Element or Login-specific request mapper.
 
 ---
 
-## 7. Frozen Send OTP success contract
+## 7. Send OTP success contract
 
-`SendOtpUseCase` currently returns legacy navigation metadata `{ template, api }`. That legacy shape will be removed from the Partner Login flow.
+Legacy `{ template, api }` navigation metadata is not canonical.
 
-The successful application result will expose OTP challenge data plus a canonical destination. Transport may envelope it, but must not reinterpret business rules.
-
-Conceptual result:
+Target result semantics:
 
 ```json
 {
@@ -209,65 +188,86 @@ Conceptual result:
 }
 ```
 
-`nextScreen` MUST use the same semantic destination contract as SDUI navigation/bootstrap destinations. Reuse will be preferred through a shared transport-neutral contract where dependency direction allows it; Identity MUST NOT depend on `sdui/ui-sdk` merely to reuse a Zod schema. If a neutral destination contract already exists in a lower/common owner, reuse it. Otherwise create the smallest application-level value contract in the correct owner and map/validate at boundaries.
+`nextScreen` must use the same semantic Destination contract as bootstrap/navigation. Identity must not depend on `sdui/ui-sdk` merely to reuse a Zod schema; reuse a neutral lower-level contract if one exists, otherwise keep the smallest application value contract and validate/map at boundaries.
 
-The OTP destination identifiers/route MUST NOT be invented until the OTP screen definition is created in its later phase. Until then, implementation phases that require concrete values remain gated.
+Concrete OTP destination identity is frozen only when the OTP screen exists.
 
 ---
 
-## 8. Redis approval and architecture
+## 8. Redis architecture — APPROVED
 
-Redis is **approved** for OTP challenge state.
+Redis is approved for OTP challenge runtime state.
 
-This is an infrastructure migration, not a rewrite of Identity business rules.
-
-### 8.1 Dependency direction
+### Dependency direction
 
 ```text
 SendOtpUseCase / VerifyOtpUseCase
              ↓
-IOtpChallengeRepository       (Identity-owned port)
+IOtpChallengeRepository              # Identity-owned port
              ↓
-RedisOtpChallengeRepository   (Identity infrastructure adapter)
+RedisOtpChallengeRepository          # Identity infrastructure
              ↓
-canonical Redis/cache provider (platform/cache)
+platform/cache                       # generic Redis/cache behavior
              ↓
-Redis client/connection
+IRedisClient
+             ↓
+concrete ioredis client from apps/api
 ```
 
-Identity application/domain code MUST NOT import a Redis client, Redis command API, Fastify, or environment configuration.
+Identity application/domain must never import Redis vendor APIs, Fastify or environment configuration.
 
-### 8.2 Reuse rule
+### Phase 3 generic infrastructure boundary
 
-Before creating Redis infrastructure:
+Current implemented generic infrastructure is:
 
-1. inspect `platform/cache` and all platform/integration packages for an existing Redis client/provider/connection manager;
-2. inspect workspace dependencies for an already-approved Redis library;
-3. extend the canonical provider and configuration path;
-4. create a new Redis provider only if no canonical implementation exists.
+```text
+apps/api/src/bootstrap/plugins/redis-cache.plugin.ts
+      ├── idempotent singleton registration in canonical Awilix root
+      ├── initialize at startup
+      └── shutdown through Fastify onClose
+             ↓
+apps/api/src/bootstrap/cache/create-cache-provider.ts
+             ↓
+RedisCacheProvider / InMemoryCacheProvider
+             ↓
+ICacheProvider + IRedisClient
+```
 
-There will be **one Redis connection/provider mechanism** for the backend.
+Rules:
 
-### 8.3 OTP Redis state requirements
+- `ICacheProvider` is the only generic cache contract.
+- Redis is used in development/production.
+- In-memory provider is selected only for `NODE_ENV=test`; no runtime fallback.
+- `RedisCacheConfig` contains only provider-owned behavior: `keyPrefix`, `defaultTtlSeconds`.
+- `REDIS_URL`, vendor timeout/retry options and concrete `ioredis` creation remain in `apps/api`.
+- current generic prefix: `carbroz:cache:`.
+- generic values use JSON serialization.
+- TTL is a positive integer when supplied.
+- `clear()` uses namespaced `SCAN` + `DEL`; `FLUSHDB/FLUSHALL` are forbidden.
+- readiness checks the same cache singleton with a 3-second timeout.
+- startup fails closed if Redis cannot pass initialization health verification.
+- shutdown uses `QUIT` with forced disconnect fallback.
 
-The Redis-backed adapter must preserve current `IOtpChallengeRepository` semantics and support:
+BullMQ/messaging is a separate platform capability. Phase 3 found no competing custom Redis cache provider there; if BullMQ later uses Redis-managed queue connections, those are queue-technology connections and must not be confused with or exposed as a second generic cache abstraction.
 
-- opaque/public challenge ID;
-- normalized phone number;
+### OTP Redis state requirements for Phase 4
+
+The Identity adapter must preserve:
+
+- opaque challenge ID;
+- normalized phone;
 - device binding;
-- OTP hash only (never plaintext OTP after provider dispatch);
-- created/expiry timestamps;
-- attempt count + maximum attempts;
-- consumed/invalidated state or an equivalent atomic terminal-state representation;
-- resend cooldown lookup;
-- rate-limit counting/window;
-- one-time verification/consumption;
+- OTP hash only;
+- creation/expiry timestamps;
+- attempt/max-attempt state;
+- consumed/invalidated terminal state;
+- latest challenge lookup;
+- cooldown/rate window behavior;
 - explicit TTL cleanup;
-- no OTP leakage in logs/errors/API results.
+- one-time consume;
+- no OTP leakage.
 
-### 8.4 Key design
-
-Keys MUST be versioned/namespaced and centralized in the Redis OTP adapter, not scattered through use cases. Conceptual namespaces:
+Conceptual Identity-owned namespaces:
 
 ```text
 carbroz:identity:otp:v1:challenge:<challengeId>
@@ -275,407 +275,360 @@ carbroz:identity:otp:v1:phone:<normalizedPhone>:latest
 carbroz:identity:otp:v1:rate:<normalizedPhone>:<window>
 ```
 
-Exact key format may change during implementation after validating Redis capabilities, but one helper/owner must generate keys.
+Exact key design is finalized in Phase 4 after mapping the current repository port semantics.
 
-### 8.5 Atomicity requirements
+### Atomicity requirements
 
-The following must be race-safe:
+Race-safe operations include:
 
-- creating challenges under rate-limit rules;
-- incrementing failed attempts;
-- invalidating at max attempts;
-- consuming a valid challenge exactly once;
+- challenge creation under concurrent send/rate-limit conditions;
+- failed-attempt increments;
+- invalidation at max attempts;
+- exactly-once consume;
 - concurrent verify requests;
-- resend cooldown checks where concurrent send requests occur.
+- resend/cooldown decisions where persistence semantics participate.
 
-Prefer Redis-native atomic commands, transactions, or a small Lua script only where multi-key/multi-step atomicity truly requires it. Do not introduce distributed locking unless simpler Redis atomic primitives cannot satisfy the invariant.
+Prefer Redis-native atomic commands/transactions. Use a small Lua script only when a multi-step/multi-key invariant requires it. Do not add distributed locking unless simpler atomic primitives cannot protect the invariant.
 
-### 8.6 Failure policy
+### Failure policy
 
-Redis failure is an authentication dependency failure. The API must fail closed for OTP send/verify rather than silently falling back to process memory or stale database state.
-
-No dual-write Prisma+Redis path will be introduced unless a separately documented migration requirement proves it necessary.
-
-### 8.7 Prisma OTP migration
-
-The current `PrismaOtpChallengeRepository` remains useful as the pre-migration implementation and test reference until Redis parity is proven.
-
-After Redis is green and DI is switched:
-
-- remove or deprecate the Prisma OTP adapter only after repository-wide usage verification;
-- database schema/table cleanup is a separate explicit migration step;
-- do not delete database structures merely because runtime DI changes.
+- Redis dependency failure fails OTP auth closed.
+- No silent fallback to process memory or Prisma.
+- No Prisma+Redis dual write unless separately documented/approved.
+- Existing Prisma adapter remains until Redis parity and DI migration are proven.
+- Database table/schema removal is a separate explicit later migration.
 
 ---
 
-## 9. API envelope and error contract gate
+## 9. API envelope/error gate — PHASE 2 PENDING
 
-Before changing OTP transport behavior, repository-wide API response/error handling must be reconciled.
+Before OTP transport behavior can be considered production-frozen, reconcile repository-wide response/error behavior:
 
-Canonical success/error body owner remains `ResponseHelper` and the global Fastify error path.
+- HTTP status equals body `status`;
+- stable machine-readable `code`;
+- safe `message`;
+- consistent `data` semantics;
+- consistent `traceId` propagation;
+- validation errors through common envelope;
+- `ApplicationError` mapping;
+- supported auth/Redis/provider 5xx status including required 503 behavior;
+- frozen 200 vs 201 creation policy;
+- correct 204 behavior.
 
-Required invariants:
+Do not patch only OTP responses while global error handling remains inconsistent.
 
-- body `status` equals HTTP status;
-- `code` is stable and machine-readable;
-- `message` is safe for clients;
-- `data` contains result or `null` according to the frozen envelope;
-- `traceId` is propagated consistently;
-- validation errors use the same global envelope;
-- `ApplicationError` status/code are mapped consistently;
-- OTP provider/Redis dependency failures have an explicitly supported 5xx status;
-- success status policy (200 vs 201) is uniform and documented before changing `created()`;
-- 204 responses must not accidentally carry an envelope body.
-
-A phase must not patch only OTP controller responses while leaving the global mapper inconsistent.
+**Current validation blocker:** the canonical closeout workflow stops at the existing CW5 error-semantics/leakage gate before build/lint/test. This is Phase 2 scope and must not be bypassed or weakened from Phase 3.
 
 ---
 
-## 10. OTP screen contract gate
+## 10. OTP screen gate
 
-The OTP SDUI screen is intentionally **not** created during documentation Phase 1.
+OTP SDUI may be created only after the required backend contracts are ready:
 
-It may be implemented only after:
+1. generic destination semantics frozen;
+2. Login input aligned;
+3. Send OTP result aligned;
+4. Redis OTP adapter green;
+5. API envelope/error behavior green.
 
-1. generic `responseMode: destination` response semantics are frozen;
-2. Login request input is aligned;
-3. Send OTP success destination contract is aligned;
-4. Redis OTP adapter behavior is green;
-5. API envelope/error behavior is green.
-
-The screen MUST reuse the existing generic hierarchy and elements. No `OtpComponent`, `OtpTemplate`, `OtpActionEngine`, `LoginOtpFlow`, or other semantic SDK type may be introduced unless generic primitives objectively cannot express the UI.
-
-OTP screen runtime data must receive what it needs through generic navigation/context/result state, not hidden server assumptions.
+Use only generic Template/Component/Section/Group/Element vocabulary and existing generic actions/references unless a real generic capability gap is proven.
 
 ---
 
 ## 11. Verify OTP contract
 
-Verify OTP keeps the existing Identity security/session logic and moves only stale navigation metadata to the canonical destination model.
+Keep current Identity security/session/token logic.
 
-Input ownership remains:
+Input ownership:
 
-- `challengeId`: prior Send OTP result/navigation state;
-- `phoneNumber`: flow state/binding/context;
-- `otp`: OTP input binding;
-- `deviceId`: runtime context;
-- optional device metadata: runtime context where supported.
+```text
+challengeId ← prior Send OTP result/flow state
+phoneNumber ← flow state/binding/context
+otp         ← OTP input binding
+deviceId    ← runtime context
+device meta ← runtime context when supported
+```
 
-Successful verification continues to return authenticated user/session/token material through the current transport boundary, plus a canonical next destination.
-
-The authenticated destination MUST NOT be fabricated. Partner Dashboard destination migration is gated until a real published Partner Dashboard SDUI screen exists.
+Replace legacy navigation metadata with canonical Destination semantics only when the real authenticated destination exists. Do not fabricate Dashboard identifiers.
 
 ---
 
-## 12. Security requirements
+## 12. Security invariants
 
-All phases touching authentication must preserve or improve:
+Preserve or improve:
 
 - cryptographically secure OTP generation;
 - one-way OTP hashing;
 - no plaintext OTP persistence;
 - provider abstraction;
-- resend cooldown;
-- per-phone rate limiting;
+- cooldown/rate limiting;
 - bounded failed attempts;
-- challenge expiration;
+- expiry;
 - device binding;
-- one-time atomic consumption;
+- atomic one-time consumption;
 - replay rejection;
-- refresh-token hashing and rotation;
-- log redaction/PII safety;
-- no secret material in SDUI JSON;
+- refresh-token hashing/rotation;
+- PII/log redaction;
+- no secrets in SDUI;
 - no Redis credentials in domain/application code;
 - production-safe errors.
 
-Tests must include concurrent/replay scenarios, not only happy paths.
+Concurrency/replay tests are mandatory for OTP persistence/verification phases.
 
 ---
 
-# 13. Implementation phases
-
-No code implementation starts until this Phase 1 documentation contract is complete.
+# 13. Implementation phases and current status
 
 ## Phase 0 — Repository-wide audit — COMPLETE
 
-Purpose: inspect current state and classify KEEP/MODIFY/CREATE/DEFER without code changes.
+Read-only source-first audit; classified KEEP/MODIFY/CREATE/DEFER and found the Login payload mismatch, legacy navigation results, missing OTP/Dashboard screens, Prisma OTP persistence and response/error contract gap.
 
-Key conclusions:
+## Phase 1 — Documentation and contract freeze — COMPLETE
 
-- loaded Screen root duplication already fixed;
-- guest Bootstrap already aligned;
-- generic request/destination architecture already exists;
-- Login request payload mismatches auth DTO;
-- Send/Verify OTP still return legacy navigation shape;
-- OTP and Dashboard Partner SDUI screens are absent;
-- OTP persistence is currently Prisma-backed;
-- Redis is now explicitly approved;
-- global response/error contract requires reconciliation.
+Completed:
 
-## Phase 1 — Documentation and contract freeze — CURRENT
+- this canonical cross-phase plan;
+- Identity ownership documentation;
+- Cache/Redis ownership documentation;
+- SDUI Partner-auth contract;
+- Partner Bootstrap contract;
+- Redis approval/ownership/failure/atomicity strategy;
+- no production code changes in the phase.
 
-Deliverables:
+## Phase 2 — Repository-wide response/error reconciliation — PENDING / BLOCKS FULL CLOSEOUT
 
-- this canonical implementation plan;
-- Identity README ownership update;
-- Cache README Redis ownership update;
-- SDUI contract addendum correcting loaded Screen/destination/action semantics;
-- Configuration/Bootstrap addendum documenting current Login destination and deferred Dashboard migration;
-- zero production code changes.
-
-Exit gate: all later phases have explicit owner, contract, dependency direction, test strategy and rollback/defer condition.
-
-## Phase 2 — Repository-wide response/error contract reconciliation
-
-Audit and align:
+Required work:
 
 - `ResponseHelper` status/code mapping;
 - global Fastify error handler;
 - Zod/Fastify validation errors;
 - `ApplicationError` mapping;
-- 503/other required 5xx support;
-- trace ID propagation;
-- 200/201 creation policy;
+- 503/required 5xx support;
+- trace ID;
+- 200/201 policy;
 - 204 behavior;
-- tests for HTTP status == body status.
+- regression tests.
 
-Do not create an OTP-specific envelope.
+The current CW5 error-semantics gate failure proves this phase is not complete. Do not weaken the gate.
 
-## Phase 3 — Redis platform infrastructure
+## Phase 3 — Redis platform infrastructure — IMPLEMENTED; PARITY-REVIEWED; FULL REPO GATE BLOCKED BY PHASE 2
 
-Repository-first discovery, then extend `platform/cache` with the single canonical Redis implementation if one does not already exist.
+Implemented/reused:
 
-Deliverables may include, only if absent:
+- existing `ICacheProvider`, consolidated as the single cache abstraction;
+- existing `InMemoryCacheProvider` retained for deterministic `NODE_ENV=test` only;
+- new domain-neutral `IRedisClient` minimal technical surface;
+- new `RedisCacheProvider`;
+- existing `ioredis ^5.11.1` reused from API dependencies;
+- existing `REDIS_URL` runtime configuration reused;
+- `createCacheProvider()` at executable composition boundary;
+- `redis-cache.plugin.ts` for idempotent singleton Awilix registration + startup/shutdown lifecycle;
+- Redis readiness integration;
+- namespace-safe `SCAN` + `DEL` clear;
+- JSON serialization and TTL validation;
+- startup fail-closed and graceful/forced shutdown tests;
+- DI regression test proving root/request scopes share the same cache singleton;
+- exact owner documentation in `platform/cache/README.md`.
 
-- Redis configuration;
-- Redis client/provider lifecycle;
-- connect/disconnect/health behavior;
-- DI registration;
-- deterministic test strategy.
+Validation defects found and fixed during the Phase 3 parity gate:
 
-No OTP business logic belongs here.
+1. lifecycle plugin originally resolved `cacheProvider` without registering it; fixed by idempotent singleton registration and regression test;
+2. `RedisCacheConfig` exposed unused connection/vendor fields even though executable composition owns them; reduced to provider-owned settings only;
+3. canonical plan had stale Phase 1 `CURRENT` status; corrected here.
 
-## Phase 4 — Redis OTP repository adapter
+Repository-wide closeout is **not** marked green because Phase 2's CW5 error-semantics gate stops the canonical workflow before runtime-config/Prisma/build/lint/test. Phase 3 must not modify unrelated HTTP error semantics merely to advance that workflow.
 
-Implement Identity infrastructure adapter behind existing `IOtpChallengeRepository`.
+## Phase 4 — Redis OTP repository adapter — NOT STARTED
 
-Deliverables:
+Implement Identity infrastructure behind existing `IOtpChallengeRepository`:
 
-- Redis challenge storage;
-- key namespace helper;
+- challenge storage;
+- centralized versioned key helper;
 - TTLs;
 - latest challenge lookup;
 - rate window/count;
-- failed-attempt atomic update;
-- one-time atomic consume;
-- invalidation;
-- focused infrastructure tests;
+- atomic failed attempts;
+- max-attempt invalidation;
+- exactly-once consume;
+- focused infrastructure/concurrency tests;
 - DI switch only after parity.
 
-## Phase 5 — Login request-contract alignment
+## Phase 5 — Login request alignment — NOT STARTED
 
-Modify the existing Partner Login generic request action only.
-
-Target mapping:
+Modify only existing Partner Login generic request body:
 
 ```text
 phoneNumber ← $binding(mobileNumber)
 deviceId    ← $context(deviceId)
 ```
 
-Align transport validation names if canonical terminology requires it, but do not duplicate DTOs/use cases.
+No duplicate DTO/use case/action framework.
 
-Tests cover invalid input, missing context, valid resolved request and no-navigation-on-error behavior where backend-testable.
+## Phase 6 — Send OTP canonical destination result — NOT STARTED
 
-## Phase 6 — Send OTP canonical destination result
+Replace legacy `{template, api}` result with canonical Destination semantics while preserving all security/business rules. Concrete OTP destination is finalized with the actual OTP screen.
 
-Replace legacy `{ template, api }` navigation result with the canonical destination semantic contract.
+## Phase 7 — Send OTP error/security regression — NOT STARTED
 
-Preserve all existing OTP security/business behavior.
+Cover cooldown, rate limit, provider failure, Redis failure, expiry, no leakage, trace/envelope consistency and concurrency.
 
-No OTP screen is created until concrete destination identity is frozen in Phase 8.
+## Phase 8 — Partner OTP SDUI screen + route — NOT STARTED
 
-## Phase 7 — End-to-end Send OTP error/security regression
+Create missing Partner OTP composition only after gates. Reuse generic SDUI vocabulary/action/references. Add destination ↔ fetched-screen identity tests.
 
-Validate:
+## Phase 9 — Verify OTP request/result alignment — NOT STARTED
 
-- resend cooldown;
-- rate limiting;
-- provider failure;
-- Redis failure;
-- expiry;
-- no OTP leakage;
-- trace ID/envelope consistency;
-- concurrency behavior.
+Wire generic OTP request references to existing `/verify_otp`; preserve Identity session/token logic; migrate navigation semantics only to a real destination.
 
-## Phase 8 — Partner OTP SDUI screen + route
+## Phase 10 — Authenticated Partner destination migration — DEFERRED
 
-Create only the missing product composition in `apps/api/src/surfaces/partner/screens` and route it through the existing Partner screen surface.
+Only after a real published Partner Dashboard/other authenticated screen exists:
 
-Requirements:
+- publish Screen;
+- align Verify OTP destination;
+- align authenticated Bootstrap;
+- add identity consistency tests;
+- remove obsolete registry references after usage audit.
 
-- use generic Template/Component/Section/Group/Element vocabulary;
-- use existing generic request action and references;
-- no semantic SDUI SDK types;
-- screen identity exactly matches Send OTP destination;
-- destination/fetched-screen identity tests.
+## Phase 11 — Prisma OTP persistence retirement — DEFERRED
 
-## Phase 9 — Verify OTP request/result alignment
+After Redis production parity:
 
-Wire OTP screen action to the existing `/verify_otp` route using generic references/context.
+- prove no runtime Prisma OTP usage;
+- remove/deprecate adapter as explicitly decided;
+- separately approve/drop unused database structures;
+- update docs;
+- no silent dual persistence.
 
-Replace legacy Verify OTP navigation result with canonical destination semantics while keeping user/session/refresh-token logic intact.
+## Phase 12 — Full backend regression and freeze — NOT STARTED
 
-Authenticated destination remains gated until a real Partner Dashboard SDUI screen exists.
+Run:
 
-## Phase 10 — Authenticated Partner destination migration
-
-Only when a real Dashboard (or other lifecycle destination) exists:
-
-- publish its Screen;
-- align Verify OTP next destination;
-- align authenticated Bootstrap destination;
-- add destination/fetched-screen identity tests;
-- remove obsolete registry references only after usage audit.
-
-## Phase 11 — Prisma OTP persistence retirement
-
-After Redis production path is proven:
-
-- verify no runtime usages of `PrismaOtpChallengeRepository` remain;
-- decide remove vs retain as explicit fallback/test adapter;
-- separately migrate/drop unused DB structures if approved;
-- update documentation.
-
-No silent dual persistence.
-
-## Phase 12 — Full backend regression and freeze
-
-Run focused and repository-level verification appropriate to changed packages:
-
-- ui-sdk schema/action tests;
-- Identity application tests;
-- Redis/cache tests;
-- configuration/bootstrap tests;
+- UI SDK contract tests;
+- Identity tests;
+- cache/Redis + OTP adapter tests;
+- Configuration/Bootstrap tests;
 - API/DI/container tests;
-- API build;
-- domain/package builds;
-- architecture/dependency gates;
-- lint/typecheck where canonical scripts exist.
+- Prisma validation/migrations/drift checks;
+- monorepo build;
+- lint;
+- Vitest;
+- architecture/dependency/security/config/PII gates;
+- re-verification proving validation is non-mutating.
 
-Document any unrelated pre-existing failure separately; do not weaken gates to obtain green.
+Unrelated pre-existing failures are documented and fixed in their own phase; gates are never weakened.
 
-## Phase 13 — Backend contract handoff for frontend MVI/UDF
+## Phase 13 — Backend contract handoff to frontend MVI/UDF — DEFERRED
 
-Only after backend freeze:
+After backend freeze publish:
 
-- publish final request/response examples;
-- publish destination rules;
-- publish `$binding/$context/$response` keys required by Login/OTP;
-- publish error/retry semantics;
-- publish auth/session storage requirements.
+- request/response examples;
+- Destination rules;
+- `$binding/$context/$response` keys;
+- error/retry semantics;
+- auth/session storage requirements.
 
-Frontend then implements the flow through its existing MVI/UDF + ActionEngine architecture. No backend phase will create frontend-specific state stores/reducers.
+Frontend then extends its existing MVI/UDF + ActionEngine architecture.
 
 ---
 
-## 14. File-level expected change map
+## 14. Expected file change map
 
-This is a planning map, not permission to blindly create every listed file.
-
-### Existing files expected to be reused/modified
+Existing files/packages are inspected/reused first:
 
 ```text
-sdui/ui-sdk/src/contract/action.schema.ts              # only if contract gap is proven
-sdui/ui-sdk/src/contract/screen.schema.ts              # normally KEEP
+sdui/ui-sdk/src/contract/action.schema.ts
+sdui/ui-sdk/src/contract/screen.schema.ts
 apps/api/src/surfaces/partner/screens/partner-login.screen.ts
 domains/identity/application/AuthUseCases.ts
 apps/api/src/transport/auth/dto/auth.dto.ts
-apps/api/src/transport/auth/auth.controller.ts          # only transport mapping if required
+apps/api/src/transport/auth/*
 domains/identity/identity.module.ts
 platform/cache/*
+apps/api/src/bootstrap/cache/*
+apps/api/src/bootstrap/plugins/redis-cache.plugin.ts
+apps/api/src/system/health/health.controller.ts
 apps/api/src/transport/response/ResponseHelper.ts
-domains/configuration/application/contracts/partner-bootstrap.ts
-domains/configuration/application/use-cases/GetPartnerBootstrapUseCase.ts
+domains/configuration/application/*
 ```
 
-### New files allowed only if repository discovery proves no canonical equivalent
+New files are allowed only when discovery proves absence of a canonical equivalent, including:
 
 ```text
-platform/cache/...Redis...                              # one canonical Redis provider
- domains/identity/infrastructure/...RedisOtpChallengeRepository.ts
+domains/identity/infrastructure/...RedisOtpChallengeRepository.ts
 apps/api/src/surfaces/partner/screens/partner-otp.screen.ts
 ```
 
-Naming/location will follow existing package conventions discovered during each phase; this plan does not authorize duplicating an existing class under a preferred name.
+Exact names/locations follow existing package conventions discovered at the relevant phase.
 
 ---
 
 ## 15. Test strategy
 
-### Contract tests
+### SDUI/contract
 
-- loaded Screen rejects root `templateId/templateType`;
-- dynamic destination accepts only canonical fields;
-- request action validates references/response mode;
-- OTP destination matches fetched OTP screen.
+- loaded Screen rejects root duplicate template identity;
+- Destination schema strictness;
+- request references/response mode;
+- destination/fetched-screen identity.
 
-### Identity tests
+### Generic Redis/cache
 
-- send OTP new/existing user;
-- no OTP leakage;
-- cooldown;
-- rate limit;
-- provider failure;
+- JSON serialize/deserialize;
+- explicit/default TTL;
+- invalid TTL/key rejection;
+- namespace-safe clear preserving non-cache keys;
+- lazy connect;
+- startup health fail-closed;
+- health failure;
+- graceful shutdown + forced disconnect fallback;
+- singleton root/request DI identity;
+- readiness failure.
+
+### Identity/OTP
+
+- new/existing user send;
+- cooldown/rate limit;
+- provider/Redis failure;
 - invalid/expired OTP;
-- failed attempts;
-- max-attempt invalidation;
-- valid verification;
+- failed/max attempts;
+- valid verify;
 - replay rejection;
-- refresh-token issuance/rotation;
-- canonical destinations.
+- concurrent consume;
+- session/refresh-token behavior;
+- canonical destinations;
+- no OTP leakage.
 
-### Redis adapter tests
-
-- TTL expiry;
-- challenge lookup;
-- latest-by-phone;
-- rate counts;
-- atomic failed attempts;
-- atomic consume under concurrency;
-- invalidation;
-- namespacing;
-- connection failures fail closed.
-
-### Transport/envelope tests
+### Transport/envelope
 
 - validation errors;
-- 401/429/5xx auth errors;
+- auth 401/429/required 5xx;
 - trace ID;
-- HTTP status equals body status;
+- HTTP/body status equality;
 - success envelope;
-- no hidden controller-specific response format.
+- no controller-specific envelope.
 
-### Configuration tests
+### Configuration
 
-- guest Bootstrap Login destination remains canonical;
-- authenticated destination is not migrated until its Screen exists.
+- guest Bootstrap remains canonical Login destination;
+- authenticated Bootstrap remains deferred until real screen exists.
 
 ---
 
-## 16. Definition of done for every phase
+## 16. Definition of done
 
 A phase is complete only when:
 
-1. repository discovery proves reuse/extension decisions;
-2. changed responsibility has exactly one owner;
-3. code follows dependency direction;
-4. focused tests are green;
-5. affected package/build tests are green;
-6. documentation is updated in the owning location;
-7. no duplicate abstraction was introduced;
-8. no unrelated cleanup is mixed into the phase;
-9. frontend remains untouched unless Phase 13 handoff has completed and frontend work is explicitly approved.
+1. current repository state has been inspected;
+2. reuse/extension decisions are proven;
+3. responsibility has one owner;
+4. dependency direction is correct;
+5. focused tests are green or, when blocked by an earlier mandatory global gate, the blocker is explicitly documented and the phase is not falsely called repository-green;
+6. affected builds/gates run when prerequisite gates allow them;
+7. canonical owning documentation matches implementation exactly;
+8. no duplicate abstraction exists;
+9. no unrelated cleanup is mixed in;
+10. frontend remains untouched until approved handoff.
 
 ---
 
@@ -683,36 +636,18 @@ A phase is complete only when:
 
 Do not implement:
 
-- a second SDUI engine;
-- `LoginContinueAction`/`OtpVerifyAction` semantic action classes in the generic SDK;
-- direct Redis calls from `SendOtpUseCase` or `VerifyOtpUseCase`;
+- second SDUI engine/ActionEngine/navigation framework;
+- semantic Login/OTP action classes in generic SDK;
+- direct Redis calls from Identity use cases;
 - direct Prisma calls from use cases;
-- Redis connection creation inside repositories per request;
-- plaintext OTP in Redis/logs/results;
-- in-memory production fallback when Redis fails;
-- dual Prisma+Redis writes without a documented migration reason;
-- a second common response helper;
-- product-specific response envelopes;
-- root loaded-Screen `templateId/templateType` duplication;
-- Dashboard destination guesses before Dashboard exists;
-- frontend reducer/store/state-machine classes in the backend;
-- new abstractions solely to rename an existing abstraction.
-
----
-
-## 18. Phase 1 freeze statement
-
-With this document approved:
-
-- **Redis is the approved target persistence for OTP challenge state.**
-- **Identity remains the owner of OTP business/security policy and the `IOtpChallengeRepository` port.**
-- **`platform/cache` owns Redis technical infrastructure.**
-- **The existing generic SDUI request/reference/destination system will be reused and extended only when a proven contract gap exists.**
-- **Loaded Screen identity remains `screenId + template.id + template.type`; destination metadata remains separate.**
-- **The Login request will map form phone state plus runtime device context to the existing auth route.**
-- **Legacy `{template, api}` auth navigation results will migrate to canonical destination semantics.**
-- **OTP SDUI is created only after backend contracts and Redis behavior are green.**
-- **Authenticated Dashboard routing is deferred until a real Dashboard Screen exists.**
-- **No frontend implementation occurs during these backend phases.**
-
-This is the implementation contract for subsequent phases.
+- per-request Redis client creation;
+- plaintext OTP persistence/logging/API leakage;
+- runtime Redis → memory fallback;
+- Prisma+Redis dual writes without explicit migration approval;
+- second response helper/envelope;
+- root loaded-Screen template identity duplication;
+- guessed Dashboard destination;
+- backend MVI reducer/store classes;
+- new abstraction created only to rename an existing one;
+- `FLUSHDB`/`FLUSHALL` from generic cache;
+- weakening CI/architecture/security gates to obtain green.
