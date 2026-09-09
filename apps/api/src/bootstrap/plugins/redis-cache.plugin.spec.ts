@@ -10,6 +10,7 @@ describe('Phase 4 Redis composition', () => {
     expect(source).toContain('new Redis(RedisConfig.url');
     expect(source).toContain('export function createCacheProvider(redisClient?: IRedisClient)');
     expect(source).toContain('return new RedisCacheProvider(redisClient');
+    expect(source).toContain("if (!redisClient) throw new Error('Redis client is required outside NODE_ENV=test')");
   });
 
   it('binds development/production OTP persistence and cache to the same redisClient singleton while test stays deterministic', () => {
@@ -22,5 +23,13 @@ describe('Phase 4 Redis composition', () => {
     expect(source).toContain('cradle.redisClient');
     expect(source).toContain("'otpChallengeRepository'");
     expect(source).not.toContain('new PrismaOtpChallengeRepository');
+  });
+
+  it('keeps cache registration out of the generic DI plugin so Redis infrastructure owns production composition', () => {
+    const source = fs.readFileSync(new URL('./di.plugin.ts', import.meta.url), 'utf8');
+
+    expect(source).not.toContain('createCacheProvider');
+    expect(source).not.toContain("container.register('cacheProvider'");
+    expect(source).not.toContain('cacheProvider: asFunction');
   });
 });
