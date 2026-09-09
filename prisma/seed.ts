@@ -108,7 +108,7 @@ async function main() {
   const permissions = [
     { key: 'users.manage', module: 'Users', description: 'Manage all users' },
     { key: 'partners.manage', module: 'Partners', description: 'Manage all partners' },
-    { key: 'bookings.manage', module: 'Bookings', description: 'Manage bookings' },
+    { key: 'bookings.manage', module: 'Bookings', description: 'Manage all bookings' },
     { key: 'pricing.manage', module: 'Pricing', description: 'Manage pricing rules' },
     { key: 'services.manage', module: 'Services', description: 'Manage catalog services' },
     { key: 'analytics.view', module: 'Analytics', description: 'View analytics' },
