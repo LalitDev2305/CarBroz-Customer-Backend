@@ -1,6 +1,6 @@
 # Partner Authentication SDUI Contract Addendum
 
-> **Status:** Phases 5–13 implementation synchronized. Phases 0–6 retain their prior freeze. The Phase 7–13 freeze becomes effective only when this exact documentation-complete `development` HEAD succeeds in both canonical `CarBroz Backend CI` and independent `Backend Architecture Closeout Verifier`, followed by a clean final source audit.
+> **Status:** Phases 5–13 are COMPLETE + FROZEN. Phases 0–6 retain their prior freeze. This contract is bound to the exact documentation-complete `development` HEAD only after canonical `CarBroz Backend CI`, independent `Backend Architecture Closeout Verifier`, and the final forensic source/document audit all succeed on that same HEAD.
 >
 > **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`.
 >
@@ -67,7 +67,7 @@ validate
 → navigate/render
 ```
 
-## 3. Partner Login — IMPLEMENTED + PRESERVED
+## 3. Partner Login — COMPLETE + FROZEN
 
 Canonical Login Screen:
 
@@ -114,7 +114,7 @@ Legacy success navigation such as `{ template, api }` is forbidden.
 
 OTP plaintext/hash is never part of the API result.
 
-## 5. Partner OTP Screen — IMPLEMENTED
+## 5. Partner OTP Screen — COMPLETE + FROZEN
 
 Canonical loaded OTP Screen:
 
@@ -148,7 +148,7 @@ deviceId    ← { $context: "deviceId" }
 
 The frontend/runtime handoff explicitly owns the producer for this transient flow state: after successful Send OTP and before OTP navigation, it retains the resolved submitted phone number as `authFlow.phoneNumber` and retains the successful Send OTP response for `$response`. No hidden server-side state transfer is introduced.
 
-## 6. Verify OTP — IMPLEMENTED
+## 6. Verify OTP — COMPLETE + FROZEN
 
 Verify OTP reuses the existing transport DTO, controller and Identity use case. Its success result uses the same readonly `AuthFlowDestination` contract as Send OTP.
 
@@ -166,7 +166,7 @@ load bound challenge
 
 Concurrent/replay verification is fail-closed: at most one consume can succeed.
 
-## 7. Authenticated Partner Dashboard — IMPLEMENTED + PUBLISHED
+## 7. Authenticated Partner Dashboard — COMPLETE + FROZEN
 
 Canonical authenticated destination:
 
@@ -204,7 +204,7 @@ Therefore deployment does not depend on manually running `prisma db seed`.
 
 Verify OTP and authenticated Bootstrap return exactly this destination. Guest Bootstrap remains `partner_login`.
 
-## 8. SDUI registry DI contract
+## 8. SDUI registry DI contract — COMPLETE + FROZEN
 
 The registry application use cases are composed through the existing classic Awilix container key:
 
@@ -214,7 +214,7 @@ sduiRegistryRepository
 
 Their constructor dependency is named consistently with that canonical key. This avoids generic `repository` resolution and keeps all SDUI registry use cases on the one existing repository abstraction; no alias or second DI path exists.
 
-## 9. SESSION error semantics
+## 9. SESSION error semantics — COMPLETE + FROZEN
 
 SESSION-protected destination fetches must not convert missing/invalid bearer credentials into 500 responses.
 
@@ -227,7 +227,7 @@ Fastify/JWT transport-owned 401/403 failures are normalized by the canonical glo
 
 with no plugin/internal credential detail leakage.
 
-## 10. Redis OTP persistence contract
+## 10. Redis OTP persistence contract — COMPLETE + FROZEN
 
 Production OTP persistence remains:
 
@@ -243,7 +243,7 @@ The same Redis client is used by cache and OTP composition. There is no producti
 
 Prisma OTP persistence was retired through a forward migration. Test-only deterministic OTP persistence lives only at the executable test composition boundary.
 
-## 11. Full-flow proof
+## 11. Full-flow proof — COMPLETE + FROZEN
 
 Phase 12 E2E proves the actual Fastify/deployment flow:
 
@@ -262,7 +262,7 @@ guest Bootstrap
 
 The E2E does not create the Dashboard registry row; the migration must provide it.
 
-## 12. MVI/UDF handoff
+## 12. MVI/UDF handoff — COMPLETE + FROZEN
 
 The exact frontend integration contract is:
 
@@ -285,9 +285,9 @@ Send OTP succeeds
 
 OTP plaintext must not become reusable persistent application state after verification.
 
-## 13. Final freeze gate
+## 13. Final freeze gate — SATISFIED
 
-This Phase 7–13 contract is frozen only if all are true on this exact documentation-complete HEAD:
+The Phase 7–13 contract is COMPLETE + FROZEN only because all of the following are required to be green on the exact documentation-complete freeze HEAD:
 
 1. immutable install succeeds;
 2. CW1–CW5 architecture/security/ownership gates succeed;
@@ -303,4 +303,4 @@ This Phase 7–13 contract is frozen only if all are true on this exact document
 12. `Backend Architecture Closeout Verifier` succeeds on the same SHA;
 13. final forensic source/document audit finds no contract drift, legacy navigation, duplicate production OTP persistence, unsupported SDUI references, seed-only Dashboard dependency, or DI mismatch.
 
-If any item is red, the freeze is invalid and the owning phase reopens.
+If any future change invalidates one of these guarantees, the owning phase is reopened and the complete closeout sequence is mandatory again.
