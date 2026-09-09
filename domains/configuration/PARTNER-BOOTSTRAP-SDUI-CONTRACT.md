@@ -1,49 +1,24 @@
 # Partner Bootstrap ↔ SDUI Routing Contract
 
-> **Status:** FROZEN for the Partner Login → OTP implementation sequence.
+> **Status:** Phases 0–13 implementation synchronized. Final freeze is valid only when the exact documentation-complete `development` HEAD passes both canonical Backend CI and the independent Architecture Closeout verifier.
 >
 > **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md` and `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`.
 
----
-
 ## 1. Configuration ownership
 
-Configuration owns Partner startup/runtime configuration decisions such as:
+Configuration owns Partner startup/runtime configuration decisions including maintenance/update policy, startup feature switches, guest/authenticated startup selection, and destination metadata.
 
-- maintenance mode;
-- supported/minimum/latest app version policy;
-- startup feature switches;
-- guest vs authenticated startup selection;
-- destination metadata for the next published Partner screen.
+Configuration does not own SDUI structure/composition, OTP/authentication policy, Redis OTP persistence, Partner business lifecycle, or the global HTTP response envelope.
 
-Configuration does **not** own:
-
-- SDUI structural contracts;
-- Partner screen composition;
-- OTP/authentication business rules;
-- Redis OTP persistence;
-- Partner KYC/profile/job/booking state;
-- HTTP response-envelope policy.
-
----
-
-## 2. Current Partner bootstrap route
-
-The Partner surface mounts bootstrap under the configuration prefix.
-
-Current effective endpoint:
+## 2. Canonical Partner bootstrap endpoint
 
 ```http
 GET /api/v1/partner/config/bootstrap
 ```
 
-Any older documentation showing `/api/v1/partner/bootstrap` is stale for the current route composition and must not be used for new implementation.
+Older `/api/v1/partner/bootstrap` examples are stale.
 
----
-
-## 3. Current guest startup destination — KEEP
-
-The current default guest destination is already aligned with the real Partner Login SDUI screen:
+## 3. Guest startup destination
 
 ```json
 {
@@ -56,7 +31,7 @@ The current default guest destination is already aligned with the real Partner L
 }
 ```
 
-This destination must remain internally consistent with the served Login screen:
+Fetched Login identity must remain:
 
 ```text
 screen.screenId      = partner_login
@@ -64,29 +39,47 @@ screen.template.id   = tpl_7K2M9Q
 screen.template.type = stack_template
 ```
 
-No Phase in the Login → OTP work should recreate or rename the guest destination without a separate product/API requirement.
+## 4. Authenticated startup destination — IMPLEMENTED
 
----
+The authenticated startup contract is now a real SESSION-protected Partner SDUI registry destination:
 
-## 4. Authenticated startup destination — DEFER
+```json
+{
+  "screenId": "partner_dashboard",
+  "templateId": "partner_dashboard_template",
+  "templateType": "default_template",
+  "endpoint": "/api/v1/partner/sdui/registry/partner_dashboard",
+  "method": "GET",
+  "authentication": "SESSION"
+}
+```
 
-The current authenticated bootstrap destination still references the older Partner Dashboard registry route.
+The canonical Partner Dashboard composition lives at:
 
-That destination is deliberately **not** migrated during early Login → OTP phases because no real current Partner Dashboard screen exists under the canonical Partner screen surface.
+```text
+apps/api/src/surfaces/partner/screens/partner-dashboard.screen.ts
+```
 
-Rules:
+The authenticated runtime route is:
 
-1. do not invent Dashboard `screenId/templateId/templateType/endpoint` values;
-2. do not migrate authenticated bootstrap solely to make Verify OTP tests pass;
-3. create/publish the real Dashboard (or other lifecycle destination) first;
-4. then align both Verify OTP next destination and authenticated Bootstrap destination to the same published screen;
-5. protect destination ↔ fetched-screen identity with tests.
+```http
+GET /api/v1/partner/sdui/registry/partner_dashboard
+Authorization: Bearer <access token>
+```
 
----
+The route verifies the JWT and hard-scopes registry lookup to `targetApp: PARTNER`.
 
-## 5. Destination contract
+The Dashboard registry document is provisioned by the forward Prisma migration:
 
-Configuration carries startup destination metadata using the same semantics expected by the generic SDUI destination contract:
+```text
+prisma/migrations/20260909142000_publish_partner_dashboard/migration.sql
+```
+
+Production availability therefore does not depend on manually executing `prisma db seed`.
+
+## 5. Destination ↔ loaded Screen contract
+
+Destination metadata is a pre-fetch value:
 
 ```text
 screenId
@@ -97,9 +90,7 @@ method
 authentication
 ```
 
-Configuration does not duplicate the loaded SDUI Screen structure.
-
-The fetched Screen itself owns:
+A loaded Screen owns:
 
 ```text
 screenId
@@ -109,58 +100,54 @@ template.id
 template.type
 ```
 
-A destination and a loaded Screen are related but are not the same object.
-
----
-
-## 6. Persisted configuration compatibility
-
-`partner.bootstrap` is persisted configuration and must be treated as a versioned runtime contract.
-
-When changing required startup destination fields or semantics:
-
-- inspect existing persisted JSON compatibility;
-- do not assume defaults deep-merge into an existing stored document;
-- prefer explicit normalization/versioning/migration;
-- keep older app-version compatibility in mind;
-- update focused Configuration tests.
-
-The current guest destination already uses the new Login values; implementation must not regress persisted/default configuration back to older examples.
-
----
-
-## 7. API response envelope boundary
-
-Configuration owns the data snapshot, not the global HTTP envelope.
-
-The Partner bootstrap controller reuses the canonical transport envelope owned by `apps/api/src/transport/response/ResponseHelper.ts` and the global Fastify error handler. Phase 2 of the canonical implementation plan completed and froze that backend-wide response/error contract.
-
-The current contract is documented in:
+After fetch, the following parity is mandatory:
 
 ```text
-apps/api/src/transport/response/README.md
-docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md
+destination.screenId     == loaded.screenId
+destination.templateId   == loaded.template.id
+destination.templateType == loaded.template.type
 ```
 
-Do not change `ResponseHelper` for a Partner-Configuration-only field change.
+For the authenticated Partner destination, SESSION authentication must succeed before the screen is returned.
 
----
+## 6. Verify OTP parity
 
-## 8. Implementation sequencing
+Successful Verify OTP and authenticated Bootstrap converge on exactly the same Dashboard destination. No legacy `{ template, api }` result is legal in this Partner auth flow.
 
-For the current Partner authentication work:
+Required parity:
 
 ```text
-Guest Bootstrap Login destination        KEEP
-Loaded Login SDUI                        KEEP
-Login send_otp request mapping           ALIGN
-SendOtp legacy nextScreen                MIGRATE
-Redis OTP persistence                    IMPLEMENT behind Identity port
-OTP Partner screen                       CREATE after backend contract freeze
-VerifyOtp legacy nextScreen              MIGRATE
-Authenticated Dashboard Bootstrap        DEFER until real Dashboard exists
+verifyOtp.nextScreen == authenticatedBootstrap.nextScreen
+verifyOtp.nextScreen == published Partner Dashboard identity
 ```
 
-The canonical full phase plan is:
+Guest Bootstrap remains unchanged and continues to select `partner_login`.
 
-`docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`.
+## 7. Persisted configuration compatibility
+
+`partner.bootstrap` is persisted configuration and remains a versioned runtime contract. `ConfigProvider` returns an existing stored document as stored; defaults do not deep-merge into it.
+
+Therefore future changes to startup destination fields/semantics must explicitly inspect stored JSON compatibility and use deliberate normalization/versioning/migration when required. The current Phase 10 implementation did not invent a new authenticated identity: the Dashboard destination was already the canonical default contract and is now backed by an actually published registry document.
+
+## 8. API envelope boundary
+
+Configuration owns the startup snapshot, not the HTTP envelope. The Partner bootstrap controller continues to reuse the canonical transport envelope owned by:
+
+```text
+apps/api/src/transport/response/ResponseHelper.ts
+```
+
+No Partner-specific response helper is authorized.
+
+## 9. Current implementation sequence
+
+```text
+Guest Bootstrap → partner_login
+Login request   → POST /api/v1/partner/auth/send_otp
+Send OTP        → partner_otp
+OTP screen      → POST /api/v1/partner/auth/verify_otp
+Verify OTP      → partner_dashboard (SESSION)
+Auth Bootstrap  → same partner_dashboard destination
+```
+
+The complete phase contract and freeze evidence are maintained in `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`.
