@@ -10,6 +10,8 @@ export class InputBuilder extends TypedElementBuilder<InputProperties> {
   keyboard(value: InputProperties['keyboardType']): this { return this.setProperty('keyboardType', value); }
   phone(): this { return this.setProperty('keyboardType', 'phone'); }
   number(): this { return this.setProperty('keyboardType', 'number'); }
+  email(): this { return this.setProperty('keyboardType', 'email'); }
+  password(): this { return this.setProperty('keyboardType', 'password'); }
   maxLength(value: number): this { return this.setProperty('maxLength', value); }
   width(value: InputProperties['width']): this { return this.setProperty('width', value); }
   height(value: InputProperties['height']): this { return this.setProperty('height', value); }
@@ -19,6 +21,16 @@ export class InputBuilder extends TypedElementBuilder<InputProperties> {
   background(value: InputProperties['background']): this { return this.setProperty('background', value); }
   border(value: InputProperties['border']): this { return this.setProperty('border', value); }
   shape(value: InputProperties['shape']): this { return this.setProperty('shape', value); }
+  required(message?: string): this {
+    this.validationRule('required', true);
+    if (message !== undefined) this.validationRule('message', message);
+    return this;
+  }
+  pattern(value: string, message?: string): this {
+    this.validationRule('pattern', value);
+    if (message !== undefined) this.validationRule('message', message);
+    return this;
+  }
 
   build(): SduiElement { return ElementFactory.create('input', this.elementInput()); }
 }
