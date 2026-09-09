@@ -1,6 +1,6 @@
 # Partner Authentication SDUI Contract Addendum
 
-> **Status:** FROZEN for the Partner Login → OTP backend implementation. Phase 5 Partner Login request alignment is COMPLETE + repository-verified; Phase 6 Send OTP canonical destination result is next.
+> **Status:** FROZEN for the Partner Login → OTP backend implementation. Phase 5 Partner Login request alignment is COMPLETE + repository-verified; Phase 6 Send OTP canonical destination contract is FROZEN BEFORE IMPLEMENTATION.
 >
 > **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` remain higher-level execution authorities.
 >
@@ -48,9 +48,9 @@ Before a screen is fetched, navigation/startup/request results may carry a desti
 ```json
 {
   "screenId": "partner_otp",
-  "templateId": "<template-id>",
-  "templateType": "<template-type>",
-  "endpoint": "/api/v1/partner/screen/<route>",
+  "templateId": "tpl_partner_otp_v1",
+  "templateType": "form_template",
+  "endpoint": "/api/v1/partner/screen/auth_otp",
   "method": "GET",
   "authentication": "NONE"
 }
@@ -59,6 +59,8 @@ Before a screen is fetched, navigation/startup/request results may carry a desti
 This duplication is intentional because the template has not yet been loaded.
 
 The existing `dynamicDestinationSchema` remains canonical. No Partner-specific destination type should be introduced in `sdui/ui-sdk`.
+
+For Phase 6, the Partner OTP identity shown above is now reserved and frozen. Phase 8 must implement the loaded OTP screen and route with exactly these identities rather than inventing different values later.
 
 ---
 
@@ -75,6 +77,16 @@ destination.templateType == loaded.template.type
 Authentication requirements must also be satisfied before performing an authenticated destination fetch.
 
 Backend tests must guarantee that published destination metadata and the served screen stay consistent.
+
+For the reserved Partner OTP destination, Phase 8 must therefore serve:
+
+```text
+loaded.screenId      = partner_otp
+loaded.template.id   = tpl_partner_otp_v1
+loaded.template.type = form_template
+GET /api/v1/partner/screen/auth_otp
+authentication       = NONE
+```
 
 ---
 
@@ -180,6 +192,7 @@ Focused source proof lives in:
 
 ```text
 apps/api/src/surfaces/partner/screens/partner-login.screen.spec.ts
+apps/api/src/transport/auth/tests/partner-auth.route.spec.ts
 ```
 
 The detailed Phase 5 frozen implementation contract is:
@@ -192,7 +205,47 @@ The exact client runtime context-key registry belongs to the frontend/runtime co
 
 ---
 
-## 7. OTP screen creation rule
+## 7. Send OTP destination result — PHASE 6 FROZEN
+
+Phase 6 replaces only the legacy Send OTP success navigation metadata. It does not alter OTP generation, hashing, persistence, delivery, cooldown, rate limiting, attempt policy, expiry, device binding, error behavior, or response envelope.
+
+Legacy result, now forbidden:
+
+```json
+{
+  "nextScreen": {
+    "template": "form_template",
+    "api": "auth/auth_otp"
+  }
+}
+```
+
+Frozen Phase 6 result destination:
+
+```json
+{
+  "nextScreen": {
+    "screenId": "partner_otp",
+    "templateId": "tpl_partner_otp_v1",
+    "templateType": "form_template",
+    "endpoint": "/api/v1/partner/screen/auth_otp",
+    "method": "GET",
+    "authentication": "NONE"
+  }
+}
+```
+
+Identity must not import `sdui/ui-sdk` merely to reuse `dynamicDestinationSchema`. No neutral lower-level destination type currently exists that Identity may legally import, so Identity may own only the smallest transport-neutral auth-flow destination value interface. Runtime/schema validation remains owned by `sdui/ui-sdk` and is proven from boundary tests.
+
+Detailed Phase 6 ownership, invariants, regression requirements, and Definition of Done are frozen in:
+
+```text
+domains/identity/PHASE-6-SEND-OTP-DESTINATION-CONTRACT.md
+```
+
+---
+
+## 8. OTP screen creation rule
 
 No OTP-specific generic SDK type is authorized.
 
@@ -218,9 +271,18 @@ apps/api/src/surfaces/partner/screens/
 
 not inside `sdui/ui-sdk` definitions as a Partner-specific class.
 
+Phase 8 must consume the Phase 6 reserved identity exactly:
+
+```text
+screenId      = partner_otp
+template.id   = tpl_partner_otp_v1
+template.type = form_template
+route         = GET /api/v1/partner/screen/auth_otp
+```
+
 ---
 
-## 8. OTP runtime-state inputs
+## 9. OTP runtime-state inputs
 
 The OTP verification request is expected to resolve generic state/context approximately as:
 
@@ -236,7 +298,7 @@ No hidden server-side assumption should be required for values that the client/r
 
 ---
 
-## 9. MVI/UDF compatibility
+## 10. MVI/UDF compatibility
 
 Frontend MVI/UDF is not implemented in this backend package.
 
@@ -254,7 +316,7 @@ The frontend will consume these contracts through its existing ActionEngine/stor
 
 ---
 
-## 10. Implementation sequencing
+## 11. Implementation sequencing
 
 The authoritative phase ordering is maintained in:
 
@@ -267,8 +329,8 @@ For SDUI specifically:
 1. keep current loaded Screen schema;
 2. keep current generic action/destination schema unless a proven gap exists;
 3. align Login request references — Phase 5 COMPLETE;
-4. align Send OTP backend destination result — Phase 6 NEXT;
-5. only then create the OTP Partner screen/route;
+4. reserve and implement canonical Send OTP destination result — Phase 6 CONTRACT FROZEN / IMPLEMENTATION NEXT;
+5. only then create the OTP Partner screen/route using the exact reserved Phase 6 identity;
 6. validate destination ↔ fetched Screen identity;
 7. align Verify OTP request/result;
 8. defer authenticated Dashboard routing until a real Dashboard Screen exists.
