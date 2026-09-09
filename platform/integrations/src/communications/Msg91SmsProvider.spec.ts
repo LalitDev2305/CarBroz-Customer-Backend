@@ -109,7 +109,7 @@ describe('Msg91SmsProvider observability', () => {
     const result = await provider.sendOtp({ phoneNumber: '+913333333333', otp: '987654' });
 
     expect(result).toEqual({ success: false, errorCode: 'MSG91_OTP_NOT_CONFIGURED' });
-    expect(logger.warn).toHaveBeenCalledWith('provider.sms.msg91.otp_configuration_missing', {
+    expect(logger.warn).toHaveBeenCalledWith('provider.sms.msg91.delivery_configuration_missing', {
       provider: 'MSG91',
       operation: 'sendOtp',
       errorCode: 'MSG91_OTP_NOT_CONFIGURED',
