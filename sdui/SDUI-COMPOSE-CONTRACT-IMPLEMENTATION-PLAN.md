@@ -1,1474 +1,150 @@
 # CarBroz SDUI Dynamic Composition Architecture & Implementation Guide
 
-> **Status:** DESIGN FREEZE CANDIDATE — documentation first. Production implementation begins only after explicit approval.
->
-> **Authority:** Subordinate to `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/ENGINEERING-DOCUMENTATION-STANDARD.md`. If a conflict exists, the higher authority wins and this guide must be corrected before code changes.
->
-> **Scope:** Purely generic Server-Driven UI composition. No product screen, feature, business flow, or application-specific UI is defined here.
-
----
+> **Status:** ARCHITECTURE DECISION FROZEN FOR IMPLEMENTATION. This freezes the target architecture only; production SDUI composition remains open until source convergence and verification are complete.
 
 ## 1. Purpose
 
-This is the canonical implementation guide for building and evolving CarBroz dynamic UI.
+This document is the canonical implementation contract for CarBroz backend SDUI composition. It replaces the earlier assumption that product screens may manually construct the final nested SDUI JSON and then call `screenSchema.parse(...)`.
 
-A developer should be able to read this document and quickly answer:
+The final architecture preserves the existing hierarchy and the valid responsibilities already present in `ui-sdk` and the runtime registry, but makes typed object-graph Builders the canonical authoring path for screen-specific composition.
 
-- What is a Screen?
-- What is a Template?
-- What is a Component?
-- When should a Section be used?
-- When should a Group be used?
-- What is an Element?
-- How do these levels stack together?
-- Which hierarchy combinations are legal?
-- How do vertical and horizontal layouts work?
-- Where do alignment, arrangement, size, padding, weight, background, border and shape belong?
-- How do leading and trailing visual accessories work?
-- How is a complete dynamic JSON document composed?
-- How is the JSON validated, registered, persisted, published and retrieved?
-- How is a new Template, Component, Section, Group or Element type added?
-- How is an existing definition updated, deprecated or removed safely?
-- Which backend class/module owns each responsibility?
-- Which class calls which class and why?
-- What tests are required before a contract change is accepted?
+No migrated production screen should manually assemble the final SDUI JSON tree.
 
-The objective is a **small generic UI language that can express many screens through configuration without creating screen-specific backend classes**.
+## 2. Goals
 
----
+The backend must describe screens through one strongly typed reusable SDUI language without forcing each product screen to know or reproduce the serialized hierarchy.
 
-# 2. Architecture in one minute
+The architecture must provide:
 
-```text
-                         ┌──────────────────────────┐
-                         │          SCREEN          │
-                         │ identity + target + theme│
-                         └────────────┬─────────────┘
-                                      │
-                                      ▼
-                         ┌──────────────────────────┐
-                         │         TEMPLATE         │
-                         │ root composition policy  │
-                         └────────────┬─────────────┘
-                                      │
-                           one or more Components
-                                      │
-                                      ▼
-                         ┌──────────────────────────┐
-                         │        COMPONENT         │
-                         │ mandatory layout boundary│
-                         └────────────┬─────────────┘
-                                      │
-                    ┌─────────────────┴─────────────────┐
-                    │                                   │
-                 Elements                            Sections
-                                                        │
-                                         ┌──────────────┴──────────────┐
-                                         │                             │
-                                      Elements                       Groups
-                                                                        │
-                                                                     Elements
-```
+- one canonical hierarchy;
+- generic reusable definitions;
+- shared atomic property schemas;
+- definition-specific property contracts;
+- definition-specific typed builders;
+- hierarchy-safe parent/child composition;
+- screen-specific builders in the owning domain;
+- canonical validation before publication;
+- runtime draft/publish/version/retrieve through the registry;
+- no duplicate SDUI engine;
+- no screen-specific primitive definitions;
+- no production reliance on arbitrary `Record<string, unknown>` properties for known definitions;
+- no giant manually nested JSON as the production authoring model.
 
-Only three structural paths are legal:
+## 3. Canonical Hierarchy
 
-```text
-Screen → Template → Component → Element
-Screen → Template → Component → Section → Element
-Screen → Template → Component → Section → Group → Element
-```
-
-Template and Component are mandatory.
-Section and Group are optional.
-Element is always terminal.
-
----
-
-# 3. Package ownership
-
-```text
-sdui/
-├── ui-sdk/
-│   ├── contract/       # structural JSON contracts
-│   ├── properties/     # reusable property/value contracts
-│   ├── definitions/    # legal reusable UI type definitions
-│   ├── registry/       # in-memory definition registries
-│   ├── builder/        # safe programmatic composition
-│   ├── factory/        # definition-driven construction
-│   ├── validator/      # validation orchestration
-│   ├── serializer/     # trusted serialization boundary
-│   ├── versioning/     # schema compatibility policy
-│   └── public/         # supported external SDK surface
-│
-└── registry/
-    └── runtime persistence, draft/publish/archive/version/retrieval
-```
-
-## Ownership rule
-
-```text
-ui-sdk
-    owns the LANGUAGE
-
-sdui/registry
-    owns runtime DOCUMENT LIFECYCLE
-
-business domains
-    own BUSINESS BEHAVIOR
-
-API/application composition
-    exposes the published document
-```
-
-No second SDUI engine may be created.
-No feature-specific SDK hierarchy may be created.
-No business behavior belongs inside generic UI definitions.
-
----
-
-# 4. Core vocabulary: ID, Type and Properties
-
-Every structural node separates three concerns:
-
-```text
-id          instance identity
-
-type        reusable behavior definition
-
-properties  configuration of that behavior
-```
-
-Example:
-
-```json
-{
-  "id": "primary_content",
-  "type": "stack_component",
-  "properties": {
-    "orientation": "vertical"
-  }
-}
-```
-
-Interpretation:
-
-```text
-primary_content     = this particular instance
-stack_component     = reusable behavior
-vertical            = runtime configuration
-```
-
-Never create `vertical_component` and `horizontal_component` when one Stack behavior plus `orientation` expresses both.
-
----
-
-# 5. Screen
-
-Screen is the root runtime document. It identifies what is being requested and contains exactly one Template.
-
-Conceptual shape:
-
-```json
-{
-  "screenId": "sample_screen",
-  "templateId": "sample_template",
-  "templateType": "stack_template",
-  "schemaVersion": "<version>",
-  "targetApp": "PARTNER",
-  "theme": {},
-  "template": {}
-}
-```
-
-## Screen responsibilities
-
-Screen owns:
-
-- screen identity;
-- template identity/type reference;
-- schema version;
-- rendering target scope;
-- optional theme;
-- optional metadata;
-- one Template document.
-
-Screen does not own:
-
-- business use cases;
-- persistence implementation;
-- renderer implementation;
-- domain logic.
-
-## Screen invariants
-
-```text
-template.id   == templateId
-template.type == templateType
-all structural IDs are unique within the screen
-```
-
----
-
-# 6. Template
-
-Template is the root composition policy inside a Screen.
+The hierarchy remains unchanged:
 
 ```text
 Screen
-  └── Template
-        ├── Component
-        ├── Component
-        └── Component
-```
+  → Template
+      → Component
+          → Element
 
-A Template answers:
-
-- how top-level Components are arranged;
-- which reusable root behavior is used;
-- orientation;
-- root alignment/arrangement;
-- outer padding;
-- root measurement behavior;
-- root appearance where allowed.
-
-Initial generic type:
-
-```text
-stack_template
-```
-
-Example:
-
-```json
-{
-  "id": "sample_template",
-  "type": "stack_template",
-  "properties": {
-    "orientation": "vertical",
-    "verticalArrangement": {
-      "type": "spacedBy",
-      "spacing": 24
-    },
-    "horizontalAlignment": "center",
-    "fillMaxSize": true,
-    "padding": {
-      "start": 24,
-      "top": 20,
-      "end": 24,
-      "bottom": 20
-    }
-  },
-  "components": []
-}
-```
-
-A Template MUST contain at least one Component.
-
----
-
-# 7. Component
-
-Component is the mandatory composition boundary directly below Template.
-
-```text
-Template
-  └── Component
-```
-
-Initial generic type:
-
-```text
-stack_component
-```
-
-A Component may choose exactly one branch:
-
-```text
-Component → elements[]
-```
-
-or:
-
-```text
-Component → sections[]
-```
-
-Never both.
-
-## When to create another Component
-
-Create a new Component when a genuine top-level composition/layout boundary exists.
-
-Do not split Components simply because content has different semantic meaning.
-
-Good reason:
-
-```text
-Component A requires vertical layout
-Component B requires independent horizontal/root measurement behavior
-```
-
-Bad reason:
-
-```text
-these labels describe different business concepts
-```
-
----
-
-# 8. Section
-
-Section is an optional internal composition boundary inside Component.
-
-```text
-Template
-  └── Component
-        └── Section
-```
-
-Initial generic type:
-
-```text
-stack_section
-```
-
-A Section may choose exactly one branch:
-
-```text
-Section → elements[]
-```
-
-or:
-
-```text
-Section → groups[]
-```
-
-Never both.
-
-## When Section is useful
-
-Use Section when:
-
-- part of a Component requires another shared layout policy;
-- the hierarchy needs Groups beneath the Component;
-- multiple child items should share a nested arrangement/alignment/container policy.
-
-Do not add Section merely to make every JSON tree have the same depth.
-
----
-
-# 9. Group
-
-Group is the final optional structural container before Elements.
-
-```text
-Template
-  └── Component
-        └── Section
-              └── Group
-                    ├── Element
-                    └── Element
-```
-
-Initial generic type:
-
-```text
-stack_group
-```
-
-Group contains Elements only.
-
-Use Group for a local composition of leaf items that must share another layout policy.
-
-Example:
-
-```text
-horizontal Group
-├── icon
-├── text
-└── button
-```
-
-Group must not contain another Group, Section or Component.
-
----
-
-# 10. Element
-
-Element is the terminal visual or interactive leaf.
-
-Initial generic vocabulary:
-
-```text
-text
-image
-icon
-button
-input
-divider
-spacer
-```
-
-Conceptually:
-
-```text
-Element
-├── id
-├── type
-├── properties
-├── optional actions
-├── optional validation
-├── optional accessibility
-├── optional binding
-└── optional metadata
-```
-
-Element MUST NOT contain structural children.
-
-```text
-Element → Element       ❌
-Element → Group         ❌
-Element → Section       ❌
-```
-
-New leaf behavior should be introduced as a new Element definition only when existing generic Elements cannot express it cleanly.
-
----
-
-# 11. Legal and illegal hierarchy diagrams
-
-## Legal A — direct Elements
-
-```text
 Screen
-└── Template
-    └── Component
-        ├── Element
-        ├── Element
-        └── Element
-```
+  → Template
+      → Component
+          → Section
+              → Element
 
-## Legal B — Sections
-
-```text
 Screen
-└── Template
-    └── Component
-        ├── Section
-        │   ├── Element
-        │   └── Element
-        └── Section
-            └── Element
+  → Template
+      → Component
+          → Section
+              → Group
+                  → Element
 ```
 
-## Legal C — Sections and Groups
+Mandatory invariants:
+
+1. Screen has exactly one Template.
+2. Template has one or more Components.
+3. Component contains Elements OR Sections, never both.
+4. Section contains Elements OR Groups, never both.
+5. Group contains Elements only.
+6. Element is terminal.
+7. Component cannot directly contain Group.
+8. Template cannot directly contain Section, Group or Element.
+9. Group cannot contain Group or Section.
+10. Element cannot contain children.
+
+The Builder API must make valid hierarchy natural and invalid hierarchy impossible or immediately rejected.
+
+## 4. Core Semantic Contract
+
+Every runtime node follows:
 
 ```text
-Screen
-└── Template
-    └── Component
-        ├── Section
-        │   └── Group
-        │       ├── Element
-        │       └── Element
-        └── Section
-            └── Group
-                ├── Element
-                └── Element
-```
-
-## Illegal examples
-
-```text
-Template → Element                         ❌
-Template → Section                         ❌
-Component → Group                          ❌
-Component → elements[] + sections[]        ❌
-Section → elements[] + groups[]            ❌
-Group → Group                              ❌
-Group → Section                            ❌
-Element → child structural node            ❌
-```
-
----
-
-# 12. Stack behavior
-
-Stack is the initial generic sequential layout primitive.
-
-The hierarchy level tells us *where* it operates:
-
-```text
-stack_template
-stack_component
-stack_section
-stack_group
-```
-
-The properties tell us *how* it lays out children.
-
-## Vertical
-
-```json
-{
-  "orientation": "vertical",
-  "verticalArrangement": {
-    "type": "spacedBy",
-    "spacing": 16
-  },
-  "horizontalAlignment": "center"
-}
-```
-
-Conceptual Compose mapping:
-
-```kotlin
-Column(
-    verticalArrangement = Arrangement.spacedBy(16.dp),
-    horizontalAlignment = Alignment.CenterHorizontally
-)
-```
-
-## Horizontal
-
-```json
-{
-  "orientation": "horizontal",
-  "horizontalArrangement": {
-    "type": "spacedBy",
-    "spacing": 12
-  },
-  "verticalAlignment": "center"
-}
-```
-
-Conceptual Compose mapping:
-
-```kotlin
-Row(
-    horizontalArrangement = Arrangement.spacedBy(12.dp),
-    verticalAlignment = Alignment.CenterVertically
-)
-```
-
-The backend contract uses Compose-inspired semantics because they clearly separate orientation, arrangement, alignment and measurement. The backend does not depend on Compose classes.
-
----
-
-# 13. Parent and child property ownership
-
-This rule prevents contradictory JSON.
-
-## Parent owns sibling relationships
-
-```text
-orientation
-horizontalArrangement
-verticalArrangement
-horizontalAlignment
-verticalAlignment
-container padding
-```
-
-## Child owns itself
-
-```text
-width
-height
-minWidth
-maxWidth
-minHeight
-maxHeight
-fillMaxWidth
-fillMaxHeight
-fillMaxSize
-weight
-aspectRatio
-offset
-alpha
-zIndex
-background
-border
-shape
-clip
-```
-
-## Core rule
-
-> Parent defines the default relationship between children. Child defines its own measurement and appearance. Child-specific alignment is used only when it intentionally overrides the parent policy.
-
-Do not make CSS-style margin a foundational layout mechanism. Prefer parent arrangement, padding, Spacer, weight, constraints and offset.
-
----
-
-# 14. Arrangement, alignment and size are independent
-
-Three questions must remain separate:
-
-```text
-1. In which direction are children placed?
-   → orientation
-
-2. How are children distributed/aligned?
-   → arrangement + alignment
-
-3. How much space does each child consume?
-   → width/height/fill/weight/constraints
+id          = instance identity
+type        = reusable behavior definition
+properties  = configuration values for this instance
+children    = hierarchy owned by this instance where permitted
 ```
 
 Example:
 
 ```text
-horizontal stack
-├── child A: natural width
-├── child B: fixed width
-└── child C: weight 1
+id   = login_content
+type = stack_component
 ```
 
-All three may still use:
+`login_content` is screen-specific identity. `stack_component` is reusable behavior.
+
+Do not create `login_stack_component`, `otp_stack_component`, `dashboard_stack_component`, etc. merely because instance values differ.
+
+## 5. Reuse Principle
+
+The backend reuses the SDUI language and behavior. Each screen owns its own instance data.
+
+Login, OTP and Dashboard may all use `stack_component` with different values:
 
 ```text
-verticalAlignment = top | center | bottom
+Login      → vertical, spacing 16
+OTP        → vertical, spacing 20
+Dashboard  → horizontal, spacing 12
 ```
 
-Different width does not imply different alignment.
+There is one reusable `stack_component` definition and one reusable `StackComponentProperties` contract. Each screen-specific builder supplies its instance values.
 
----
+## 6. Final Ownership Model
 
-# 15. Generic property families
+### 6.1 UI SDK owns the reusable SDUI language
 
-The target contract should type important reusable properties instead of allowing every critical layout value to remain arbitrary JSON.
+`ui-sdk` owns:
 
-## Layout
+- canonical contracts and structural schemas;
+- shared atomic property schemas;
+- reusable definitions and definition registries;
+- definition-specific property contracts;
+- definition-specific typed node builders;
+- factories where they remain legitimate existing owners;
+- base screen/hierarchy builder primitives;
+- hierarchy/property/canonical validation;
+- serializer;
+- versioning;
+- public exports.
 
-```text
-orientation
-horizontalArrangement
-verticalArrangement
-horizontalAlignment
-verticalAlignment
-padding
-width
-height
-minWidth
-maxWidth
-minHeight
-maxHeight
-fillMaxWidth
-fillMaxHeight
-fillMaxSize
-weight
-aspectRatio
-offset
-```
+`ui-sdk` must not know about Login, OTP, Dashboard, Booking or other business screens.
 
-## Appearance
+### 6.2 Owning domain owns screen-specific composition
 
-```text
-background
-border
-shape
-clip
-alpha
-zIndex
-color
-```
+The owning domain/surface owns:
 
-## Content-specific examples
+- screen ID and node instance IDs;
+- selected reusable node types;
+- screen-specific property values;
+- content/text;
+- actions and bindings;
+- validation values;
+- analytics/accessibility values where applicable;
+- exact screen composition.
 
-```text
-text
-fontSize
-fontWeight
-letterSpacing
-lineHeight
-textAlign
-url
-contentScale
-placeholder
-keyboardType
-maxLength
-thickness
-```
+This is expressed through screen-specific composition builders such as `PartnerLoginScreenBuilder`, `PartnerOtpScreenBuilder` and `PartnerDashboardScreenBuilder` in their correct owners.
 
-Properties must be validated by the definition/property contract that owns them. A node should not silently accept unrelated properties simply because they are JSON-compatible.
+These are orchestration classes only. They are not a second SDUI framework and must consume the reusable `ui-sdk` builders/contracts.
 
----
+### 6.3 Runtime Registry owns document lifecycle
 
-# 16. Leading and trailing accessories
-
-Some leaf content needs small visual content immediately before or after its primary content.
-
-Generic mechanism:
-
-```text
-leading[]
-trailing[]
-```
-
-Initial accessory types:
-
-```text
-text
-icon
-image
-divider
-```
-
-Accessories are ordered.
-
-Example:
-
-```json
-{
-  "id": "caption",
-  "type": "text",
-  "properties": {
-    "text": "FEATURED",
-    "leading": [
-      {
-        "type": "divider",
-        "properties": {
-          "orientation": "horizontal",
-          "width": 32,
-          "thickness": 1,
-          "color": "#999999"
-        }
-      }
-    ],
-    "trailing": [
-      {
-        "type": "icon",
-        "properties": {
-          "name": "arrow_forward",
-          "size": 16,
-          "color": "#999999"
-        }
-      }
-    ]
-  }
-}
-```
-
-## Accessory invariant
-
-Accessory is a value object, **not a structural Element**.
-
-```text
-Text Element
-├── primary text
-├── leading[] accessory values
-└── trailing[] accessory values
-```
-
-It does not create:
-
-```text
-Element
-└── Element
-```
-
-Accessories must not have structural IDs, Sections, Groups or child Elements.
-
-## When not to use an accessory
-
-If two items are independent siblings with independent sizing/layout behavior, represent them as separate Elements inside a Group.
-
-```text
-Group
-├── Element A
-└── Element B
-```
-
-Do not hide a real sibling relationship inside `leading[]` or `trailing[]` merely to reduce JSON size.
-
----
-
-# 17. Theme
-
-Theme is optional screen-level visual configuration.
-
-Conceptual generic example:
-
-```json
-{
-  "theme": "light",
-  "statusBar": "transparent",
-  "properties": {
-    "background": {
-      "type": "linearGradient",
-      "angle": 135,
-      "colors": [
-        { "color": "#EAF9F8", "stop": 0.0 },
-        { "color": "#FFFFFF", "stop": 0.5 },
-        { "color": "#E5F7F6", "stop": 1.0 }
-      ]
-    }
-  }
-}
-```
-
-Runtime colors use direct `#RRGGBB` values in this contract.
-
-Theme owns screen visual policy. It must not become a container for unrelated component behavior or business/navigation behavior.
-
----
-
-# 18. Complete generic JSON example
-
-This example intentionally demonstrates all three legal branches without representing any real product screen.
-
-```json
-{
-  "screenId": "sample_dynamic_screen",
-  "templateId": "sample_dynamic_template",
-  "templateType": "stack_template",
-  "schemaVersion": "<version>",
-  "targetApp": "PARTNER",
-  "theme": {
-    "theme": "light",
-    "statusBar": "transparent",
-    "properties": {
-      "background": {
-        "color": "#FFFFFF"
-      }
-    }
-  },
-  "template": {
-    "id": "sample_dynamic_template",
-    "type": "stack_template",
-    "properties": {
-      "orientation": "vertical",
-      "verticalArrangement": {
-        "type": "spacedBy",
-        "spacing": 20
-      },
-      "horizontalAlignment": "center",
-      "fillMaxSize": true,
-      "padding": {
-        "start": 24,
-        "top": 24,
-        "end": 24,
-        "bottom": 24
-      }
-    },
-    "components": [
-      {
-        "id": "direct_leaf_component",
-        "type": "stack_component",
-        "properties": {
-          "orientation": "vertical",
-          "verticalArrangement": {
-            "type": "spacedBy",
-            "spacing": 8
-          },
-          "horizontalAlignment": "center",
-          "fillMaxWidth": true
-        },
-        "elements": [
-          {
-            "id": "sample_title",
-            "type": "text",
-            "properties": {
-              "text": "Dynamic UI",
-              "fontSize": 24,
-              "fontWeight": 700,
-              "color": "#111111",
-              "textAlign": "center"
-            }
-          },
-          {
-            "id": "sample_image",
-            "type": "image",
-            "properties": {
-              "url": "https://example.com/image.png",
-              "width": 96,
-              "height": 96,
-              "contentScale": "fit"
-            }
-          }
-        ]
-      },
-      {
-        "id": "section_component",
-        "type": "stack_component",
-        "properties": {
-          "orientation": "vertical",
-          "fillMaxWidth": true
-        },
-        "sections": [
-          {
-            "id": "direct_leaf_section",
-            "type": "stack_section",
-            "properties": {
-              "orientation": "vertical",
-              "verticalArrangement": {
-                "type": "spacedBy",
-                "spacing": 12
-              },
-              "fillMaxWidth": true
-            },
-            "elements": [
-              {
-                "id": "sample_input",
-                "type": "input",
-                "properties": {
-                  "fieldId": "sampleValue",
-                  "placeholder": "Enter value",
-                  "fillMaxWidth": true
-                }
-              },
-              {
-                "id": "sample_button",
-                "type": "button",
-                "properties": {
-                  "text": "Continue",
-                  "fillMaxWidth": true,
-                  "trailing": [
-                    {
-                      "type": "icon",
-                      "properties": {
-                        "name": "arrow_forward",
-                        "size": 18,
-                        "color": "#FFFFFF"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "id": "group_section",
-            "type": "stack_section",
-            "properties": {
-              "orientation": "vertical",
-              "fillMaxWidth": true
-            },
-            "groups": [
-              {
-                "id": "sample_horizontal_group",
-                "type": "stack_group",
-                "properties": {
-                  "orientation": "horizontal",
-                  "horizontalArrangement": {
-                    "type": "spacedBy",
-                    "spacing": 12
-                  },
-                  "verticalAlignment": "center",
-                  "fillMaxWidth": true
-                },
-                "elements": [
-                  {
-                    "id": "sample_icon",
-                    "type": "icon",
-                    "properties": {
-                      "name": "info",
-                      "size": 20,
-                      "color": "#444444"
-                    }
-                  },
-                  {
-                    "id": "sample_description",
-                    "type": "text",
-                    "properties": {
-                      "text": "Example grouped content",
-                      "weight": 1,
-                      "fontSize": 14,
-                      "color": "#444444"
-                    }
-                  },
-                  {
-                    "id": "sample_divider",
-                    "type": "divider",
-                    "properties": {
-                      "orientation": "vertical",
-                      "height": 24,
-                      "thickness": 1,
-                      "color": "#DDDDDD"
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-This example demonstrates:
-
-```text
-Template → Component → Element
-Template → Component → Section → Element
-Template → Component → Section → Group → Element
-```
-
-in one document while preserving the XOR rule at each branching level.
-
----
-
-# 19. End-to-end lifecycle
-
-```text
-┌────────────────────────────┐
-│ 1. Reusable type exists?   │
-└──────────────┬─────────────┘
-               │
-        yes ───┴─── no
-         │            │
-         │            ▼
-         │   Add generic definition
-         │   + property contract
-         │   + tests
-         │            │
-         └────────────┘
-               │
-               ▼
-┌────────────────────────────┐
-│ 2. Compose runtime JSON    │
-└──────────────┬─────────────┘
-               ▼
-┌────────────────────────────┐
-│ 3. Structural validation  │
-└──────────────┬─────────────┘
-               ▼
-┌────────────────────────────┐
-│ 4. Definition/property    │
-│    validation             │
-└──────────────┬─────────────┘
-               ▼
-┌────────────────────────────┐
-│ 5. Store as DRAFT         │
-└──────────────┬─────────────┘
-               ▼
-┌────────────────────────────┐
-│ 6. Validate for publish   │
-└──────────────┬─────────────┘
-               ▼
-┌────────────────────────────┐
-│ 7. PUBLISH version        │
-└──────────────┬─────────────┘
-               ▼
-┌────────────────────────────┐
-│ 8. Runtime retrieval      │
-│ screenId + targetApp      │
-└──────────────┬─────────────┘
-               ▼
-┌────────────────────────────┐
-│ 9. Parse again through    │
-│    canonical SDK schema   │
-└──────────────┬─────────────┘
-               ▼
-┌────────────────────────────┐
-│10. Serialize trusted JSON │
-└──────────────┬─────────────┘
-               ▼
-┌────────────────────────────┐
-│11. Client interprets UI   │
-└────────────────────────────┘
-```
-
-A persisted document is not trusted merely because it was valid when originally stored. Runtime retrieval must continue to respect canonical schema/version policy.
-
----
-
-# 20. Definition registration flow
-
-Reusable types are registered once through the existing definition system.
-
-```text
-registerProductionSduiDefinitions()
-        │
-        ├── register Element definitions
-        │      text / image / icon / button / input / divider / spacer
-        │
-        ├── register Group definitions
-        │      stack_group
-        │
-        ├── register Section definitions
-        │      stack_section
-        │
-        ├── register Component definitions
-        │      stack_component
-        │
-        └── register Template definitions
-               stack_template
-```
-
-Registration must remain idempotent.
-
-The production definition bootstrap registers reusable language only. It must not register runtime screen documents.
-
----
-
-# 21. Proposed property contract classes/files
-
-The exact split must be reconciled against existing source before implementation. Do not create a duplicate if an existing artifact already owns the responsibility.
-
-Target organization:
-
-```text
-sdui/ui-sdk/src/properties/
-├── layout/
-│   ├── orientation.schema.ts
-│   ├── arrangement.schema.ts
-│   ├── alignment.schema.ts
-│   ├── spacing.schema.ts
-│   ├── size.schema.ts
-│   └── stack-properties.schema.ts
-│
-├── appearance/
-│   ├── color.schema.ts
-│   ├── background.schema.ts
-│   ├── border.schema.ts
-│   └── shape.schema.ts
-│
-├── accessory/
-│   └── accessory.schema.ts
-│
-└── index.ts
-```
-
-Do not create empty folders merely to match this diagram.
-
----
-
-# 22. Class/file responsibility matrix
-
-| Artifact | Owns | Called/consumed by | Must not own |
-|---|---|---|---|
-| `common.schema.ts` | shared primitive contract vocabulary | structural schemas/property schemas | feature behavior |
-| `screen.schema.ts` | root Screen shape, root invariants, target/theme linkage | parser/validator/public contract | persistence |
-| `template.schema.ts` | Template structural shape | screen schema, builders | runtime storage |
-| `component.schema.ts` | Component shape and Elements XOR Sections | template schema/builders | Group direct ownership |
-| `section.schema.ts` | Section shape and Elements XOR Groups | component schema/builders | business semantics |
-| `group.schema.ts` | Group → Elements-only shape | section schema/builders | nested structural containers |
-| `element.schema.ts` | terminal Element envelope | group/section/component schemas | structural children |
-| `orientation.schema.ts` | vertical/horizontal axis | stack properties | screen-specific behavior |
-| `arrangement.schema.ts` | main-axis distribution/spacedBy | stack properties | measurement |
-| `alignment.schema.ts` | cross-axis alignment | stack properties/layout contracts | business meaning |
-| `spacing.schema.ts` | padding/spacing value shapes | layout contracts | CSS layout model |
-| `size.schema.ts` | width/height/fill/constraints/weight | structural and leaf property contracts | sibling arrangement |
-| `color.schema.ts` | runtime color format | appearance/text/icon/divider contracts | theme business policy |
-| `background.schema.ts` | solid/gradient background shape | Theme and supported nodes | hardcoded screen background |
-| `border.schema.ts` | generic border shape | supported nodes | component semantics |
-| `shape.schema.ts` | generic shape/corner configuration | supported nodes | renderer implementation |
-| `accessory.schema.ts` | ordered lightweight leading/trailing values | supported leaf properties | structural Element hierarchy |
-| `stack-properties.schema.ts` | reusable Stack property composition | all `stack_*` definitions | hierarchy ownership |
-| Template definition registry | available Template behaviors | factory/builder/validation composition | runtime screens |
-| Component definition registry | available Component behaviors | factory/builder/validation composition | runtime screens |
-| Section definition registry | available Section behaviors | factory/builder/validation composition | runtime screens |
-| Group definition registry | available Group behaviors | factory/builder/validation composition | runtime screens |
-| Element definition registry | available terminal behaviors | factory/builder/validation composition | business logic |
-| `production-definitions.ts` | canonical reusable production registration | SDK bootstrap | runtime document data |
-| builder layer | safe programmatic construction | SDK consumers/factory as designed | persistence authority |
-| factory layer | definition-driven creation | builder/composition boundary | business decisions |
-| validator layer | orchestration of contract/definition validation | draft/publish/runtime boundaries | mutation of valid data |
-| serializer layer | trusted output serialization | runtime/public boundary | validation bypass |
-| versioning layer | compatibility/schema policy | parser/publish/runtime | screen semantics |
-| `sdui/registry` | draft/publish/archive/version/persistence/retrieval | application/API boundary | definition language |
-
-Every production class/function introduced during implementation must also receive TSDoc describing owner, role, callers, dependencies, non-responsibilities and invariants according to the engineering documentation standard.
-
----
-
-# 23. Call relationship diagram
-
-```text
-                         UI SDK bootstrap
-                               │
-                               ▼
-                  Production Definition Registrar
-                               │
-             ┌─────────────────┼─────────────────┐
-             ▼                 ▼                 ▼
-      Definition Registries  Property Schemas  Structural Schemas
-             │                 │                 │
-             └──────────┬──────┴──────────┬──────┘
-                        │                 │
-                        ▼                 ▼
-                      Factory          Validator
-                        │                 ▲
-                        ▼                 │
-                      Builder ────────────┘
-                        │
-                        ▼
-                 Valid SDUI document
-                        │
-                        ▼
-                  Runtime Registry
-              draft/version/publish/store
-                        │
-                        ▼
-                Retrieval application
-                        │
-                        ▼
-                Canonical parse/validate
-                        │
-                        ▼
-                    Serializer
-                        │
-                        ▼
-                     API output
-```
-
-Actual source dependencies must follow the Master Constitution. This diagram describes responsibilities, not permission to introduce dependency cycles.
-
----
-
-# 24. How to add a new Template type
-
-Use this process only when an existing Template behavior cannot express the required root composition.
-
-```text
-Requirement
-   ↓
-Can stack_template express it using properties?
-   ├── YES → do not create a new Template type
-   └── NO
-       ↓
-Identify genuinely different reusable layout behavior
-       ↓
-Define typed properties
-       ↓
-Create Template definition
-       ↓
-Register through Template definition registry
-       ↓
-Add positive + negative tests
-       ↓
-Update public documentation
-```
-
-Example future categories might include genuinely different behaviors such as grid or overlay. They must not be added speculatively.
-
-Checklist:
-
-```text
-[ ] reusable across more than one potential screen
-[ ] cannot be represented by existing behavior + properties
-[ ] generic name
-[ ] no feature/business terminology
-[ ] typed properties
-[ ] legal Template → Component structure
-[ ] registration test
-[ ] validation tests
-[ ] migration/version impact reviewed
-[ ] documentation updated
-```
-
----
-
-# 25. How to add a new Component type
-
-```text
-Need new Component behavior
-   ↓
-Can stack_component + properties express it?
-   ├── YES → configure existing type
-   └── NO → define reusable Component behavior
-               ↓
-          property contract
-               ↓
-          definition registration
-               ↓
-          preserve Elements XOR Sections
-               ↓
-          tests + docs
-```
-
-Never create a Component type because one screen calls the area by a particular business name.
-
----
-
-# 26. How to add a new Section type
-
-A new Section type requires a genuinely new reusable nested composition behavior.
-
-It must always preserve:
-
-```text
-Section → elements[]
-OR
-Section → groups[]
-```
-
-Never both.
-
-The same source-first, typed-property, registration, test and documentation process applies.
-
----
-
-# 27. How to add a new Group type
-
-Group is a local Element container.
-
-A new Group type must preserve:
-
-```text
-Group → elements[] only
-```
-
-If Stack plus orientation/arrangement/alignment can express the requirement, reuse `stack_group`.
-
-Do not create `left_group`, `right_group`, `top_group`, `bottom_group`, `vertical_group`, or `horizontal_group` merely to encode configuration in a type name.
-
----
-
-# 28. How to add a new Element type
-
-Create a new Element only for a genuinely new terminal visual/interactive capability.
-
-Process:
-
-```text
-Need leaf behavior
-   ↓
-Can existing Element + properties/accessories express it?
-   ├── YES → reuse existing Element
-   └── NO
-       ↓
-Define generic Element contract
-       ↓
-Define type-specific properties
-       ↓
-Register Element definition
-       ↓
-Prove terminal invariant
-       ↓
-Positive/negative tests
-       ↓
-Document renderer expectation without coupling backend to renderer
-```
-
-Element must never introduce structural children.
-
----
-
-# 29. How to add or change a property
-
-Properties are part of the public SDUI contract and must be treated as versioned API vocabulary.
-
-## Additive compatible property
-
-Typical safe path:
-
-```text
-new optional property
-   ↓
-add typed schema
-   ↓
-add to owning property contract
-   ↓
-register/compose through existing definition
-   ↓
-positive + negative tests
-   ↓
-compatibility review
-   ↓
-document
-```
-
-## Required property
-
-Changing an optional property to required may break persisted documents and clients. Treat as a compatibility change, not a small refactor.
-
-## Rename property
-
-Do not simply rename in place if published documents may contain the old name.
-
-```text
-old property
-   ↓
-introduce new property/version policy
-   ↓
-compatibility/migration path
-   ↓
-migrate persisted documents
-   ↓
-prove old usage removed
-   ↓
-remove deprecated vocabulary later
-```
-
-## Delete property
-
-Deletion requires proof that:
-
-- no supported schema version needs it;
-- no published/persisted document needs it;
-- no public consumer depends on it;
-- migration is complete;
-- regression tests protect the new contract.
-
----
-
-# 30. How to update an existing definition
-
-A definition change may alter every runtime document using that type.
-
-Required sequence:
-
-```text
-1. Search source references
-2. Search tests/seeds/fixtures
-3. Determine persisted/published usage
-4. Classify change:
-      additive compatible
-      behavior-compatible
-      breaking
-5. Update typed contract
-6. Update definition
-7. Add/update focused tests
-8. Validate representative documents
-9. Run package verification
-10. Run freeze verification
-11. Update this guide/README/TSDoc
-```
-
-Never change a definition merely until one sample JSON passes.
-
----
-
-# 31. How to deprecate or delete a definition
-
-Deletion is a lifecycle operation.
-
-```text
-Definition marked for removal
-          ↓
-Find every source/test/runtime reference
-          ↓
-Any supported runtime document uses it?
-   ├── YES → cannot remove
-   │          migrate/version first
-   └── NO
-          ↓
-Remove registration
-          ↓
-Remove implementation
-          ↓
-Keep regression proving unsupported type is rejected
-          ↓
-Run full verification
-```
-
-Do not leave old and new definitions indefinitely as duplicate authorities. Compatibility aliases require an explicit migration purpose and removal plan.
-
----
-
-# 32. Runtime document CRUD versus definition CRUD
-
-These are different operations and must never be confused.
-
-## Runtime document lifecycle
-
-Owned by `sdui/registry`:
+The runtime registry owns:
 
 ```text
 CREATE draft
@@ -1479,470 +155,668 @@ ARCHIVE version
 RETRIEVE published version
 ```
 
-A published immutable/versioned artifact should not be silently mutated in place; follow the Registry's version lifecycle.
+It does not dynamically redefine the meaning of core SDK types.
 
-## Definition lifecycle
+## 7. Property Architecture
 
-Owned by `sdui/ui-sdk` code:
+### 7.1 Shared atomic property schemas
 
-```text
-ADD reusable definition
-UPDATE definition with compatibility review
-DEPRECATE definition
-REMOVE definition after migration proof
-```
-
-Runtime admin operations must not dynamically redefine the meaning of core SDK types unless a separately approved architecture explicitly introduces that capability.
-
----
-
-# 33. Validation layers
-
-Validation should answer progressively deeper questions.
+Reusable atomic concepts remain centralized:
 
 ```text
-Layer 1 — JSON/structural
-Is the document shaped correctly?
-
-Layer 2 — hierarchy
-Are only legal parent/child relationships used?
-
-Layer 3 — definition
-Does each `type` exist at the correct hierarchy level?
-
-Layer 4 — property
-Are properties valid for that type?
-
-Layer 5 — invariant
-Are IDs unique? Do template ID/type match root references?
-
-Layer 6 — version/target
-Is the schema version supported and target valid?
-
-Layer 7 — publication
-Is this document safe to become a published runtime artifact?
+sdui/ui-sdk/src/properties/
+├── layout/
+│   ├── orientation.schema.ts
+│   ├── arrangement.schema.ts
+│   ├── alignment.schema.ts
+│   ├── spacing.schema.ts
+│   └── size.schema.ts
+├── appearance/
+│   ├── color.schema.ts
+│   ├── background.schema.ts
+│   ├── border.schema.ts
+│   └── shape.schema.ts
+├── accessory/
+│   └── accessory.schema.ts
+└── index.ts
 ```
 
-Validation must reject invalid input; it should not silently reinterpret malformed contracts into a different UI.
+These files define reusable atomic vocabulary only: Orientation, Arrangement, Alignment, Spacing, Size, Color, Background, Border, Shape, Accessory, etc.
 
----
+### 7.2 No global final `stack-properties.schema.ts`
 
-# 34. Error philosophy
+A global `stack-properties.schema.ts` must not own the final property contract for Template, Component, Section and Group.
 
-Errors should identify:
+Although those definitions share atomic concepts, their valid property sets may evolve independently. The final composed property contract therefore lives beside the definition that owns it.
+
+Target organization:
 
 ```text
-WHAT failed
-WHERE it failed
-WHY it is invalid
-WHICH invariant was violated
+sdui/ui-sdk/src/definitions/
+├── templates/
+│   └── stack/
+│       ├── stack-template.definition.ts
+│       ├── stack-template.properties.ts
+│       ├── stack-template.builder.ts
+│       └── index.ts
+├── components/
+│   └── stack/
+│       ├── stack-component.definition.ts
+│       ├── stack-component.properties.ts
+│       ├── stack-component.builder.ts
+│       └── index.ts
+├── sections/
+│   └── stack/
+│       ├── stack-section.definition.ts
+│       ├── stack-section.properties.ts
+│       ├── stack-section.builder.ts
+│       └── index.ts
+├── groups/
+│   └── stack/
+│       ├── stack-group.definition.ts
+│       ├── stack-group.properties.ts
+│       ├── stack-group.builder.ts
+│       └── index.ts
+└── elements/
+    ├── text/
+    │   ├── text.definition.ts
+    │   ├── text.properties.ts
+    │   ├── text.builder.ts
+    │   └── index.ts
+    ├── image/
+    ├── icon/
+    ├── input/
+    ├── button/
+    ├── divider/
+    └── spacer/
 ```
 
-Useful conceptual error:
+Exact migration paths must follow `KEEP → EXTEND → MODIFY → CREATE`; existing legitimate owners are extended rather than duplicated.
+
+### 7.3 Property ownership rule
 
 ```text
-component 'content_area': cannot contain both elements[] and sections[]
+Atomic property schema
+    = reusable primitive vocabulary
+
+Definition-specific properties
+    = exact properties accepted by that definition
+
+Screen-specific builder
+    = actual values used by a particular screen instance
 ```
 
-Poor error:
+For example `orientation.schema.ts` can be reused by `StackTemplateProperties`, `StackComponentProperties`, `StackSectionProperties` and `StackGroupProperties`, while each definition independently decides which atomic properties it accepts.
+
+## 8. Builder Architecture — Object Graph, Not Raw JSON
+
+The Builder layer is the canonical screen-authoring mechanism.
+
+The builder model is an object graph. It is not one global stateful fluent chain and not a raw JSON wrapper.
+
+Each parent builder object owns and creates its children:
 
 ```text
-invalid json
+ScreenBuilder
+    └── TemplateBuilder
+        ├── ComponentBuilder
+        │   ├── ElementBuilder(s)
+        │   └── OR SectionBuilder(s)
+        │       ├── ElementBuilder(s)
+        │       └── OR GroupBuilder(s)
+        │           └── ElementBuilder(s)
+        └── ComponentBuilder
+            └── ...
 ```
 
-Do not expose sensitive implementation details through public API errors, but internal validation must remain diagnosable.
+### 8.1 Parent object is the relationship
 
----
+Normal composition must not depend on a global `currentComponent`, hidden mutable parent state, parent-ID lookup, or manually nested arrays.
 
-# 35. Versioning and compatibility
-
-SDUI is a distributed contract. Backend and multiple client versions may coexist.
-
-Therefore:
+Instead:
 
 ```text
-schema change != local refactor
+screen.addTemplate(...)
+template.addComponent(...)
+component.addSection(...)
+component.addElement(...)
+section.addGroup(...)
+section.addElement(...)
+group.addElement(...)
 ```
 
-Every change must be classified:
+The actual parent builder object establishes ownership. This is a frozen design rule.
+
+## 9. Typed Node Builders
+
+Reusable definitions expose typed builders appropriate to their behavior, for example:
 
 ```text
-compatible additive
-compatible behavioral
-breaking structural
-breaking semantic
+StackTemplateBuilder
+StackComponentBuilder
+StackSectionBuilder
+StackGroupBuilder
+TextBuilder
+ImageBuilder
+IconBuilder
+InputBuilder
+ButtonBuilder
+DividerBuilder
+SpacerBuilder
 ```
 
-Breaking changes require an explicit schema/version and migration strategy consistent with the existing versioning architecture.
+Builders expose semantic methods instead of forcing screen code to know serialized property shape:
 
-Never guess a new `schemaVersion` merely because a file changed.
+```ts
+component
+  .vertical()
+  .spacing(16)
+  .alignCenter()
+  .fillMaxWidth();
+```
 
----
+rather than manually constructing a `properties` object.
 
-# 36. Initial implementation target
+The builder translates semantic calls into the canonical definition-specific property contract. If serialized representation changes later, the generic builder can change while screen-specific composition remains stable.
 
-The first implementation phase should establish generic vocabulary only:
+## 10. Hierarchy-Safe Builder API
+
+Valid public operations include:
+
+```text
+screen.addTemplate()
+template.addComponent()
+component.addElement()
+component.addSection()
+section.addElement()
+section.addGroup()
+group.addElement()
+```
+
+Invalid relationships must not be normal API operations:
+
+```text
+screen.addComponent()       INVALID
+template.addSection()       INVALID
+component.addGroup()        INVALID
+group.addSection()          INVALID
+group.addGroup()            INVALID
+element.addElement()        INVALID
+```
+
+XOR rules are mandatory:
+
+```text
+Component → Elements OR Sections
+Section   → Elements OR Groups
+```
+
+Once a Component selects direct Elements, adding Sections must fail. Once it selects Sections, adding direct Elements must fail. The same applies to Section with Elements versus Groups.
+
+Compile-time modeling is preferred where practical; runtime enforcement remains mandatory defense in depth.
+
+## 11. Screen-Specific Builder Pattern
+
+A screen-specific builder lives with the domain/surface that owns the screen. It should be compact and read like the high-level screen structure.
+
+Example conceptual organization:
+
+```text
+domains/identity/
+└── presentation/
+    └── sdui/
+        └── builders/
+            ├── partner-login-screen.builder.ts
+            └── partner-otp-screen.builder.ts
+```
+
+Other screens belong to their correct owner rather than being forced into Identity.
+
+Recommended style:
+
+```ts
+build(): SduiScreen {
+  const screen = this.createScreen();
+  const template = this.createTemplate(screen);
+
+  this.addBrandComponent(template);
+  this.addLoginComponent(template);
+  this.addFooterComponent(template);
+
+  return screen.build();
+}
+```
+
+Recommended granularity:
+
+```text
+build()
+    = screen-level flow
+
+private component methods
+    = major screen blocks
+
+private section methods
+    = complex subsections only
+
+simple elements
+    = created directly inside their owning parent method
+```
+
+Do not split every element into a class/method when it adds no clarity.
+
+## 12. Canonical Object-Graph Example
+
+The following is illustrative; exact API names must be reconciled with existing source before implementation.
+
+```ts
+const screen = new ScreenBuilder({
+  screenId: 'partner_login',
+  targetApp: 'PARTNER',
+  schemaVersion: '3.0.0',
+});
+
+const template = screen.addStackTemplate('tpl_partner_login');
+
+template.vertical().fillMaxSize();
+
+const brand = template.addStackComponent('brand_component');
+brand.vertical().alignCenter().spacing(8);
+brand.addImage('brand_logo').source('carbroz_partner_logo');
+brand.addText('brand_title').value('CarBroz Partner');
+
+const form = template.addStackComponent('login_component');
+form.vertical().fillMaxWidth().spacing(16);
+
+const mobileSection = form.addStackSection('mobile_section');
+const mobileGroup = mobileSection.addStackGroup('mobile_group');
+mobileGroup.horizontal().spacing(8);
+mobileGroup.addText('country_code').value('+91');
+mobileGroup
+  .addInput('mobile_number')
+  .binding('mobileNumber')
+  .phone()
+  .required()
+  .maxLength(10);
+
+const actionSection = form.addStackSection('action_section');
+actionSection
+  .addButton('continue_button')
+  .text('Continue')
+  .action('send_otp');
+
+const result = screen.build();
+```
+
+The screen code never manually creates final `components: []`, `sections: []`, `groups: []` or `elements: []` arrays. The object graph owns those relationships.
+
+## 13. Multiple Components and Exact Child Ownership
+
+A Template may contain many Components:
+
+```text
+Template
+├── Component 1
+├── Component 2
+└── Component 3
+```
+
+Each returned Component builder is a distinct object reference:
+
+```ts
+const component1 = template.addStackComponent('brand');
+const component2 = template.addStackComponent('form');
+const component3 = template.addStackComponent('footer');
+```
+
+Children are added to the exact intended parent:
+
+```ts
+component1.addText(...);
+
+const section = component2.addStackSection(...);
+section.addButton(...);
+
+component3.addText(...);
+```
+
+There is no ambiguity about which Component owns a Section, Group or Element. Parent-object ownership is mandatory.
+
+## 14. Base Builder vs Screen Builder
+
+### UI SDK reusable/base builders — HOW SDUI is built
+
+They own:
+
+- node creation;
+- typed properties;
+- hierarchy ownership;
+- XOR enforcement;
+- definition lookup;
+- canonical node creation;
+- recursive final construction;
+- integration with validation.
+
+### Domain screen-specific builder — WHAT the screen contains
+
+It owns:
+
+- screen identity;
+- instance IDs;
+- selected reusable types;
+- property values;
+- content;
+- actions;
+- bindings;
+- screen-specific validation values;
+- exact composition.
+
+This separation is mandatory.
+
+## 15. Definition and Builder Flow
+
+The intended internal flow is:
+
+```text
+Domain Screen-Specific Builder
+        ↓
+Reusable Typed Node Builders
+        ↓
+Definition-Specific Properties
+        ↓
+Reusable Definitions / Definition Registries
+        ↓
+Existing Factories where legitimately required
+        ↓
+Canonical Node Contracts
+        ↓
+Canonical Hierarchy
+        ↓
+Layered Validator
+        ↓
+SduiScreen
+```
+
+Builders must not bypass reusable definitions/property contracts by creating arbitrary unvalidated property bags.
+
+## 16. Validation Model
+
+Validation remains layered:
+
+1. **JSON / structural** — canonical shape and required fields.
+2. **Hierarchy** — legal parent/child relationships and XOR branches.
+3. **Definition** — every `type` resolves to a registered reusable definition.
+4. **Property** — properties satisfy the exact definition-specific schema.
+5. **Invariant** — cross-field and semantic invariants.
+6. **Version / target** — schema version, target application and compatibility.
+7. **Publication** — all publication requirements before activation.
+
+Builder safety does not replace final validation. The validator remains the authoritative defense-in-depth boundary.
+
+## 17. Registry Lifecycle
+
+After a screen-specific builder produces a canonical screen:
+
+```text
+Domain Screen Builder
+        ↓
+Canonical SduiScreen
+        ↓
+Validator
+        ↓
+Registry Draft
+        ↓
+Publish
+        ↓
+Versioned Runtime Document
+        ↓
+Retrieve Published Version
+        ↓
+Canonical Parse / Validate
+        ↓
+Serializer
+        ↓
+API Response
+```
+
+The runtime registry manages documents; it is not a second UI-definition registry.
+
+## 18. Explicitly Rejected Anti-Patterns
+
+### Giant raw JSON screen constructors
+
+Product code must not manually reproduce the final nested canonical tree and merely call `screenSchema.parse(...)`.
+
+### Screen-specific primitive definitions
+
+Do not create:
+
+```text
+login_stack_component
+otp_stack_component
+dashboard_stack_component
+login_text
+otp_button
+```
+
+Use generic definitions with screen-specific values.
+
+### Screen-specific property classes duplicating SDK contracts
+
+Do not create `LoginStackComponentProperties`, `OtpStackComponentProperties`, etc. There is one reusable `StackComponentProperties`; screen builders provide different values.
+
+### Hidden current-parent state
+
+Do not make `currentComponent`, `currentSection` or `currentGroup` the primary composition mechanism. Use explicit parent object references.
+
+### Parent-ID based normal composition
+
+Do not make `addElement({ parentId: '...' })` the normal authoring path. The parent object owns the child.
+
+### One global final Stack properties contract
+
+Do not centralize final Stack behavior into `properties/layout/stack-properties.schema.ts`. Final Template/Component/Section/Group property contracts live beside their definitions.
+
+## 19. Current Known Gap
+
+The current source already contains valuable pieces including canonical hierarchy schemas, definition registries, node factories, hierarchy builders, screen builder, serializer/versioning and runtime registry infrastructure.
+
+However, current production Partner screens manually construct large nested JSON documents and call structural parsing directly. The common property contract is also too open for the target architecture (`Record<string, unknown>` behavior), and current validation is shallower than the layered model defined here.
+
+Implementation must therefore converge existing source toward this contract rather than create a parallel framework.
+
+## 20. Migration Strategy
+
+All implementation follows:
+
+```text
+KEEP → EXTEND → MODIFY → CREATE
+```
+
+Before adding a new artifact:
+
+1. inspect the current owner;
+2. KEEP it if it already satisfies the responsibility;
+3. EXTEND it if incomplete;
+4. MODIFY it if the abstraction is correct but behavior is wrong;
+5. CREATE only when no legitimate owner exists.
+
+### Phase A — Source reconciliation
+
+Audit contracts, properties, definitions, registries, factories, builders, validator, serializer, versioning, runtime registry and Login/OTP/Dashboard composition. Produce exact KEEP / EXTEND / MODIFY / CREATE decisions.
+
+### Phase B — Property contracts
+
+Introduce/complete shared atomic property schemas; colocate definition-specific property contracts; remove production reliance on arbitrary property bags for known definitions while preserving required compatibility.
+
+### Phase C — Typed reusable node builders
+
+Make Stack Template/Component/Section/Group builders property-aware; add typed Element builders; expose only legal child APIs; enforce Component and Section XOR branches.
+
+### Phase D — Base object-graph builder
+
+Screen owns Template; Template owns Components; Component owns Elements OR Sections; Section owns Elements OR Groups; Group owns Elements. Final `build()` recursively produces canonical nodes and invokes validation.
+
+### Phase E — Login golden reference
+
+Migrate Partner Login first. It becomes the golden reference for domain screen-builder style, parent-object ownership, typed properties, validation, registry publication/retrieval and API compatibility.
+
+Do not copy the migration to OTP/Dashboard until Login architecture is proven.
+
+### Phase F — OTP migration
+
+Migrate Partner OTP using the proven Login pattern without duplicate abstractions.
+
+### Phase G — Dashboard migration
+
+Migrate Partner Dashboard using the same canonical SDK builders and its own screen-specific composition builder.
+
+### Phase H — Retire obsolete raw composition
+
+After migrated screens are proven, remove obsolete raw construction paths and compatibility-only artifacts that have no remaining legitimate owner.
+
+### Phase I — Full verification and refreeze
+
+Run unit, integration, architecture and canonical repository gates; update documentation; only then refreeze SDUI composition implementation.
+
+## 21. Testing Requirements
+
+Tests must prove behavior rather than only snapshot giant JSON literals. Required coverage includes:
+
+- atomic property schemas;
+- definition-specific property validation;
+- semantic builder-method mapping;
+- Template → Component ownership;
+- Component direct-element branch;
+- Component section branch;
+- Component elements/sections XOR rejection;
+- Section direct-element branch;
+- Section group branch;
+- Section elements/groups XOR rejection;
+- Group element ownership;
+- invalid hierarchy rejection;
+- unknown definition rejection;
+- canonical screen build validation;
+- screen identity/destination contracts;
+- actions and bindings;
+- registry draft/publish/retrieve;
+- serialized API compatibility;
+- Login/OTP/Dashboard end-to-end behavior.
+
+Tests and architecture gates must never be weakened to make migration pass.
+
+## 22. Naming Rules
+
+Generic reusable names belong in `ui-sdk`:
 
 ```text
 stack_template
 stack_component
 stack_section
 stack_group
-
 text
 image
 icon
-button
 input
+button
 divider
 spacer
-
-orientation
-arrangement
-alignment
-spacing
-size
-background
-border
-shape
-color
-leading[]
-trailing[]
 ```
 
-No product-specific document is required to define these capabilities.
-
----
-
-# 37. Existing vocabulary migration rule
-
-If the current repository contains older generic definitions, implementation must first determine whether source, tests, fixtures, seeds or persisted/published documents still depend on them.
-
-Two safe paths exist.
-
-## No dependency
+Screen-specific names belong only to runtime instances/composition builders:
 
 ```text
-prove unused
-   ↓
-replace atomically
-   ↓
-update tests/docs
+PartnerLoginScreenBuilder
+partner_login
+login_component
+mobile_section
+mobile_group
+mobile_number
+continue_button
 ```
 
-## Compatibility required
+Do not encode product screen names into reusable primitives unless a genuinely new reusable behavior exists.
+
+## 23. Frozen Responsibility Matrix
+
+| Concern | Owner |
+|---|---|
+| Canonical hierarchy | `ui-sdk` contracts |
+| Atomic property vocabulary | `ui-sdk/properties` |
+| Definition-specific properties | definition package |
+| Reusable node behavior | definition package |
+| Reusable typed node builder | definition package / canonical builder owner |
+| Hierarchy object graph | `ui-sdk` base builders |
+| Screen-specific composition | owning domain screen builder |
+| Screen-specific property values | owning domain screen builder |
+| Screen-specific actions/bindings/content | owning domain screen builder |
+| Final canonical validation | `ui-sdk` validator |
+| Serialization | `ui-sdk` serializer |
+| Schema compatibility/versioning | `ui-sdk` versioning |
+| Draft/publish/archive/retrieve | runtime SDUI registry |
+| HTTP transport | API/surface layer |
+| Rendering | frontend SDUI renderer |
+
+## 24. Frozen Architecture Summary
 
 ```text
-introduce new vocabulary
-   ↓
-retain explicit temporary compatibility
-   ↓
-migrate runtime documents
-   ↓
-prove migration
-   ↓
-remove legacy vocabulary in controlled change
+Shared Atomic Properties
+        ↓
+Definition-Specific Properties
+        ↓
+Reusable SDUI Definitions
+        ↓
+Typed Definition-Specific Node Builders
+        ↓
+Base Hierarchy/Object-Graph Builders
+        ↓
+Domain Screen-Specific Builder
+        ↓
+Canonical SduiScreen
+        ↓
+Layered Validator
+        ↓
+Runtime Registry
+        ↓
+Serializer
+        ↓
+API
+        ↓
+Frontend Renderer
 ```
 
-Never maintain two equivalent vocabularies permanently without a real architectural reason.
-
----
-
-# 38. Implementation phases
-
-## Phase 0 — forensic source audit
-
-Before editing production code:
-
-- re-fetch `development` and record HEAD;
-- inspect all current structural schemas;
-- inspect definition registries;
-- inspect factory/builder/validator/serializer/versioning;
-- inspect runtime Registry lifecycle;
-- discover all tests;
-- discover all current production definitions;
-- search old definition/property usage;
-- determine compatibility requirements;
-- identify existing owners before creating any new file.
-
-## Phase 1 — typed property foundation
-
-Implement reusable layout/appearance/accessory value contracts with focused tests.
-
-## Phase 2 — Stack definitions
-
-Implement/register `stack_template`, `stack_component`, `stack_section`, `stack_group` through existing registries.
-
-## Phase 3 — generic Elements
-
-Ensure initial Element definitions exist and add only missing generic capabilities such as Divider. Add typed properties and accessory support where valid.
-
-## Phase 4 — Theme contract
-
-Type generic Theme appearance properties and remove unrelated responsibilities only through compatibility-safe migration.
-
-## Phase 5 — migration
-
-Resolve legacy definition/property compatibility based on Phase 0 evidence.
-
-## Phase 6 — Registry integration proof
-
-Prove generic draft → validation → publish → retrieval → parse → serialization flow.
-
-## Phase 7 — architecture and freeze proof
-
-Run focused tests, package verification, architecture gates and final repository freeze command.
-
----
-
-# 39. Required test matrix
-
-## Hierarchy positive
-
-```text
-Template → Component → Element passes
-Template → Component → Section → Element passes
-Template → Component → Section → Group → Element passes
-multiple Components pass
-multiple Sections pass
-multiple Groups pass
-multiple Elements pass
-```
-
-## Hierarchy negative
-
-```text
-Template without Component fails
-Template direct Element fails
-Component with Elements + Sections fails
-empty Component fails
-Component direct Group fails
-Section with Elements + Groups fails
-empty Section fails
-empty Group fails
-Group nested Group fails
-Element structural child fails
-duplicate structural ID fails
-template ID mismatch fails
-template type mismatch fails
-```
-
-## Stack properties
-
-```text
-vertical orientation passes
-horizontal orientation passes
-unknown orientation fails
-valid arrangements pass
-invalid arrangement fails
-spacedBy validates spacing
-alignment values validate
-weight validates
-size constraints validate
-padding validates
-```
-
-## Appearance
-
-```text
-valid #RRGGBB passes
-malformed color fails
-solid background passes
-supported gradient passes
-invalid gradient fails
-border validates
-shape validates
-```
-
-## Accessories
-
-```text
-leading text passes
-leading icon passes
-trailing image passes
-trailing divider passes
-multiple ordered accessories preserve order
-unsupported accessory fails
-accessory structural child fails
-nested accessory recursion fails
-accessory is not counted as structural node ID
-```
-
-## Definition registration
-
-```text
-all canonical definitions register
-registration is idempotent
-unknown type fails
-wrong hierarchy-level type fails
-removed/deprecated type follows version policy
-```
-
-## Registry lifecycle
-
-```text
-valid draft stores
-invalid draft cannot publish
-published version retrieves
-retrieved layout parses through canonical SDK
-archived/version behavior follows Registry policy
-target scope remains isolated
-```
-
-Every production bug found during implementation receives a permanent regression test.
-
----
-
-# 40. Verification requirements
-
-Exact commands must be discovered from actual workspace scripts during implementation; do not invent unavailable commands.
-
-Completed documentation must list focused commands in this form where they actually exist:
-
-```text
-pnpm exec vitest run <focused-test-file>
-pnpm --filter <ui-sdk-workspace> test
-pnpm --filter <ui-sdk-workspace> typecheck
-pnpm --filter <ui-sdk-workspace> lint
-pnpm --filter <ui-sdk-workspace> build
-pnpm test:freeze
-```
-
-`pnpm test:freeze` remains the final repository-wide proof, but it does not replace focused tests.
-
----
-
-# 41. Fast decision guide
-
-```text
-Need new UI?
-   │
-   ├─ Can existing JSON types express it?
-   │      └─ YES → create/update runtime document only
-   │
-   └─ NO
-       │
-       ├─ New root layout behavior?      → Template definition
-       ├─ New major container behavior?  → Component definition
-       ├─ New nested container behavior? → Section definition
-       ├─ New local leaf layout?         → Group definition
-       └─ New terminal capability?       → Element definition
-
-Before creating any type:
-Can existing type + properties express it?
-   ├─ YES → reuse it
-   └─ NO  → add one generic reusable capability
-```
-
----
-
-# 42. Quick hierarchy selection guide
-
-```text
-Always need:
-Screen → Template → Component
-
-Need only leaf items in Component?
-Component → Elements
-
-Need another nested layout boundary?
-Component → Sections → Elements
-
-Need local grouping of leaf items inside Section?
-Component → Sections → Groups → Elements
-```
-
-Do not choose hierarchy depth based on visual complexity alone. Choose it based on actual layout boundaries and legal composition.
-
----
-
-# 43. Architecture rules for implementation
-
-1. Source-first: inspect current owner before creating code.
-2. One authority per responsibility.
-3. UI SDK defines language; Registry owns runtime lifecycle.
-4. Business domains own business behavior.
-5. Template and Component are mandatory.
-6. Section and Group are optional.
-7. Element is terminal.
-8. Component uses Elements XOR Sections.
-9. Section uses Elements XOR Groups.
-10. Group contains Elements only.
-11. Orientation is configuration, not type proliferation.
-12. Parent owns sibling layout relationships.
-13. Child owns its measurement/appearance.
-14. Accessories are values, not structural children.
-15. Do not hide real sibling relationships inside accessories.
-16. Add generic behavior only when existing behavior cannot express the requirement.
-17. Treat property/type changes as versioned contract changes.
-18. Do not delete vocabulary without runtime compatibility proof.
-19. Do not weaken validation to make one JSON document pass.
-20. Every important new class/function gets architectural TSDoc.
-21. Every important behavior gets focused tests.
-22. Every fixed defect gets a permanent regression test.
-23. Update this guide when approved architecture changes.
-24. Do not declare completion until focused and freeze validation pass.
-
----
-
-# 44. Definition of done for the generic SDUI foundation
-
-The foundation is complete only when:
-
-```text
-[ ] current source ownership has been audited
-[ ] structural hierarchy remains constitution-compliant
-[ ] typed reusable property contracts exist
-[ ] Stack definitions are generic and registered once
-[ ] generic Element vocabulary is validated
-[ ] leading/trailing accessories preserve terminal Element invariant
-[ ] Theme contains only appropriate screen visual policy
-[ ] legacy vocabulary compatibility is explicitly resolved
-[ ] definition registration is idempotent
-[ ] draft/publish/retrieval flow is proven
-[ ] runtime retrieval reparses through canonical contract
-[ ] version/target behavior is proven
-[ ] positive tests pass
-[ ] negative tests pass
-[ ] regression tests pass
-[ ] package build/typecheck/lint/tests pass where configured
-[ ] architecture gates pass
-[ ] `pnpm test:freeze` passes
-[ ] TSDoc and package documentation match implementation
-[ ] no duplicate SDUI authority was introduced
-```
-
----
-
-# 45. Final mental model
-
-Remember the system as five simple questions:
-
-```text
-SCREEN
-What runtime UI document is this?
-
-TEMPLATE
-How are the major areas of the screen composed?
-
-COMPONENT
-What mandatory major layout boundaries exist?
-
-SECTION / GROUP
-Do we need additional nested/local layout boundaries?
-
-ELEMENT
-What terminal content is actually rendered or interacted with?
-```
-
-And remember the extension rule:
-
-```text
-CONFIGURE first
-REUSE second
-EXTEND only when necessary
-VERSION when compatibility requires it
-NEVER create screen-specific SDUI architecture
-```
-
-This document is the implementation blueprint for the generic CarBroz SDUI composition system. Production code must remain consistent with it and with the higher-level backend constitution.
+Frozen implementation rules:
+
+1. Final SDUI hierarchy does not change.
+2. UI SDK remains the single reusable SDUI language/engine.
+3. Shared atomic properties stay centralized.
+4. Definition-specific property contracts live beside their definitions.
+5. There is no global final `stack-properties` contract.
+6. Screen-specific builders live with the owning domain.
+7. Parent builder objects own and create their children.
+8. Object references establish hierarchy; hidden current-parent state does not.
+9. Typed builder methods hide final JSON property representation from screen code.
+10. Screen builders describe screen intent/composition, not raw JSON structure.
+11. Definitions remain generic; instance values remain screen-specific.
+12. Builder safety is backed by final canonical validation.
+13. Registry remains responsible for runtime document lifecycle.
+14. No duplicate SDUI framework may be introduced.
+15. Login is the first golden-reference migration before OTP and Dashboard.
+
+## 25. Freeze Gate
+
+This document freezes the **target architecture**, not the current implementation state.
+
+The current SDUI composition implementation remains open until source has converged to this contract and verification is complete.
+
+The SDUI composition campaign may be declared **COMPLETE + FROZEN** only after:
+
+1. implementation conforms to this document;
+2. Login, OTP and Dashboard use the canonical builder path;
+3. obsolete raw composition paths are retired or explicitly justified;
+4. documentation matches final source;
+5. full canonical Backend CI is green on the documentation-complete `development` HEAD;
+6. independent Architecture Closeout is green on the exact same SHA;
+7. a second-pass forensic architecture audit finds no material drift or duplicate ownership.
+
+Until those conditions are satisfied, this document is the frozen implementation target and SDUI composition source remains under migration.
