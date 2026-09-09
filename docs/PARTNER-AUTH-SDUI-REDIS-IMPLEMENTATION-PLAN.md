@@ -1,6 +1,6 @@
 # Partner Authentication + SDUI + Redis Implementation Plan
 
-> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phase 1 complete; Phase 3 infrastructure implemented and parity-reviewed; repository-wide closeout remains blocked by pending Phase 2 response/error reconciliation.
+> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phase 1 complete; Phase 2 response/error reconciliation implemented and frozen; Phase 3 Redis infrastructure implemented and parity-reviewed; Phase 4 is the next implementation phase after canonical CI closeout.
 >
 > **Branch:** `development`
 >
@@ -300,24 +300,41 @@ Prefer Redis-native atomic commands/transactions. Use a small Lua script only wh
 
 ---
 
-## 9. API envelope/error gate — PHASE 2 PENDING
+## 9. API envelope/error gate — PHASE 2 FROZEN
 
-Before OTP transport behavior can be considered production-frozen, reconcile repository-wide response/error behavior:
+The repository-wide response/error contract has one canonical envelope owner: `apps/api/src/transport/response/ResponseHelper.ts` plus the single global Fastify error handler.
 
-- HTTP status equals body `status`;
-- stable machine-readable `code`;
-- safe `message`;
-- consistent `data` semantics;
-- consistent `traceId` propagation;
-- validation errors through common envelope;
-- `ApplicationError` mapping;
-- supported auth/Redis/provider 5xx status including required 503 behavior;
-- frozen 200 vs 201 creation policy;
-- correct 204 behavior.
+Canonical JSON envelope:
 
-Do not patch only OTP responses while global error handling remains inconsistent.
+```text
+{
+  status,
+  code,
+  message,
+  data,
+  traceId
+}
+```
 
-**Current validation blocker:** the canonical closeout workflow stops at the existing CW5 error-semantics/leakage gate before build/lint/test. This is Phase 2 scope and must not be bypassed or weakened from Phase 3.
+Frozen rules:
+
+- actual HTTP status equals body `status` for JSON envelopes;
+- `code` is stable and machine-readable;
+- mapped failures use `data: null`;
+- `traceId` is propagated when request context provides it;
+- successful creation remains HTTP 200 under the current API contract;
+- HTTP 204 carries no response body;
+- transport validation maps to 400 + `VALIDATION_ERROR` without reflecting raw schema details;
+- typed `ApplicationError`/`DomainError` codes are preserved when available;
+- domain validation defaults to 422 unless a stronger status mapping applies;
+- unknown/unhandled failures map to 500 with a generic safe message;
+- required provider/infrastructure failures may map to 503;
+- unknown routes use the same non-reflective envelope;
+- no product/controller may define a competing response helper, envelope or status map.
+
+Security containment is permanent and environment-independent: raw validation details, stack traces, provider internals, SQL errors, request secrets, tokens, OTP values and unnecessary PII must not be reflected to clients.
+
+The owner-local normative details are documented in `apps/api/src/transport/response/README.md`.
 
 ---
 
@@ -395,23 +412,27 @@ Completed:
 - Redis approval/ownership/failure/atomicity strategy;
 - no production code changes in the phase.
 
-## Phase 2 — Repository-wide response/error reconciliation — PENDING / BLOCKS FULL CLOSEOUT
+## Phase 2 — Repository-wide response/error reconciliation — COMPLETE
 
-Required work:
+Completed at the canonical owners:
 
-- `ResponseHelper` status/code mapping;
-- global Fastify error handler;
-- Zod/Fastify validation errors;
-- `ApplicationError` mapping;
-- 503/required 5xx support;
-- trace ID;
-- 200/201 policy;
-- 204 behavior;
-- regression tests.
+- reconciled `ResponseHelper` around one `{status, code, message, data, traceId}` contract;
+- added first-class 503 support for required dependency/provider failures;
+- froze creation semantics at HTTP 200;
+- froze HTTP 204 as no-body;
+- aligned global Fastify error handling for application, domain, validation, not-found and unknown failures;
+- preserved stable application/domain codes instead of replacing them with message text;
+- mapped domain/business validation to 422 when no stronger status applies;
+- made validation/internal client messages non-reflective and production-safe;
+- guaranteed HTTP/body status equality through executable tests/gates;
+- aligned route-not-found behavior to the common envelope;
+- reconciled observability/PII policy so request diagnostics remain metadata-only and logging contracts do not accept request body/header payloads;
+- updated the CW5 executable error/PII gates to validate the current canonical contract rather than the removed legacy `{success:false}` contract;
+- aligned stale SDUI/cache/registry test fixtures with already-frozen contracts instead of weakening strict schemas or provider validation.
 
-The current CW5 error-semantics gate failure proves this phase is not complete. Do not weaken the gate.
+Closeout rule: Phase 2 is accepted only when the canonical `CarBroz Backend CI` run on the documentation-complete HEAD passes architecture/security gates, Prisma validation/migrations/drift, monorepo build, ESLint, full Vitest, repeated post-test gates and the non-mutating validation proof.
 
-## Phase 3 — Redis platform infrastructure — IMPLEMENTED; PARITY-REVIEWED; FULL REPO GATE BLOCKED BY PHASE 2
+## Phase 3 — Redis platform infrastructure — IMPLEMENTED; PARITY-REVIEWED
 
 Implemented/reused:
 
@@ -430,13 +451,14 @@ Implemented/reused:
 - DI regression test proving root/request scopes share the same cache singleton;
 - exact owner documentation in `platform/cache/README.md`.
 
-Validation defects found and fixed during the Phase 3 parity gate:
+Validation defects found and fixed during parity/closeout:
 
 1. lifecycle plugin originally resolved `cacheProvider` without registering it; fixed by idempotent singleton registration and regression test;
 2. `RedisCacheConfig` exposed unused connection/vendor fields even though executable composition owns them; reduced to provider-owned settings only;
-3. canonical plan had stale Phase 1 `CURRENT` status; corrected here.
+3. `defaultTtlSeconds` typing was aligned with `exactOptionalPropertyTypes` without changing runtime behavior;
+4. the in-memory TTL test now proves expiry with a valid positive TTL and controlled time instead of violating the provider's positive-TTL contract.
 
-Repository-wide closeout is **not** marked green because Phase 2's CW5 error-semantics gate stops the canonical workflow before runtime-config/Prisma/build/lint/test. Phase 3 must not modify unrelated HTTP error semantics merely to advance that workflow.
+Phase 3 remains infrastructure-only; OTP business persistence begins in Phase 4.
 
 ## Phase 4 — Redis OTP repository adapter — NOT STARTED
 
