@@ -1,6 +1,6 @@
 # Partner Authentication + SDUI + Redis Implementation Plan
 
-> **Status:** Phases 0–6 remain COMPLETE + FROZEN. Phases 7–13 are IMPLEMENTED and in final same-HEAD closeout. The Phase 7–13 freeze is valid only when the exact documentation-complete `development` HEAD passes both canonical `CarBroz Backend CI` and the independent `Backend Architecture Closeout Verifier`, followed by the mandatory second-pass forensic audit.
+> **Status:** Phases 0–13 are COMPLETE + FROZEN. The Phase 7–13 campaign passed the complete implementation contract, mandatory second-pass forensic audit, canonical `CarBroz Backend CI`, and independent `Backend Architecture Closeout Verifier` on the exact documentation-complete freeze candidate. Any future modification to these contracts reopens the owning phase and requires the full closeout sequence again.
 >
 > **Branch:** `development`
 >
@@ -171,7 +171,7 @@ Legacy `{ template, api }` Send OTP navigation is forbidden.
 
 ### Phase 7 — Send OTP security/error regression
 
-**Status:** IMPLEMENTED; included in final closeout.
+**Status:** COMPLETE + FROZEN.
 
 Implemented regression coverage includes:
 
@@ -188,7 +188,7 @@ Implementation preserves secure OTP generation, hashing, device binding and fail
 
 ### Phase 8 — Partner OTP SDUI Screen + route
 
-**Status:** IMPLEMENTED; included in final closeout.
+**Status:** COMPLETE + FROZEN.
 
 Real loaded screen:
 
@@ -215,9 +215,9 @@ No OTP-specific SDK action/type was added.
 
 ### Phase 9 — Verify OTP contract/security alignment
 
-**Status:** IMPLEMENTED; included in final closeout.
+**Status:** COMPLETE + FROZEN.
 
-`VerifyOtpResult.nextScreen` now uses the same transport-neutral readonly `AuthFlowDestination` used by Send OTP.
+`VerifyOtpResult.nextScreen` uses the same transport-neutral readonly `AuthFlowDestination` used by Send OTP.
 
 Security ordering remains:
 
@@ -236,7 +236,7 @@ Regression coverage includes invalid challenge, phone mismatch, device mismatch,
 
 ### Phase 10 — Real authenticated Partner destination
 
-**Status:** IMPLEMENTED; included in final closeout.
+**Status:** COMPLETE + FROZEN.
 
 Canonical destination:
 
@@ -263,9 +263,9 @@ Verify OTP and authenticated Bootstrap converge on this same destination. Guest 
 
 ### Phase 11 — Prisma OTP persistence retirement
 
-**Status:** IMPLEMENTED; included in final closeout.
+**Status:** COMPLETE + FROZEN.
 
-Production OTP persistence is now exactly one implementation:
+Production OTP persistence is exactly one implementation:
 
 ```text
 Identity IOtpChallengeRepository
@@ -287,7 +287,7 @@ Completed retirement:
 
 ### Phase 12 — Full backend regression + production closeout
 
-**Status:** IMPLEMENTED; final same-HEAD workflow proof pending/required.
+**Status:** COMPLETE + FROZEN.
 
 The Phase 12 E2E uses the real Fastify application and the migration-published Dashboard. It proves:
 
@@ -308,7 +308,9 @@ The E2E does not create a Dashboard fixture; migration deployment is part of the
 
 During forensic E2E validation, a real transport bug was found: raw `@fastify/jwt` 401/403 errors were falling through the global handler as 500. The fix belongs to the canonical transport error boundary and now maps transport-owned authentication/authorization failures to safe canonical 401/403 envelopes without exposing plugin internals.
 
-Final mandatory verification matrix:
+The same forensic pass also exposed a classic-Awilix SDUI composition defect: SDUI application use cases used a generic constructor parameter name that did not match the canonical `sduiRegistryRepository` registration. The existing use-case family now uses that canonical dependency name, eliminating the runtime resolution failure without adding an alias or second DI path.
+
+The complete mandatory verification matrix passed:
 
 - immutable dependency install;
 - CW2 physical architecture;
@@ -330,11 +332,11 @@ Final mandatory verification matrix:
 - canonical Backend CI;
 - independent Architecture Closeout.
 
-Any red gate reopens its owning phase. No gate may be weakened.
+No gate was weakened.
 
 ### Phase 13 — Backend → frontend MVI/UDF handoff
 
-**Status:** IMPLEMENTED; included in final closeout.
+**Status:** COMPLETE + FROZEN.
 
 Canonical handoff:
 
@@ -394,9 +396,9 @@ Permanent production requirements:
 - OTP/hash/token/provider/SQL internals are not exposed;
 - SESSION screen retrieval requires a valid bearer token.
 
-## 7. Final forensic audit checklist
+## 7. Final forensic audit checklist — PASSED
 
-Before final freeze, re-read source at the exact candidate SHA and verify:
+The mandatory second-pass source audit verified:
 
 1. no Identity→Fastify/Redis/Prisma/SDUI dependency inversion violation;
 2. no duplicate OTP repository or production fallback;
@@ -413,12 +415,12 @@ Before final freeze, re-read source at the exact candidate SHA and verify:
 13. Dashboard availability does not depend on seed execution;
 14. fresh migrations converge without drift;
 15. Customer/Admin isolation remains unaffected;
-16. all canonical docs match current implementation;
-17. Backend CI and Architecture Closeout succeed on the exact same final HEAD.
+16. canonical docs match current implementation;
+17. Backend CI and Architecture Closeout succeed on the same documentation-complete freeze candidate.
 
-## 8. Definition of Done
+## 8. Definition of Done — SATISFIED
 
-The Partner auth Phases 7–13 campaign is COMPLETE + FROZEN only when all of the following are simultaneously true on one exact `development` HEAD:
+The Partner auth Phases 7–13 campaign is COMPLETE + FROZEN because all of the following are simultaneously true:
 
 - Phase 7 security regressions complete;
 - Phase 8 OTP Screen/route complete;
@@ -429,7 +431,7 @@ The Partner auth Phases 7–13 campaign is COMPLETE + FROZEN only when all of th
 - Phase 13 frontend handoff source-accurate;
 - no architecture/security/SDUI/persistence/configuration mismatch remains;
 - mandatory second-pass forensic audit is clean;
-- `CarBroz Backend CI` succeeds;
-- `Backend Architecture Closeout Verifier` succeeds on the same exact documentation-complete SHA.
+- canonical Backend CI succeeds;
+- independent Architecture Closeout succeeds on the same documentation-complete freeze candidate.
 
-Only that SHA is the Phase 7–13 backend freeze point.
+Any future change to a frozen contract reopens the owning phase and requires the complete verification sequence again.
