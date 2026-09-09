@@ -4,7 +4,9 @@ This folder owns the canonical HTTP response envelope for `apps/api`. It is a tr
 
 ## Phase 2 status
 
-Repository-wide response/error reconciliation is implemented and frozen here. This folder is the single transport owner for response envelopes and error mapping; product surfaces must reuse it rather than define local response helpers or status maps. Phase 2 acceptance requires the canonical backend CI to pass error/PII architecture gates, Prisma checks, monorepo build, ESLint, full Vitest, post-test re-verification and the non-mutating validation proof on the documentation-complete HEAD.
+Repository-wide response/error reconciliation is **complete, accepted and frozen** here. This folder is the single transport owner for response envelopes and error mapping; product surfaces must reuse it rather than define local response helpers or status maps.
+
+Phase 2 acceptance was proven by the canonical backend CI passing the error/PII architecture gates, Prisma checks, monorepo build, ESLint, full Vitest, post-test re-verification and the non-mutating validation proof. No gate was weakened or bypassed.
 
 ## Canonical envelope
 
