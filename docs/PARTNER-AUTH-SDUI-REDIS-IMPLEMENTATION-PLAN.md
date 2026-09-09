@@ -1,6 +1,6 @@
 # Partner Authentication + SDUI + Redis Implementation Plan
 
-> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–4 complete and repository-verified; Phase 5 Login request alignment is next. Phase 4 Redis OTP persistence is frozen on the Constitution-compliant `platform/integrations` adapter boundary.
+> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–4 complete and repository-verified; Phase 5 Login request alignment is implemented and awaiting documentation-complete repository closeout. Phase 6 remains next only after Phase 5 closeout is green.
 >
 > **Branch:** `development`
 >
@@ -145,7 +145,7 @@ No `LoginContinueAction`, `OtpVerifyAction`, screen-specific `onSuccess`, second
 
 ## 6. Login → Send OTP input contract
 
-Target request payload:
+Phase 5 implemented request payload:
 
 ```json
 {
@@ -157,11 +157,13 @@ Target request payload:
 Ownership:
 
 ```text
-phoneNumber ← visible Login binding
-deviceId    ← runtime/application context
+phoneNumber ← visible Login binding `mobileNumber`
+deviceId    ← runtime/application context `deviceId`
 ```
 
-No fake Device ID input Element or Login-specific request mapper.
+No fake Device ID input Element or Login-specific request mapper is allowed. The existing shared `SendOtpSchema` remains the transport owner for resolved `{ phoneNumber, deviceId }` input.
+
+The detailed frozen Phase 5 contract is `sdui/PHASE-5-PARTNER-LOGIN-REQUEST-CONTRACT.md`.
 
 ---
 
@@ -477,16 +479,27 @@ Completed and repository-verified:
 - corrected the initial illegal domain→platform adapter placement instead of weakening CW gates;
 - passed canonical CI and the independent architecture closeout verifier on the same documentation-complete Phase 4 baseline before Phase 5.
 
-## Phase 5 — Login request alignment — NOT STARTED
+## Phase 5 — Login request alignment — IMPLEMENTED; CLOSEOUT PENDING
 
-Modify only existing Partner Login generic request body:
+Implemented only on the existing Partner Login generic request action:
 
 ```text
 phoneNumber ← $binding(mobileNumber)
 deviceId    ← $context(deviceId)
 ```
 
-No duplicate DTO/use case/action framework.
+Preserved unchanged:
+
+```text
+POST /api/v1/partner/auth/send_otp
+authentication = NONE
+validate = true
+responseMode = destination
+```
+
+No duplicate DTO, controller, use case, request mapper, action type, device field or navigation framework was introduced. `SendOtpSchema` remains the shared transport owner for `{ phoneNumber, deviceId }`. Focused verification is in `apps/api/src/surfaces/partner/screens/partner-login.screen.spec.ts`; the detailed frozen Phase 5 contract is `sdui/PHASE-5-PARTNER-LOGIN-REQUEST-CONTRACT.md`.
+
+Phase 5 may be marked COMPLETE only after the documentation-complete HEAD passes canonical CI and the independent architecture closeout verifier.
 
 ## Phase 6 — Send OTP canonical destination result — NOT STARTED
 
@@ -595,6 +608,8 @@ Exact names/locations follow existing package conventions discovered at the rele
 - loaded Screen rejects root duplicate template identity;
 - Destination schema strictness;
 - request references/response mode;
+- Partner Login request mapping resolves `phoneNumber` from `$binding(mobileNumber)` and `deviceId` from `$context(deviceId)`;
+- Partner Login HTTP body does not expose stale `mobileNumber` field or add a device input element;
 - destination/fetched-screen identity.
 
 ### Generic Redis/cache
