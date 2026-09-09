@@ -30,7 +30,7 @@ export class ScreenRegistry {
     return this;
   }
 
-  resolve(targetApp: SduiTargetApp, screenId: string): ScreenComposer {
+  get(targetApp: SduiTargetApp, screenId: string): ScreenComposer {
     const composer = this.composers.get(this.key(targetApp, screenId));
 
     if (!composer) {
