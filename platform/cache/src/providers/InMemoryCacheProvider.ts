@@ -1,16 +1,12 @@
-/** CacheProvider is an exported platform/cache contract/implementation; see the owning README for lifecycle and extension rules. */
-export interface CacheProvider {
-  initialize?(): Promise<void>;
-  shutdown?(): Promise<void>;
-  get<T>(key: string): Promise<T | null>;
-  set<T>(key: string, value: T, ttlSeconds?: number): Promise<void>;
-  delete(key: string): Promise<void>;
-  clear(): Promise<void>;
-}
+import type { ICacheProvider } from '../ports/ICacheProvider.js';
 
-/** InMemoryCacheProvider is an exported platform/cache contract/implementation; see the owning README for lifecycle and extension rules. */
-export class InMemoryCacheProvider implements CacheProvider {
-  private cache = new Map<string, { value: any; expiresAt?: number }>();
+/** Deterministic in-process cache used by tests and explicitly local scenarios only. */
+export class InMemoryCacheProvider implements ICacheProvider {
+  private readonly cache = new Map<string, { value: unknown; expiresAt?: number }>();
+
+  async health(): Promise<boolean> {
+    return true;
+  }
 
   async get<T>(key: string): Promise<T | null> {
     const entry = this.cache.get(key);
@@ -23,8 +19,11 @@ export class InMemoryCacheProvider implements CacheProvider {
   }
 
   async set<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
-    const entry: { value: any; expiresAt?: number } = { value };
-    if (ttlSeconds) {
+    const entry: { value: unknown; expiresAt?: number } = { value };
+    if (ttlSeconds !== undefined) {
+      if (!Number.isInteger(ttlSeconds) || ttlSeconds <= 0) {
+        throw new RangeError('ttlSeconds must be a positive integer when provided');
+      }
       entry.expiresAt = Date.now() + ttlSeconds * 1000;
     }
     this.cache.set(key, entry);
