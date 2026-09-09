@@ -1,6 +1,6 @@
 # Partner Authentication + SDUI + Redis Implementation Plan
 
-> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phase 1 complete; Phase 2 response/error reconciliation implemented and frozen; Phase 3 Redis infrastructure implemented and parity-reviewed; Phase 4 is the next implementation phase after canonical CI closeout.
+> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–4 complete and repository-verified; Phase 5 Login request alignment is next. Phase 4 Redis OTP persistence is frozen on the Constitution-compliant `platform/integrations` adapter boundary.
 >
 > **Branch:** `development`
 >
@@ -73,7 +73,7 @@ Nothing above may be replaced without an explicit architecture amendment.
 | OTP persistence port | `domains/identity` | Keep `IOtpChallengeRepository` |
 | Generic cache behavior | `platform/cache` | Domain-neutral only |
 | Concrete Redis client creation/options | `apps/api` composition root | Existing `ioredis`; runtime config only |
-| Redis OTP adapter | Identity infrastructure | Implements Identity port; owns OTP Redis keys/atomic persistence semantics |
+| Redis OTP adapter | `platform/integrations` | Technical adapter implementing the Identity-owned port; owns Redis key/serialization/atomic persistence mechanics |
 | HTTP auth validation | `apps/api/src/transport/auth/dto` | Transport boundary only |
 | HTTP auth controller | shared auth transport | Adapter only |
 | API response/error envelope | `ResponseHelper` + global handler | One response contract |
@@ -205,16 +205,14 @@ SendOtpUseCase / VerifyOtpUseCase
              ↓
 IOtpChallengeRepository              # Identity-owned port
              ↓
-RedisOtpChallengeRepository          # Identity infrastructure
+RedisOtpChallengeRepository          # platform/integrations technical adapter
              ↓
-platform/cache                       # generic Redis/cache behavior
-             ↓
-IRedisClient
+IRedisClient                          # platform/cache technical Redis port
              ↓
 concrete ioredis client from apps/api
 ```
 
-Identity application/domain must never import Redis vendor APIs, Fastify or environment configuration.
+Identity application/domain must never import Redis vendor APIs, Fastify, platform implementation packages or environment configuration. The Redis OTP adapter lives in `platform/integrations` because the Constitution forbids `domains/*` from importing platform packages; the adapter depends inward on the Identity public port.
 
 ### Phase 3 generic infrastructure boundary
 
@@ -267,15 +265,17 @@ The Identity adapter must preserve:
 - one-time consume;
 - no OTP leakage.
 
-Conceptual Identity-owned namespaces:
+Frozen Identity OTP Redis namespace/key design:
 
 ```text
-carbroz:identity:otp:v1:challenge:<challengeId>
-carbroz:identity:otp:v1:phone:<normalizedPhone>:latest
-carbroz:identity:otp:v1:rate:<normalizedPhone>:<window>
+carbroz:identity:otp:v1:seq
+carbroz:identity:otp:v1:challenge:<internalId>
+carbroz:identity:otp:v1:public:<publicId>
+carbroz:identity:otp:v1:phone:<encodedPhone>:latest
+carbroz:identity:otp:v1:rate:<encodedPhone>
 ```
 
-Exact key design is finalized in Phase 4 after mapping the current repository port semantics.
+The namespace is semantically Identity-owned; technical key construction, serialization and atomic scripts are implemented only by `platform/integrations/RedisOtpChallengeRepository`.
 
 ### Atomicity requirements
 
@@ -460,20 +460,22 @@ Validation defects found and fixed during parity/closeout:
 
 Phase 3 remains infrastructure-only; OTP business persistence begins in Phase 4.
 
-## Phase 4 — Redis OTP repository adapter — NOT STARTED
+## Phase 4 — Redis OTP repository adapter — COMPLETE
 
-Implement Identity infrastructure behind existing `IOtpChallengeRepository`:
+Completed and repository-verified:
 
-- challenge storage;
-- centralized versioned key helper;
-- TTLs;
-- latest challenge lookup;
-- rate window/count;
-- atomic failed attempts;
-- max-attempt invalidation;
-- exactly-once consume;
-- focused infrastructure/concurrency tests;
-- DI switch only after parity.
+- kept `IOtpChallengeRepository` as the single Identity-owned persistence port;
+- placed `RedisOtpChallengeRepository` under `platform/integrations`, not `domains/*`, to preserve the Constitution dependency boundary;
+- extended only the generic `IRedisClient` technical surface required by the adapter;
+- implemented versioned `carbroz:identity:otp:v1:` keys, opaque public IDs, numeric internal IDs and bounded TTLs;
+- implemented atomic create/rate-limit, failed-attempt, exactly-once consume and idempotent invalidation semantics;
+- preserved phone/device binding and OTP-hash-only persistence;
+- switched development/production DI to Redis while retaining Prisma only for deterministic test/legacy compatibility;
+- shared the same root `redisClient` singleton between `RedisCacheProvider` and OTP persistence;
+- prohibited dual write and Redis → Prisma/memory fallback;
+- added focused concurrency/corruption/failure/DI tests;
+- corrected the initial illegal domain→platform adapter placement instead of weakening CW gates;
+- passed canonical CI and the independent architecture closeout verifier on the same documentation-complete Phase 4 baseline before Phase 5.
 
 ## Phase 5 — Login request alignment — NOT STARTED
 
@@ -577,7 +579,8 @@ domains/configuration/application/*
 New files are allowed only when discovery proves absence of a canonical equivalent, including:
 
 ```text
-domains/identity/infrastructure/...RedisOtpChallengeRepository.ts
+platform/integrations/src/identity/RedisOtpChallengeRepository.ts
+platform/integrations/src/identity/RedisOtpChallengeRepository.spec.ts
 apps/api/src/surfaces/partner/screens/partner-otp.screen.ts
 ```
 

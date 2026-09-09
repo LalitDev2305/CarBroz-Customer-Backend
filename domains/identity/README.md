@@ -129,4 +129,4 @@ For the Partner Login → OTP → Verify OTP migration, the canonical phased imp
 
 `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`.
 
-Phase 4 implementation is present and must pass the documentation-complete canonical repository closeout before being marked formally complete.
+Phase 4 Redis OTP persistence is formally complete and repository-verified on the Constitution-compliant `platform/integrations` boundary. Phase 5 Login request alignment is the next authorized phase.
