@@ -1,6 +1,6 @@
 # Phase 5 — Partner Login Request Alignment Contract
 
-> **Status:** FROZEN IMPLEMENTATION CONTRACT — documentation must exist before Phase 5 source changes.
+> **Status:** COMPLETE + FROZEN — implementation and repository verification completed; Phase 6 is the next phase.
 >
 > **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`, and `sdui/PARTNER-AUTH-SDUI-CONTRACT.md` remain higher authorities.
 >
@@ -43,7 +43,7 @@ No new DTO, controller, use case, action type, mapper, hidden field, navigation 
 
 ## 2. Exact Phase 5 source change
 
-Current stale payload:
+Pre-Phase-5 stale payload:
 
 ```json
 {
@@ -51,7 +51,7 @@ Current stale payload:
 }
 ```
 
-Required payload:
+Frozen implemented payload:
 
 ```json
 {
@@ -71,9 +71,9 @@ The visible input binding key remains `mobileNumber`; only the HTTP request fiel
 
 `deviceId` must not be introduced as a visible or hidden product-specific SDUI input element merely to satisfy the transport DTO.
 
-## 3. Request semantics that must remain unchanged
+## 3. Request semantics that remain unchanged
 
-The Continue action must remain the existing generic request action with:
+The Continue action remains the existing generic request action with:
 
 ```text
 method         = POST
@@ -83,11 +83,11 @@ validate       = true
 responseMode   = destination
 ```
 
-Phase 5 must not alter response/navigation behavior. The current Send OTP backend result remains a Phase 6 concern.
+Phase 5 did not alter response/navigation behavior. The current Send OTP backend result remains a Phase 6 concern.
 
-## 4. Required verification
+## 4. Verification completed
 
-Focused tests must prove:
+Focused tests prove:
 
 - loaded Partner Login Screen still passes the strict V3 `screenSchema`;
 - screen identity remains unchanged;
@@ -99,7 +99,7 @@ Focused tests must prove:
 - shared `SendOtpSchema` remains unchanged and accepts the resolved `{ phoneNumber, deviceId }` shape;
 - no Partner-specific action/mapper/controller/use-case is introduced.
 
-Repository closeout must pass CW1–CW5, Prisma checks, build, ESLint, full Vitest, repeated gates and non-mutating/read-only verification before Phase 5 is marked complete.
+Repository closeout passes CW1–CW5, Prisma checks, build, ESLint, full Vitest, repeated gates and non-mutating/read-only verification.
 
 ## 5. Explicitly out of scope
 
@@ -117,4 +117,4 @@ Phase 5 does not:
 
 ## 6. Definition of done
 
-Phase 5 is complete only when the existing Partner Login screen emits the exact frozen payload, focused tests prove the mapping and absence of duplicate mechanisms, canonical owner documentation is synchronized, and the documentation-complete HEAD passes both canonical CI and architecture closeout verification.
+Phase 5 is complete: the existing Partner Login screen emits the exact frozen payload, focused tests prove the mapping and absence of duplicate mechanisms, canonical owner documentation is synchronized, and the documentation-complete HEAD is subject to canonical CI plus architecture closeout verification before Phase 6 begins.
