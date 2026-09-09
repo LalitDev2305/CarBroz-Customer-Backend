@@ -1,55 +1,62 @@
 # Phase 4 — Redis OTP Repository Contract
 
-> **Status:** FROZEN IMPLEMENTATION CONTRACT — implementation must follow this document before Phase 4 can be marked complete.
+> **Status:** FROZEN IMPLEMENTATION CONTRACT — higher-authority dependency-boundary correction applied after the first Phase 4 Constitution run.
 >
-> **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`, and `domains/identity/README.md` remain higher-level authorities.
+> **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`, and `domains/identity/README.md` remain higher-level authorities. If this document conflicts with a Constitution gate, the Constitution wins and this document is corrected before implementation continues.
 >
-> **Scope:** Replace the development/production runtime persistence implementation behind the existing Identity-owned `IOtpChallengeRepository` with Redis while preserving existing Send OTP / Verify OTP business semantics. This phase does **not** change Login SDUI request mapping, Send OTP destination output, OTP screen composition, Verify OTP destination output, Dashboard routing, or Prisma schema retirement.
+> **Scope:** Replace development/production runtime persistence behind the existing Identity-owned `IOtpChallengeRepository` with Redis while preserving existing Send OTP / Verify OTP business semantics. This phase does **not** change Login SDUI request mapping, Send OTP destination output, OTP screen composition, Verify OTP destination output, Dashboard routing, or Prisma schema retirement.
 
 ---
 
 ## 1. Phase 4 objectives
 
-Phase 4 must deliver all of the following in one coherent migration:
+Phase 4 must deliver all of the following:
 
 1. keep `IOtpChallengeRepository` as the single Identity persistence port;
-2. add one Identity infrastructure adapter, `RedisOtpChallengeRepository`;
-3. reuse the single Redis technical client owned by the API composition root;
-4. preserve opaque public challenge IDs and the existing numeric internal repository ID contract;
-5. persist only OTP hashes, never plaintext OTP values;
-6. preserve latest-challenge lookup, verification lookup, rate-window counting, failed attempts, invalidation and exactly-once consumption;
-7. make Redis state transitions atomic where repository semantics require them;
-8. enforce a race-safe create/rate-limit guard in Redis so concurrent send requests cannot bypass the configured challenge limit;
-9. switch development/production DI to Redis only after adapter parity tests are present;
-10. retain Prisma OTP persistence only as deterministic test/legacy infrastructure until the later explicit retirement phase;
-11. fail closed on Redis failure with no runtime Redis → memory or Redis → Prisma fallback;
-12. complete full repository build/lint/Vitest/architecture/security re-verification before Phase 4 is marked complete.
+2. add one technical Redis adapter, `RedisOtpChallengeRepository`, outside `domains/*` because the Backend Constitution forbids domains from importing platform packages;
+3. place the adapter under `platform/integrations`, the canonical workspace for technical adapters that implement inward-facing domain ports;
+4. reuse the single Redis technical client owned by the API composition root;
+5. preserve opaque public challenge IDs and the existing numeric internal repository ID contract;
+6. persist only OTP hashes, never plaintext OTP values;
+7. preserve latest-challenge lookup, verification lookup, rate-window counting, failed attempts, invalidation and exactly-once consumption;
+8. make Redis state transitions atomic where repository semantics require them;
+9. enforce a race-safe create/rate-limit guard in Redis so concurrent sends cannot bypass the configured challenge limit;
+10. switch development/production DI to Redis only after adapter parity tests are present;
+11. retain Prisma OTP persistence only as deterministic test/legacy infrastructure until the later explicit retirement phase;
+12. fail closed on Redis failure with no runtime Redis → memory or Redis → Prisma fallback;
+13. complete full repository build/lint/Vitest/architecture/security re-verification before Phase 4 is marked complete.
 
 ---
 
 ## 2. Ownership and dependency direction
 
-The dependency direction is frozen as:
+The corrected dependency direction is frozen as:
 
 ```text
-SendOtpUseCase / VerifyOtpUseCase
+Identity domain/application
+  SendOtpUseCase / VerifyOtpUseCase
              ↓
-IOtpChallengeRepository                  # Identity domain-owned port
+  IOtpChallengeRepository                  # Identity-owned inward-facing port
+             ↑
+platform/integrations
+  RedisOtpChallengeRepository              # technical adapter implementing the Identity port
              ↓
-RedisOtpChallengeRepository              # Identity infrastructure adapter
+  IRedisClient                             # platform/cache domain-neutral technical Redis port
              ↓
-IRedisClient                             # platform/cache technical port
-             ↓
-single concrete ioredis client           # apps/api composition root
+apps/api composition root
+  one concrete ioredis client singleton
 ```
+
+This correction is mandatory because Constitution §§33–36 forbid every `domains/*` source file — including a domain's infrastructure directory — from importing a `@carbroz/platform-*` implementation package. The adapter therefore cannot physically live in `domains/identity/infrastructure` if it needs `IRedisClient`.
 
 Ownership rules:
 
-- Identity domain/application owns OTP policy and repository semantics.
-- Identity infrastructure owns OTP-specific Redis keys, serialization and atomic scripts.
-- `platform/cache` owns only domain-neutral Redis/cache technical contracts.
-- `apps/api` owns `REDIS_URL`, concrete `ioredis` construction, connection/retry policy and runtime DI composition.
-- No Identity use case may import `ioredis`, environment variables, Fastify, Prisma clients or cache-provider implementation classes.
+- `domains/identity` owns OTP business policy, `OtpChallenge`, and `IOtpChallengeRepository` semantics.
+- `platform/integrations` owns the concrete Redis OTP technical adapter, Identity-specific Redis keys/serialization and atomic Redis scripts.
+- `platform/cache` owns only the domain-neutral Redis technical client/cache contracts and generic cache behavior.
+- `apps/api` owns `REDIS_URL`, concrete `ioredis` construction/vendor options, singleton DI composition, startup/shutdown and readiness.
+- The Identity public boundary exports the port/domain policy, never the concrete Redis adapter.
+- No Identity source imports `@carbroz/platform-cache`, `ioredis`, environment variables or Fastify.
 - No second Redis connection manager, cache abstraction or per-request Redis client may be created.
 
 ---
@@ -60,6 +67,7 @@ The canonical `IOtpChallengeRepository` behavior remains authoritative:
 
 ```text
 create(input)
+tryCreateWithinRateLimit(input, guard)
 findForVerification(publicId, phoneNumber, deviceId)
 findLatestByPhone(phoneNumber)
 countCreatedSince(phoneNumber, since)
@@ -68,7 +76,9 @@ tryConsume(id, now, maxAttempts)
 invalidate(id, now)
 ```
 
-The existing `OtpChallenge` domain shape remains:
+`tryCreateWithinRateLimit()` is the smallest Phase 4 extension required to make the already-frozen concurrent rate-limit invariant enforceable at persistence commit time. It does not create a second repository abstraction.
+
+The existing `OtpChallenge` shape remains:
 
 ```text
 id                 numeric internal persistence identity
@@ -85,13 +95,11 @@ createdAt
 updatedAt
 ```
 
-Phase 4 may **extend** the existing port only where required to preserve the already-frozen race-safety requirement. It must not replace the port or create a competing OTP repository abstraction.
-
 ---
 
 ## 4. Redis key ownership and versioning
 
-All OTP keys are Identity-owned and versioned. The adapter must centralize key construction; call sites must not concatenate OTP Redis keys ad hoc.
+All OTP keys implement Identity persistence semantics but are physically owned by the technical adapter. Key construction must be centralized inside that adapter.
 
 Canonical namespace:
 
@@ -111,17 +119,17 @@ carbroz:identity:otp:v1:rate:<encodedPhone>
 
 Rules:
 
-- phone-derived key material must be deterministically encoded/sanitized by one helper;
-- raw OTP values must never appear in a key or value;
-- `publicId` remains opaque and non-sequential;
-- the numeric `id` remains internal and is allocated through Redis atomically;
-- key format changes require a namespace version change or explicit migration.
+- phone-derived key material is deterministically encoded by one helper;
+- raw OTP values never appear in a key or value;
+- `publicId` remains opaque/non-sequential;
+- numeric `id` remains internal and is allocated atomically in Redis;
+- key-format changes require a namespace version change or explicit migration.
 
 ---
 
 ## 5. Stored challenge record
 
-The challenge value must contain only repository/domain state needed to reconstruct `OtpChallenge`:
+The Redis challenge value contains only state needed to reconstruct `OtpChallenge`:
 
 ```text
 id
@@ -140,93 +148,78 @@ updatedAt
 
 Serialization rules:
 
-- dates are stored as ISO-8601 UTC strings;
-- reads reconstruct real `Date` objects;
-- malformed/corrupt challenge JSON fails closed rather than being silently accepted;
+- dates are ISO-8601 UTC strings and reconstructed as `Date` on read;
+- malformed/corrupt JSON fails closed;
 - OTP plaintext is never serialized;
-- no provider response payload, token, request body or unrelated PII is stored with the challenge.
+- no provider payload, token, request body or unrelated PII is stored with the challenge.
 
 ---
 
 ## 6. TTL and retention policy
 
-Challenge/index TTL is derived from the challenge's actual `expiresAt` and must be positive when written.
+Challenge/public/latest TTL derives from the challenge's real `expiresAt` and must be positive.
 
 Required behavior:
 
-- challenge record expires automatically after its useful verification lifetime;
-- public-ID index expires with the challenge;
-- latest-by-phone index expires with the challenge and therefore cannot outlive the record it references;
-- rate-window state has an independent sliding retention suitable for `AUTH_SECURITY_POLICY.otp.rateLimitWindowMs`;
-- consumed/invalidated records remain available until normal challenge expiry so replay/terminal-state checks remain deterministic during the challenge lifetime;
-- Phase 4 does not introduce permanent OTP Redis records.
+- challenge records automatically expire after verification usefulness ends;
+- public-ID and latest-by-phone indexes cannot outlive their challenge;
+- rate-window state has independent bounded retention derived from the application-owned rate window;
+- consumed/invalidated records remain only until normal challenge expiry so replay/terminal-state checks stay deterministic within the challenge lifetime;
+- no permanent OTP records are introduced.
 
 ---
 
 ## 7. Rate-limit and create atomicity
 
-The existing Send OTP flow checks recent challenge count before creation. Redis persistence must additionally protect the create boundary against concurrent sends so two requests that both observe the same pre-create count cannot overrun the configured maximum.
+`SendOtpUseCase` may keep its existing cooldown/rate pre-checks for fast failure, but the final persistence decision must be atomic.
 
-The canonical solution is **reuse + extension**, not a new service:
+`tryCreateWithinRateLimit()` must atomically:
 
-- keep `IOtpChallengeRepository`;
-- extend it with the smallest atomic create-with-limit capability needed by `SendOtpUseCase`;
-- pass the application-owned rate-window boundary and maximum into the repository call;
-- Redis performs stale rate-entry cleanup, count check, internal-ID allocation, challenge write, public index write, latest index write and rate-member insertion atomically;
-- if the maximum has already been reached at commit time, the repository returns a non-created result and `SendOtpUseCase` preserves the existing `429 / OTP_RATE_LIMITED` application behavior.
+1. remove stale rate-window entries;
+2. count current entries;
+3. reject if the configured maximum is already reached;
+4. allocate numeric internal ID;
+5. create the challenge record;
+6. create public-ID and latest-by-phone indexes;
+7. add the rate-window member;
+8. apply bounded TTLs.
 
-No distributed lock is authorized because one Redis atomic script/transaction can protect this invariant.
+If creation is rejected at commit time, the use case preserves `429 / OTP_RATE_LIMITED`.
 
-The existing `countCreatedSince()` method remains available because it is part of the canonical port and useful for parity/diagnostics, but the final create decision must be made atomically at persistence time.
+No distributed lock is authorized; one Redis atomic script/transaction protects this invariant.
 
 ---
 
 ## 8. Atomic state transitions
 
-The following operations must be race-safe and single-winner where required:
-
 ### Failed attempt
 
-`recordFailedAttempt(id, maxAttempts)` must atomically:
-
-1. load the challenge;
-2. reject missing/consumed/invalidated challenges;
-3. reject challenges already at or above `maxAttempts`;
-4. increment `attemptCount` once;
-5. update `updatedAt`;
-6. persist and return the updated challenge.
-
-Concurrent failed verifications must not lose increments.
+`recordFailedAttempt(id, maxAttempts)` atomically rejects missing/consumed/invalidated/max-attempt challenges, increments once, updates `updatedAt`, preserves record TTL and returns the updated challenge.
 
 ### Consume
 
-`tryConsume(id, now, maxAttempts)` must atomically succeed only when:
-
-```text
-challenge exists
-consumedAt == null
-invalidatedAt == null
-expiresAt > now
-attemptCount < maxAttempts
-```
-
-Exactly one concurrent valid verification may transition `consumedAt` from null to `now`. All competing consume attempts must return false.
+`tryConsume(id, now, maxAttempts)` atomically succeeds only when the challenge exists, is active, unexpired and below max attempts. Exactly one concurrent verification can transition `consumedAt`; replay/competitors return false.
 
 ### Invalidate
 
-`invalidate(id, now)` must atomically set `invalidatedAt` only while the challenge is neither consumed nor already invalidated. Repeated invalidation is idempotent.
+`invalidate(id, now)` atomically sets `invalidatedAt` only while active. Repeated invalidation is idempotent. Invalidated challenges no longer count toward the existing `countCreatedSince()` semantics, matching the Prisma adapter's `invalidatedAt: null` filter.
+
+Redis Lua JSON-null handling must use Redis `cjson.null`; comparing decoded JSON null fields with Lua `nil` is incorrect.
 
 ---
 
 ## 9. Redis technical surface
 
-`IRedisClient` remains the one domain-neutral technical Redis port. Phase 4 may extend it only with the minimum generic Redis primitives needed by the Identity adapter, specifically atomic script execution and sorted-set counting required for rate-window semantics.
+`IRedisClient` remains one domain-neutral technical Redis port. Phase 4 may extend it only with generic primitives needed by technical adapters:
 
-It must not gain OTP-specific method names.
+```text
+zcount(...)
+eval(...)
+```
 
-The concrete `ioredis` client remains created once in `apps/api`. The existing generic `RedisCacheProvider` and the new Identity Redis adapter must share that same client singleton in development/production.
+No OTP-specific method names belong in `IRedisClient`.
 
-`NODE_ENV=test` remains deterministic and does not silently change development/production behavior. Prisma OTP persistence may remain the test composition until the later explicit retirement phase; Redis adapter behavior itself must be covered by focused deterministic tests using a controlled fake technical client/script harness.
+The concrete `ioredis` client is created exactly once by `apps/api`. `RedisCacheProvider` and `RedisOtpChallengeRepository` share that same `redisClient` singleton in development/production.
 
 ---
 
@@ -245,34 +238,22 @@ NODE_ENV=test
   otpChallengeRepository -> PrismaOtpChallengeRepository
 
 development / production
-  otpChallengeRepository -> RedisOtpChallengeRepository
+  otpChallengeRepository -> platform/integrations RedisOtpChallengeRepository
 ```
 
 Rules:
 
 - no dual write;
-- no runtime fallback to Prisma after Redis failure;
-- no memory fallback;
+- no runtime fallback to Prisma or memory;
 - one repository implementation is selected for a runtime;
-- Redis adapter registration must use the same root Redis client singleton as `RedisCacheProvider`;
-- existing Prisma adapter/table remain untouched for now and are retired only in Phase 11 after production parity.
+- Redis adapter and cache provider share one root `redisClient` singleton;
+- existing Prisma adapter/table stay untouched until Phase 11 explicitly retires them.
 
 ---
 
 ## 11. Failure semantics
 
-Redis infrastructure failures propagate as failures and OTP auth fails closed.
-
-Required behavior:
-
-- create failure does not return a usable challenge;
-- read failure does not silently return a fabricated challenge;
-- failed-attempt/consume/invalidate failures are not ignored;
-- no fallback to in-memory or Prisma is attempted in development/production;
-- no OTP plaintext or Redis credentials are logged;
-- client-facing mapping remains owned by the existing Phase 2 global error contract.
-
-Rate-limit rejection is a business result, not an infrastructure outage, and must preserve `OTP_RATE_LIMITED` / HTTP 429 behavior.
+Redis infrastructure failures propagate and OTP auth fails closed. Create/read/mutation failures are never fabricated as successful/missing state merely to continue. Rate-limit rejection is a business result, not an infrastructure outage, and preserves `OTP_RATE_LIMITED / 429`. Client-facing mapping remains owned by the Phase 2 global error contract. OTP values and Redis credentials are never logged.
 
 ---
 
@@ -280,72 +261,56 @@ Rate-limit rejection is a business result, not an infrastructure outage, and mus
 
 Focused adapter tests must prove:
 
-- challenge create/read round trip;
-- opaque public-ID lookup + phone/device binding;
+- create/read round trip;
+- opaque public-ID + phone/device binding;
 - latest-by-phone lookup;
 - rate-window count;
-- atomic create rejects the request that would exceed max challenges;
-- concurrent/competing create attempts cannot exceed the configured maximum;
-- positive TTL applied to challenge and indexes;
-- expired/missing index behavior fails closed;
-- invalid/corrupt challenge serialization fails closed;
-- failed-attempt increment is atomic and bounded;
-- max-attempt state prevents further mutation;
-- invalidation is idempotent and terminal;
-- exactly one consume succeeds under concurrent attempts;
-- consume rejects expired, invalidated, consumed or max-attempt challenges;
-- no plaintext OTP is stored/logged;
-- key namespace is exactly `carbroz:identity:otp:v1:`;
-- Redis failures are propagated and do not trigger fallback.
+- atomic create maximum and concurrent create safety;
+- positive challenge/index TTLs;
+- missing/expired index behavior;
+- corrupt serialization fails closed;
+- failed attempts are atomic/bounded;
+- invalidation is idempotent/terminal and removed from active rate count;
+- exactly one concurrent consume succeeds;
+- consume rejects expired/invalidated/consumed/max-attempt challenges;
+- no plaintext OTP persistence;
+- exact `carbroz:identity:otp:v1:` namespace;
+- Redis failures propagate without fallback.
 
-DI tests must prove:
+DI/boundary tests must prove:
 
-- development/production composition selects `RedisOtpChallengeRepository`;
-- test composition remains deterministic;
-- `RedisCacheProvider` and `RedisOtpChallengeRepository` share one Redis client singleton;
-- no second Redis client is created per request.
+- domain source has no platform import;
+- development/production selects Redis adapter;
+- test composition remains deterministic on Prisma;
+- cache + OTP adapter share one `redisClient` singleton;
+- no per-request/second Redis client exists;
+- concrete adapter is not exported through the Identity public boundary.
 
-Repository-wide closeout must then pass:
-
-- architecture/Constitution gates;
-- CW5 error/runtime-config/PII gates;
-- Prisma validate/generate/migrations;
-- monorepo build;
-- ESLint;
-- full Vitest;
-- repeated post-test architecture/security gates;
-- non-mutating/read-only verification proof.
+Repository-wide closeout must pass all Constitution/CW gates, Prisma checks, build, ESLint, full Vitest, repeated gates and non-mutating/read-only proof.
 
 ---
 
 ## 13. Explicitly out of scope
 
-Phase 4 must not implement:
-
-- Partner Login request-body correction (Phase 5);
-- canonical Send OTP destination result (Phase 6);
-- Partner OTP SDUI screen/route (Phase 8);
-- Verify OTP destination migration (Phase 9);
-- authenticated Partner Dashboard destination (Phase 10);
-- Prisma OTP table/adapter deletion (Phase 11);
-- frontend changes;
-- new Redis/cache abstraction;
-- distributed locks;
-- second response envelope/error mapper.
+Phase 4 does not implement Partner Login request correction (Phase 5), canonical Send OTP destination (Phase 6), OTP screen (Phase 8), Verify OTP destination migration (Phase 9), Dashboard routing (Phase 10), Prisma OTP table/adapter deletion (Phase 11), frontend changes, a second Redis/cache abstraction, distributed locks, or another response/error framework.
 
 ---
 
 ## 14. Phase 4 definition of done
 
-Phase 4 is complete only when all are true:
+Phase 4 is complete only when:
 
-1. this contract remains consistent with higher-authority documentation;
-2. `RedisOtpChallengeRepository` implements the canonical Identity port;
-3. create/rate-limit, failed-attempt, consume and invalidate operations satisfy the atomicity rules above;
-4. development/production DI uses Redis and test composition remains deterministic;
-5. Redis cache and Identity OTP adapter share one technical Redis client singleton;
-6. no dual write/fallback is present;
-7. focused Redis OTP and DI tests pass;
-8. canonical owner documentation is updated to the implemented state;
+1. this contract matches all higher-authority architecture rules;
+2. `RedisOtpChallengeRepository` implements the Identity-owned port from `platform/integrations` without a domain → platform dependency;
+3. atomic create/rate-limit, failed-attempt, consume and invalidate semantics are proven;
+4. dev/prod DI uses Redis while test remains deterministic;
+5. cache and OTP adapter share one technical Redis singleton;
+6. no dual write/fallback exists;
+7. focused adapter/DI/boundary tests pass;
+8. owner docs match implementation;
 9. full canonical CI/closeout is green on the documentation-complete HEAD;
-10. Phase 5 remains untouched until Phase 4 is formally closed.
+10. Phase 5 remains untouched.
+
+### Phase 4 verification note
+
+The first lock-synchronized Phase 4 CI correctly rejected the initial physical adapter placement because `domains/identity/infrastructure/RedisOtpChallengeRepository` imported `@carbroz/platform-cache`. This was a documentation/placement defect against the higher-authority Constitution, not a reason to weaken the gate. The corrected contract above moves the technical adapter to `platform/integrations` while preserving Identity ownership of the port and all previously frozen runtime semantics.
