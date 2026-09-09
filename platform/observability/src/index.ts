@@ -24,12 +24,6 @@ const SENSITIVE_KEY_NAMES = new Set([
   'body', 'payload', 'rawbody', 'requestbody', 'responsebody',
 ]);
 
-/**
- * Framework/DI internals must never be traversed by the logging sanitizer. Some of these values are
- * lazy proxies (for example Awilix request scopes/cradles), and enumerating them can resolve arbitrary
- * application registrations as a side effect. They are implementation details and provide no useful
- * production log context, so replace them before recursion reaches the underlying runtime object.
- */
 const NON_LOGGABLE_RUNTIME_KEY_NAMES = new Set([
   'discope',
   'dicontainer',
@@ -98,11 +92,7 @@ function redactSensitiveMetadataInternal(value: unknown, ancestors: WeakSet<obje
   }
 }
 
-/**
- * Recursively strips sensitive values before they reach Pino. This complements Pino path redaction,
- * protects nested metadata whose depth is not known when the logger is configured, and safely
- * replaces circular references instead of recursively traversing them forever.
- */
+/** Recursively strips sensitive values before they reach structured/readable log output. */
 export function redactSensitiveMetadata(value: unknown): unknown {
   return redactSensitiveMetadataInternal(value, new WeakSet<object>());
 }
@@ -144,21 +134,17 @@ export interface FlowLogFields {
   errorCode?: string;
 }
 
-/**
- * Emits structured flow events that make request → surface → application → response interaction traceable
- * without ever accepting arbitrary request/response payloads.
- */
+/** Emits structured request/application flow metadata without accepting arbitrary payloads. */
 export function logFlow(logger: { info: (obj: object, msg?: string) => void; error: (obj: object, msg?: string) => void }, event: string, fields: FlowLogFields): void {
   const method = fields.outcome === 'failed' ? logger.error.bind(logger) : logger.info.bind(logger);
   method({ event, ...fields }, event);
 }
 
+/** Development/Staging request diagnostics are metadata-only by contract. */
 export interface HttpRequestDiagnostic {
   correlationId: string;
   method: string;
   url: string;
-  headers: unknown;
-  body?: unknown;
 }
 
 export interface HttpResponseDiagnostic {
@@ -180,7 +166,7 @@ export interface HttpErrorDiagnostic {
   body?: unknown;
 }
 
-/** Development/Staging-only readable request block. Production callers must pass enabled=false. */
+/** Development/Staging-only readable request block. Request headers/bodies are never accepted. */
 export function emitHttpRequestDiagnostic(enabled: boolean, input: HttpRequestDiagnostic): void {
   if (!enabled) return;
   emitDiagnosticBlock(
@@ -190,10 +176,6 @@ export function emitHttpRequestDiagnostic(enabled: boolean, input: HttpRequestDi
       `TRACE    ${input.correlationId}`,
       `METHOD   ${input.method}`,
       `URL      ${sanitizeDiagnosticUrl(input.url)}`,
-      'HEADERS',
-      indent(formatDiagnosticValue(input.headers)),
-      'BODY',
-      indent(input.body === undefined ? '<none>' : formatDiagnosticValue(input.body)),
     ],
   );
 }
@@ -258,39 +240,31 @@ function formatDiagnosticValue(value: unknown): string {
 }
 
 function sanitizeDiagnosticUrl(url: string): string {
-  const queryIndex = url.indexOf('?');
-  if (queryIndex < 0) return url;
-  const base = url.slice(0, queryIndex);
-  const query = url.slice(queryIndex + 1);
-  const sanitized = query.split('&').map((entry) => {
-    const delimiter = entry.indexOf('=');
-    if (delimiter < 0) return entry;
-    const key = entry.slice(0, delimiter);
-    const value = entry.slice(delimiter + 1);
-    return `${key}=${SENSITIVE_KEY_NAMES.has(normalizedKey(key)) ? REDACTED : value}`;
-  }).join('&');
-  return `${base}?${sanitized}`;
+  const [path, query] = url.split('?', 2);
+  if (!query) return path ?? '/';
+  const params = new URLSearchParams(query);
+  for (const key of [...params.keys()]) {
+    if (SENSITIVE_KEY_NAMES.has(normalizedKey(key))) params.set(key, REDACTED);
+  }
+  const sanitized = params.toString();
+  return sanitized ? `${path ?? '/'}?${sanitized}` : path ?? '/';
 }
 
 function indent(value: string): string {
   return value.split('\n').map((line) => `  ${line}`).join('\n');
 }
 
-function emitDiagnosticBlock(color: string, title: string, lines: string[], stderr = false): void {
-  const rendered = [
-    `${color}╭─ ${title}`,
-    ...lines.flatMap((line) => line.split('\n')).map((line) => `│ ${line}`),
-    `╰────────────────────────────────────────────────────────${ANSI.reset}`,
-  ].join('\n') + '\n';
-  if (stderr) process.stderr.write(rendered); else process.stdout.write(rendered);
-}
-
 const ANSI = {
-  reset: '\u001B[0m',
-  red: '\u001B[31m',
-  green: '\u001B[32m',
-  magenta: '\u001B[35m',
-  cyan: '\u001B[36m',
+  reset: '\u001b[0m',
+  cyan: '\u001b[36m',
+  green: '\u001b[32m',
+  red: '\u001b[31m',
+  magenta: '\u001b[35m',
 } as const;
 
-export * from './adapters/LoggerProvider.js';
+function emitDiagnosticBlock(color: string, title: string, lines: string[], error = false): void {
+  const writer = error ? process.stderr : process.stdout;
+  writer.write(`${color}╭─ ${title}${ANSI.reset}\n`);
+  for (const line of lines) writer.write(`${color}│${ANSI.reset} ${line}\n`);
+  writer.write(`${color}╰────────────────────────────────────────────────────────${ANSI.reset}\n`);
+}
