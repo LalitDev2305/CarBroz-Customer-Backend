@@ -1,6 +1,10 @@
 import type { PrismaClient } from '@prisma/client';
 import type { OtpChallenge } from '../../domain/OtpChallenge.js';
-import type { CreateOtpChallengeInput, IOtpChallengeRepository } from '../../domain/repositories/IOtpChallengeRepository.js';
+import type {
+  CreateOtpChallengeInput,
+  IOtpChallengeRepository,
+  OtpChallengeRateLimitGuard,
+} from '../../domain/repositories/IOtpChallengeRepository.js';
 
 /** Prisma persistence adapter for Identity-owned OTP challenges. */
 export class PrismaOtpChallengeRepository implements IOtpChallengeRepository {
@@ -17,6 +21,35 @@ export class PrismaOtpChallengeRepository implements IOtpChallengeRepository {
       },
     });
     return this.mapToDomain(challenge);
+  }
+
+  async tryCreateWithinRateLimit(
+    input: CreateOtpChallengeInput,
+    guard: OtpChallengeRateLimitGuard,
+  ): Promise<OtpChallenge | null> {
+    return this.prisma.$transaction(async (tx) => {
+      const recentChallenges = await tx.otpChallenge.count({
+        where: {
+          phoneNumber: input.phoneNumber,
+          createdAt: { gte: guard.windowStart },
+          invalidatedAt: null,
+        },
+      });
+      if (recentChallenges >= guard.maxChallenges) return null;
+
+      const challenge = await tx.otpChallenge.create({
+        data: {
+          phoneNumber: input.phoneNumber,
+          deviceId: input.deviceId,
+          otpHash: input.otpHash,
+          maxAttempts: input.maxAttempts,
+          expiresAt: input.expiresAt,
+          createdAt: guard.now,
+          updatedAt: guard.now,
+        },
+      });
+      return this.mapToDomain(challenge);
+    });
   }
 
   async findForVerification(publicId: string, phoneNumber: string, deviceId: string): Promise<OtpChallenge | null> {
