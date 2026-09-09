@@ -267,33 +267,37 @@ export class RefreshTokenUseCase implements IUseCase<RefreshTokenInput, RefreshT
       replacementExpiresAt: new Date(now.getTime() + AUTH_SECURITY_POLICY.refresh.ttlMs),
       now,
     });
-    if (!rotation) throw refreshFailure();
+    if (rotation.status !== 'ROTATED' || !rotation.session || !rotation.session.user) throw refreshFailure();
 
     return {
-      user: rotation.user,
+      user: rotation.session.user,
       session: rotation.session,
       refreshToken: replacementToken,
     };
   }
 }
 
-/** Input for logging out a specific device session. */
+/** Input for revoking either the current session or every session for a user. */
 export interface LogoutInput {
-  userId: number;
-  deviceId: string;
+  sessionId?: number;
+  logoutAll?: boolean;
+  userId?: number;
 }
 
-/** Revokes the current device session and all refresh-token families owned by it. */
+/** Revokes refresh-token families and their owning session(s) through the canonical token repository. */
 export class LogoutUseCase implements IUseCase<LogoutInput, void> {
-  constructor(
-    private readonly userSessionRepository: IUserSessionRepository,
-    private readonly refreshTokenRepository: IRefreshTokenRepository,
-  ) {}
+  constructor(private readonly refreshTokenRepository: IRefreshTokenRepository) {}
 
   async execute(input: LogoutInput): Promise<void> {
-    const session = await this.userSessionRepository.findActiveByUserAndDevice(input.userId, input.deviceId);
-    if (!session) return;
-    await this.refreshTokenRepository.revokeBySession(session.id, systemClock.now());
-    await this.userSessionRepository.revoke(session.id, systemClock.now());
+    const now = systemClock.now();
+    if (input.logoutAll) {
+      if (input.userId !== undefined) {
+        await this.refreshTokenRepository.revokeAllForUser(input.userId, now);
+      }
+      return;
+    }
+    if (input.sessionId !== undefined) {
+      await this.refreshTokenRepository.revokeSession(input.sessionId, now);
+    }
   }
 }
