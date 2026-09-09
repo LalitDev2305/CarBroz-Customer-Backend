@@ -4,7 +4,6 @@ import type { FastifyInstance } from 'fastify';
 import type { IOtpDeliveryProvider } from '@carbroz/domain-identity';
 import { buildApp } from '../../apps/api/src/bootstrap/app.js';
 import { getContainer } from '../../apps/api/src/bootstrap/container/index.js';
-import { createPartnerDashboardScreen } from '../../apps/api/src/surfaces/partner/screens/partner-dashboard.screen.js';
 
 const bootstrapHeaders = {
   'x-carbroz-platform': 'ANDROID',
@@ -15,7 +14,6 @@ const phoneNumber = `9198${randomInt(10_000_000, 99_999_999)}`;
 const deviceId = `phase12-device-${randomInt(100_000, 999_999)}`;
 let app: FastifyInstance;
 let deliveredOtp = '';
-let createdUserId: number | undefined;
 
 const deliveryProvider: IOtpDeliveryProvider = {
   sendOtp: async ({ otp }) => {
@@ -35,45 +33,25 @@ const destination = (value: unknown) => value as {
 
 beforeAll(async () => {
   app = await buildApp();
-  const container = getContainer();
-  container.register('smsProvider', { resolve: () => deliveryProvider });
-
-  const prisma = container.resolve('prismaProvider').getClient();
-  const dashboard = createPartnerDashboardScreen();
-  await prisma.sduiScreen.deleteMany({ where: { screenId: dashboard.screenId, targetApp: 'PARTNER' } });
-  await prisma.sduiScreen.create({
-    data: {
-      screenId: dashboard.screenId,
-      targetApp: 'PARTNER',
-      versionNumber: 1,
-      status: 'PUBLISHED',
-      layoutJson: dashboard,
-      lockVersion: 1,
-      publishedAt: new Date(),
-      publishedBy: 'phase12-e2e',
-      changeDescription: 'Phase 12 end-to-end authenticated destination fixture',
-    },
-  });
+  getContainer().register('smsProvider', { resolve: () => deliveryProvider });
 });
 
 afterAll(async () => {
   const container = getContainer();
   const prisma = container.resolve('prismaProvider').getClient();
   const existing = await prisma.user.findUnique({ where: { phoneNumber } });
-  createdUserId = existing?.id;
-  if (createdUserId) {
-    const sessions = await prisma.userSession.findMany({ where: { userId: createdUserId }, select: { id: true } });
+  if (existing) {
+    const sessions = await prisma.userSession.findMany({ where: { userId: existing.id }, select: { id: true } });
     const sessionIds = sessions.map(({ id }) => id);
     if (sessionIds.length) await prisma.refreshToken.deleteMany({ where: { sessionId: { in: sessionIds } } });
-    await prisma.userSession.deleteMany({ where: { userId: createdUserId } });
-    await prisma.user.delete({ where: { id: createdUserId } });
+    await prisma.userSession.deleteMany({ where: { userId: existing.id } });
+    await prisma.user.delete({ where: { id: existing.id } });
   }
-  await prisma.sduiScreen.deleteMany({ where: { screenId: 'partner_dashboard', targetApp: 'PARTNER' } });
   await app.close();
 });
 
 describe('Phase 12 Partner auth → SDUI end-to-end contract', () => {
-  it('completes guest bootstrap through authenticated dashboard without navigation drift or OTP leakage', async () => {
+  it('completes guest bootstrap through the migration-published authenticated dashboard without navigation drift or OTP leakage', async () => {
     const guestBootstrapResponse = await app.inject({
       method: 'GET',
       url: '/api/v1/partner/config/bootstrap',
