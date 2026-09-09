@@ -21,7 +21,8 @@ describe('ResponseHelper', () => {
     [422, 'UNPROCESSABLE_ENTITY'],
     [429, 'TOO_MANY_REQUESTS'],
     [500, 'INTERNAL_SERVER_ERROR'],
-  ] as const)('maps HTTP %s to %s', (status, code) => {
+    [503, 'SERVICE_UNAVAILABLE'],
+  ] as const)('maps HTTP %s to default code %s', (status, code) => {
     expect(ResponseHelper.error(status, 'Request failed.', 'trace-2')).toEqual({
       status,
       code,
@@ -29,5 +30,29 @@ describe('ResponseHelper', () => {
       data: null,
       traceId: 'trace-2',
     });
+  });
+
+  it('preserves a more-specific stable application/domain error code', () => {
+    expect(ResponseHelper.error(409, 'Slot unavailable.', 'trace-3', 'BOOKING_SLOT_CONFLICT')).toEqual({
+      status: 409,
+      code: 'BOOKING_SLOT_CONFLICT',
+      message: 'Slot unavailable.',
+      data: null,
+      traceId: 'trace-3',
+    });
+  });
+
+  it('keeps the frozen creation contract on HTTP/body status 200', () => {
+    expect(ResponseHelper.created({ id: 'new-resource' }, 'Created.', 'trace-4')).toEqual({
+      status: 200,
+      code: 'SUCCESS',
+      message: 'Created.',
+      data: { id: 'new-resource' },
+      traceId: 'trace-4',
+    });
+  });
+
+  it('returns no body for the 204 helper contract', () => {
+    expect(ResponseHelper.noContent()).toBeUndefined();
   });
 });
