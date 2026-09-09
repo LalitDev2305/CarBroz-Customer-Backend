@@ -19,7 +19,7 @@ Identity owns the business/application rules for:
 - refresh-token issuance, hashing, rotation and revocation;
 - authentication provider ports.
 
-Identity application/domain code MUST remain transport- and infrastructure-neutral. It must not import Fastify, Redis clients, Prisma clients, environment variables, HTTP DTOs or SDUI implementation classes.
+Identity application/domain code MUST remain transport- and infrastructure-neutral. It must not import Fastify, Redis clients, platform implementation packages, Prisma clients, environment variables, HTTP DTOs or SDUI implementation classes.
 
 ## OTP persistence
 
@@ -31,23 +31,25 @@ domains/identity/domain/repositories/IOtpChallengeRepository.ts
 
 Phase 4 implements Redis as the development/production runtime persistence for OTP challenge state while preserving that Identity-owned port.
 
-Dependency direction is:
+The Constitution-compliant dependency direction is:
 
 ```text
 SendOtpUseCase / VerifyOtpUseCase
              ↓
-IOtpChallengeRepository
+IOtpChallengeRepository               # domains/identity ownership
+             ↑
+RedisOtpChallengeRepository           # platform/integrations technical adapter
              ↓
-RedisOtpChallengeRepository          # Identity infrastructure
-             ↓
-IRedisClient                         # platform/cache technical port
+IRedisClient                          # platform/cache technical port
              ↓
 single Redis client supplied by apps/api
 ```
 
+The domain does not import `platform/cache` or `platform/integrations`. The technical adapter depends inward on the Identity public port, which preserves Dependency Inversion and the permanent CW1-CW5 Constitution boundary.
+
 The Redis adapter preserves challenge creation, opaque public challenge IDs, numeric internal repository IDs, latest-by-phone lookup, verification lookup with phone/device binding, rate-window counting, bounded failed attempts, invalidation and exactly-once consumption. OTP plaintext is never persisted; only `otpHash` is stored.
 
-The Redis key namespace is versioned and Identity-owned:
+The Redis key namespace is versioned and Identity-owned semantically even though its technical serialization is implemented by `platform/integrations`:
 
 ```text
 carbroz:identity:otp:v1:seq
@@ -85,7 +87,7 @@ development / production
 
 Tests remain deterministic. Development/production have no Redis → Prisma or Redis → memory fallback and no dual write. The Prisma adapter/table remain only for deterministic test/legacy compatibility until Phase 11 explicitly retires them.
 
-`platform/cache` owns the domain-neutral Redis/cache provider behavior and `IRedisClient`. The executable `apps/api` composition root owns `REDIS_URL`, concrete `ioredis` construction/vendor options, the single `redisClient` singleton, Fastify lifecycle and readiness. `RedisCacheProvider` and `RedisOtpChallengeRepository` share that same technical Redis client singleton in development/production.
+`platform/cache` owns the domain-neutral Redis/cache provider behavior and `IRedisClient`. `platform/integrations` owns the Redis OTP technical adapter implementing the Identity port. The executable `apps/api` composition root owns `REDIS_URL`, concrete `ioredis` construction/vendor options, the single `redisClient` singleton, Fastify lifecycle and readiness. `RedisCacheProvider` and `RedisOtpChallengeRepository` share that same technical Redis client singleton in development/production.
 
 Do not call Redis directly from Identity use cases.
 
@@ -111,7 +113,8 @@ The actual Partner Login/OTP screen compositions remain owned by the Partner API
 
 - Reuse existing Identity ports/use cases before creating abstractions.
 - Keep one responsibility per class/module.
-- Infrastructure implements Identity-owned ports.
+- Technical infrastructure implements Identity-owned ports from outside the domain workspace.
+- Identity packages do not import platform implementation packages.
 - No duplicate authentication flow for Partner.
 - No plaintext OTP persistence or logging.
 - Redis failures fail closed; no silent in-memory/Prisma production fallback.
