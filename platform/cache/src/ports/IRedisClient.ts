@@ -1,5 +1,5 @@
 /**
- * Minimal Redis client surface required by platform/cache and domain infrastructure adapters.
+ * Minimal Redis client surface required by platform/cache and Constitution-compliant technical adapters.
  *
  * The concrete vendor client is supplied by the executable composition root.
  * This keeps platform/cache independently testable without exposing vendor types

@@ -63,6 +63,12 @@ class FakeAtomicRedisClient implements IRedisClient {
   }
   keys(): string[] { return [...this.values.keys(), ...this.sortedSets.keys()]; }
   storedValues(): string[] { return [...this.values.values()].map((entry) => entry.value); }
+  ttlMs(key: string): number | null {
+    const valueExpiry = this.values.get(key)?.expiresAt;
+    if (valueExpiry !== undefined) return valueExpiry - Date.now();
+    const sortedSetExpiry = this.sortedSetExpiry.get(key);
+    return sortedSetExpiry === undefined ? null : sortedSetExpiry - Date.now();
+  }
   overwrite(key: string, value: string): void {
     const current = this.values.get(key);
     if (!current) throw new Error(`missing key ${key}`);
@@ -163,7 +169,21 @@ describe('RedisOtpChallengeRepository', () => {
     await expect(repository.findLatestByPhone('+919876543210')).resolves.toEqual(created);
     await expect(repository.countCreatedSince('+919876543210', guard(now).windowStart)).resolves.toBe(1);
     expect(client.keys().every((key) => key.startsWith(NAMESPACE))).toBe(true);
+    const persistedKeys = client.keys();
+    expect(persistedKeys.some((key) => key.startsWith(`${NAMESPACE}challenge:`))).toBe(true);
+    expect(persistedKeys).toContain(`${NAMESPACE}public:${created!.publicId}`);
+    expect(persistedKeys.some((key) => key.startsWith(`${NAMESPACE}phone:`) && key.endsWith(':latest'))).toBe(true);
+    for (const key of persistedKeys.filter((key) => !key.endsWith(':seq'))) {
+      expect(client.ttlMs(key)).not.toBeNull();
+      expect(client.ttlMs(key)!).toBeGreaterThan(0);
+    }
     expect(client.storedValues().join('|')).not.toContain('123456');
+
+    await client.del(`${NAMESPACE}public:${created!.publicId}`);
+    await expect(repository.findForVerification(created!.publicId, '+919876543210', 'device-1')).resolves.toBeNull();
+    const encodedPhone = Buffer.from('+919876543210', 'utf8').toString('base64url');
+    await client.del(`${NAMESPACE}phone:${encodedPhone}:latest`);
+    await expect(repository.findLatestByPhone('+919876543210')).resolves.toBeNull();
   });
 
   it('atomically rejects concurrent creates above the rate-window maximum', async () => {
@@ -181,10 +201,13 @@ describe('RedisOtpChallengeRepository', () => {
     const challenge = (await repository.tryCreateWithinRateLimit(createInput(now), guard(now)))!;
     const updates = await Promise.all(Array.from({ length: 7 }, () => repository.recordFailedAttempt(challenge.id, 5)));
     expect(updates.filter(Boolean)).toHaveLength(5);
+    await expect(repository.tryConsume(challenge.id, new Date(now.getTime() + 1000), 5)).resolves.toBe(false);
     const secondNow = new Date('2026-09-09T09:33:00.000Z');
     const second = (await repository.tryCreateWithinRateLimit(createInput(secondNow, '+912222222222'), guard(secondNow)))!;
+    await expect(repository.tryConsume(second.id, new Date(second.expiresAt.getTime() + 1), 5)).resolves.toBe(false);
     const consumed = await Promise.all(Array.from({ length: 5 }, () => repository.tryConsume(second.id, new Date(secondNow.getTime() + 1000), 5)));
     expect(consumed.filter(Boolean)).toHaveLength(1);
+    await expect(repository.tryConsume(second.id, new Date(secondNow.getTime() + 2000), 5)).resolves.toBe(false);
   });
 
   it('invalidates idempotently and propagates corrupt/Redis failures without fallback', async () => {
@@ -194,6 +217,7 @@ describe('RedisOtpChallengeRepository', () => {
     const challenge = (await repository.tryCreateWithinRateLimit(createInput(now, '+913333333333'), guard(now)))!;
     await repository.invalidate(challenge.id, new Date(now.getTime() + 1000));
     await repository.invalidate(challenge.id, new Date(now.getTime() + 2000));
+    await expect(repository.countCreatedSince(challenge.phoneNumber, guard(now).windowStart)).resolves.toBe(0);
     await expect(repository.tryConsume(challenge.id, new Date(now.getTime() + 3000), 5)).resolves.toBe(false);
     client.overwrite(`${NAMESPACE}challenge:${challenge.id}`, '{bad-json');
     await expect(repository.findLatestByPhone(challenge.phoneNumber)).rejects.toThrow('corrupt');
