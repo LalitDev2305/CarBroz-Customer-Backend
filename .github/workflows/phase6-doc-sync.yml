@@ -1,0 +1,82 @@
+name: Phase 6 Documentation Sync
+
+on:
+  push:
+    branches: [development]
+    paths:
+      - '.github/workflows/phase6-doc-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: development
+          fetch-depth: 0
+      - name: Synchronize Phase 6 documentation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_exact(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f'Expected text not found in {path}: {old[:120]!r}')
+              p.write_text(text.replace(old, new))
+
+          replace_exact(
+              'docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md',
+              '> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–5 complete and repository-verified; Phase 6 Send OTP canonical destination result is next. Phase 5 Partner Login request alignment is frozen on the existing generic request/reference architecture.',
+              '> **Status:** APPROVED IMPLEMENTATION CONTRACT — Phases 0–5 complete and repository-verified; Phase 6 Send OTP canonical destination implementation is complete and final same-HEAD repository/architecture verification is pending. Phase 7+ production behavior remains untouched.'
+          )
+          replace_exact(
+              'docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md',
+              'Concrete OTP destination identity is frozen only when the OTP screen exists.',
+              'Phase 6 now freezes the concrete OTP destination identity as `partner_otp` / `tpl_partner_otp_v1` / `form_template` at `GET /api/v1/partner/screen/auth_otp` with `authentication = NONE`. Phase 8 must implement that exact reserved screen/route identity; it must not silently invent different values.'
+          )
+          replace_exact(
+              'docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md',
+              '## Phase 6 — Send OTP canonical destination result — NOT STARTED\n\nReplace legacy `{template, api}` result with canonical Destination semantics while preserving all security/business rules. Concrete OTP destination is finalized with the actual OTP screen.',
+              '''## Phase 6 — Send OTP canonical destination result — IMPLEMENTED / FINAL VERIFICATION PENDING
+
+Completed implementation scope:
+
+- froze the detailed contract before production changes in `domains/identity/PHASE-6-SEND-OTP-DESTINATION-CONTRACT.md` and this Partner-auth SDUI contract;
+- kept Identity transport-neutral with the smallest readonly `AuthFlowDestination` value shape and no dependency on `sdui/ui-sdk`, Configuration or API transport;
+- replaced only `SendOtpResult.nextScreen` legacy `{ template, api }` metadata;
+- reserved the exact destination `partner_otp` / `tpl_partner_otp_v1` / `form_template` / `GET /api/v1/partner/screen/auth_otp` / `NONE` for Phase 8;
+- preserved Send OTP challenge generation, hashing, cooldown, atomic rate limiting, Redis/Prisma composition, provider delivery, invalidation, error codes and envelope behavior;
+- added real-use-case Identity regression proof for exact destination fields, no legacy fields and no OTP leakage;
+- extended the existing Partner HTTP route regression to prove the canonical response envelope and `dynamicDestinationSchema` compatibility at the legal API/SDUI boundary;
+- corrected the boundary test to structurally narrow Fastify's broad JSON union rather than weakening TypeScript safety;
+- intentionally left Verify OTP navigation, OTP screen/route creation and Dashboard routing for later phases.
+
+Phase 6 becomes COMPLETE + FROZEN only after both canonical Backend CI and independent Architecture Closeout succeed on the same final documentation-complete `development` HEAD.'''
+          )
+          replace_exact(
+              'sdui/PARTNER-AUTH-SDUI-CONTRACT.md',
+              '> **Status:** FROZEN for the Partner Login → OTP backend implementation. Phase 5 Partner Login request alignment is COMPLETE + repository-verified; Phase 6 Send OTP canonical destination contract is FROZEN BEFORE IMPLEMENTATION.',
+              '> **Status:** FROZEN for the Partner Login → OTP backend implementation. Phase 5 Partner Login request alignment is COMPLETE + repository-verified; Phase 6 Send OTP canonical destination implementation is complete and final same-HEAD verification is pending.'
+          )
+          replace_exact(
+              'sdui/PARTNER-AUTH-SDUI-CONTRACT.md',
+              '4. reserve and implement canonical Send OTP destination result — Phase 6 CONTRACT FROZEN / IMPLEMENTATION NEXT;',
+              '4. reserve and implement canonical Send OTP destination result — Phase 6 IMPLEMENTED / FINAL VERIFICATION PENDING;'
+          )
+          replace_exact(
+              'domains/identity/PHASE-6-SEND-OTP-DESTINATION-CONTRACT.md',
+              '> **Status:** FROZEN BEFORE IMPLEMENTATION',
+              '> **Status:** IMPLEMENTED — FINAL SAME-HEAD VERIFICATION PENDING'
+          )
+          PY
+          rm .github/workflows/phase6-doc-sync.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md sdui/PARTNER-AUTH-SDUI-CONTRACT.md domains/identity/PHASE-6-SEND-OTP-DESTINATION-CONTRACT.md .github/workflows/phase6-doc-sync.yml
+          git commit -m 'docs(auth): synchronize Phase 6 implementation state'
+          git push origin development
