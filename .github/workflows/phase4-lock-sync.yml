@@ -1,0 +1,29 @@
+name: Phase4 lock sync
+on:
+  push:
+    branches: [development]
+    paths:
+      - '.github/workflows/phase4-lock-sync.yml'
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: development
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: corepack prepare pnpm@11.9.0 --activate
+      - run: pnpm install --lockfile-only
+      - name: Commit synchronized lockfile and remove temporary workflow
+        run: |
+          rm .github/workflows/phase4-lock-sync.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pnpm-lock.yaml .github/workflows/phase4-lock-sync.yml
+          git commit -m 'chore(lockfile): synchronize Phase 4 ownership move'
+          git push origin development
