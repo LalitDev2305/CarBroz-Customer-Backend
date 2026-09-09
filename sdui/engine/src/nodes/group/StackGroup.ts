@@ -14,6 +14,7 @@ export type StackGroupProperties = z.infer<typeof stackGroupPropertiesSchema>;
 export const StackGroupDefinition: NodeDefinition<StackGroupProperties> = {
   type: STACK_GROUP,
   level: 'group',
+  defaults: { orientation: 'vertical' },
   properties: stackGroupPropertiesSchema,
   children: 'elements',
 };
