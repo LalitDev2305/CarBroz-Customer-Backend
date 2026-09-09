@@ -1,6 +1,5 @@
 import { randomInt } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { asValue } from 'awilix';
 import type { FastifyInstance } from 'fastify';
 import type { IOtpDeliveryProvider } from '@carbroz/domain-identity';
 import { buildApp } from '../../apps/api/src/bootstrap/app.js';
@@ -37,7 +36,7 @@ const destination = (value: unknown) => value as {
 beforeAll(async () => {
   app = await buildApp();
   const container = getContainer();
-  container.register('smsProvider', asValue(deliveryProvider));
+  container.register('smsProvider', { resolve: () => deliveryProvider });
 
   const prisma = container.resolve('prismaProvider').getClient();
   const dashboard = buildPartnerDashboardScreen();
