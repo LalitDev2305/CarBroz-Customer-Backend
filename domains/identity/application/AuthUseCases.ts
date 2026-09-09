@@ -17,6 +17,16 @@ import { AUTH_SECURITY_POLICY } from './AuthSecurityPolicy.js';
 const otpFailure = () => new UnauthorizedError('Invalid or expired OTP challenge');
 const refreshFailure = () => new UnauthorizedError('Invalid or expired refresh token');
 
+/** Transport-neutral pre-fetch destination returned by Identity auth flows. */
+export interface AuthFlowDestination {
+  readonly screenId: string;
+  readonly templateId: string;
+  readonly templateType: string;
+  readonly endpoint: string;
+  readonly method: 'GET';
+  readonly authentication: 'NONE' | 'SESSION';
+}
+
 /** Input for beginning the phone-number OTP flow. */
 export interface SendOtpInput {
   phoneNumber: string;
@@ -29,10 +39,7 @@ export interface SendOtpResult {
   challengeId: string;
   expiresInSeconds: number;
   isNewUser: boolean;
-  nextScreen: {
-    template: string;
-    api: string;
-  };
+  nextScreen: AuthFlowDestination;
 }
 
 /** Starts a persisted, rate-limited, provider-delivered OTP challenge. */
@@ -99,8 +106,12 @@ export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResult> {
       expiresInSeconds: Math.floor(AUTH_SECURITY_POLICY.otp.ttlMs / 1000),
       isNewUser: !user,
       nextScreen: {
-        template: 'form_template',
-        api: 'auth/auth_otp',
+        screenId: 'partner_otp',
+        templateId: 'tpl_partner_otp_v1',
+        templateType: 'form_template',
+        endpoint: '/api/v1/partner/screen/auth_otp',
+        method: 'GET',
+        authentication: 'NONE',
       },
     };
   }
