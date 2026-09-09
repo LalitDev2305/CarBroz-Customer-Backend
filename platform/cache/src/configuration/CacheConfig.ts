@@ -1,11 +1,10 @@
-/** Canonical Redis cache configuration consumed by platform/cache. */
+/**
+ * Domain-neutral behavior configuration consumed by RedisCacheProvider.
+ *
+ * Redis endpoint, credentials, TLS and connection/retry policy belong to the
+ * executable composition root that creates the concrete vendor client.
+ */
 export interface RedisCacheConfig {
-  url?: string;
-  host?: string;
-  port?: number;
-  password?: string;
   keyPrefix?: string;
   defaultTtlSeconds?: number;
-  connectTimeoutMs?: number;
-  maxRetriesPerRequest?: number;
 }
