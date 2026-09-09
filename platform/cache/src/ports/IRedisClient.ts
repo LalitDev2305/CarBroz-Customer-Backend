@@ -1,9 +1,9 @@
 /**
- * Minimal Redis client surface required by platform/cache.
+ * Minimal Redis client surface required by platform/cache and domain infrastructure adapters.
  *
  * The concrete vendor client is supplied by the executable composition root.
  * This keeps platform/cache independently testable without exposing vendor types
- * through domain/application layers.
+ * through domain/application layers. New methods must remain domain-neutral.
  */
 export interface IRedisClient {
   readonly status: string;
@@ -21,4 +21,6 @@ export interface IRedisClient {
     countToken: 'COUNT',
     count: number,
   ): Promise<[string, string[]]>;
+  zcount(key: string, min: string | number, max: string | number): Promise<number>;
+  eval(script: string, numberOfKeys: number, ...args: string[]): Promise<unknown>;
 }
