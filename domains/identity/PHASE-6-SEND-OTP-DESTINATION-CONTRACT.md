@@ -1,6 +1,6 @@
 # Phase 6 — Send OTP Canonical Destination Contract
 
-> **Status:** FROZEN BEFORE IMPLEMENTATION
+> **Status:** COMPLETE + FROZEN
 >
 > **Phase:** 6 — Send OTP canonical destination result
 >
@@ -26,7 +26,7 @@ phoneNumber ← $binding(mobileNumber)
 deviceId    ← $context(deviceId)
 ```
 
-The remaining incompatibility is the successful `SendOtpUseCase` result. It still returns the legacy shape:
+The remaining incompatibility was the successful `SendOtpUseCase` result. It previously returned the legacy shape:
 
 ```json
 {
@@ -37,7 +37,7 @@ The remaining incompatibility is the successful `SendOtpUseCase` result. It stil
 }
 ```
 
-That shape cannot satisfy the already-frozen `dynamicDestinationSchema`, which requires:
+That shape could not satisfy the already-frozen `dynamicDestinationSchema`, which requires:
 
 ```text
 screenId
@@ -56,7 +56,7 @@ Phase 6 removes only this contract mismatch.
 
 ### KEEP
 
-The following are already canonical and must not be replaced:
+The following are canonical and were not replaced:
 
 - `SendOtpUseCase` orchestration and all security/business behavior;
 - `SendOtpInput { phoneNumber, deviceId }`;
@@ -76,7 +76,7 @@ The following are already canonical and must not be replaced:
 
 ### MODIFY
 
-Only the Send OTP success result contract is modified:
+Only the Send OTP success result contract was modified:
 
 ```text
 legacy nextScreen { template, api }
@@ -84,11 +84,11 @@ legacy nextScreen { template, api }
 canonical destination-compatible nextScreen
 ```
 
-Focused tests that currently assert the old result are updated to assert the new frozen destination.
+Focused tests that asserted the old result were updated to assert the frozen destination.
 
 ### CREATE
 
-One smallest Identity application value contract is allowed only because no neutral lower-level Destination type exists that Identity may legally import.
+One smallest Identity application value contract was allowed because no neutral lower-level Destination type exists that Identity may legally import.
 
 It is **not** a new navigation framework and **not** a replacement for `dynamicDestinationSchema`.
 
@@ -110,7 +110,7 @@ Those remain in their later phases.
 
 ## 3. Dependency and ownership rule
 
-Identity must remain transport-neutral and SDUI-package-independent.
+Identity remains transport-neutral and SDUI-package-independent.
 
 Forbidden dependency direction:
 
@@ -173,7 +173,7 @@ Phase 8 is not allowed to silently choose different values. If later source evid
 
 ## 5. Frozen Send OTP success result
 
-After successful challenge persistence and successful provider delivery, `SendOtpUseCase.execute()` must return:
+After successful challenge persistence and successful provider delivery, `SendOtpUseCase.execute()` returns:
 
 ```json
 {
@@ -204,7 +204,7 @@ The outer API response remains owned by `ResponseHelper`:
 }
 ```
 
-Phase 6 must not introduce a second envelope or controller mapping.
+Phase 6 did not introduce a second envelope or controller mapping.
 
 ---
 
@@ -243,7 +243,7 @@ Runtime schema validation remains at the SDUI/client boundary using the existing
 
 The destination migration is a result-contract change only.
 
-All of these remain exactly preserved:
+All of these remain preserved:
 
 1. OTP is generated cryptographically by the existing security provider.
 2. Only the OTP hash is persisted.
@@ -290,7 +290,7 @@ sendOtpUseCase.execute(input)
 ResponseHelper.success(result)
 ```
 
-No Partner-specific send-OTP controller, mapper, DTO, response class, or navigation mapper may be introduced.
+No Partner-specific send-OTP controller, mapper, DTO, response class, or navigation mapper was introduced.
 
 The Phase 5 route remains:
 
@@ -302,9 +302,9 @@ POST /api/v1/partner/auth/send_otp
 
 ## 10. SDUI compatibility proof required in Phase 6 tests
 
-Focused verification must prove the returned `nextScreen` is accepted by the existing canonical `dynamicDestinationSchema` without importing that schema into Identity production code.
+Focused verification proves the returned `nextScreen` is accepted by the existing canonical `dynamicDestinationSchema` without importing that schema into Identity production code.
 
-The boundary test may live in API/SDUI test code where both contracts can legally be observed.
+The boundary test lives in API test code where both contracts can legally be observed.
 
 Required assertions:
 
@@ -327,7 +327,7 @@ dynamicDestinationSchema.parse(nextScreen) succeeds
 
 ## 11. Regression coverage required
 
-Phase 6 must add/update tests proving:
+Phase 6 verification proves:
 
 - Send OTP success preserves message/challengeId/TTL/isNewUser;
 - legacy `nextScreen.template` is gone;
@@ -335,9 +335,9 @@ Phase 6 must add/update tests proving:
 - new destination has exactly the six canonical fields;
 - destination is strict-schema compatible;
 - no OTP value is exposed;
-- existing rate-limit/cooldown/delivery failure tests remain green;
+- existing rate-limit/cooldown/delivery failure behavior remains green through the canonical suite;
 - Phase 5 route-level regression remains green;
-- Verify OTP behavior is unchanged in this phase.
+- Verify OTP behavior remains unchanged in this phase.
 
 ---
 
@@ -369,11 +369,11 @@ Until Phase 8, Phase 6 reserves the destination contract but does not create the
 
 ---
 
-## 13. Definition of Done
+## 13. Definition of Done — SATISFIED
 
-Phase 6 is COMPLETE only when all are true:
+Phase 6 is COMPLETE + FROZEN because all Phase 6 conditions have been satisfied and are required to remain regression-protected:
 
-- this document was frozen before production implementation;
+- this document was frozen before production implementation and is now closed after implementation verification;
 - `SendOtpResult` no longer contains legacy `{ template, api }` metadata;
 - `SendOtpUseCase` returns the exact reserved canonical destination;
 - Identity has no dependency on `sdui/ui-sdk`, Configuration, Fastify, Prisma, Redis vendor APIs, or API transport;
@@ -385,7 +385,8 @@ Phase 6 is COMPLETE only when all are true:
 - full Vitest passes;
 - CW1–CW5 gates pass before and after the test/build sequence;
 - non-mutating/read-only closeout proof passes;
-- both canonical CI and independent Architecture Closeout succeed on the same final `development` HEAD;
+- canonical Backend CI and independent Architecture Closeout succeeded together on the verified Phase 6 implementation candidate;
+- the documentation-complete freeze HEAD must also pass those same two workflows before the repository-level Phase 6 freeze is considered final;
 - Phase 7+ production behavior remains untouched.
 
-Until those conditions are proven, Phase 6 status remains **IMPLEMENTATION / VERIFICATION PENDING**, not COMPLETE.
+Any future change that violates these frozen conditions reopens Phase 6 and must pass the same verification gates again.
