@@ -37,41 +37,41 @@ export interface RegistryNodeCommandInput {
 
 /** CreateSduiComponentUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CreateSduiComponentUseCase implements IUseCase<RegistryNodeCommandInput, SduiComponentEntity> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: RegistryNodeCommandInput): Promise<SduiComponentEntity> {
     assertAdmin(input.context);
-    return this.repository.createComponent(input.data);
+    return this.sduiRegistryRepository.createComponent(input.data);
   }
 }
 
 /** CreateSduiSectionUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CreateSduiSectionUseCase implements IUseCase<RegistryNodeCommandInput, SduiSectionEntity> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: RegistryNodeCommandInput): Promise<SduiSectionEntity> {
     assertAdmin(input.context);
-    return this.repository.createSection(input.data);
+    return this.sduiRegistryRepository.createSection(input.data);
   }
 }
 
 /** CreateSduiGroupUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CreateSduiGroupUseCase implements IUseCase<RegistryNodeCommandInput, SduiGroupEntity> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: RegistryNodeCommandInput): Promise<SduiGroupEntity> {
     assertAdmin(input.context);
-    return this.repository.createGroup(input.data);
+    return this.sduiRegistryRepository.createGroup(input.data);
   }
 }
 
 /** CreateSduiElementUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CreateSduiElementUseCase implements IUseCase<RegistryNodeCommandInput, SduiElementEntity> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: RegistryNodeCommandInput): Promise<SduiElementEntity> {
     assertAdmin(input.context);
-    return this.repository.createElement(input.data);
+    return this.sduiRegistryRepository.createElement(input.data);
   }
 }
 
@@ -79,11 +79,11 @@ export class CreateSduiElementUseCase implements IUseCase<RegistryNodeCommandInp
 export interface CreateSduiDraftInput { context: ExecutionContext; data: CreateDraftInput; }
 /** CreateSduiDraftUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CreateSduiDraftUseCase implements IUseCase<CreateSduiDraftInput, SduiScreenEntity> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: CreateSduiDraftInput): Promise<SduiScreenEntity> {
     assertAdmin(input.context);
-    return this.repository.createDraft(input.data);
+    return this.sduiRegistryRepository.createDraft(input.data);
   }
 }
 
@@ -91,11 +91,11 @@ export class CreateSduiDraftUseCase implements IUseCase<CreateSduiDraftInput, Sd
 export interface UpdateSduiDraftInput { context: ExecutionContext; data: UpdateDraftInput; }
 /** UpdateSduiDraftUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class UpdateSduiDraftUseCase implements IUseCase<UpdateSduiDraftInput, SduiScreenEntity> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: UpdateSduiDraftInput): Promise<SduiScreenEntity> {
     assertAdmin(input.context);
-    return this.repository.updateDraft(input.data);
+    return this.sduiRegistryRepository.updateDraft(input.data);
   }
 }
 
@@ -105,12 +105,12 @@ export interface PublishSduiVersionRequest { screenId: string; targetApp?: SduiT
 export interface PublishSduiVersionInput { context: ExecutionContext; data: PublishSduiVersionRequest; }
 /** PublishSduiVersionUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class PublishSduiVersionUseCase implements IUseCase<PublishSduiVersionInput, SduiScreenEntity> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: PublishSduiVersionInput): Promise<SduiScreenEntity> {
     const publishedBy = publisherIdentity(input.context);
     const { screenId, targetApp = 'CUSTOMER', versionNumber } = input.data;
-    return this.repository.publishVersion(screenId, targetApp, versionNumber, publishedBy);
+    return this.sduiRegistryRepository.publishVersion(screenId, targetApp, versionNumber, publishedBy);
   }
 }
 
@@ -120,12 +120,12 @@ export interface ArchiveSduiVersionRequest { screenId: string; targetApp?: SduiT
 export interface ArchiveSduiVersionInput { context: ExecutionContext; data: ArchiveSduiVersionRequest; }
 /** ArchiveSduiVersionUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class ArchiveSduiVersionUseCase implements IUseCase<ArchiveSduiVersionInput, SduiScreenEntity> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: ArchiveSduiVersionInput): Promise<SduiScreenEntity> {
     assertAdmin(input.context);
     const { screenId, targetApp = 'CUSTOMER', versionNumber } = input.data;
-    return this.repository.archiveVersion(screenId, targetApp, versionNumber);
+    return this.sduiRegistryRepository.archiveVersion(screenId, targetApp, versionNumber);
   }
 }
 
@@ -135,12 +135,12 @@ export interface RollbackSduiVersionRequest { screenId: string; targetApp?: Sdui
 export interface RollbackSduiVersionInput { context: ExecutionContext; data: RollbackSduiVersionRequest; }
 /** RollbackSduiVersionUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class RollbackSduiVersionUseCase implements IUseCase<RollbackSduiVersionInput, SduiScreenEntity> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: RollbackSduiVersionInput): Promise<SduiScreenEntity> {
     const publishedBy = publisherIdentity(input.context);
     const { screenId, targetApp = 'CUSTOMER', targetVersionNumber } = input.data;
-    return this.repository.rollbackVersion(screenId, targetApp, targetVersionNumber, publishedBy);
+    return this.sduiRegistryRepository.rollbackVersion(screenId, targetApp, targetVersionNumber, publishedBy);
   }
 }
 
@@ -148,10 +148,10 @@ export class RollbackSduiVersionUseCase implements IUseCase<RollbackSduiVersionI
 export interface GetSduiVersionHistoryInput { screenId: string; targetApp?: SduiTargetApp; }
 /** GetSduiVersionHistoryUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class GetSduiVersionHistoryUseCase implements IUseCase<GetSduiVersionHistoryInput, SduiScreenEntity[]> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: GetSduiVersionHistoryInput): Promise<SduiScreenEntity[]> {
-    return this.repository.getVersionHistory(input.screenId, input.targetApp);
+    return this.sduiRegistryRepository.getVersionHistory(input.screenId, input.targetApp);
   }
 }
 
@@ -159,11 +159,11 @@ export class GetSduiVersionHistoryUseCase implements IUseCase<GetSduiVersionHist
 export interface GetSduiSpecificVersionInput { screenId: string; targetApp?: SduiTargetApp; versionNumber: number; }
 /** GetSduiSpecificVersionUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class GetSduiSpecificVersionUseCase implements IUseCase<GetSduiSpecificVersionInput, SduiScreenEntity> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: GetSduiSpecificVersionInput): Promise<SduiScreenEntity> {
     const targetApp = input.targetApp ?? 'CUSTOMER';
-    const version = await this.repository.getSpecificVersion(input.screenId, targetApp, input.versionNumber);
+    const version = await this.sduiRegistryRepository.getSpecificVersion(input.screenId, targetApp, input.versionNumber);
     if (!version) throw new NotFoundError(`SDUI version ${input.versionNumber} not found for screen '${input.screenId}'`);
     return version;
   }
@@ -213,13 +213,13 @@ function countHierarchy(layout: SduiScreen) {
 
 /** CompareSduiVersionsUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class CompareSduiVersionsUseCase implements IUseCase<CompareSduiVersionsInput, CompareSduiVersionsResult> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: CompareSduiVersionsInput): Promise<CompareSduiVersionsResult> {
     const targetApp = input.targetApp ?? 'CUSTOMER';
-    const sourceVersion = await this.repository.getSpecificVersion(input.screenId, targetApp, input.sourceVersion);
+    const sourceVersion = await this.sduiRegistryRepository.getSpecificVersion(input.screenId, targetApp, input.sourceVersion);
     if (!sourceVersion) throw new NotFoundError(`Source version ${input.sourceVersion} not found for screen '${input.screenId}'`);
-    const targetVersion = await this.repository.getSpecificVersion(input.screenId, targetApp, input.targetVersion);
+    const targetVersion = await this.sduiRegistryRepository.getSpecificVersion(input.screenId, targetApp, input.targetVersion);
     if (!targetVersion) throw new NotFoundError(`Target version ${input.targetVersion} not found for screen '${input.screenId}'`);
     const sourceLayout = parseSduiScreen(sourceVersion.layoutJson);
     const targetLayout = parseSduiScreen(targetVersion.layoutJson);
@@ -246,11 +246,11 @@ export class CompareSduiVersionsUseCase implements IUseCase<CompareSduiVersionsI
 export interface GetSduiScreenInput { data: { screenId: string; targetApp: SduiTargetApp; }; }
 /** GetSduiScreenUseCase is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export class GetSduiScreenUseCase implements IUseCase<GetSduiScreenInput, SduiScreen> {
-  constructor(private readonly repository: ISduiRegistryRepository) {}
+  constructor(private readonly sduiRegistryRepository: ISduiRegistryRepository) {}
   /** Executes this application operation through its declared ports and domain invariants. */
   async execute(input: GetSduiScreenInput): Promise<SduiScreen> {
     const { screenId, targetApp } = input.data;
-    const screen = await this.repository.findPublishedScreen(screenId, targetApp);
+    const screen = await this.sduiRegistryRepository.findPublishedScreen(screenId, targetApp);
     if (!screen) throw new NotFoundError(`Published screen '${screenId}' for target '${targetApp}' was not found.`);
     return parseSduiScreen(screen.layoutJson);
   }
