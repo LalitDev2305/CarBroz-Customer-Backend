@@ -18,7 +18,7 @@ const canonicalWorkspaces = [
   'domains/identity', 'domains/partner', 'domains/customer', 'domains/catalog-pricing',
   'domains/booking', 'domains/operations', 'domains/financials', 'domains/communications',
   'domains/engagement', 'domains/configuration', 'domains/dispute', 'domains/enterprise', 'domains/audit',
-  'sdui/ui-sdk', 'sdui/registry',
+  'sdui/engine', 'sdui/ui-sdk', 'sdui/registry',
   'platform/database', 'platform/cache', 'platform/messaging', 'platform/storage',
   'platform/observability', 'platform/integrations',
   'foundation/kernel',
