@@ -6,7 +6,7 @@ describe('Partner Login SDUI composition', () => {
     const screen = createPartnerLoginScreen();
     expect(screen.screenId).toBe('partner_login');
     expect(screen.targetApp).toBe('PARTNER');
-    expect(screen.templateType).toBe('stack_template');
+    expect(screen.template.type).toBe('stack_template');
     expect(screen.template.components).toHaveLength(3);
   });
 
