@@ -1,30 +1,18 @@
-import { screenSchema, type SduiScreen, type SduiTheme } from '../contract/screen.schema.js';
 import type { SduiTemplate } from '../contract/template.schema.js';
+import { BaseSduiScreenBuilder, type ScreenBuilderInput } from './BaseSduiScreenBuilder.js';
 
-/** ScreenBuilderInput is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
-export interface ScreenBuilderInput {
-  screenId: string;
-  schemaVersion: string;
-  targetApp: 'CUSTOMER' | 'PARTNER';
-  metadata?: Record<string, unknown>;
-}
+export type { ScreenBuilderInput } from './BaseSduiScreenBuilder.js';
 
-/** ScreenBuilder is an exported sdui/ui-sdk contract/implementation; see the owning README for lifecycle and extension rules. */
-export class ScreenBuilder {
-  private template?: SduiTemplate;
-  private theme?: SduiTheme;
+/**
+ * Backward-compatible facade for callers that already own a built Template.
+ * New screen composition must use BaseSduiScreenBuilder's parent-owned object graph methods.
+ */
+export class ScreenBuilder extends BaseSduiScreenBuilder {
+  constructor(input: ScreenBuilderInput) {
+    super(input);
+  }
 
-  constructor(private readonly input: ScreenBuilderInput) {}
-
-  withTemplate(template: SduiTemplate): this { this.template = template; return this; }
-  withTheme(theme: SduiTheme): this { this.theme = theme; return this; }
-
-  build(): SduiScreen {
-    if (!this.template) throw new Error('Screen requires exactly one template');
-    return screenSchema.parse({
-      ...this.input,
-      template: this.template,
-      ...(this.theme ? { theme: this.theme } : {}),
-    });
+  withTemplate(template: SduiTemplate): this {
+    return this.withBuiltTemplate(template);
   }
 }
