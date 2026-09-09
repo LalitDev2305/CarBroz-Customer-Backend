@@ -8,6 +8,7 @@ import {
   DuplicateScreenRegistrationError,
   ScreenRegistry,
   SduiService,
+  SduiValidator,
   UnknownScreenError,
   type ScreenComposer,
 } from '../src/index.js';
@@ -30,14 +31,14 @@ function composer(screenId = 'partner_test'): ScreenComposer {
   return {
     screenId,
     targetApp: 'PARTNER',
-    compose: () => validPartnerScreen(screenId),
+    build: () => validPartnerScreen(screenId),
   };
 }
 
 describe('ScreenRegistry', () => {
-  it('resolves a registered screen by target and id', () => {
+  it('gets a registered screen by target and id', () => {
     const registry = new ScreenRegistry().register(composer());
-    expect(registry.resolve('PARTNER', 'partner_test').screenId).toBe('partner_test');
+    expect(registry.get('PARTNER', 'partner_test').screenId).toBe('partner_test');
   });
 
   it('rejects duplicate registration for the same target and id', () => {
@@ -47,14 +48,14 @@ describe('ScreenRegistry', () => {
 
   it('rejects unknown screens', () => {
     const registry = new ScreenRegistry();
-    expect(() => registry.resolve('PARTNER', 'missing')).toThrow(UnknownScreenError);
+    expect(() => registry.get('PARTNER', 'missing')).toThrow(UnknownScreenError);
   });
 });
 
 describe('SduiService', () => {
-  it('composes and validates a registered screen', () => {
+  it('builds and validates a registered screen', () => {
     const registry = new ScreenRegistry().register(composer());
-    const service = new SduiService(registry);
+    const service = new SduiService(registry, new SduiValidator());
 
     const screen = service.buildScreen({ targetApp: 'PARTNER', screenId: 'partner_test' });
 
@@ -66,9 +67,9 @@ describe('SduiService', () => {
     const registry = new ScreenRegistry().register({
       screenId: 'partner_test',
       targetApp: 'PARTNER',
-      compose: () => validPartnerScreen('different_screen'),
+      build: () => validPartnerScreen('different_screen'),
     });
-    const service = new SduiService(registry);
+    const service = new SduiService(registry, new SduiValidator());
 
     expect(() =>
       service.buildScreen({ targetApp: 'PARTNER', screenId: 'partner_test' }),
