@@ -1,6 +1,6 @@
 # Partner Authentication SDUI Contract Addendum
 
-> **Status:** FROZEN for the Partner Login → OTP backend implementation. Phase 5 Partner Login request alignment is implemented; repository closeout verification is pending before Phase 5 is marked complete.
+> **Status:** FROZEN for the Partner Login → OTP backend implementation. Phase 5 Partner Login request alignment is COMPLETE + repository-verified; Phase 6 Send OTP canonical destination result is next.
 >
 > **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` remain higher-level execution authorities.
 >
@@ -139,7 +139,7 @@ The backend response must therefore return canonical destination metadata rather
 
 ---
 
-## 6. Partner Login request contract — PHASE 5 IMPLEMENTED
+## 6. Partner Login request contract — PHASE 5 COMPLETE
 
 The existing Login screen is reused unchanged except for its request-body field mapping.
 
@@ -162,7 +162,7 @@ validate       = true
 responseMode   = destination
 ```
 
-Implemented request-body mapping:
+Frozen request-body mapping:
 
 ```json
 {
@@ -266,8 +266,8 @@ For SDUI specifically:
 
 1. keep current loaded Screen schema;
 2. keep current generic action/destination schema unless a proven gap exists;
-3. align Login request references — Phase 5 implemented, closeout pending;
-4. align Send OTP backend destination result — Phase 6;
+3. align Login request references — Phase 5 COMPLETE;
+4. align Send OTP backend destination result — Phase 6 NEXT;
 5. only then create the OTP Partner screen/route;
 6. validate destination ↔ fetched Screen identity;
 7. align Verify OTP request/result;
