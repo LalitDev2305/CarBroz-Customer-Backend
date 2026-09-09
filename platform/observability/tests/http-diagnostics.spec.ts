@@ -18,21 +18,27 @@ describe('local http diagnostic presentation', () => {
       correlationId: 'corr-1',
       method: 'POST',
       url: '/api/v1/partner/test',
-      headers: { authorization: 'private-value' },
-      body: { phoneNumber: 'private-phone' },
     });
     emitHttpResponseDiagnostic(false, {
-      correlationId: 'corr-1', method: 'POST', url: '/api/v1/partner/test', statusCode: 200, body: { success: true },
+      correlationId: 'corr-1',
+      method: 'POST',
+      url: '/api/v1/partner/test',
+      statusCode: 200,
+      body: { status: 200, code: 'SUCCESS' },
     });
     emitHttpErrorDiagnostic(false, {
-      correlationId: 'corr-1', method: 'POST', url: '/api/v1/partner/test', statusCode: 400, errorCode: 'INVALID_REQUEST',
+      correlationId: 'corr-1',
+      method: 'POST',
+      url: '/api/v1/partner/test',
+      statusCode: 400,
+      errorCode: 'INVALID_REQUEST',
     });
 
     expect(stdout).not.toHaveBeenCalled();
     expect(stderr).not.toHaveBeenCalled();
   });
 
-  it('prints one readable request block and redacts sensitive values', () => {
+  it('prints metadata-only request diagnostics and sanitizes sensitive query values', () => {
     let output = '';
     vi.spyOn(process.stdout, 'write').mockImplementation((chunk: string | Uint8Array) => {
       output += chunk.toString();
@@ -43,19 +49,15 @@ describe('local http diagnostic presentation', () => {
       correlationId: 'corr-request',
       method: 'POST',
       url: '/api/v1/partner/auth?mode=test&token=private-query',
-      headers: { authorization: 'private-auth', 'x-carbroz-platform': 'ANDROID' },
-      body: { phoneNumber: 'private-phone', otp: 'private-otp', displayName: 'Partner' },
     });
 
     expect(output).toContain('API REQUEST');
-    expect(output).toContain('ANDROID');
-    expect(output).toContain('Partner');
-    expect(output).toContain('token=[REDACTED]');
-    expect(output).toContain('[REDACTED]');
-    expect(output).not.toContain('private-auth');
+    expect(output).toContain('corr-request');
+    expect(output).toContain('POST');
+    expect(output).toContain('token=%5BREDACTED%5D');
     expect(output).not.toContain('private-query');
-    expect(output).not.toContain('private-phone');
-    expect(output).not.toContain('private-otp');
+    expect(output).not.toContain('HEADERS');
+    expect(output).not.toContain('BODY');
   });
 
   it('prints pretty json response and redacts sensitive response fields', () => {
@@ -72,14 +74,15 @@ describe('local http diagnostic presentation', () => {
       statusCode: 200,
       durationMs: 12.5,
       body: JSON.stringify({
-        success: true,
+        status: 200,
+        code: 'SUCCESS',
         data: { startup: { nextScreen: { screenId: 'partner_login' } }, email: 'private-email' },
       }),
     });
 
     expect(output).toContain('API RESPONSE');
     expect(output).toContain('partner_login');
-    expect(output).toContain('"success": true');
+    expect(output).toContain('"status": 200');
     expect(output).toContain('[REDACTED]');
     expect(output).not.toContain('private-email');
   });
@@ -92,9 +95,13 @@ describe('local http diagnostic presentation', () => {
     });
 
     emitHttpErrorDiagnostic(true, {
-      correlationId: 'corr-error', method: 'GET', url: '/api/v1/partner/bootstrap',
-      statusCode: 500, durationMs: 9, errorCode: 'INTERNAL_SERVER_ERROR',
-      body: { success: false, code: 'INTERNAL_SERVER_ERROR' },
+      correlationId: 'corr-error',
+      method: 'GET',
+      url: '/api/v1/partner/bootstrap',
+      statusCode: 500,
+      durationMs: 9,
+      errorCode: 'INTERNAL_SERVER_ERROR',
+      body: { status: 500, code: 'INTERNAL_SERVER_ERROR', data: null },
     });
 
     expect(output).toContain('API ERROR');
