@@ -1,4 +1,6 @@
 export * from './templates/stack/stack-template.builder.js';
+export * from './templates/form/form-template.builder.js';
+export * from './templates/default/default-template.builder.js';
 export * from './components/stack/stack-component.builder.js';
 export * from './sections/stack/stack-section.builder.js';
 export * from './groups/stack/stack-group.builder.js';
