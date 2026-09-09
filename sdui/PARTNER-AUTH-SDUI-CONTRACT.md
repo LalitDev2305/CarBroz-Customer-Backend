@@ -1,6 +1,6 @@
 # Partner Authentication SDUI Contract Addendum
 
-> **Status:** FROZEN for the Partner Login → OTP backend implementation. Phase 5 Partner Login request alignment is COMPLETE + repository-verified; Phase 6 Send OTP canonical destination contract is FROZEN BEFORE IMPLEMENTATION.
+> **Status:** FROZEN for the Partner Login → OTP backend implementation. Phase 5 Partner Login request alignment is COMPLETE + repository-verified; Phase 6 Send OTP canonical destination contract is COMPLETE + FROZEN after same-HEAD Backend CI and Architecture Closeout verification.
 >
 > **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` remain higher-level execution authorities.
 >
@@ -205,7 +205,7 @@ The exact client runtime context-key registry belongs to the frontend/runtime co
 
 ---
 
-## 7. Send OTP destination result — PHASE 6 FROZEN
+## 7. Send OTP destination result — PHASE 6 COMPLETE + FROZEN
 
 Phase 6 replaces only the legacy Send OTP success navigation metadata. It does not alter OTP generation, hashing, persistence, delivery, cooldown, rate limiting, attempt policy, expiry, device binding, error behavior, or response envelope.
 
@@ -329,7 +329,7 @@ For SDUI specifically:
 1. keep current loaded Screen schema;
 2. keep current generic action/destination schema unless a proven gap exists;
 3. align Login request references — Phase 5 COMPLETE;
-4. reserve and implement canonical Send OTP destination result — Phase 6 CONTRACT FROZEN / IMPLEMENTATION NEXT;
+4. reserve and implement canonical Send OTP destination result — Phase 6 COMPLETE + FROZEN;
 5. only then create the OTP Partner screen/route using the exact reserved Phase 6 identity;
 6. validate destination ↔ fetched Screen identity;
 7. align Verify OTP request/result;
