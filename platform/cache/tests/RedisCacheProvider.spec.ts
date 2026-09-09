@@ -77,12 +77,33 @@ describe('RedisCacheProvider', () => {
     expect(client.quit).toHaveBeenCalledOnce();
   });
 
+  it('fails startup closed when Redis cannot pass health verification', async () => {
+    const { client } = fakeRedis('wait');
+    vi.mocked(client.ping).mockRejectedValueOnce(new Error('redis unavailable'));
+    const provider = new RedisCacheProvider(client);
+
+    await expect(provider.initialize()).rejects.toThrow(
+      'Redis cache provider failed health verification during initialization',
+    );
+    expect(client.connect).toHaveBeenCalledOnce();
+  });
+
   it('fails health closed when Redis ping fails', async () => {
     const { client } = fakeRedis();
     vi.mocked(client.ping).mockRejectedValueOnce(new Error('redis unavailable'));
     const provider = new RedisCacheProvider(client);
 
     await expect(provider.health()).resolves.toBe(false);
+  });
+
+  it('forces disconnect when graceful Redis shutdown fails', async () => {
+    const { client } = fakeRedis();
+    vi.mocked(client.quit).mockRejectedValueOnce(new Error('quit failed'));
+    const provider = new RedisCacheProvider(client);
+
+    await provider.shutdown();
+
+    expect(client.disconnect).toHaveBeenCalledWith(false);
   });
 
   it('rejects invalid TTLs and empty keys before issuing Redis commands', async () => {
