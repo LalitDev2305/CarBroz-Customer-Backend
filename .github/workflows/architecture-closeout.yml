@@ -88,6 +88,9 @@ jobs:
       - name: Verify canonical CW2 topology
         run: node tools/architecture-closeout.mjs
 
+      - name: Verify Backend Constitution regression boundary
+        run: node tools/architecture-closeout-constitution-gate.mjs --regression
+
       - name: Verify full Backend Constitution
         run: node tools/architecture-closeout-constitution-gate.mjs
 
