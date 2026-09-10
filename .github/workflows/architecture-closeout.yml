@@ -138,7 +138,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cw5-closeout-test-diagnostics
-          path: closeout-test-output.txt
+          path: |
+            closeout-test-output.txt
+            coverage/coverage-final.json
           if-no-files-found: ignore
           retention-days: 7
 
