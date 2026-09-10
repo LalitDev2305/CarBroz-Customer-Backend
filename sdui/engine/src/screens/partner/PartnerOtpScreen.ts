@@ -3,7 +3,6 @@ import type { ScreenContext } from '../../core/ScreenContext.js';
 import type { SduiScreen } from '../../core/SduiModel.js';
 import { action, ref } from '../../core/Action.js';
 import { SduiBuilder } from '../../core/SduiBuilder.js';
-import { partnerAuthTheme } from './PartnerAuthTheme.js';
 
 export class PartnerOtpScreen implements ScreenComposer {
   readonly screenId = 'partner_otp';
@@ -15,7 +14,6 @@ export class PartnerOtpScreen implements ScreenComposer {
     return this.builder.screen({
       id: this.screenId,
       targetApp: this.targetApp,
-      theme: partnerAuthTheme,
     }, screen => {
       screen.template('form_template', 'tpl_partner_otp_v1', template => {
         template.base()
