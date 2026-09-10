@@ -856,9 +856,6 @@ importers:
 
   sdui/engine:
     dependencies:
-      '@carbroz/ui-sdk':
-        specifier: workspace:*
-        version: link:../ui-sdk
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -875,9 +872,9 @@ importers:
       '@carbroz/foundation-kernel':
         specifier: workspace:*
         version: link:../../foundation/kernel
-      '@carbroz/ui-sdk':
+      '@carbroz/sdui-engine':
         specifier: workspace:*
-        version: link:../ui-sdk
+        version: link:../engine
       awilix:
         specifier: ^12.0.0
         version: 12.1.1
