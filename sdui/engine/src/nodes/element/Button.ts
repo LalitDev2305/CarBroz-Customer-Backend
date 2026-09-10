@@ -29,4 +29,6 @@ export const ButtonDefinition: NodeDefinition<ButtonProperties> = {
   defaults: { semanticRole: 'action' },
   properties: buttonPropertiesSchema,
   children: 'none',
+  categories: ['base', 'style', 'content', 'behavior', 'metadata'],
+  supportedEvents: ['onClick', 'onLongClick'],
 };
