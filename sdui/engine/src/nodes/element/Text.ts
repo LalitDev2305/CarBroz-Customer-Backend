@@ -38,11 +38,13 @@ export const textPropertiesSchema = z.object({
   leading: accessoriesSchema.optional(),
   trailing: accessoriesSchema.optional(),
 }).strict().superRefine((properties, context) => {
-  if (properties.text === undefined && properties.spans === undefined) {
+  const hasText = properties.text !== undefined;
+  const hasSpans = properties.spans !== undefined;
+  if (hasText === hasSpans) {
     context.addIssue({
       code: 'custom',
       path: ['text'],
-      message: 'text element requires text or spans',
+      message: 'text element requires exactly one content mode: text or spans',
     });
   }
 });
