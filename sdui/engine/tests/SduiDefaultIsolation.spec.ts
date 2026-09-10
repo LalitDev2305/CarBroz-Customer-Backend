@@ -2,12 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { SduiBuilder } from '../src/index.js';
 import { DEFAULT_STACK_BASE_PROPERTIES } from '../src/core/value-objects/Layout.js';
 
-function buildScreen(id: string, configure?: (builder: ReturnType<Parameters<Parameters<SduiBuilder['screen']>[1]>[0]['template']> extends never ? never : never) => void) {
+function buildScreen(id: string) {
   return new SduiBuilder().screen({ id, targetApp: 'PARTNER' }, root => {
     root.template('stack_template', `${id}_template`, template => {
-      if (configure) {
-        // This helper intentionally stays simple; individual golden tests compose directly below when overrides matter.
-      }
       template.component('stack_component', `${id}_component`, component => {
         component.text(`${id}_text`, text => text.content().text('CarBroz'));
       });
