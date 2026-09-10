@@ -117,7 +117,7 @@ carbroz-backend/
 │   └── audit/
 │
 ├── sdui/
-│   ├── ui-sdk/
+│   ├── engine/
 │   └── registry/
 │
 ├── platform/
@@ -487,54 +487,28 @@ Exactly two SDUI workspace packages are canonical:
 
 ```text
 sdui/
-├── ui-sdk/      generic structural/composition SDK
-└── registry/    SDUI draft/publish/version persistence lifecycle
+├── engine/      canonical SDUI language/composition/definitions/validation/screen composition
+└── registry/    persisted draft/publish/version lifecycle only
 ```
 
 Final package identities:
 
 ```text
-@carbroz/ui-sdk
+@carbroz/sdui-engine
 @carbroz/sdui-registry
 ```
 
-No second UI SDK, `sdui-engine`, UI schema package, API-local duplicate SDUI DTO hierarchy or domain-local duplicate structural contract may exist after migration.
+The retired `sdui/ui-sdk` / `@carbroz/ui-sdk` architecture MUST NOT be restored. No second SDUI engine, UI schema package, API-local duplicate SDUI DTO hierarchy or domain-local duplicate structural contract may exist.
 
-## 25. `sdui/ui-sdk` responsibility
+## 25. `sdui/engine` responsibility
 
-`ui-sdk` is the one canonical generic SDUI language and composition toolkit. It owns runtime contracts, reusable definitions, registries, factories, builders, validation, serialization and schema versioning.
+`engine` is the one canonical generic SDUI language, composition and validation authority. It owns runtime contracts, reusable node definitions, property/default resolution, generic actions/references, `NodeDefinitionRegistry`, `ScreenRegistry`, `SduiBuilder`, `SduiValidator`, `SduiService`, serialization/model contracts, schema versioning and code-composed Partner/Customer/Admin screen composers.
 
-```text
-sdui/ui-sdk/
-├── contract/
-│   ├── screen/
-│   ├── template/
-│   ├── component/
-│   ├── section/
-│   ├── group/
-│   ├── element/
-│   ├── action/
-│   ├── theme/
-│   └── properties/
-├── definitions/
-│   ├── templates/
-│   ├── components/
-│   ├── sections/
-│   ├── groups/
-│   └── elements/
-├── registry/
-├── factory/
-├── builder/
-├── validator/
-├── serializer/
-├── versioning/
-├── public/
-└── tests/
-```
+The engine MUST NOT own persisted draft/publication history. That lifecycle remains in `sdui/registry` while concrete runtime/admin consumers require it. No API surface or business domain may create a parallel screen builder, validator or presentation contract.
 
 ## 26. `sdui/registry` responsibility
 
-`registry` owns SDUI runtime lifecycle only: screen metadata, drafts, publish, immutable versions, rollback, target application/scope, persistence, checksums and version history. It consumes `@carbroz/ui-sdk`; it never redefines UI structure or composition mechanics.
+`registry` owns persisted SDUI lifecycle only: screen metadata, drafts, publish, immutable versions, rollback, target application/scope, persistence, checksums and version history. It consumes `@carbroz/sdui-engine`; it never redefines UI structure, properties, actions, definitions, validation or composition mechanics.
 
 ```text
 sdui/registry/

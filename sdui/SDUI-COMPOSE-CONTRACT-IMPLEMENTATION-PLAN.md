@@ -41,7 +41,7 @@ Canonical target module:
 sdui/engine
 ```
 
-`sdui/ui-sdk` and `sdui/registry` are migration/compatibility sources until their remaining behavior is safely converged. They are not permanent parallel SDUI authoring engines.
+`sdui/engine` is the canonical SDUI language/composition/validation owner. The retired `sdui/ui-sdk` must not return. The standalone `sdui/registry` remains only as a persisted lifecycle/version boundary while concrete current runtime/admin consumers require that behavior; it is not a parallel authoring engine.
 
 ### 2.2 Explicit hierarchy, fluent configuration
 
@@ -825,7 +825,7 @@ Arbitrary mutation such as `background.color` is forbidden.
 
 `external_uri` delegates to platform-safe URI handling. `sequence` is only for genuinely ordered independent generic actions.
 
-The full canonical wire-level contract remains in `sdui/ui-sdk/ACTION-CONTRACT.md` during migration and must converge into engine ownership without changing semantics.
+The canonical wire-level action/reference contract is owned by `sdui/engine/src/core/Action.ts` and its engine tests. No retired `ui-sdk` action contract or parallel action framework is authoritative.
 
 ---
 
