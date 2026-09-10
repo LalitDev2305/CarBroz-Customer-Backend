@@ -9,17 +9,20 @@ This file identifies the current SDUI implementation authorities and separates t
 For implementation, use this order:
 
 ```text
-1. SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md
-2. PARTNER-AUTH-SDUI-CONTRACT.md                 // Login / OTP behavior
-3. docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md
-4. docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md
-5. docs/MASTER-BACKEND-CONSTITUTION.md
-6. executable architecture / freeze gates
+1. sdui/README.md                                  // current authority map + latest frozen amendments
+2. SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md
+3. PARTNER-AUTH-SDUI-CONTRACT.md                 // Login / OTP behavior
+4. docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md
+5. docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md
+6. docs/MASTER-BACKEND-CONSTITUTION.md
+7. executable architecture / freeze gates
 ```
 
-If a historical document describes a different builder, package, hierarchy, screen owner, or file path, it does not override this architecture.
+If a historical document describes a different builder, package, hierarchy, screen owner, file path, default, or theme rule, it does not override this architecture.
 
-The Master Backend Constitution and the frozen SDUI implementation plan are now reconciled to the same physical topology and ownership model: `sdui/engine` is canonical and the standalone `sdui/registry` is retained only for concrete persisted lifecycle/version responsibilities.
+The Master Backend Constitution and the frozen SDUI implementation plan are reconciled to the same physical topology and ownership model: `sdui/engine` is canonical and the standalone `sdui/registry` is retained only for concrete persisted lifecycle/version responsibilities.
+
+**Latest frozen amendment:** the old illustrative `theme: partnerAuthTheme` example in `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md` is superseded by Section 12 of this README. There is no auth-specific theme abstraction in the current architecture. New screen composition uses one canonical default screen theme and per-screen overrides only where data genuinely differs.
 
 ## 2. Permanent SDUI authority
 
@@ -275,27 +278,80 @@ button
 
 Properties such as width, height, fill behavior, alignment, background, border, shape and typography are **supported capabilities but are not automatically defaulted merely because they appear in conceptual examples**. If a universal default is required later, it must first be deliberately added to the owning `NodeDefinition.defaults`, documented here/current contract, covered by golden tests, and then consumed by screens without repeating the default.
 
-## 12. Frozen screen-theme authoring rule
+## 12. Frozen screen-theme default/override rule
 
-`theme` is a **screen-level protocol object**, not a Template/Component/Section/Group/Element node and therefore not part of the node `base()/style()/content()/behavior()/metadata()` fluent property scopes.
+`theme` is a **screen-level protocol object** and uses the same architectural principle as reusable node defaults: common data belongs to one canonical default; screen composers state only genuine differences.
 
-Current rule:
+There is no Login theme, OTP theme, Partner Auth theme, Customer theme builder, or per-screen theme wrapper in the frozen architecture.
+
+The canonical default theme is owned by the SDUI engine as `DEFAULT_SDUI_THEME` and is resolved by `SduiBuilder.screen()` for every newly composed screen.
+
+Current canonical default:
 
 ```text
-screen options -> typed SduiTheme -> canonical screen JSON
+theme = light
+statusBar = transparent
+properties.gradient.type = linear
+properties.gradient.angle = 135
+properties.gradient.colors = CarBroz default gradient colors
 ```
 
-Do not add a separate `ThemeBuilder` merely to make theme syntax look like node syntax. A new fluent theme abstraction is allowed only if it later proves a stable invariant or removes meaningful repeated complexity.
-
-For shared Partner authentication visuals, prefer one typed reusable theme definition/helper such as:
+Normal screen authoring therefore does **not** mention theme:
 
 ```ts
-theme: partnerAuthTheme
+sdui.screen({
+  id: 'partner_login',
+  targetApp: 'PARTNER',
+}, screen => {
+  // compose template/components/elements only
+});
 ```
 
-rather than duplicating the full gradient/status-bar object independently in Login and OTP. A screen may still supply a deliberately screen-specific typed theme when it genuinely differs.
+The builder emits the complete canonical theme automatically.
 
-The reusable theme helper must remain presentation-only; it must not become a second SDUI builder/property framework.
+If one screen genuinely differs, it supplies only the changed data:
+
+```ts
+sdui.screen({
+  id: 'special_screen',
+  targetApp: 'PARTNER',
+  theme: {
+    statusBar: 'default',
+    properties: {
+      gradient: { angle: 90 },
+    },
+  },
+}, screen => {
+  // compose screen
+});
+```
+
+Frozen theme-resolution pipeline:
+
+```text
+DEFAULT_SDUI_THEME
+        +
+optional screen theme overrides
+        ↓
+deterministic deep merge
+        ↓
+strict themeSchema validation
+        ↓
+complete canonical screen.theme JSON
+```
+
+Frozen semantics:
+
+1. Every newly composed screen receives the canonical default theme even when the composer declares no theme.
+2. Login, OTP, Dashboard and future screens must not repeat canonical theme values.
+3. A screen may override only the data that genuinely differs.
+4. Nested theme objects merge recursively and deterministically.
+5. Arrays such as gradient colors replace as complete values if explicitly overridden.
+6. One screen override must not mutate `DEFAULT_SDUI_THEME` or another screen.
+7. The resolved theme is validated by `themeSchema` before serialization.
+8. Do not create `partnerAuthTheme`, `ThemeBuilder`, per-feature theme wrappers or another theme framework merely for naming/syntax.
+9. Backward-compatible persisted documents may still be readable without `theme`, but all new builder-produced screens emit the resolved canonical theme.
+10. Any future change to the universal default must change the single engine default, documentation and golden tests together; screen composers remain unchanged unless they intentionally override it.
 
 ## 13. Frozen-decision documentation governance
 
@@ -304,10 +360,10 @@ A decision that is discussed and declared **frozen** is not considered implement
 From this freeze forward:
 
 1. **Document first or together:** every new frozen architecture/contract/ownership/default/wire decision must update the highest relevant current authority before or with implementation.
-2. **No contradictory active documents:** when a new frozen decision supersedes old active guidance, the old active guidance must be updated in the same convergence change.
+2. **No contradictory active documents:** when a new frozen decision supersedes old active guidance, the old active guidance must be updated or explicitly superseded in the same convergence change.
 3. **Historical evidence is explicit:** an obsolete phase/audit document may remain only when it is useful evidence and is clearly labeled `HISTORICAL`, `SUPERSEDED`, or equivalent near the top.
 4. **Delete noise when evidence has no value:** obsolete documents that add no useful audit/history value should be removed instead of retained indefinitely.
-5. **Current authority always wins:** the current read order in this README must point only to documents that describe the present frozen implementation direction.
+5. **Current authority always wins:** the current read order in this README must identify the latest implementation direction and any explicit amendments to older examples.
 6. **No implementation from stale examples:** examples that differ from current definitions/contracts are illustrative only; current executable definitions and current frozen contract text govern.
 7. **Update the authority map:** if ownership/read order changes, this README must be updated in the same change.
 8. **Tests freeze behavior:** important frozen semantics must have executable regression/golden tests wherever practical; documentation alone is not sufficient for behavior that can regress.
