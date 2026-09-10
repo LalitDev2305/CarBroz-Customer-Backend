@@ -1,57 +1,45 @@
 # Phase 5 — Partner Login Request Alignment Contract
 
-> **Status:** COMPLETE + FROZEN — implementation and repository verification completed; Phase 6 is the next phase.
+> **Status:** HISTORICAL PHASE COMPLETE + BEHAVIOR FROZEN.
 >
-> **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`, and `sdui/PARTNER-AUTH-SDUI-CONTRACT.md` remain higher authorities.
->
-> **Scope:** Align only the existing Partner Login Continue request payload with the already-existing shared auth transport contract. Phase 5 does not change Send OTP result navigation, create the OTP screen, alter Identity business logic, change Redis persistence, or introduce frontend/runtime code.
+> **Current architecture:** `sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md` supersedes the old screen-authoring location/model. This document remains the immutable behavioral record for the Login Continue request mapping and must be preserved during the new fluent-engine migration.
 
-## 1. Existing contracts to reuse
+---
 
-The existing Partner Login screen remains:
+## 1. Frozen Partner Login identity
 
 ```text
-apps/api/src/surfaces/partner/screens/partner-login.screen.ts
 screenId      = partner_login
 template.id   = tpl_7K2M9Q
 template.type = stack_template
 targetApp     = PARTNER
+route         = GET /api/v1/partner/screen/auth_login
 ```
 
-The existing shared endpoint remains:
+The final screen-composition owner is:
+
+```text
+sdui/engine/src/screens/partner/PartnerLoginScreen.ts
+```
+
+Older API/domain screen-builder locations are migration/compatibility sources only and must be retired after zero-reference proof.
+
+---
+
+## 2. Frozen request endpoint
 
 ```text
 POST /api/v1/partner/auth/send_otp
 ```
 
-The existing transport DTO already requires:
+Transport fields:
 
 ```text
 phoneNumber: string
 deviceId: string
 ```
 
-The existing generic SDUI request/reference system already supports:
-
-```text
-$binding
-$context
-responseMode: destination
-```
-
-No new DTO, controller, use case, action type, mapper, hidden field, navigation framework, or runtime context mechanism is authorized.
-
-## 2. Exact Phase 5 source change
-
-Pre-Phase-5 stale payload:
-
-```json
-{
-  "mobileNumber": { "$binding": "mobileNumber" }
-}
-```
-
-Frozen implemented payload:
+Canonical SDUI request mapping:
 
 ```json
 {
@@ -60,22 +48,26 @@ Frozen implemented payload:
 }
 ```
 
-Ownership is frozen as:
+The visible input binding remains:
 
 ```text
-phoneNumber <- visible input binding `mobileNumber`
-deviceId    <- generic runtime context key `deviceId`
+mobileNumber
 ```
 
-The visible input binding key remains `mobileNumber`; only the HTTP request field name is `phoneNumber`.
-
-`deviceId` must not be introduced as a visible or hidden product-specific SDUI input element merely to satisfy the transport DTO.
-
-## 3. Request semantics that remain unchanged
-
-The Continue action remains the existing generic request action with:
+The HTTP field remains:
 
 ```text
+phoneNumber
+```
+
+`deviceId` is runtime context; it must not be represented as a fake hidden/visible product-specific input merely to satisfy transport.
+
+---
+
+## 3. Frozen request semantics
+
+```text
+type           = request
 method         = POST
 endpoint       = /api/v1/partner/auth/send_otp
 authentication = NONE
@@ -83,38 +75,127 @@ validate       = true
 responseMode   = destination
 ```
 
-Phase 5 did not alter response/navigation behavior. The current Send OTP backend result remains a Phase 6 concern.
+Authoring under the new engine should be equivalent to:
 
-## 4. Verification completed
+```ts
+button.behavior().onClick(
+  action.request({
+    method: 'POST',
+    endpoint: '/api/v1/partner/auth/send_otp',
+    authentication: 'NONE',
+    validate: true,
+    responseMode: 'destination',
+    body: {
+      phoneNumber: ref.binding('mobileNumber'),
+      deviceId: ref.context('deviceId'),
+    },
+  }),
+);
+```
 
-Focused tests prove:
+The authoring syntax may change; the serialized wire contract above may not.
 
-- loaded Partner Login Screen still passes the strict V3 `screenSchema`;
-- screen identity remains unchanged;
-- Continue action remains generic `request`;
-- endpoint/method/authentication/validate/responseMode remain unchanged;
-- request body contains exactly `phoneNumber -> $binding(mobileNumber)` and `deviceId -> $context(deviceId)`;
-- stale request field `mobileNumber` is absent from the HTTP body;
-- no device input element is added to the screen;
-- shared `SendOtpSchema` remains unchanged and accepts the resolved `{ phoneNumber, deviceId }` shape;
-- no Partner-specific action/mapper/controller/use-case is introduced.
+---
 
-Repository closeout passes CW1–CW5, Prisma checks, build, ESLint, full Vitest, repeated gates and non-mutating/read-only verification.
+## 4. New Golden Reference requirement
 
-## 5. Explicitly out of scope
+Partner Login is the first screen migrated to the finalized fluent SDUI architecture.
 
-Phase 5 does not:
+The migration must prove:
 
-- change `SendOtpUseCase` result shape;
-- create or publish `partner_otp`;
-- change `responseMode: destination` semantics;
-- modify Redis OTP persistence;
-- modify OTP security/rate-limit behavior;
-- change Verify OTP;
-- change Bootstrap/Dashboard routing;
-- touch frontend MVI/UDF;
-- retire Prisma OTP persistence.
+```text
+old accepted canonical Login JSON
+==
+new engine-generated canonical Login JSON
+```
 
-## 6. Definition of done
+Deep equality/parity must cover:
 
-Phase 5 is complete: the existing Partner Login screen emits the exact frozen payload, focused tests prove the mapping and absence of duplicate mechanisms, canonical owner documentation is synchronized, and the documentation-complete HEAD is subject to canonical CI plus architecture closeout verification before Phase 6 begins.
+- screen identity;
+- target app;
+- template id/type;
+- theme;
+- hierarchy;
+- node ids/types;
+- final resolved properties;
+- bindings;
+- validation rules;
+- actions;
+- request body references;
+- endpoint/method/authentication;
+- responseMode.
+
+No migration is considered complete merely because the new screen “looks equivalent”.
+
+---
+
+## 5. Property-authoring migration rule
+
+The new screen composer may omit canonical default properties from source code because the engine definition emits them automatically.
+
+This does **not** authorize wire-output removal.
+
+Example:
+
+```text
+stack_component definition default spacing/padding/etc.
+        +
+Login-specific fluent overrides
+        ↓
+resolved final properties
+```
+
+Where old accepted output contains a required canonical value, the new resolved output must preserve it exactly unless the architecture contract intentionally defines that value as a newly canonical default with identical serialized result.
+
+---
+
+## 6. Action/reference migration rule
+
+Migrated screen source must use:
+
+```text
+action.*
+ref.*
+```
+
+instead of hand-writing protocol markers.
+
+Required mapping remains:
+
+```text
+phoneNumber ← ref.binding('mobileNumber')
+deviceId    ← ref.context('deviceId')
+```
+
+No Login-specific request mapper/action class is authorized.
+
+---
+
+## 7. Explicitly unchanged behavior
+
+The fluent-engine migration does not change:
+
+- SendOtp DTO/controller/use case;
+- Redis OTP persistence;
+- rate limits/cooldown;
+- OTP verification behavior;
+- Destination semantics;
+- Bootstrap behavior;
+- Dashboard authentication;
+- frontend MVI/UDF ownership.
+
+---
+
+## 8. Definition of done under the current plan
+
+This historical Phase 5 behavior remains complete only if the current migration preserves it.
+
+Current Golden Reference closeout requires:
+
+1. new engine Login composer uses finalized hierarchy/property DSL;
+2. final output deep-equals frozen Login contract;
+3. existing Login tests stay green;
+4. action/reference helpers serialize exactly;
+5. no duplicate production Login composition owner remains after safe retirement;
+6. build/lint/test/coverage/freeze gates remain green;
+7. only then may Partner OTP migration proceed.
