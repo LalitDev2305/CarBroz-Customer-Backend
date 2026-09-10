@@ -1,3 +1,4 @@
+export * from './core/Action.js';
 export * from './core/NodeDefinition.js';
 export * from './core/ScreenComposer.js';
 export * from './core/ScreenContext.js';
