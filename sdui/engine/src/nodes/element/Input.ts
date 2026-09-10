@@ -5,6 +5,20 @@ import { dimensionSchema, textAlignmentSchema, weightSchema } from '../../core/v
 
 export const INPUT = 'input';
 
+/** Generic visual presentation for one logical input rendered as equal segmented cells. */
+export const segmentedInputPresentationSchema = z.object({
+  type: z.literal('segmented'),
+  count: z.number().int().positive(),
+  spacing: z.number().finite().nonnegative(),
+  segmentWidth: dimensionSchema.optional(),
+  segmentHeight: dimensionSchema.optional(),
+  background: backgroundSchema.optional(),
+  border: borderSchema.optional(),
+  shape: shapeSchema.optional(),
+}).strict();
+
+export type SegmentedInputPresentation = z.infer<typeof segmentedInputPresentationSchema>;
+
 export const inputPropertiesSchema = z.object({
   semanticRole: z.literal('input').optional(),
   placeholder: z.string().optional(),
@@ -18,6 +32,7 @@ export const inputPropertiesSchema = z.object({
   background: backgroundSchema.optional(),
   border: borderSchema.optional(),
   shape: shapeSchema.optional(),
+  presentation: segmentedInputPresentationSchema.optional(),
 }).strict();
 
 export type InputProperties = z.infer<typeof inputPropertiesSchema>;
