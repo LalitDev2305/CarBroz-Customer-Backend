@@ -1,14 +1,50 @@
 # Partner Authentication SDUI Contract Addendum
 
-> **Status:** Phases 5–13 are COMPLETE + FROZEN. Phases 0–6 retain their prior freeze. This contract is bound to the exact documentation-complete `development` HEAD only after canonical `CarBroz Backend CI`, independent `Backend Architecture Closeout Verifier`, and the final forensic source/document audit all succeed on that same HEAD.
+> **Status:** FROZEN BEHAVIOR CONTRACT — synchronized with the final single-engine SDUI architecture.
 >
-> **Authority:** `docs/MASTER-BACKEND-CONSTITUTION.md`, `docs/PRODUCTION_FREEZE_CONSTITUTION.md`, and `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`.
+> **Architecture authority:** `sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`
 >
-> **Purpose:** Freeze the implemented Partner Bootstrap → Login → OTP → authenticated Dashboard SDUI/auth contract without duplicating the generic SDUI framework.
+> **Interaction authority:** `sdui/ui-sdk/ACTION-CONTRACT.md` during migration, converging to `sdui/engine`.
+>
+> **Security authority:** `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` plus the backend constitutions.
+>
+> This document freezes Partner Bootstrap → Login → OTP → authenticated Dashboard behavior. The implementation location of screen composition is being migrated into `sdui/engine`; wire behavior below must remain unchanged.
 
-## 1. Loaded Screen identity
+---
 
-A loaded Screen owns:
+## 1. Ownership boundary
+
+Frozen final ownership:
+
+```text
+Identity domain
+  → authentication/business rules
+  → OTP challenge lifecycle
+  → user/session/credential creation
+
+SDUI Engine
+  → Login / OTP / Dashboard presentation composition
+  → generic node/action/reference contracts
+  → property defaults/overrides
+  → screen resolution + validation
+
+API surface
+  → HTTP routes, request adaptation, response serialization
+
+Frontend runtime
+  → bindings/context/response resolution
+  → generic action execution
+  → transient auth-flow state
+  → destination verification + rendering
+```
+
+Domains and API surfaces must not become parallel screen-composition owners after migration.
+
+---
+
+## 2. Loaded screen and Destination identity
+
+Loaded screen owns:
 
 ```text
 screen.screenId
@@ -18,9 +54,7 @@ screen.template.id
 screen.template.type
 ```
 
-Root-level `templateId` and `templateType` do not belong to a loaded Screen.
-
-A pre-fetch Destination separately owns:
+Destination owns:
 
 ```text
 screenId
@@ -31,7 +65,7 @@ method
 authentication
 ```
 
-After destination fetch:
+After fetch:
 
 ```text
 destination.screenId     == loaded.screenId
@@ -39,9 +73,15 @@ destination.templateId   == loaded.template.id
 destination.templateType == loaded.template.type
 ```
 
-## 2. Generic action/reference contract
+Root-level `templateId` and `templateType` are not part of a loaded screen.
 
-Partner auth reuses the existing generic SDUI `request` action and `responseMode: destination` behavior. The implemented value-reference vocabulary is exactly:
+---
+
+## 3. Generic action/reference contract
+
+Partner Auth uses only generic actions and references.
+
+References:
 
 ```text
 $binding
@@ -50,16 +90,25 @@ $response
 $literal
 ```
 
-No Partner-specific action class and no `$form`, `$payload`, or `$state` reference namespace has been added.
+Authoring direction:
 
-For `responseMode: destination`:
+```ts
+ref.binding(...)
+ref.context(...)
+ref.response(...)
+ref.literal(...)
+```
+
+Partner-specific action types are forbidden.
+
+For request actions with `responseMode: destination`:
 
 ```text
 validate
-→ resolve generic references
+→ resolve references
 → request
 → failure: expose/reduce error, no navigation
-→ success: retain required transient flow context/response
+→ success: retain required transient response/context
 → validate destination
 → satisfy authentication requirement
 → fetch destination
@@ -67,9 +116,9 @@ validate
 → navigate/render
 ```
 
-## 3. Partner Login — COMPLETE + FROZEN
+---
 
-Canonical Login Screen:
+## 4. Partner Login — frozen wire contract
 
 ```text
 screenId      = partner_login
@@ -88,7 +137,7 @@ validate       = true
 responseMode   = destination
 ```
 
-Request mapping:
+Body:
 
 ```json
 {
@@ -97,7 +146,19 @@ Request mapping:
 }
 ```
 
-## 4. Send OTP destination — COMPLETE + FROZEN
+The Login screen is the Golden Reference for the new fluent SDUI DSL.
+
+Its implementation will live at:
+
+```text
+sdui/engine/src/screens/partner/PartnerLoginScreen.ts
+```
+
+The migration must preserve deep-equal canonical output. Any old API/domain Login screen builder becomes compatibility-only and is deleted only after zero production references are proven.
+
+---
+
+## 5. Send OTP destination — frozen
 
 Successful Send OTP returns:
 
@@ -110,13 +171,13 @@ method         = GET
 authentication = NONE
 ```
 
-Legacy success navigation such as `{ template, api }` is forbidden.
+Legacy navigation shapes such as `{ template, api }` are forbidden.
 
-OTP plaintext/hash is never part of the API result.
+OTP plaintext/hash is never returned.
 
-## 5. Partner OTP Screen — COMPLETE + FROZEN
+---
 
-Canonical loaded OTP Screen:
+## 6. Partner OTP screen — frozen wire contract
 
 ```text
 screenId      = partner_otp
@@ -126,7 +187,13 @@ targetApp     = PARTNER
 route         = GET /api/v1/partner/screen/auth_otp
 ```
 
-The screen uses existing generic primitives only.
+Final implementation owner:
+
+```text
+sdui/engine/src/screens/partner/PartnerOtpScreen.ts
+```
+
+OTP must use the same generic fluent hierarchy/property/action model as Login. No OTP-specific builder or action language is allowed.
 
 Verify action:
 
@@ -146,88 +213,60 @@ otp         ← { $binding: "otp" }
 deviceId    ← { $context: "deviceId" }
 ```
 
-The frontend/runtime handoff explicitly owns the producer for this transient flow state: after successful Send OTP and before OTP navigation, it retains the resolved submitted phone number as `authFlow.phoneNumber` and retains the successful Send OTP response for `$response`. No hidden server-side state transfer is introduced.
+Authoring equivalent:
 
-## 6. Verify OTP — COMPLETE + FROZEN
+```text
+challengeId ← ref.response('data.challengeId')
+phoneNumber ← ref.context('authFlow.phoneNumber')
+otp         ← ref.binding('otp')
+deviceId    ← ref.context('deviceId')
+```
 
-Verify OTP reuses the existing transport DTO, controller and Identity use case. Its success result uses the same readonly `AuthFlowDestination` contract as Send OTP.
+---
 
-Security order remains:
+## 7. Transient auth-flow state
+
+After successful Send OTP and before OTP navigation the frontend runtime retains:
+
+```text
+authFlow.phoneNumber = resolved submitted phone number
+lastSuccessfulResponse = complete successful Send OTP response
+```
+
+This state exists only to resolve generic references required by the next screen.
+
+Clear it after:
+
+- successful Verify OTP;
+- explicit cancellation/back that abandons auth;
+- logout/reset;
+- a new authentication flow.
+
+OTP plaintext must not become reusable persistent application state.
+
+---
+
+## 8. Verify OTP security behavior — frozen
+
+Security order:
 
 ```text
 load bound challenge
-→ validate lifecycle/phone/device/attempt state
+→ validate lifecycle / phone / device / attempt state
 → verify secret hash
-→ atomic one-time consume
+→ atomically consume one-time challenge
 → only then user/session creation
 → only then refresh/access credential issuance
 → authenticated destination
 ```
 
-Concurrent/replay verification is fail-closed: at most one consume can succeed.
+Concurrent/replay verification is fail-closed: at most one consume succeeds.
 
-## 7. Authenticated Partner Dashboard — COMPLETE + FROZEN
+No SDUI refactor may alter this ordering.
 
-Canonical authenticated destination:
+---
 
-```text
-screenId       = partner_dashboard
-templateId     = partner_dashboard_template
-templateType   = default_template
-endpoint       = /api/v1/partner/sdui/registry/partner_dashboard
-method         = GET
-authentication = SESSION
-```
-
-Canonical Dashboard composition:
-
-```text
-apps/api/src/surfaces/partner/screens/partner-dashboard.screen.ts
-```
-
-Runtime retrieval:
-
-```http
-GET /api/v1/partner/sdui/registry/partner_dashboard
-Authorization: Bearer <access token>
-```
-
-The registry route verifies JWT and hard-scopes lookup to `targetApp: PARTNER`.
-
-The Dashboard registry document is guaranteed by the forward migration:
-
-```text
-prisma/migrations/20260909142000_publish_partner_dashboard/migration.sql
-```
-
-Therefore deployment does not depend on manually running `prisma db seed`.
-
-Verify OTP and authenticated Bootstrap return exactly this destination. Guest Bootstrap remains `partner_login`.
-
-## 8. SDUI registry DI contract — COMPLETE + FROZEN
-
-The registry application use cases are composed through the existing classic Awilix container key:
-
-```text
-sduiRegistryRepository
-```
-
-Their constructor dependency is named consistently with that canonical key. This avoids generic `repository` resolution and keeps all SDUI registry use cases on the one existing repository abstraction; no alias or second DI path exists.
-
-## 9. SESSION error semantics — COMPLETE + FROZEN
-
-SESSION-protected destination fetches must not convert missing/invalid bearer credentials into 500 responses.
-
-Fastify/JWT transport-owned 401/403 failures are normalized by the canonical global error handler into safe:
-
-```text
-401 UNAUTHORIZED
-403 FORBIDDEN
-```
-
-with no plugin/internal credential detail leakage.
-
-## 10. Redis OTP persistence contract — COMPLETE + FROZEN
+## 9. Redis OTP persistence — permanent
 
 Production OTP persistence remains:
 
@@ -239,13 +278,125 @@ RedisOtpChallengeRepository
 shared singleton redisClient
 ```
 
-The same Redis client is used by cache and OTP composition. There is no production memory/Prisma fallback and no dual write.
+Forbidden:
 
-Prisma OTP persistence was retired through a forward migration. Test-only deterministic OTP persistence lives only at the executable test composition boundary.
+```text
+Prisma production OTP model/table
+production in-memory fallback
+dual write
+OTP plaintext persistence/response
+screen-owned OTP storage
+```
 
-## 11. Full-flow proof — COMPLETE + FROZEN
+Test-only deterministic persistence is allowed only at executable test composition boundaries.
 
-Phase 12 E2E proves the actual Fastify/deployment flow:
+---
+
+## 10. Authenticated Partner Dashboard — frozen destination
+
+```text
+screenId       = partner_dashboard
+templateId     = partner_dashboard_template
+templateType   = default_template
+endpoint       = /api/v1/partner/sdui/registry/partner_dashboard
+method         = GET
+authentication = SESSION
+```
+
+Runtime retrieval:
+
+```http
+GET /api/v1/partner/sdui/registry/partner_dashboard
+Authorization: Bearer <access token>
+```
+
+The existing published registry document remains required during lifecycle convergence.
+
+The final dynamic composition owner for code-authored Dashboard presentation must converge under:
+
+```text
+sdui/engine/src/screens/partner/PartnerDashboardScreen.ts
+```
+
+If production retrieval continues through the persisted registry route, that registry lifecycle consumes canonical engine contracts; it does not become a second screen language.
+
+Authenticated Bootstrap and Verify OTP must continue to return the same Dashboard Destination.
+
+---
+
+## 11. Fluent property architecture for Partner Auth screens
+
+Partner Login and OTP must use the frozen five property categories where legal:
+
+```text
+base/default
+style
+content/instance
+behavior
+metadata/semantic
+```
+
+Rules:
+
+- node-definition defaults are emitted automatically;
+- screen composers do not repeat defaults;
+- allowed defaults may be overridden per node instance;
+- non-default properties appear only when explicitly supplied;
+- unknown properties are rejected;
+- one screen's override must never mutate another screen or global defaults.
+
+Login and OTP must not introduce screen-specific reusable primitives merely to avoid configuration.
+
+---
+
+## 12. Generic event/action usage
+
+Elements may bind generic events such as:
+
+```text
+onClick
+onLongClick
+onValueChange
+onFocus
+onBlur
+```
+
+Partner Auth currently requires request actions primarily through `onClick`.
+
+Future auth UI interactions must reuse generic action vocabulary:
+
+```text
+request
+navigate
+present
+dismiss
+state
+external_uri
+sequence
+```
+
+No Partner Auth feature-specific action type may be added without changing the generic SDUI protocol first.
+
+---
+
+## 13. SESSION error semantics
+
+SESSION-protected screen fetches must never convert missing/invalid bearer credentials into 500 responses.
+
+Transport-owned auth failures remain safe:
+
+```text
+401 UNAUTHORIZED
+403 FORBIDDEN
+```
+
+No internal credential/plugin detail leakage.
+
+---
+
+## 14. Full-flow proof required after migration
+
+The executable flow must still prove:
 
 ```text
 guest Bootstrap
@@ -255,52 +406,61 @@ guest Bootstrap
 → OTP Screen
 → Verify OTP
 → credentials
-→ unauthenticated Dashboard request rejected with 401
-→ authenticated migration-published Dashboard loaded
+→ unauthenticated Dashboard request rejected
+→ authenticated Dashboard loaded
 → authenticated Bootstrap destination parity
 ```
 
-The E2E does not create the Dashboard registry row; the migration must provide it.
-
-## 12. MVI/UDF handoff — COMPLETE + FROZEN
-
-The exact frontend integration contract is:
+Additionally the SDUI migration must prove:
 
 ```text
-docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md
+Login old canonical output == Login new engine output
+OTP expected canonical output == OTP new engine output
+Destination identities unchanged
+Auth endpoint payloads unchanged
+Redis-only OTP persistence unchanged
 ```
 
-Backend remains deterministic/action-driven and does not implement frontend reducer/store/ViewModel/state classes.
+---
 
-Required transient runtime behavior:
+## 15. Screen registration rule
+
+Partner screens are explicitly registered once in the engine, conceptually:
+
+```ts
+export const partnerScreens = [
+  new PartnerLoginScreen(),
+  new PartnerOtpScreen(),
+  new PartnerDashboardScreen(),
+];
+```
+
+Adding a new Partner screen should mean:
 
 ```text
-Send OTP succeeds
-→ retain resolved phone as authFlow.phoneNumber
-→ retain successful response for $response
-→ navigate to OTP
-→ Verify OTP
-→ clear transient auth-flow state on success/reset/cancel
+create screen composer
++ register once
++ done
 ```
 
-OTP plaintext must not become reusable persistent application state after verification.
+No API switch statement, domain registration, second builder factory or screen-name-specific runtime handler should be required.
 
-## 13. Final freeze gate — SATISFIED
+---
 
-The Phase 7–13 contract is COMPLETE + FROZEN only because all of the following are required to be green on the exact documentation-complete freeze HEAD:
+## 16. Final freeze rule
 
-1. immutable install succeeds;
-2. CW1–CW5 architecture/security/ownership gates succeed;
-3. Prisma validate/generate succeeds;
-4. all forward migrations apply on fresh PostgreSQL;
-5. fresh-schema convergence/drift proof succeeds;
-6. monorepo build succeeds;
-7. ESLint succeeds;
-8. full Vitest succeeds, including the Partner auth→SDUI E2E;
-9. post-test CW1–CW5 gates succeed;
-10. non-mutating/read-only proof succeeds;
-11. `CarBroz Backend CI` succeeds;
-12. `Backend Architecture Closeout Verifier` succeeds on the same SHA;
-13. final forensic source/document audit finds no contract drift, legacy navigation, duplicate production OTP persistence, unsupported SDUI references, seed-only Dashboard dependency, or DI mismatch.
+This behavior contract remains frozen while internal SDUI composition is migrated.
 
-If any future change invalidates one of these guarantees, the owning phase is reopened and the complete closeout sequence is mandatory again.
+If a future implementation change modifies any of the following, the corresponding contract must be explicitly reopened before code changes:
+
+- screen/template identity;
+- auth endpoint/method/authentication;
+- request body mapping;
+- Destination shape;
+- reference meaning;
+- responseMode behavior;
+- OTP persistence/security ordering;
+- SESSION semantics;
+- Dashboard destination identity.
+
+Architecture improvements are allowed only when these external behaviors remain exactly compatible or are deliberately versioned.
