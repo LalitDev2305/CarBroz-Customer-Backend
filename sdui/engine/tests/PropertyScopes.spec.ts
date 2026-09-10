@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { action, PropertyAccumulator } from '../src/index.js';
+import { action, PropertyAccumulator, ref } from '../src/index.js';
 
 describe('SDUI property scopes', () => {
   it('accepts numeric and explicit edge insets and merges later edge overrides', () => {
@@ -48,6 +48,55 @@ describe('SDUI property scopes', () => {
     expect(properties.extras.actions).toEqual({
       onClick: first,
       onLongClick: second,
+    });
+  });
+
+  it('authors generic rich text spans including dynamic references and inline actions', () => {
+    const properties = new PropertyAccumulator();
+    const termsAction = action.externalUri(ref.context('legal.termsUri'));
+
+    properties.content
+      .text(ref.context('authFlow.phoneNumber'))
+      .spans([
+        { text: '+91 ' },
+        { text: ref.context('authFlow.phoneNumber'), fontWeight: 600 },
+        { text: 'Terms', color: '#13B8B5', underline: true, onClick: termsAction },
+      ]);
+
+    expect(properties.properties).toMatchObject({
+      text: { $context: 'authFlow.phoneNumber' },
+      spans: [
+        { text: '+91 ' },
+        { text: { $context: 'authFlow.phoneNumber' }, fontWeight: 600 },
+        { text: 'Terms', color: '#13B8B5', underline: true, onClick: termsAction },
+      ],
+    });
+  });
+
+  it('authors generic disabled presentation and segmented input configuration', () => {
+    const properties = new PropertyAccumulator();
+
+    properties.behavior.enabled(false);
+    properties.style
+      .disabledColor('#9CA3AF')
+      .presentation({
+        type: 'segmented',
+        count: 6,
+        spacing: 8,
+        segmentWidth: 44,
+        segmentHeight: 52,
+      });
+
+    expect(properties.properties).toEqual({
+      enabled: false,
+      disabledColor: '#9CA3AF',
+      presentation: {
+        type: 'segmented',
+        count: 6,
+        spacing: 8,
+        segmentWidth: 44,
+        segmentHeight: 52,
+      },
     });
   });
 });
