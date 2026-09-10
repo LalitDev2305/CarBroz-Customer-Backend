@@ -1,6 +1,6 @@
-import { PartnerLoginScreen, type SduiScreen } from '@carbroz/sdui-engine';
+import { productionSduiService, type SduiScreen } from '@carbroz/sdui-engine';
 
-/** Partner Login SDUI composition. Business authentication remains owned by Identity. */
+/** Transport compatibility wrapper; composition/registration/validation are engine-owned. */
 export function createPartnerLoginScreen(): SduiScreen {
-  return new PartnerLoginScreen().build({});
+  return productionSduiService.buildScreen({ targetApp: 'PARTNER', screenId: 'partner_login' });
 }
