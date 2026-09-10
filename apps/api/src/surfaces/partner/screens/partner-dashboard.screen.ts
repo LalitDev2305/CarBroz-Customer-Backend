@@ -1,7 +1,6 @@
-import type { SduiScreen } from '@carbroz/ui-sdk';
-import { PartnerDashboardScreenBuilder } from './builders/partner-dashboard-screen.builder.js';
+import { PartnerDashboardScreen, type SduiScreen } from '@carbroz/sdui-engine';
 
-/** Minimal authenticated Partner Dashboard shell. Business dashboard data remains owned by its feature contexts. */
+/** Transport compatibility wrapper; SDUI presentation composition is owned by the engine. */
 export function createPartnerDashboardScreen(): SduiScreen {
-  return new PartnerDashboardScreenBuilder().build();
+  return new PartnerDashboardScreen().build({});
 }
