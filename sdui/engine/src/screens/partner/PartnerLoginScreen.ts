@@ -60,7 +60,12 @@ export class PartnerLoginScreen implements ScreenComposer {
             });
 
             brand.text('welcome_title', text => {
-              text.content().text('Welcome Partner!');
+              text.content()
+                .text('Welcome Partner!')
+                .spans([
+                  { text: 'Welcome ' },
+                  { text: 'Partner!', color: '#13B8B5' },
+                ]);
               text.style().fontSize(32).fontWeight(700).color('#101522').textAlign('center');
             });
 
@@ -152,7 +157,24 @@ export class PartnerLoginScreen implements ScreenComposer {
               });
 
               section.text('legal_text', text => {
-                text.content().text('By continuing, you agree to our Terms & Conditions and Privacy Policy');
+                text.content()
+                  .text('By continuing, you agree to our Terms & Conditions and Privacy Policy')
+                  .spans([
+                    { text: 'By continuing, you agree to our ' },
+                    {
+                      text: 'Terms & Conditions',
+                      color: '#13B8B5',
+                      underline: true,
+                      onClick: action.externalUri(ref.context('legal.termsUri')),
+                    },
+                    { text: ' and ' },
+                    {
+                      text: 'Privacy Policy',
+                      color: '#13B8B5',
+                      underline: true,
+                      onClick: action.externalUri(ref.context('legal.privacyUri')),
+                    },
+                  ]);
                 text.base().fillMaxWidth();
                 text.style().fontSize(13).fontWeight(400).lineHeight(19).color('#6B7078').textAlign('center');
               });
