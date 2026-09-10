@@ -6,6 +6,7 @@ import {
   createProductionNodeDefinitionRegistry,
 } from '../src/index.js';
 import { StackComponentDefinition } from '../src/nodes/component/StackComponent.js';
+import { InputDefinition } from '../src/nodes/element/Input.js';
 import { TextDefinition } from '../src/nodes/element/Text.js';
 import { StackGroupDefinition } from '../src/nodes/group/StackGroup.js';
 import { StackSectionDefinition } from '../src/nodes/section/StackSection.js';
@@ -48,8 +49,48 @@ describe('co-located node contracts', () => {
     ).toThrow();
   });
 
-  it('requires text content for text elements', () => {
+  it('requires exactly one canonical text content mode', () => {
     expect(() => TextDefinition.properties.parse({})).toThrow();
     expect(TextDefinition.properties.parse({ text: 'CarBroz' })).toEqual({ text: 'CarBroz' });
+    expect(TextDefinition.properties.parse({
+      spans: [
+        { text: 'Verify ' },
+        { text: 'Your', color: '#13B8B5' },
+        { text: { $context: 'authFlow.phoneNumber' }, fontWeight: 600 },
+      ],
+    })).toEqual({
+      spans: [
+        { text: 'Verify ' },
+        { text: 'Your', color: '#13B8B5' },
+        { text: { $context: 'authFlow.phoneNumber' }, fontWeight: 600 },
+      ],
+    });
+    expect(() => TextDefinition.properties.parse({ text: 'duplicate', spans: [{ text: 'duplicate' }] })).toThrow();
+    expect(() => TextDefinition.properties.parse({ spans: [{ text: 'x', unknownField: true }] })).toThrow();
+  });
+
+  it('accepts generic segmented input presentation and rejects malformed segments', () => {
+    expect(InputDefinition.properties.parse({
+      keyboardType: 'number',
+      maxLength: 6,
+      presentation: {
+        type: 'segmented',
+        count: 6,
+        spacing: 8,
+        segmentWidth: 44,
+        segmentHeight: 52,
+      },
+    })).toMatchObject({
+      keyboardType: 'number',
+      maxLength: 6,
+      presentation: { type: 'segmented', count: 6, spacing: 8 },
+    });
+
+    expect(() => InputDefinition.properties.parse({
+      presentation: { type: 'segmented', count: 0, spacing: 8 },
+    })).toThrow();
+    expect(() => InputDefinition.properties.parse({
+      presentation: { type: 'segmented', count: 6, spacing: -1 },
+    })).toThrow();
   });
 });
