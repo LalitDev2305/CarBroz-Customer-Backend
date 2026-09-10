@@ -7,9 +7,9 @@ import { dimensionSchema, textAlignmentSchema, weightSchema } from '../../core/v
 
 export const TEXT = 'text';
 
-/** Generic ordered inline run used for partial text styling and independently actionable text. */
+/** Generic ordered inline run used for partial text styling, dynamic content and independently actionable text. */
 export const textSpanSchema = z.object({
-  text: z.string(),
+  text: z.union([z.string(), valueReferenceSchema]),
   fontWeight: z.number().int().min(100).max(900).optional(),
   color: colorSchema.optional(),
   underline: z.boolean().optional(),
