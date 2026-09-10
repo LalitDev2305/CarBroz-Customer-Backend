@@ -1,4 +1,4 @@
-import type { SduiScreen, SduiTargetApp } from '@carbroz/ui-sdk';
+import type { SduiScreen, SduiTargetApp } from './SduiModel.js';
 import type { ScreenContext } from './ScreenContext.js';
 
 /** One application-specific SDUI screen recipe. */
