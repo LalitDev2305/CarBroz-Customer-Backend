@@ -7,14 +7,18 @@ export type SduiContentMode =
   | 'elements'
   | 'none';
 
+export type SduiPropertyCategory = 'base' | 'style' | 'content' | 'behavior' | 'metadata';
+export type SduiEventName = 'onClick' | 'onLongClick' | 'onValueChange' | 'onFocus' | 'onBlur';
+
 /** Minimal parser contract; Zod schemas satisfy this structurally without coupling core to Zod. */
 export interface PropertyParser<TProperties> {
   parse(input: unknown): TProperties;
 }
 
 /**
- * Single source of truth for one reusable SDUI node type.
- * A concrete definition co-locates type identity, defaults, property contract and legal content mode.
+ * Canonical owner for one reusable SDUI node type.
+ * Defaults are always resolved before strict parsing. Categories/events describe authoring capabilities,
+ * while the exact property parser remains the final authority for legal serialized fields.
  */
 export interface NodeDefinition<TProperties = unknown> {
   readonly type: string;
@@ -22,4 +26,6 @@ export interface NodeDefinition<TProperties = unknown> {
   readonly defaults?: Readonly<Record<string, unknown>>;
   readonly properties: PropertyParser<TProperties>;
   readonly children: SduiContentMode;
+  readonly categories?: readonly SduiPropertyCategory[];
+  readonly supportedEvents?: readonly SduiEventName[];
 }
