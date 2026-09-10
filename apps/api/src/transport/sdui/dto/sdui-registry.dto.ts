@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { screenSchema, targetAppSchema } from '@carbroz/ui-sdk';
+import { screenSchema, targetAppSchema } from '@carbroz/sdui-engine';
 
 const registryNodeSchema = z.object({
   name: z.string().trim().min(1),
