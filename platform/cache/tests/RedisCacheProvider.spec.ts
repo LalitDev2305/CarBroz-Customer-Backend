@@ -108,6 +108,29 @@ describe('RedisCacheProvider', () => {
     expect(client.disconnect).toHaveBeenCalledWith(false);
   });
 
+  it('is a no-op when Redis is already closed and returns null for cache misses', async () => {
+    const { client } = fakeRedis('end');
+    const provider = new RedisCacheProvider(client);
+
+    await expect(provider.shutdown()).resolves.toBeUndefined();
+    expect(client.quit).not.toHaveBeenCalled();
+    await expect(provider.get('missing')).resolves.toBeNull();
+  });
+
+  it('supports non-expiring values and rejects non-serializable undefined values', async () => {
+    const { client } = fakeRedis();
+    const provider = new RedisCacheProvider(client);
+
+    await provider.set('permanent', 'value');
+    expect(client.set).toHaveBeenCalledWith('carbroz:cache:permanent', '"value"');
+    await expect(provider.set('undefined', undefined)).rejects.toThrow('Cache values must be JSON serializable');
+  });
+
+  it('rejects an empty cache namespace at construction time', () => {
+    const { client } = fakeRedis();
+    expect(() => new RedisCacheProvider(client, { keyPrefix: '   ' })).toThrow('Redis cache keyPrefix must not be empty');
+  });
+
   it('rejects invalid TTLs and empty keys before issuing Redis commands', async () => {
     const { client } = fakeRedis();
     const provider = new RedisCacheProvider(client);
