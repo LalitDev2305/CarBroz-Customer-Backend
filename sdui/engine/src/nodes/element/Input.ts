@@ -25,7 +25,9 @@ export type InputProperties = z.infer<typeof inputPropertiesSchema>;
 export const InputDefinition: NodeDefinition<InputProperties> = {
   type: INPUT,
   level: 'element',
-  defaults: { semanticRole: 'input' },
+  defaults: { semanticRole: 'input', keyboardType: 'text' },
   properties: inputPropertiesSchema,
   children: 'none',
+  categories: ['base', 'style', 'content', 'behavior', 'metadata'],
+  supportedEvents: ['onValueChange', 'onFocus', 'onBlur'],
 };
