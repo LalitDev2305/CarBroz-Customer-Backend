@@ -3,6 +3,7 @@ import type { ScreenContext } from '../../core/ScreenContext.js';
 import type { SduiScreen } from '../../core/SduiModel.js';
 import { action, ref } from '../../core/Action.js';
 import { SduiBuilder } from '../../core/SduiBuilder.js';
+import { partnerAuthTheme } from './PartnerAuthTheme.js';
 
 export class PartnerOtpScreen implements ScreenComposer {
   readonly screenId = 'partner_otp';
@@ -14,33 +15,17 @@ export class PartnerOtpScreen implements ScreenComposer {
     return this.builder.screen({
       id: this.screenId,
       targetApp: this.targetApp,
-      theme: {
-        theme: 'light',
-        statusBar: 'transparent',
-        properties: {
-          gradient: {
-            type: 'linear',
-            angle: 135,
-            colors: [
-              { color: '#DDF8F6', stop: 0 },
-              { color: '#F7FEFD', stop: 0.28 },
-              { color: '#FFFFFF', stop: 0.55 },
-              { color: '#D9F7F4', stop: 1 },
-            ],
-          },
-        },
-      },
+      theme: partnerAuthTheme,
     }, screen => {
       screen.template('form_template', 'tpl_partner_otp_v1', template => {
         template.base()
-          .vertical()
           .spacing(24)
           .horizontalAlignment('center')
           .fillMaxSize()
           .padding({ start: 24, top: 32, end: 24, bottom: 24 });
 
         template.component('stack_component', 'otp_header', header => {
-          header.base().vertical().spacing(8).horizontalAlignment('center').fillMaxWidth();
+          header.base().spacing(8).horizontalAlignment('center').fillMaxWidth();
 
           header.text('otp_title', title => {
             title.content().text('Verify OTP');
@@ -55,10 +40,10 @@ export class PartnerOtpScreen implements ScreenComposer {
         });
 
         template.component('stack_component', 'otp_form', form => {
-          form.base().vertical().spacing(16).horizontalAlignment('center').fillMaxWidth();
+          form.base().spacing(16).horizontalAlignment('center').fillMaxWidth();
 
           form.section('stack_section', 'otp_input_section', section => {
-            section.base().vertical().horizontalAlignment('center').fillMaxWidth();
+            section.base().horizontalAlignment('center').fillMaxWidth();
 
             section.input('otp_input', input => {
               input.content().placeholder('000000').maxLength(6);
@@ -73,7 +58,7 @@ export class PartnerOtpScreen implements ScreenComposer {
           });
 
           form.section('stack_section', 'otp_action_section', section => {
-            section.base().vertical().spacing(12).horizontalAlignment('center').fillMaxWidth();
+            section.base().spacing(12).horizontalAlignment('center').fillMaxWidth();
 
             section.button('verify_otp_button', button => {
               button.content().text('Verify & Continue');
