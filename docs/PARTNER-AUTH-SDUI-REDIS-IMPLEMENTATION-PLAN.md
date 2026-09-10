@@ -1,6 +1,6 @@
 # Partner Authentication + SDUI + Redis Implementation Plan
 
-> **Status:** AUTH/SECURITY BEHAVIOR FROZEN; SDUI composition ownership updated to the final single-engine architecture.
+> **Status:** AUTH/SECURITY BEHAVIOR FROZEN; SDUI composition ownership and final OTP identity/UX synchronized with the current single-engine architecture.
 >
 > **Branch:** `development`
 >
@@ -43,6 +43,7 @@ frontend MVI/UDF runtime
   → bindings/context/response resolution
   → generic action execution
   → transient auth-flow state
+  → hidden resend cooldown state/timing
   → destination verification/rendering
 ```
 
@@ -85,7 +86,7 @@ No `$form`, `$payload` or `$state` namespace is authorized.
 
 ---
 
-## 3. Canonical Destination
+## 3. Canonical Destination and identity semantics
 
 ```text
 screenId
@@ -111,6 +112,8 @@ destination.screenId     == loaded.screenId
 destination.templateId   == loaded.template.id
 destination.templateType == loaded.template.type
 ```
+
+Concrete Template/Component/Section/Group/Element IDs are unique instance identities. Reuse belongs to generic node `type`, properties/actions and composition patterns, never reuse of concrete IDs across screens.
 
 ---
 
@@ -145,7 +148,7 @@ Authenticated Bootstrap
   → same partner_dashboard Destination
 ```
 
-The transport routes remain frozen while screen composition ownership migrates.
+The transport routes remain frozen while screen composition ownership remains engine-owned.
 
 ---
 
@@ -189,12 +192,14 @@ action.request({
 
 ```text
 screenId       = partner_otp
-templateId     = tpl_partner_otp_v1
+templateId     = tpl_P6X8N3
 templateType   = form_template
 endpoint       = /api/v1/partner/screen/auth_otp
 method         = GET
 authentication = NONE
 ```
+
+`tpl_P6X8N3` is the opaque stable Partner OTP template identity. Legacy semantic template ID `tpl_partner_otp_v1` is superseded and must not be emitted by current implementation.
 
 Legacy `{ template, api }` navigation is forbidden.
 
@@ -206,9 +211,15 @@ Loaded OTP identity:
 
 ```text
 screenId      = partner_otp
-template.id   = tpl_partner_otp_v1
+template.id   = tpl_P6X8N3
 template.type = form_template
 targetApp     = PARTNER
+```
+
+Six visual OTP cells represent one logical six-digit binding:
+
+```text
+otp ← { $binding: "otp" }
 ```
 
 Verify request:
@@ -223,17 +234,46 @@ responseMode   = destination
 References:
 
 ```text
-challengeId ← { $response: "data.challengeId" }
+challengeId ← latest successful Send OTP challenge
 phoneNumber ← { $context: "authFlow.phoneNumber" }
 otp         ← { $binding: "otp" }
 deviceId    ← { $context: "deviceId" }
 ```
 
-The new screen implementation must express these through `ref.*` helpers without changing serialized output.
+The screen implementation must express these through the generic engine action/reference model without creating Partner/OTP-specific action types.
 
 ---
 
-## 8. Verify OTP security order — permanent
+## 8. Resend OTP + cooldown boundary — frozen
+
+Redis/backend business policy remains authoritative for whether another OTP request is allowed. Frontend UX state must never bypass server rate/cooldown enforcement.
+
+The final screen UX does **not** render a visible countdown. Instead:
+
+```text
+COOLDOWN
+  Resend OTP visible
+  disabled / grey
+  hidden timer runs in frontend/runtime
+
+READY
+  Resend OTP visible
+  enabled / clickable
+```
+
+The initial successful Send OTP starts the local hidden cooldown. A READY tap calls the same:
+
+```text
+POST /api/v1/partner/auth/send_otp
+```
+
+using the active phone number and device ID. Resend is immediately disabled to prevent duplicate taps. On success the frontend retains the newest successful challenge and restarts the hidden cooldown. On failure it exposes the request error and restores an appropriate retryable state subject to backend policy.
+
+`expiresInSeconds` represents OTP/challenge validity and must not be interpreted as resend eligibility. If cooldown duration is backend-configurable it must be represented separately, for example as `resendAfterSeconds`.
+
+---
+
+## 9. Verify OTP security order — permanent
 
 ```text
 load phone/device-bound challenge
@@ -260,7 +300,7 @@ No SDUI architecture work may modify this ordering.
 
 ---
 
-## 9. Redis OTP persistence — permanent
+## 10. Redis OTP persistence — permanent
 
 Production persistence is exactly:
 
@@ -291,7 +331,7 @@ Test-only deterministic in-memory composition is allowed only at executable test
 
 ---
 
-## 10. Dashboard destination — frozen
+## 11. Dashboard destination — frozen
 
 ```text
 screenId       = partner_dashboard
@@ -322,7 +362,7 @@ The registry route may remain the retrieval mechanism while publication lifecycl
 
 ---
 
-## 11. SESSION error semantics — frozen
+## 12. SESSION error semantics — frozen
 
 Missing/invalid credentials for SESSION routes must produce safe canonical auth responses:
 
@@ -335,21 +375,19 @@ Never convert transport-owned JWT/auth failures into 500 responses and never exp
 
 ---
 
-## 12. Frontend transient auth-flow state
+## 13. Frontend transient auth-flow state
 
 After successful Send OTP and before OTP destination execution:
 
 ```text
-authFlow.phoneNumber   = resolved Send OTP request phoneNumber
-lastSuccessfulResponse = complete successful Send OTP response envelope
+authFlow.phoneNumber = resolved Send OTP request phoneNumber
+latestSuccessfulSendOtpResponse = complete successful Send OTP response envelope
+activeChallengeId = latest successful Send OTP challengeId
+resendEnabled = false
+hidden resend cooldown = running
 ```
 
-This supplies:
-
-```text
-$context: authFlow.phoneNumber
-$response: data.challengeId
-```
+This supplies the latest challenge, phone context and generic OTP binding to Verify OTP. After every successful resend, the latest successful challenge replaces the previous active challenge.
 
 Clear state on successful Verify OTP, abandoned flow, logout/reset or new auth flow.
 
@@ -357,9 +395,9 @@ OTP plaintext must not become reusable persistent application state.
 
 ---
 
-## 13. Property/default migration boundary
+## 14. Property/default migration boundary
 
-Partner Auth screen source now follows the engine's five property categories:
+Partner Auth screen source follows the engine's five property categories:
 
 ```text
 base/default
@@ -373,33 +411,30 @@ Node definitions own canonical defaults. Screen composers specify only intention
 
 This is an authoring change only. Final canonical wire properties must preserve accepted behavior and pass strict schema validation.
 
+Generic rich text/inline span support, if required by Login/OTP visuals, belongs to the existing reusable `text` element contract. Generic enabled/disabled presentation/state belongs to reusable behavior/state contracts. Neither may become Partner-specific primitives.
+
 ---
 
-## 14. Screen migration order
+## 15. Screen migration status
 
-The original auth behavior campaign is complete. The new SDUI-engine convergence follows a separate architecture migration order:
+The original auth behavior campaign is complete. Current work is a narrowly scoped Partner OTP contract/convergence update; do not restart completed Login/OTP ownership migrations.
+
+The permanent order for this change remains:
 
 ```text
-property/default model
-→ fluent property scopes
-→ hierarchy DSL refinement
-→ complete action/ref authoring
-→ screen registration simplification
-→ Partner Login Golden Reference + deep parity
-→ Partner OTP + deep parity
-→ Partner Dashboard convergence
-→ duplicate screen-owner removal
-→ persisted registry convergence
-→ remaining screens
-→ retired ui-sdk remains absent; canonical action/composition ownership stays in engine
-→ final forensic freeze
+current documentation reconciliation
+→ inspect existing engine capabilities
+→ minimal generic capability additions only where missing
+→ Partner OTP composer update using Login as structural reference
+→ Destination identity convergence
+→ focused golden/regression proof
+→ canonical architecture/build/lint/test gates
+→ exact-SHA freeze
 ```
-
-Login and OTP migration are complete; retain this sequence only as historical migration evidence and do not restart completed phases.
 
 ---
 
-## 15. Historical completed security phases
+## 16. Historical completed security phases
 
 The earlier phases remain valid evidence for the behavior they proved:
 
@@ -419,20 +454,25 @@ repository audit
 → frontend MVI/UDF handoff
 ```
 
-Their old physical screen-owner locations do not override the current architecture ownership.
+Their old physical screen-owner locations or old OTP template identity do not override current authorities.
 
 ---
 
-## 16. Required regression proof after SDUI migration
+## 17. Required regression proof after OTP convergence
 
-The final migration must prove all prior security/transport behavior again, including:
+The final change must prove all prior security/transport behavior again, including:
 
 ```text
 guest Bootstrap
 → Login
 → Send OTP
-→ OTP Destination
+→ OTP Destination (tpl_P6X8N3)
 → OTP screen
+→ initial Resend disabled/grey
+→ hidden cooldown enables Resend
+→ Resend calls Send OTP again
+→ newest successful challenge retained
+→ six-digit aggregate OTP binding
 → Verify OTP
 → credentials
 → unauthenticated Dashboard rejected
@@ -440,19 +480,22 @@ guest Bootstrap
 → authenticated Bootstrap parity
 ```
 
-Plus architecture-specific parity:
+Plus architecture-specific proof:
 
-- Login old/new canonical deep equality;
-- OTP expected/new canonical deep equality;
-- request body mappings unchanged;
-- Destination identities unchanged;
-- strict validation unchanged or stronger;
-- Redis-only OTP persistence unchanged;
-- no API/domain screen-composition owner remains after safe migration.
+- Login remains the structural golden reference;
+- OTP expected canonical output equals engine output;
+- every concrete OTP node ID is unique and does not reuse Login IDs;
+- request body mappings are correct;
+- no visible countdown is emitted;
+- Destination identities match loaded screen identity;
+- strict validation is unchanged or stronger;
+- Redis-only OTP persistence is unchanged;
+- no API/domain screen-composition owner is introduced;
+- no Partner/OTP-specific action language is introduced.
 
 ---
 
-## 17. Persistence/deployment invariants
+## 18. Persistence/deployment invariants
 
 - historical Prisma migrations remain immutable;
 - OTP retirement remains forward-only;
@@ -463,8 +506,8 @@ Plus architecture-specific parity:
 
 ---
 
-## 18. Final change rule
+## 19. Final change rule
 
-Any future change to OTP security, persistence, Destination identity, auth payloads, SESSION semantics or credential ordering reopens the corresponding security/behavior contract and requires full closeout.
+Any future change to OTP security, persistence, Destination identity, auth payloads, SESSION semantics, credential ordering, OTP binding semantics or Resend UX reopens the corresponding security/behavior contract and requires full closeout.
 
 SDUI internal authoring may evolve only through the documentation-first process in `sdui/README.md` and `sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`.
