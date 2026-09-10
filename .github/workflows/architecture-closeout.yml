@@ -37,9 +37,7 @@ jobs:
           set -euo pipefail
           git rm -r sdui/ui-sdk
           pnpm install --lockfile-only --no-frozen-lockfile
-          git checkout 6f1f7c2634343535044ce06fb1d1fc2389869407 -- .github/workflows/architecture-closeout.yml
-          git rm .github/workflows/temporary-lockfile-refresh.yml
-          git add pnpm-lock.yaml .github/workflows/architecture-closeout.yml
+          git add pnpm-lock.yaml
           test ! -e sdui/ui-sdk
           if git grep -nE "from ['\"]@carbroz/ui-sdk|import[[:space:]]*\(['\"]@carbroz/ui-sdk|['\"]@carbroz/ui-sdk['\"][[:space:]]*:" -- ':!docs/**'; then
             echo 'Live ui-sdk import or package dependency remains' >&2
