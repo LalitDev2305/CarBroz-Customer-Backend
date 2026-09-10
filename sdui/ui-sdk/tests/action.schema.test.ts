@@ -31,6 +31,14 @@ describe('SDUI action contract', () => {
     expect(actionSchema.safeParse({ type: 'state', targetId: 'details', payload: { operation: 'set', property: 'background.color', value: '#000000' } }).success).toBe(false);
   });
 
+  it('rejects state set without a value', () => {
+    expect(actionSchema.safeParse({ type: 'state', targetId: 'details', payload: { operation: 'set', property: 'visible' } }).success).toBe(false);
+  });
+
+  it('rejects state toggle when a value is supplied', () => {
+    expect(actionSchema.safeParse({ type: 'state', targetId: 'details', payload: { operation: 'toggle', property: 'visible', value: true } }).success).toBe(false);
+  });
+
   it('rejects value toggle because value is not boolean runtime state', () => {
     expect(actionSchema.safeParse({ type: 'state', targetId: 'input', payload: { operation: 'toggle', property: 'value' } }).success).toBe(false);
   });
