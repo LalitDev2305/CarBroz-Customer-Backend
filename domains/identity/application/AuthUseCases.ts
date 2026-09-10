@@ -259,8 +259,8 @@ export interface RefreshTokenInput {
 
 /** Raw replacement refresh material is returned only once, after its hash has been persisted. */
 export interface RefreshTokenResult {
-  user: rotation.session.user,
-  session: rotation.session,
+  user: User;
+  session: UserSession;
   refreshToken: string;
 }
 
