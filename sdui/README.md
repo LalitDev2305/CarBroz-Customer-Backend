@@ -157,6 +157,8 @@ The destination identifies the next resource; the actual Login/OTP screen defini
 
 Phase/audit/reconciliation documents under `sdui/` are historical evidence unless explicitly listed above as a current authority. Keep them truthful to the repository state they audited; do not use old package paths or builder APIs from those files as implementation instructions.
 
+`SDUI-FINAL-FORENSIC-AUDIT.md` and `PHASE-A-SOURCE-RECONCILIATION.md` are explicitly labeled historical/superseded because they retain migration-era `ui-sdk` evidence that must not be interpreted as current architecture.
+
 Examples include historical phase closeouts, source reconciliations and forensic audits.
 
 ## 9. Change rule
