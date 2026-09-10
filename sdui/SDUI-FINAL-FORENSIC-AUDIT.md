@@ -1,5 +1,7 @@
 # CarBroz SDUI Final Forensic Convergence Audit
 
+> **HISTORICAL / SUPERSEDED IMPLEMENTATION EVIDENCE:** This audit records the earlier `ui-sdk` convergence state. It is not current implementation authority and MUST NOT be used to restore `ui-sdk`, `SduiScreenBuilder`, Partner wrapper builders, or the old action-contract path. Current authority is `sdui/README.md` -> `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md` -> current Partner Auth contracts -> current source/gates.
+
 > **Scope:** Final source-level audit for the SDUI composition convergence defined by `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md` and `PHASE-A-SOURCE-RECONCILIATION.md`.
 >
 > **Freeze rule:** This document records source/test convergence. `COMPLETE + FROZEN` is valid only when Backend CI and Backend Architecture Closeout both complete successfully on the exact `development` SHA containing this audit.

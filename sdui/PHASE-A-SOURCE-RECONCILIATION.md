@@ -1,5 +1,7 @@
 # SDUI Phase A — Source Reconciliation
 
+> **HISTORICAL / SUPERSEDED MIGRATION EVIDENCE:** This document describes the source state and decisions at Phase A. References to `ui-sdk` or migration-era owners are historical and do not override the current `sdui/README.md`, frozen SDUI implementation plan, current Constitution, or current source/gates.
+
 > **Status:** COMPLETE — source audit only. No production SDUI implementation changes are included in this phase.
 >
 > **Authority:** `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`
