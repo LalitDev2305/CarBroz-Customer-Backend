@@ -1,4 +1,4 @@
-import type { SduiTargetApp } from '@carbroz/ui-sdk';
+import type { SduiTargetApp } from '../core/SduiModel.js';
 import type { ScreenComposer } from '../core/ScreenComposer.js';
 
 export class DuplicateScreenRegistrationError extends Error {
