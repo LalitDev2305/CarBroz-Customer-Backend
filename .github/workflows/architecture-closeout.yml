@@ -135,11 +135,7 @@ jobs:
 
       - name: Package tracked closeout source context
         if: failure()
-        run: |
-          git archive --format=zip --output=closeout-source.zip HEAD -- \
-            apps/api/src domains platform foundation \
-            sdui/engine/src sdui/registry/src sdui/ui-sdk/src \
-            tests vitest.config.ts
+        run: git archive --format=zip --output=closeout-source.zip HEAD
 
       - name: Upload closeout test diagnostics
         if: failure()
