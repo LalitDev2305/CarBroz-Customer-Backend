@@ -8,7 +8,7 @@ const canonicalWorkspaces = [
   'domains/identity', 'domains/partner', 'domains/customer', 'domains/catalog-pricing',
   'domains/booking', 'domains/operations', 'domains/financials', 'domains/communications',
   'domains/engagement', 'domains/configuration', 'domains/dispute', 'domains/enterprise', 'domains/audit',
-  'sdui/ui-sdk', 'sdui/registry',
+  'sdui/engine', 'sdui/registry',
   'platform/database', 'platform/cache', 'platform/messaging', 'platform/storage',
   'platform/observability', 'platform/integrations',
   'foundation/kernel',
@@ -31,7 +31,7 @@ const isProductionTs = (file: string) => /\.[cm]?tsx?$/.test(file) && !isTest(fi
 describe('final module completeness policy', () => {
   it('has exactly the canonical production workspaces and no legacy workspace roots', () => {
     for (const workspace of canonicalWorkspaces) expect(fs.existsSync(path.join(root, workspace, 'package.json')), workspace).toBe(true);
-    for (const forbidden of ['packages', 'shared', 'libs']) expect(fs.existsSync(path.join(root, forbidden)), forbidden).toBe(false);
+    for (const forbidden of ['packages', 'shared', 'libs', 'sdui/ui-sdk']) expect(fs.existsSync(path.join(root, forbidden)), forbidden).toBe(false);
   });
 
   it('has architecture, contract, integration and e2e test layers', () => {
