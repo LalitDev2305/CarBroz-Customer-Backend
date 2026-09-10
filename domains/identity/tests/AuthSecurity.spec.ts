@@ -60,7 +60,7 @@ describe('CW5 Identity authentication security primitives', () => {
     expect(security.hashRefreshToken(first)).not.toContain(first);
   });
 
-  it('persists only the OTP hash, never returns the delivered OTP, and returns the frozen Phase 6 destination', async () => {
+  it('persists only the OTP hash, never returns the delivered OTP, and returns the frozen Partner OTP destination', async () => {
     const security = new NodeAuthSecurityProvider();
     let persistedHash = '';
     let deliveredOtp = '';
@@ -116,10 +116,12 @@ describe('CW5 Identity authentication security primitives', () => {
     expect(result.message).toBe('OTP sent successfully');
     expect(result.challengeId).toBe('33333333-3333-4333-8333-333333333333');
     expect(result.expiresInSeconds).toBe(AUTH_SECURITY_POLICY.otp.ttlMs / 1000);
+    expect(result.resendAfterSeconds).toBe(AUTH_SECURITY_POLICY.otp.resendCooldownMs / 1000);
+    expect(result.resendAfterSeconds).not.toBe(result.expiresInSeconds);
     expect(result.isNewUser).toBe(true);
     expect(result.nextScreen).toEqual({
       screenId: 'partner_otp',
-      templateId: 'tpl_partner_otp_v1',
+      templateId: 'tpl_P6X8N3',
       templateType: 'form_template',
       endpoint: '/api/v1/partner/screen/auth_otp',
       method: 'GET',
