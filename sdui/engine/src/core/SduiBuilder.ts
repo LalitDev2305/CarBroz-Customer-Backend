@@ -103,6 +103,8 @@ class SectionScope extends ElementScope {
   }
 
   group(type: string, id: string, properties: unknown = {}, compose: Compose<GroupScope>): void {
+    const parsedProperties = this.nodeCreator.properties('group', type, properties);
+
     if (this.branch?.kind === 'elements') {
       throw new Error('SDUI section cannot contain both elements and groups');
     }
@@ -114,7 +116,6 @@ class SectionScope extends ElementScope {
     compose(scope);
     if (elements.length === 0) throw new Error(`SDUI group '${id}' requires at least one element`);
 
-    const parsedProperties = this.nodeCreator.properties('group', type, properties);
     this.branch.values.push({ id, type, ...withOptionalProperties(parsedProperties), elements });
   }
 
@@ -153,6 +154,8 @@ class ComponentScope extends ElementScope {
   }
 
   section(type: string, id: string, properties: unknown = {}, compose: Compose<SectionScope>): void {
+    const parsedProperties = this.nodeCreator.properties('section', type, properties);
+
     if (this.branch?.kind === 'elements') {
       throw new Error('SDUI component cannot contain both elements and sections');
     }
@@ -161,12 +164,11 @@ class ComponentScope extends ElementScope {
 
     const scope = new SectionScope(this.nodeCreator);
     compose(scope);
-    const childBranch = scope.finish(id);
-    const parsedProperties = this.nodeCreator.properties('section', type, properties);
+    const contentBranch = scope.finish(id);
 
-    const section: SduiSection = childBranch.kind === 'elements'
-      ? { id, type, ...withOptionalProperties(parsedProperties), elements: childBranch.values }
-      : { id, type, ...withOptionalProperties(parsedProperties), groups: childBranch.values };
+    const section: SduiSection = contentBranch.kind === 'elements'
+      ? { id, type, ...withOptionalProperties(parsedProperties), elements: contentBranch.values }
+      : { id, type, ...withOptionalProperties(parsedProperties), groups: contentBranch.values };
 
     this.branch.values.push(section);
   }
@@ -195,14 +197,14 @@ class TemplateScope {
   constructor(private readonly creator: NodeCreator) {}
 
   component(type: string, id: string, properties: unknown = {}, compose: Compose<ComponentScope>): void {
+    const parsedProperties = this.creator.properties('component', type, properties);
     const scope = new ComponentScope(this.creator);
     compose(scope);
-    const branch = scope.finish(id);
-    const parsedProperties = this.creator.properties('component', type, properties);
+    const contentBranch = scope.finish(id);
 
-    const component: SduiComponent = branch.kind === 'elements'
-      ? { id, type, ...withOptionalProperties(parsedProperties), elements: branch.values }
-      : { id, type, ...withOptionalProperties(parsedProperties), sections: branch.values };
+    const component: SduiComponent = contentBranch.kind === 'elements'
+      ? { id, type, ...withOptionalProperties(parsedProperties), elements: contentBranch.values }
+      : { id, type, ...withOptionalProperties(parsedProperties), sections: contentBranch.values };
 
     this.components.push(component);
   }
@@ -221,10 +223,10 @@ class ScreenScope {
   template(type: string, id: string, properties: unknown = {}, compose: Compose<TemplateScope>): void {
     if (this.templateValue) throw new Error('SDUI screen requires exactly one template');
 
+    const parsedProperties = this.creator.properties('template', type, properties);
     const scope = new TemplateScope(this.creator);
     compose(scope);
     const components = scope.finish(id);
-    const parsedProperties = this.creator.properties('template', type, properties);
     this.templateValue = { id, type, ...withOptionalProperties(parsedProperties), components };
   }
 
