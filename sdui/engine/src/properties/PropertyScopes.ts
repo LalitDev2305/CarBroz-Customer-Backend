@@ -1,7 +1,9 @@
-import type { SduiAction, SduiElement } from '../core/SduiModel.js';
+import type { SduiAction, SduiElement, SduiValueReference } from '../core/SduiModel.js';
 import type { Arrangement, EdgeInsets, HorizontalAlignment, Orientation, TextAlignment, VerticalAlignment } from '../core/value-objects/Layout.js';
 import type { Background, Border, Shape } from '../core/value-objects/Appearance.js';
 import type { Accessory } from '../core/value-objects/Accessory.js';
+import type { SegmentedInputPresentation } from '../nodes/element/Input.js';
+import type { TextSpan } from '../nodes/element/Text.js';
 
 type MutableRecord = Record<string, unknown>;
 type ElementExtras = Omit<SduiElement, 'id' | 'type' | 'properties'>;
@@ -82,8 +84,10 @@ export class StylePropertyScope {
   lineHeight(value: number): this { return this.property('lineHeight', value); }
   letterSpacing(value: number): this { return this.property('letterSpacing', value); }
   color(value: string): this { return this.property('color', value); }
+  disabledColor(value: string): this { return this.property('disabledColor', value); }
   textColor(value: string): this { return this.property('textColor', value); }
   textAlign(value: TextAlignment): this { return this.property('textAlign', value); }
+  presentation(value: SegmentedInputPresentation): this { return this.property('presentation', value); }
 
   private property(key: string, value: unknown): this {
     this.sink.setProperty(key, value);
@@ -94,7 +98,8 @@ export class StylePropertyScope {
 export class ContentPropertyScope {
   constructor(private readonly sink: PropertySink) {}
 
-  text(value: string): this { return this.property('text', value); }
+  text(value: string | SduiValueReference): this { return this.property('text', value); }
+  spans(value: readonly TextSpan[]): this { return this.property('spans', [...value]); }
   url(value: string): this { return this.property('url', value); }
   placeholder(value: string): this { return this.property('placeholder', value); }
   maxLength(value: number): this { return this.property('maxLength', value); }
@@ -112,6 +117,7 @@ export class BehaviorPropertyScope {
   constructor(private readonly sink: PropertySink) {}
 
   keyboardType(value: 'text' | 'phone' | 'number' | 'email' | 'password'): this { return this.property('keyboardType', value); }
+  enabled(value = true): this { return this.property('enabled', value); }
   binding(key: string): this { this.sink.setExtra('binding', { key }); return this; }
   validation(value: Record<string, unknown>): this { this.sink.setExtra('validation', value); return this; }
   required(message?: string): this {
