@@ -210,6 +210,54 @@ describe('RedisOtpChallengeRepository', () => {
     await expect(repository.tryConsume(second.id, new Date(secondNow.getTime() + 2000), 5)).resolves.toBe(false);
   });
 
+  it('rejects invalid repository policy and challenge creation inputs before Redis writes', async () => {
+    const client = new FakeAtomicRedisClient();
+    expect(() => new RedisOtpChallengeRepository(client, { rateLimitWindowMs: 0 })).toThrow('rateLimitWindowMs');
+    const repository = new RedisOtpChallengeRepository(client, { rateLimitWindowMs: 900_000 });
+    const now = new Date('2026-09-09T09:33:30.000Z');
+
+    await expect(repository.tryCreateWithinRateLimit({ ...createInput(now), phoneNumber: '   ' }, guard(now))).rejects.toThrow('phoneNumber');
+    await expect(repository.tryCreateWithinRateLimit({ ...createInput(now), deviceId: '   ' }, guard(now))).rejects.toThrow('deviceId');
+    await expect(repository.tryCreateWithinRateLimit({ ...createInput(now), otpHash: '' }, guard(now))).rejects.toThrow('otpHash');
+    await expect(repository.tryCreateWithinRateLimit({ ...createInput(now), maxAttempts: 0 }, guard(now))).rejects.toThrow('maxAttempts');
+    await expect(repository.tryCreateWithinRateLimit(createInput(now), { ...guard(now), maxChallenges: 0 })).rejects.toThrow('maxChallenges');
+    await expect(repository.tryCreateWithinRateLimit(createInput(now), { ...guard(now), windowStart: new Date(now.getTime() + 1) })).rejects.toThrow('windowStart');
+    await expect(repository.tryCreateWithinRateLimit({ ...createInput(now), expiresAt: now }, guard(now))).rejects.toThrow('expiresAt');
+  });
+
+  it('fails closed on malformed Redis indexes and challenge payloads', async () => {
+    const now = new Date('2026-09-09T09:33:40.000Z');
+    const invalidIndexClient = new FakeAtomicRedisClient();
+    const invalidIndexRepository = new RedisOtpChallengeRepository(invalidIndexClient, { rateLimitWindowMs: 900_000 });
+    await invalidIndexClient.set(`${NAMESPACE}public:bad-public-id`, 'not-an-id');
+    await expect(invalidIndexRepository.findForVerification('bad-public-id', '+919999999999', 'device-1')).rejects.toThrow('invalid internal ID');
+
+    const client = new FakeAtomicRedisClient();
+    const repository = new RedisOtpChallengeRepository(client, { rateLimitWindowMs: 900_000 });
+    const created = (await repository.tryCreateWithinRateLimit(createInput(now), guard(now)))!;
+    client.overwrite(`${NAMESPACE}challenge:${created.id}`, JSON.stringify({ ...created, expiresAt: 'not-a-date' }));
+    await expect(repository.findLatestByPhone(created.phoneNumber)).rejects.toThrow('corrupt');
+  });
+
+  it('handles missing challenge records safely for failed-attempt, consume and invalidate operations', async () => {
+    const client = new FakeAtomicRedisClient();
+    const repository = new RedisOtpChallengeRepository(client, { rateLimitWindowMs: 900_000 });
+    const now = new Date('2026-09-09T09:33:50.000Z');
+
+    await expect(repository.recordFailedAttempt(999, 5)).resolves.toBeNull();
+    await expect(repository.tryConsume(999, now, 5)).resolves.toBe(false);
+    await expect(repository.invalidate(999, now)).resolves.toBeUndefined();
+  });
+
+  it('fails closed when Redis returns structurally invalid mutation results', async () => {
+    const now = new Date('2026-09-09T09:33:55.000Z');
+    const client = new FakeAtomicRedisClient();
+    const repository = new RedisOtpChallengeRepository(client, { rateLimitWindowMs: 900_000 });
+    client.eval = vi.fn(async (script) => script.includes('create-with-rate-limit:v1') ? [1, '1', 42] : 42);
+    await expect(repository.tryCreateWithinRateLimit(createInput(now), guard(now))).rejects.toThrow('invalid challenge record');
+    await expect(repository.recordFailedAttempt(1, 5)).rejects.toThrow('invalid data');
+  });
+
   it('invalidates idempotently and propagates corrupt/Redis failures without fallback', async () => {
     const client = new FakeAtomicRedisClient();
     const repository = new RedisOtpChallengeRepository(client, { rateLimitWindowMs: 900_000 });
