@@ -57,6 +57,16 @@ export const containerPropertyShape = {
   shape: shapeSchema.optional(),
 } as const;
 
+/**
+ * Universal defaults for stack-like structural definitions.
+ * `spacing(0)` is represented by the existing canonical verticalArrangement wire field.
+ */
+export const DEFAULT_STACK_BASE_PROPERTIES = Object.freeze({
+  orientation: 'vertical' as const,
+  verticalArrangement: Object.freeze({ type: 'spacedBy' as const, spacing: 0 }),
+  padding: Object.freeze({ start: 0, top: 0, end: 0, bottom: 0 }),
+});
+
 export type Orientation = z.infer<typeof orientationSchema>;
 export type EdgeInsets = z.infer<typeof edgeInsetsSchema>;
 export type Arrangement = z.infer<typeof arrangementSchema>;
