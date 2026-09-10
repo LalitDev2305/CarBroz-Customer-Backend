@@ -108,6 +108,19 @@ describe('SduiBuilder', () => {
     })).toThrow('SDUI component cannot contain both elements and sections');
   });
 
+  it('rejects sections followed by direct component elements', () => {
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
+      root.template('stack_template', 'template', template => {
+        template.component('stack_component', 'component', component => {
+          component.section('stack_section', 'section', section => {
+            section.text('subtitle', { text: 'Partner' });
+          });
+          component.text('title', { text: 'CarBroz' });
+        });
+      });
+    })).toThrow('SDUI component cannot contain both elements and sections');
+  });
+
   it('rejects section elements mixed with groups', () => {
     expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
       root.template('stack_template', 'template', template => {
@@ -121,6 +134,141 @@ describe('SduiBuilder', () => {
         });
       });
     })).toThrow('SDUI section cannot contain both elements and groups');
+  });
+
+  it('rejects groups followed by direct section elements', () => {
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
+      root.template('stack_template', 'template', template => {
+        template.component('stack_component', 'component', component => {
+          component.section('stack_section', 'section', section => {
+            section.group('stack_group', 'group', group => {
+              group.text('inside', { text: 'Inside' });
+            });
+            section.text('outside', { text: 'Outside' });
+          });
+        });
+      });
+    })).toThrow('SDUI section cannot contain both elements and groups');
+  });
+
+  it('builds property overloads, grouped content, element extras and explicit screen options', () => {
+    const screen = new SduiBuilder().screen({
+      id: 'overloads',
+      targetApp: 'PARTNER',
+      schemaVersion: '9.9.9',
+      metadata: { source: 'coverage' },
+    }, root => {
+      root.template('stack_template', 'template', { orientation: 'horizontal' }, template => {
+        template.component('stack_component', 'component', { orientation: 'horizontal' }, component => {
+          component.section('stack_section', 'section', { orientation: 'horizontal' }, section => {
+            section.group('stack_group', 'group', { orientation: 'horizontal' }, group => {
+              group.text('text', { text: 'Text' }, { metadata: { kind: 'text' } });
+              group.image('image', { url: 'https://example.invalid/image.png' }, { accessibility: { label: 'Image' } });
+              group.input('input', { placeholder: 'Input' }, { validation: { required: true } });
+              group.button('button', { text: 'Button' }, { analytics: { event: 'tap' } });
+            });
+          });
+        });
+      });
+    });
+
+    expect(screen.schemaVersion).toBe('9.9.9');
+    expect(screen.metadata).toEqual({ source: 'coverage' });
+    const group = screen.template.components[0]?.sections?.[0]?.groups?.[0];
+    expect(group?.elements).toHaveLength(4);
+    expect(group?.elements[0]?.metadata).toEqual({ kind: 'text' });
+    expect(group?.elements[1]?.accessibility).toEqual({ label: 'Image' });
+    expect(group?.elements[2]?.validation).toEqual({ required: true });
+    expect(group?.elements[3]?.analytics).toEqual({ event: 'tap' });
+  });
+
+  it('covers fluent image, text, input and button element helpers including metadata', () => {
+    const screen = new SduiBuilder().screen({ id: 'helpers', targetApp: 'PARTNER' }, root => {
+      root.template('stack_template', 'template', template => {
+        template.component('stack_component', 'component', component => {
+          component.text('text', node => {
+            node.content().text('Text');
+            node.metadata().metadata({ kind: 'copy' });
+          });
+          component.image('image', node => node.content().url('https://example.invalid/image.png'));
+          component.input('input', node => node.content().placeholder('Input'));
+          component.button('button', node => node.content().text('Button'));
+        });
+      });
+    });
+
+    expect(screen.template.components[0]?.elements).toHaveLength(4);
+  });
+
+  it('rejects every property overload that omits its required composition callback', () => {
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
+      root.template('stack_template', 'template', {} as Record<string, unknown>);
+    })).toThrow("SDUI template 'template' requires a composition callback");
+
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
+      root.template('stack_template', 'template', template => {
+        template.component('stack_component', 'component', {} as Record<string, unknown>);
+      });
+    })).toThrow("SDUI component 'component' requires a composition callback");
+
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
+      root.template('stack_template', 'template', template => {
+        template.component('stack_component', 'component', component => {
+          component.section('stack_section', 'section', {} as Record<string, unknown>);
+        });
+      });
+    })).toThrow("SDUI section 'section' requires a composition callback");
+
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
+      root.template('stack_template', 'template', template => {
+        template.component('stack_component', 'component', component => {
+          component.section('stack_section', 'section', section => {
+            section.group('stack_group', 'group', {} as Record<string, unknown>);
+          });
+        });
+      });
+    })).toThrow("SDUI group 'group' requires a composition callback");
+  });
+
+  it('rejects empty group, section, component and screen structures', () => {
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
+      root.template('stack_template', 'template', template => {
+        template.component('stack_component', 'component', component => {
+          component.section('stack_section', 'section', section => {
+            section.group('stack_group', 'group', () => undefined);
+          });
+        });
+      });
+    })).toThrow("SDUI group 'group' requires at least one element");
+
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
+      root.template('stack_template', 'template', template => {
+        template.component('stack_component', 'component', component => {
+          component.section('stack_section', 'section', () => undefined);
+        });
+      });
+    })).toThrow("SDUI section 'section' requires exactly one non-empty branch: elements or groups");
+
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
+      root.template('stack_template', 'template', template => {
+        template.component('stack_component', 'component', () => undefined);
+      });
+    })).toThrow("SDUI component 'component' requires exactly one non-empty branch: elements or sections");
+
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, () => undefined))
+      .toThrow("SDUI screen 'screen' requires exactly one template");
+  });
+
+  it('rejects a second template on the same screen', () => {
+    expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
+      const compose = (template: Parameters<Parameters<typeof root.template>[2]>[0]) => {
+        template.component('stack_component', 'component', component => {
+          component.text('title', { text: 'CarBroz' });
+        });
+      };
+      root.template('stack_template', 'first', compose);
+      root.template('stack_template', 'second', compose);
+    })).toThrow('SDUI screen requires exactly one template');
   });
 
   it('rejects empty structural containers', () => {
