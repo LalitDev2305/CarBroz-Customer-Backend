@@ -7,6 +7,7 @@ on:
 permissions:
   contents: read
 
+# Temporary Phase 12 evidence only; remove after consuming the regenerated lock artifact.
 jobs:
   refresh-lockfile:
     runs-on: ubuntu-24.04
