@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { screenSchema } from '@carbroz/ui-sdk';
+import { screenSchema } from '@carbroz/sdui-engine';
 import { createPartnerDashboardScreen } from './partner-dashboard.screen.js';
 
 describe('Partner Dashboard Phase 10 contract', () => {
