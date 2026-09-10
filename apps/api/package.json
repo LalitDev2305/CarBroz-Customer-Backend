@@ -31,7 +31,6 @@
     "@carbroz/platform-storage": "workspace:*",
     "@carbroz/sdui-engine": "workspace:*",
     "@carbroz/sdui-registry": "workspace:*",
-    "@carbroz/ui-sdk": "workspace:*",
     "@fastify/awilix": "^8.2.0",
     "@fastify/cors": "^11.2.0",
     "@fastify/env": "^7.0.0",
