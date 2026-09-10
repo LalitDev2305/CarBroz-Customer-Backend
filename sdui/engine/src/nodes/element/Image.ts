@@ -23,7 +23,9 @@ export type ImageProperties = z.infer<typeof imagePropertiesSchema>;
 export const ImageDefinition: NodeDefinition<ImageProperties> = {
   type: IMAGE,
   level: 'element',
-  defaults: { semanticRole: 'image' },
+  defaults: { semanticRole: 'image', contentScale: 'fit' },
   properties: imagePropertiesSchema,
   children: 'none',
+  categories: ['base', 'content', 'behavior', 'metadata'],
+  supportedEvents: ['onClick', 'onLongClick'],
 };
