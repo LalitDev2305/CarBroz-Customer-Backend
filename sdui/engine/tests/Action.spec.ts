@@ -29,11 +29,40 @@ describe('SDUI action authoring', () => {
     })).toMatchObject({ type: 'navigate', payload: { screenId: 'partner_profile' } });
   });
 
+  it('covers canonical request and navigation defaults and optional targets', () => {
+    expect(action.request({
+      targetId: 'submit_button', method: 'GET', endpoint: '/api/v1/example', authentication: 'SESSION',
+    })).toEqual({
+      type: 'request',
+      targetId: 'submit_button',
+      payload: {
+        method: 'GET', endpoint: '/api/v1/example', authentication: 'SESSION',
+        validate: false, responseMode: 'none',
+      },
+    });
+
+    expect(action.navigate({
+      targetId: 'continue_button',
+      screenId: 'next', templateId: 'next_template', templateType: 'stack_template',
+      endpoint: '/api/v1/screen/next', method: 'POST', authentication: 'NONE',
+      body: { source: ref.literal('test') },
+    })).toEqual({
+      type: 'navigate',
+      targetId: 'continue_button',
+      payload: {
+        screenId: 'next', templateId: 'next_template', templateType: 'stack_template',
+        endpoint: '/api/v1/screen/next', method: 'POST', authentication: 'NONE',
+        responseMode: 'screen', body: { source: { $literal: 'test' } },
+      },
+    });
+  });
+
   it('creates presentation, state, external uri and sequence actions', () => {
     expect(action.present('cancel_dialog', 'dialog')).toEqual({
       type: 'present', targetId: 'cancel_dialog', payload: { presentation: 'dialog' },
     });
     expect(action.dismiss('cancel_dialog')).toEqual({ type: 'dismiss', targetId: 'cancel_dialog' });
+    expect(action.dismiss()).toEqual({ type: 'dismiss' });
     expect(action.state({ targetId: 'referral', operation: 'toggle', property: 'visible' })).toEqual({
       type: 'state', targetId: 'referral', payload: { operation: 'toggle', property: 'visible' },
     });
