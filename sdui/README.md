@@ -1,65 +1,96 @@
 # CarBroz SDUI Documentation Authority Map
 
-> **Status:** ACTIVE INDEX — read this before changing SDUI code.
+> **Status:** ACTIVE — read this before changing SDUI code.
 
-This file defines which SDUI documents are implementation authorities, which are compatibility/security contracts, and which are historical audit records.
+This file identifies the current SDUI implementation authorities and separates them from historical migration evidence.
 
-## 1. Read order before implementation
+## 1. Current read order
 
-Implementation must follow this order:
+For implementation, use this order:
 
 ```text
 1. SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md
-2. ui-sdk/ACTION-CONTRACT.md
-3. PARTNER-AUTH-SDUI-CONTRACT.md        // when Partner Auth is involved
-4. docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md
-5. docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md
-6. backend constitutions / freeze gates
+2. PARTNER-AUTH-SDUI-CONTRACT.md                 // Login / OTP behavior
+3. docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md
+4. docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md
+5. docs/MASTER-BACKEND-CONSTITUTION.md
+6. executable architecture / freeze gates
 ```
 
-If an older historical document describes a different authoring architecture, the current final architecture document wins for implementation design while the older document's already-frozen external behavior remains preserved.
+If a historical document describes a different builder, package, hierarchy, screen owner, or file path, it does not override this architecture.
 
----
+## 2. Permanent SDUI authority
 
-## 2. Primary implementation authority
+`sdui/engine` is the sole SDUI language, composition, definition, validation and screen-composition authority.
 
-### `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`
+It owns:
 
-This is the **single source of truth for SDUI architecture and implementation order**.
+- `Screen`, `Template`, `Component`, `Section`, `Group`, `Element` contracts;
+- `action.*` and `ref.*` wire authoring;
+- property scopes and canonical defaults;
+- node definitions and `NodeDefinitionRegistry`;
+- `ScreenRegistry` and explicit screen registration;
+- `SduiBuilder`;
+- `SduiValidator`;
+- `SduiService`;
+- serialization/model contracts;
+- Partner/Customer/Admin screen composers under `sdui/engine/src/screens/*`.
 
-It freezes:
+The retired `sdui/ui-sdk` package must not return.
 
-- one `sdui/engine` presentation authority;
-- Composite hierarchy;
-- explicit `template/component/section/group/element` hierarchy methods;
-- fluent dot-based property configuration;
-- five property categories:
-  - base/default;
-  - style;
-  - content/instance;
-  - behavior;
-  - metadata/semantic;
-- automatic canonical defaults;
-- instance-only overrides;
-- strict node-specific capability/property contracts;
-- `action.*` and `ref.*` authoring;
-- `ScreenComposer` Strategy;
-- explicit one-time screen registration;
-- `SduiService` orchestration;
-- validation and migration phases;
-- Login as the Golden Reference before OTP.
+The canonical hierarchy is:
 
-No implementation may substitute an older returned-child-builder architecture for this contract.
+```text
+Template -> Component -> Element
+Template -> Component -> Section -> Element
+Template -> Component -> Section -> Group -> Element
+```
 
----
+Template and Component are mandatory. Element is terminal. Section and Group are optional according to the selected legal branch.
 
-## 3. Generic action/API interaction authority
+## 3. Two meanings of registry
 
-### `ui-sdk/ACTION-CONTRACT.md`
+### Engine registries — permanent
 
-This is the stable generic interaction/wire contract during migration.
+These are part of the permanent engine architecture:
 
-Frozen vocabulary:
+```text
+sdui/engine/src/registry/NodeDefinitionRegistry.ts
+sdui/engine/src/registry/ScreenRegistry.ts
+```
+
+They are required for one-time canonical definition registration and screen-composer lookup. They do not persist draft/publication history.
+
+### `sdui/registry` workspace — persisted lifecycle only
+
+The standalone `@carbroz/sdui-registry` workspace remains only for persisted lifecycle/version capabilities that still have concrete runtime/admin callers or persisted records:
+
+```text
+draft
+publish
+archive
+history
+compare
+rollback
+current-version resolution
+version transactions
+persisted screen versions
+```
+
+It consumes `@carbroz/sdui-engine` contracts and validation. It is **not** allowed to become a second SDUI vocabulary, builder, property framework, definition registry, validator or screen-composition authority.
+
+Compatibility catalogue persistence may remain only while concrete callers or persisted data require it. It must be removed/converged only after caller and persisted-data analysis proves that deletion is safe.
+
+## 4. Generic action contract
+
+The canonical action/reference implementation now belongs to the engine:
+
+```text
+sdui/engine/src/core/Action.ts
+sdui/engine/tests/Action.spec.ts
+```
+
+Frozen generic action vocabulary:
 
 ```text
 request
@@ -80,149 +111,88 @@ $response
 $literal
 ```
 
-New engine authoring uses:
+Request-dependent navigation uses `request` with `responseMode = destination`; it must not be modeled as `sequence(request, navigate)`.
+
+## 5. Partner Login / OTP behavior authority
+
+`PARTNER-AUTH-SDUI-CONTRACT.md` freezes the external Partner auth flow:
 
 ```text
-action.*
-ref.*
+Bootstrap -> Login -> Send OTP -> OTP -> Verify OTP -> Dashboard
 ```
 
-The authoring syntax may improve; wire semantics must not drift without deliberate versioning.
-
----
-
-## 4. Partner Auth behavior authority
-
-### `PARTNER-AUTH-SDUI-CONTRACT.md`
-
-Freezes:
+The concrete Login and OTP screen composers are owned only by:
 
 ```text
-Bootstrap → Login → Send OTP → OTP → Verify OTP → Dashboard
+sdui/engine/src/screens/partner/PartnerLoginScreen.ts
+sdui/engine/src/screens/partner/PartnerOtpScreen.ts
 ```
 
-including exact screen/template identities, endpoints, authentication modes, request references, responseMode behavior, SESSION semantics and Redis-only OTP persistence.
+API Partner routes/controllers are transport adapters only. They may request a registered engine screen, but they must not maintain wrapper builders or duplicate screen composition under `apps/api` or `domains/*`.
 
-SDUI architecture migration must preserve these behaviors exactly.
-
----
-
-## 5. Frontend runtime handoff
-
-### `../docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md`
-
-Defines:
-
-- backend/frontend ownership;
-- generic action execution;
-- binding/context/response resolution;
-- MVI/UDF interaction boundary;
-- transient auth-flow state;
-- destination verification;
-- credential/error handling.
-
-It does not prescribe backend Builder classes or frontend concrete class names.
-
----
+Business authentication and OTP policy remain in Identity/application ports and their infrastructure adapters. SDUI does not own authentication policy.
 
 ## 6. OTP/security authority
 
-### `../docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md`
+`../docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` remains authoritative for OTP security/persistence where not superseded by a later security Constitution rule.
 
-Remains authoritative for OTP security and Redis persistence where not superseded by a later security constitution.
+Production OTP persistence must not silently fall back to Prisma or process-memory state. Redis-backed challenge semantics, one-time consume behavior, attempt limits, expiry, security ordering and safe error behavior must remain tested.
 
-The SDUI refactor must not reintroduce Prisma/in-memory production OTP persistence or alter one-time consume/security ordering.
+## 7. Configuration boundary
 
----
+Configuration owns startup routing/configuration decisions, not screen structure.
 
-## 7. Compatibility package documents
+For Partner bootstrap:
 
-### `ui-sdk/README.md`
+```text
+guest -> Partner Login destination
+authenticated -> Partner Dashboard destination
+```
 
-`ui-sdk` is a migration compatibility source. It is not the final authoring architecture.
-
-Older `SduiScreenBuilder` / `addStack*()` / returned typed child Builder guidance is superseded for new implementation by the engine contract.
-
-### `registry/README.md`
-
-Registry is a persisted screen-document lifecycle boundary where still required. It is not a second SDUI vocabulary, screen builder, property framework or validator authority.
-
----
+The destination identifies the next resource; the actual Login/OTP screen definition remains engine-owned.
 
 ## 8. Historical documents
 
-The following documents are historical evidence and should not be rewritten merely to make old timelines appear current:
+Phase/audit/reconciliation documents under `sdui/` are historical evidence unless explicitly listed above as a current authority. Keep them truthful to the repository state they audited; do not use old package paths or builder APIs from those files as implementation instructions.
 
-### `PHASE-5-PARTNER-LOGIN-REQUEST-CONTRACT.md`
+Examples include historical phase closeouts, source reconciliations and forensic audits.
 
-Historical phase record whose request behavior remains frozen. It has been synchronized with the new Login Golden Reference migration requirement.
+## 9. Change rule
 
-### `PHASE-A-SOURCE-RECONCILIATION.md`
-
-Historical source-reconciliation/audit record. Use it to understand previous repository state and migration decisions, not as the current Builder API specification.
-
-### `SDUI-FINAL-FORENSIC-AUDIT.md`
-
-Historical forensic closeout evidence for the state it audited. Future engine migration requires a new final forensic closeout against the current architecture; do not treat the historical audit as proof that future changes are green.
-
-Historical evidence should remain truthful to the repository state it audited.
-
----
-
-## 9. Conflict-resolution rule
-
-When documents appear to conflict:
+For an SDUI change:
 
 ```text
-security/backend constitutions
-        ↓
-current SDUI final architecture contract
-        ↓
-current action + Partner Auth behavior contracts
-        ↓
-frontend handoff / compatibility package docs
-        ↓
-historical phase/audit records
+latest governing contract
+-> architecture/ownership check
+-> implementation at the existing owner
+-> focused positive + negative tests
+-> wire/behavior parity proof where applicable
+-> canonical architecture gates
+-> exact-SHA verification
 ```
 
-A historical path/file location never overrides the current ownership model.
+Do not add compatibility wrappers, aliases, secondary registries, secondary validators, duplicate screen composers or duplicate property systems to make a migration easier.
 
-A current architecture document never silently overrides already-frozen external behavior/security; explicit contract/version changes are required for that.
+## 10. Current focused freeze
 
----
-
-## 10. Documentation-first change rule
-
-For any future SDUI change:
+The current freeze scope is deliberately limited to:
 
 ```text
-1. identify affected contract(s)
-2. update/freeze documentation first
-3. implement exactly against the documents
-4. add/modify tests without weakening existing gates
-5. prove wire/behavior parity where required
-6. run canonical repository closeout
-7. update forensic documentation with actual final evidence
+Configuration
+Partner Login
+Partner OTP
+SDUI architecture/design
 ```
 
-Never implement an architectural change first and retrofit the documentation afterward.
+Within this scope the target is:
 
----
-
-## 11. Current next implementation step
-
-The next implementation work is **not OTP**.
-
-Follow the phases in `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`:
-
-```text
-property model foundation
-→ fluent property scopes
-→ hierarchy DSL refinement
-→ complete generic actions/ref authoring
-→ screen registration simplification
-→ migrate Partner Login as Golden Reference with deep parity proof
-→ only then migrate Partner OTP
-```
-
-This order is frozen until the architecture document is deliberately reopened.
+- one `sdui/engine` language/composition/validation authority;
+- no `ui-sdk`;
+- engine-owned Partner Login and OTP screen composers;
+- API transport-only screen delivery;
+- Identity-owned Login/OTP business behavior;
+- Redis-backed production OTP challenge persistence;
+- Configuration-owned bootstrap/startup decision data;
+- standalone `sdui/registry` restricted to persisted lifecycle/version behavior;
+- focused tests and documentation aligned with the exact implementation;
+- no unrelated backend feature expansion during this freeze.
