@@ -20,4 +20,5 @@ export * from './nodes/template/StackTemplate.js';
 export * from './registry/NodeDefinitionRegistry.js';
 export * from './registry/createProductionNodeDefinitionRegistry.js';
 export * from './registry/ScreenRegistry.js';
+export * from './screens/partner/PartnerLoginScreen.js';
 export * from './SduiService.js';
