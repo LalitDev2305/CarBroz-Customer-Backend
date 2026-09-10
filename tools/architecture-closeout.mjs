@@ -13,7 +13,7 @@ const canonicalWorkspaces = [
   'domains/identity', 'domains/partner', 'domains/customer', 'domains/catalog-pricing',
   'domains/booking', 'domains/operations', 'domains/financials', 'domains/communications',
   'domains/engagement', 'domains/configuration', 'domains/dispute', 'domains/enterprise', 'domains/audit',
-  'sdui/engine', 'sdui/ui-sdk', 'sdui/registry',
+  'sdui/engine', 'sdui/registry',
   'platform/database', 'platform/cache', 'platform/messaging', 'platform/storage',
   'platform/observability', 'platform/integrations',
   'foundation/kernel',
@@ -52,7 +52,7 @@ if (JSON.stringify(actualWorkspaces) !== JSON.stringify([...canonicalWorkspaces]
   violations.push(`production workspaces must be exactly ${[...canonicalWorkspaces].sort().join(', ')}`);
 }
 
-for (const forbidden of ['packages', 'shared', 'libs', 'common']) requireAbsent(forbidden);
+for (const forbidden of ['packages', 'shared', 'libs', 'common', 'sdui/ui-sdk']) requireAbsent(forbidden);
 
 const workspaceFile = path.join(root, 'pnpm-workspace.yaml');
 requirePresent('pnpm-workspace.yaml');
