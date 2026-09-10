@@ -2,134 +2,143 @@
 
 > **Status: FINAL ARCHITECTURE CONTRACT — FROZEN FOR IMPLEMENTATION**
 >
-> This document is the single source of truth for the CarBroz backend SDUI architecture. The previous multi-layer `ui-sdk`/builder/factory/property/registry design is superseded by this contract. Implementation must converge the existing source toward this architecture without weakening existing production behavior, validation, tests, authentication contracts, or SDUI compatibility.
+> **Implementation rule:** documentation is updated first. Source code must then converge to this contract exactly. If implementation and this document disagree, implementation is wrong until this document is deliberately amended and re-frozen.
+>
+> This document supersedes the older multi-builder / returned-child-builder / raw-properties authoring direction. Stable wire contracts, Partner Auth behavior, validation strictness, Redis OTP behavior, API envelopes, destinations, and already-proven production behavior remain unchanged unless this document explicitly says otherwise.
 
 ---
 
 ## 1. Purpose
 
-CarBroz uses Server-Driven UI (SDUI) so the backend can describe application screens dynamically while the frontend renders them from a stable JSON contract.
+CarBroz uses Server-Driven UI (SDUI) so the backend can describe screens dynamically while Android/iOS/Desktop render a stable canonical JSON contract.
 
-The SDUI implementation must be:
+The architecture must be:
 
-- simple to understand;
-- easy to extend;
+- simple to read and write;
 - strongly typed;
 - safe at runtime;
+- extensible without modifying unrelated screens;
 - reusable across Partner, Customer, and Admin applications;
-- independent from business domains;
-- free from duplicated builders, factories, validators, registries, and property systems;
-- maintainable by a new developer without first learning an internal framework.
+- independent from business-domain ownership;
+- free from duplicate builders, property frameworks, factories, validators and registries;
+- suitable for long-term evolution without screen-specific rendering logic in the client.
 
-The final rule is:
+The permanent ownership rule is:
 
-> **One SDUI engine owns the complete SDUI presentation lifecycle: vocabulary → composition → screen resolution → validation → canonical output.**
+> **One SDUI engine owns the complete presentation lifecycle: vocabulary → composition → property resolution → action authoring → screen resolution → validation → canonical output.**
 
-Domains own business capability. SDUI owns presentation. API surfaces only transport requests and responses.
+Domains own business behavior. SDUI owns presentation. API surfaces own HTTP transport/adaptation only.
 
 ---
 
-## 2. Architectural Principles
+## 2. Permanent architectural principles
 
-The implementation MUST follow these principles.
+### 2.1 One engine
 
-### 2.1 Single responsibility
-
-Every class has one clear reason to change.
+Canonical target module:
 
 ```text
-Domain              → business rules
-SDUI node definition→ what one UI type supports
-SduiBuilder          → how a UI tree is composed
-ScreenComposer       → what one specific screen contains
-ScreenRegistry       → which screen composer handles a screen request
-SduiValidator        → whether final output is valid
-SduiService          → one public orchestration entry point
-API Surface          → HTTP transport only
+sdui/engine
 ```
 
-### 2.2 Dependency direction
+`sdui/ui-sdk` and `sdui/registry` are migration/compatibility sources until their remaining behavior is safely converged. They are not permanent parallel SDUI authoring engines.
+
+### 2.2 Explicit hierarchy, fluent configuration
+
+Hierarchy must be obvious from source code. Property configuration should be easy through dot-based fluent APIs.
+
+The architecture intentionally separates:
 
 ```text
-apps/api
-   ↓
-SDUI Engine
-   ↓
-Domain public contracts/use cases only when screen context requires business data
-
-Domains ─X→ SDUI Engine
-Domains ─X→ Fastify
-Domains ─X→ screen builders/composers
+Hierarchy authoring     → template/component/section/group/element ownership
+Property authoring      → base/style/content/behavior/metadata fluent categories
+Action authoring        → generic typed action helpers
+Final serialization     → canonical SDUI wire contract
 ```
 
-Identity, Partner, Customer, Booking, Catalog, Financials, and other domains MUST NOT import SDUI implementation classes.
+### 2.3 Open/Closed evolution
 
-### 2.3 No framework inside the framework
+The normal cost of extension is frozen:
 
-Do not introduce abstractions merely because a design pattern exists.
+```text
+new screen       → create screen composer + register once
+new node type    → create node definition + register once
+new property     → extend only the owning node/capability contract
+new action type  → extend generic action contract + runtime handler support
+new event        → extend supported generic event vocabulary
+existing screens → unchanged unless they intentionally adopt the feature
+```
 
-A new abstraction is allowed only when it removes duplication, enforces a real invariant, or creates a stable boundary.
+### 2.4 No hidden hierarchy state
 
-### 2.4 Prefer explicit code over hidden state
-
-Forbidden composition techniques:
+Forbidden:
 
 ```text
 currentComponent
 currentSection
 currentGroup
 global mutable parent cursor
-parent ID lookup
-implicit hierarchy mutation
+parent-ID lookup to determine ownership
 manual cross-tree child attachment
+screen-specific factory graphs
 ```
 
-The visible code structure must make the resulting UI hierarchy obvious.
+The lexical nesting of the composer must reveal the resulting UI tree.
+
+### 2.5 No framework inside the framework
+
+A new abstraction is allowed only when it:
+
+1. enforces a real invariant;
+2. represents a stable boundary; or
+3. removes meaningful duplication.
+
+No abstraction is allowed merely because a design pattern exists.
 
 ---
 
-## 3. Canonical SDUI Hierarchy
+## 3. Canonical hierarchy
 
-The hierarchy remains frozen:
+The hierarchy is frozen:
 
 ```text
 Screen
-  └── Template
-      └── Component
-          └── Element
+  → Template
+      → Component
+          → Element
 ```
 
 or:
 
 ```text
 Screen
-  └── Template
-      └── Component
-          └── Section
-              └── Element
+  → Template
+      → Component
+          → Section
+              → Element
 ```
 
 or:
 
 ```text
 Screen
-  └── Template
-      └── Component
-          └── Section
-              └── Group
-                  └── Element
+  → Template
+      → Component
+          → Section
+              → Group
+                  → Element
 ```
 
 Mandatory rules:
 
 1. Screen owns exactly one Template.
 2. Template owns one or more Components.
-3. Component owns Elements **OR** Sections, never both.
-4. Section owns Elements **OR** Groups, never both.
+3. Component owns Elements **XOR** Sections.
+4. Section owns Elements **XOR** Groups.
 5. Group owns Elements only.
 6. Element is terminal.
 7. Component cannot directly own Group.
-8. Template cannot directly own Section, Group, or Element.
+8. Template cannot directly own Section, Group or Element.
 9. Group cannot own Group or Section.
 10. Element cannot own children.
 
@@ -140,490 +149,755 @@ Component → Elements XOR Sections
 Section   → Elements XOR Groups
 ```
 
-They must be prevented by the composition API where practical and validated again before output.
+The fluent composition API should make illegal combinations difficult or impossible, and the canonical validator must reject any invalid final document regardless of how it was produced.
 
 ---
 
-## 4. Canonical Semantic Model
+## 4. Identity and reusable type semantics
 
-Every SDUI node follows the same semantic meaning:
+Every node follows:
 
 ```text
-id          = instance identity on one screen
-type        = reusable rendering behavior
-properties  = values for this instance
-children    = owned hierarchy when the node is structural
+id         = unique instance identity within the screen
+type       = reusable generic rendering behavior
+properties = resolved canonical values for this instance
+children   = owned structural descendants where applicable
 ```
 
-Example:
+Examples:
 
 ```text
 id   = login_content
 type = stack_component
+
+id   = mobile_number
+type = input
 ```
 
 Do not create screen-specific reusable types such as:
 
 ```text
-login_stack_component
-otp_stack_component
-partner_login_text
-customer_login_button
+partner_login_stack
+otp_input_component
+booking_submit_button
 ```
 
-Reusable types remain generic. Screen-specific values belong in screen composers.
+Reusable type meaning stays generic. Screen-specific content/configuration belongs in the screen composer.
 
 ---
 
-## 5. Final Design Patterns
+## 5. Final design patterns
 
-Only the following patterns are intentionally used.
-
-| Requirement | Pattern | Reason |
+| Requirement | Pattern | Frozen reason |
 |---|---|---|
-| Hierarchical SDUI tree | **Composite** | Screen content is naturally a tree of containers and leaves. |
-| Readable tree construction | **Builder / Internal DSL** | Makes hierarchy readable while hiding array assembly. |
-| Resolve a screen by app + screen ID | **Registry + Factory Method behavior** | Maps requests to the correct screen composer without switch statements across API code. |
-| Different screen implementations behind one contract | **Strategy via `ScreenComposer`** | Every screen provides the same `build(context)` behavior. |
-| Validation | Plain schema + semantic validation | No additional pattern is needed. |
-| Actions/theme/value objects | Typed objects + small helper functions | Builder classes would add unnecessary complexity. |
+| SDUI hierarchy | **Composite** | The document is naturally a structural tree. |
+| Readable screen authoring | **Builder / Internal DSL** | Hierarchy is explicit while array assembly is hidden. |
+| Dot-based node configuration | **Fluent Interface** | Developers configure only what they need with discoverable methods. |
+| Screen variation | **Strategy via `ScreenComposer`** | Each screen implements the same build contract independently. |
+| Screen lookup | **Registry** | `(targetApp, screenId)` resolves exactly one composer. |
+| Generic actions | **Command-style typed data** | Runtime executes product-neutral action contracts. |
+| Action execution | **Strategy/handler registry on client** | Each generic action type has isolated handling. |
+| Validation | Exact schemas + semantic validation | Additional object-pattern hierarchy is unnecessary. |
 
-Patterns not required by this architecture must not be added without a concrete need.
-
----
-
-## 6. One Canonical SDUI Module
-
-The target architecture is one module:
-
-```text
-sdui/
-└── engine/
-    ├── package.json
-    ├── tsconfig.json
-    ├── src/
-    │   ├── core/
-    │   │   ├── SduiModel.ts
-    │   │   ├── SduiBuilder.ts
-    │   │   ├── SduiValidator.ts
-    │   │   ├── NodeDefinition.ts
-    │   │   ├── Action.ts
-    │   │   ├── Theme.ts
-    │   │   └── value-objects/
-    │   │       ├── Dimension.ts
-    │   │       ├── Spacing.ts
-    │   │       ├── Background.ts
-    │   │       ├── Border.ts
-    │   │       └── Shape.ts
-    │   │
-    │   ├── nodes/
-    │   │   ├── template/
-    │   │   │   ├── StackTemplate.ts
-    │   │   │   ├── FormTemplate.ts
-    │   │   │   └── DefaultTemplate.ts
-    │   │   ├── component/
-    │   │   │   ├── StackComponent.ts
-    │   │   │   ├── FormComponent.ts
-    │   │   │   └── ContentComponent.ts
-    │   │   ├── section/
-    │   │   │   └── StackSection.ts
-    │   │   ├── group/
-    │   │   │   └── StackGroup.ts
-    │   │   ├── element/
-    │   │   │   ├── Text.ts
-    │   │   │   ├── Image.ts
-    │   │   │   ├── Input.ts
-    │   │   │   ├── Button.ts
-    │   │   │   ├── Icon.ts
-    │   │   │   ├── Divider.ts
-    │   │   │   └── Spacer.ts
-    │   │   └── definitions.ts
-    │   │
-    │   ├── screens/
-    │   │   ├── partner/
-    │   │   │   ├── PartnerLoginScreen.ts
-    │   │   │   ├── PartnerOtpScreen.ts
-    │   │   │   └── PartnerDashboardScreen.ts
-    │   │   ├── customer/
-    │   │   │   ├── CustomerLoginScreen.ts
-    │   │   │   ├── CustomerOtpScreen.ts
-    │   │   │   └── CustomerDashboardScreen.ts
-    │   │   └── admin/
-    │   │
-    │   ├── registry/
-    │   │   └── ScreenRegistry.ts
-    │   │
-    │   ├── SduiService.ts
-    │   └── index.ts
-    │
-    └── tests/
-```
-
-The exact file count may evolve when a file becomes too large, but the responsibility boundaries above are frozen.
-
-### 6.1 Existing source convergence
-
-The current `sdui/ui-sdk` and `sdui/registry` packages are migration sources, not permanent parallel engines.
-
-Implementation must converge them into the single engine.
-
-During migration:
-
-- KEEP stable canonical JSON contracts and behavior;
-- KEEP required runtime publication/version behavior until safely moved;
-- EXTEND only where the target design needs functionality;
-- MODIFY existing source where ownership is wrong;
-- CREATE only missing target pieces;
-- DELETE compatibility source only after references and tests prove it is safe.
-
-Do not maintain both old and new authoring architectures after migration completes.
+There is **one SduiBuilder architecture**, not a public Builder class per reusable node type.
 
 ---
 
-## 7. Node Definitions: One File Owns One UI Type
-
-The most important simplification is **co-location**.
-
-A reusable UI type must not require developers to search separate `definitions`, `properties`, `builders`, and `factory` folders to understand it.
-
-Example target file:
+## 6. Target package structure
 
 ```text
-nodes/component/StackComponent.ts
+sdui/engine/
+├── package.json
+├── tsconfig.json
+├── src/
+│   ├── core/
+│   │   ├── SduiModel.ts
+│   │   ├── SduiBuilder.ts
+│   │   ├── SduiValidator.ts
+│   │   ├── NodeDefinition.ts
+│   │   ├── ScreenComposer.ts
+│   │   └── ScreenContext.ts
+│   │
+│   ├── properties/
+│   │   ├── BaseProperties.ts
+│   │   ├── StyleProperties.ts
+│   │   ├── ContentProperties.ts
+│   │   ├── BehaviorProperties.ts
+│   │   ├── MetadataProperties.ts
+│   │   └── value-objects/
+│   │       ├── Dimension.ts
+│   │       ├── Spacing.ts
+│   │       ├── Alignment.ts
+│   │       ├── Arrangement.ts
+│   │       ├── Background.ts
+│   │       ├── Border.ts
+│   │       ├── Shape.ts
+│   │       └── Typography.ts
+│   │
+│   ├── actions/
+│   │   ├── Action.ts
+│   │   ├── ActionSchemas.ts
+│   │   └── ValueReference.ts
+│   │
+│   ├── nodes/
+│   │   ├── template/
+│   │   ├── component/
+│   │   ├── section/
+│   │   ├── group/
+│   │   ├── element/
+│   │   └── definitions.ts
+│   │
+│   ├── screens/
+│   │   ├── partner/
+│   │   ├── customer/
+│   │   └── admin/
+│   │
+│   ├── registry/
+│   │   ├── NodeDefinitionRegistry.ts
+│   │   └── ScreenRegistry.ts
+│   │
+│   ├── SduiService.ts
+│   └── index.ts
+└── tests/
 ```
 
-It owns:
+Exact physical files may be combined where a split creates noise. Responsibility boundaries are frozen; unnecessary file proliferation is forbidden.
 
-- canonical type name;
+---
+
+## 7. Node definition is the canonical owner of one reusable type
+
+A reusable type such as `stack_template`, `stack_component`, `text`, `input` or `button` owns its exact contract in one definition.
+
+Each definition owns:
+
+- canonical `type`;
+- hierarchy level;
+- supported child/content mode;
 - exact property schema;
-- TypeScript property type;
-- hierarchy capability metadata;
-- definition metadata required by validation.
+- canonical default property values;
+- supported property capabilities/categories;
+- supported events when applicable;
+- optional definition metadata used by validation.
 
-Example:
+Conceptually:
 
 ```ts
-export const STACK_COMPONENT = 'stack_component';
-
-export const StackComponentPropertiesSchema = z.object({
-  axis: z.enum(['vertical', 'horizontal']).optional(),
-  spacing: z.number().nonnegative().optional(),
-  width: DimensionSchema.optional(),
-  height: DimensionSchema.optional(),
-  padding: SpacingSchema.optional(),
-  background: BackgroundSchema.optional(),
-  border: BorderSchema.optional(),
-  shape: ShapeSchema.optional(),
-});
-
-export type StackComponentProperties =
-  z.infer<typeof StackComponentPropertiesSchema>;
-
-export const StackComponentDefinition = {
-  type: STACK_COMPONENT,
-  level: 'component',
-  properties: StackComponentPropertiesSchema,
-  children: {
-    oneOf: ['elements', 'sections'],
-  },
-} satisfies NodeDefinition;
+interface NodeDefinition<TProperties> {
+  readonly type: string;
+  readonly level: 'template' | 'component' | 'section' | 'group' | 'element';
+  readonly properties: PropertyParser<TProperties>;
+  readonly defaults: Partial<TProperties>;
+  readonly children: SduiContentMode;
+  readonly supportedEvents?: readonly SduiEventName[];
+}
 ```
 
-A developer opening one file must understand what that UI type is allowed to do.
+A developer opening one node definition must be able to understand what the type supports without searching through a separate screen-specific property architecture.
 
 ---
 
-## 8. Shared Value Objects Are Small Reusable Schemas
+## 8. Property classification — frozen model
 
-Shared concepts remain reusable but do not become their own architecture layer.
+Every supported property belongs to one of five conceptual categories.
+
+### 8.1 Base / default properties
+
+Fundamental layout/rendering behavior of the node.
+
+Typical examples:
+
+```text
+width
+height
+padding
+margin
+spacing
+orientation / axis
+mainAxisAlignment
+crossAxisAlignment
+arrangement
+```
+
+Where a node type has a safe universal value, it is stored in the node definition defaults and is emitted automatically even when the screen does not mention it.
 
 Examples:
 
 ```text
-Dimension
-Spacing
-Background
-Border
-Shape
-Gradient
-Typography
+padding = 0
+margin = 0
+spacing = 0
+stack orientation = vertical
 ```
 
-They live under:
+A screen may override any allowed default.
+
+### 8.2 Style properties
+
+Visual appearance that may be defaulted or may be instance-specific.
+
+Typical examples:
 
 ```text
-core/value-objects/
+background
+border
+shape
+elevation
+alpha
+color
+fontSize
+fontWeight
+fontFamily
+textAlign
+lineHeight
+letterSpacing
 ```
 
-Definitions import them directly.
+A style property is emitted automatically only if its owning definition has a canonical default; otherwise it appears only when the screen sets it.
 
-There is no standalone property framework that screen authors must understand.
+### 8.3 Content / instance properties
+
+Actual content or instance data. Usually there is no meaningful universal default.
+
+Examples:
+
+```text
+text
+imageUrl / resource
+placeholder
+label
+icon
+maxLines
+```
+
+These are emitted only when supplied, unless the owning node contract explicitly defines a safe default.
+
+### 8.4 Behavior properties
+
+Runtime interaction/configuration.
+
+Examples:
+
+```text
+binding
+validation
+actions
+enabled
+visible
+keyboardType
+singleLine
+```
+
+They are generic capabilities, not feature-specific business behavior.
+
+### 8.5 Metadata / semantic properties
+
+Accessibility, semantic and runtime metadata.
+
+Examples:
+
+```text
+semanticRole
+contentDescription
+testTag
+```
+
+Only metadata supported by the node definition is legal.
 
 ---
 
-## 9. Single Definition Registry
+## 9. Default-property resolution — frozen semantics
 
-Every supported reusable node type is registered exactly once.
+The screen composer should not repeat canonical defaults.
 
-Example:
+For each node:
+
+```text
+canonical defaults from node definition
+              +
+explicit screen overrides / additions
+              ↓
+strict property validation
+              ↓
+canonical serialized properties
+```
+
+Rules:
+
+1. Definition defaults are always present in final properties.
+2. Screen code may override an allowed default.
+3. A non-default property appears only when explicitly set.
+4. Unknown properties are rejected; they are never silently dropped.
+5. Default values are not mutated globally by one screen.
+6. Screen-specific overrides affect only that node instance.
+7. Nested object overrides use deterministic recursive merge semantics where supported.
+8. Arrays are replaced as complete values; arrays are not element-by-element merged.
+9. `undefined` means “no override”; the default remains.
+10. Final resolved properties are validated after resolution.
+
+Example definition:
 
 ```ts
-export const nodeDefinitions = {
-  templates: {
-    stack_template: StackTemplateDefinition,
-    form_template: FormTemplateDefinition,
-    default_template: DefaultTemplateDefinition,
-  },
-
-  components: {
-    stack_component: StackComponentDefinition,
-    form_component: FormComponentDefinition,
-    content_component: ContentComponentDefinition,
-  },
-
-  sections: {
-    stack_section: StackSectionDefinition,
-  },
-
-  groups: {
-    stack_group: StackGroupDefinition,
-  },
-
-  elements: {
-    text: TextDefinition,
-    image: ImageDefinition,
-    input: InputDefinition,
-    button: ButtonDefinition,
-    icon: IconDefinition,
-    divider: DividerDefinition,
-    spacer: SpacerDefinition,
-  },
-} as const;
+stack_component.defaults = {
+  width: 'match_parent',
+  height: 'wrap_content',
+  padding: { start: 0, top: 0, end: 0, bottom: 0 },
+  margin: { start: 0, top: 0, end: 0, bottom: 0 },
+  spacing: 0,
+  orientation: 'vertical',
+  mainAxisAlignment: 'start',
+  crossAxisAlignment: 'stretch',
+};
 ```
 
-There must not be:
+Screen authoring:
 
-- a second definition registry;
-- a second property contract registry;
-- Registry-layer redefinition of canonical node behavior;
-- screen-specific primitive definitions.
+```ts
+component.base()
+  .spacing(14)
+  .paddingHorizontal(24);
+```
+
+Final JSON still contains all canonical defaults; only `spacing` and horizontal padding are changed for that instance.
 
 ---
 
-## 10. Builder Responsibility: Only Build the Tree
+## 10. Fluent screen authoring — final API direction
 
-The Builder pattern is used only where it provides real value: hierarchical composition.
+The final authoring model is:
 
-The public composition experience should visually resemble the resulting tree.
+> **Explicit hierarchy methods + fluent dot-based property categories.**
 
-Example:
+Hierarchy methods must use hierarchy names, not type aliases.
+
+Correct:
+
+```ts
+screen.template('form_template', 'tpl_partner_login', template => {
+  template.component('stack_component', 'brand_content', component => {
+    component.section('stack_section', 'brand_section', section => {
+      section.group('stack_group', 'brand_group', group => {
+        group.text('brand_name', text => {
+          // properties
+        });
+      });
+    });
+  });
+});
+```
+
+Do not use confusing hierarchy/type mixing such as:
+
+```text
+template.stack(...)
+component.verticalStack(...)
+```
+
+`template()` creates a Template. `component()` creates a Component. `section()` creates a Section. `group()` creates a Group. The first argument identifies the reusable type.
+
+### 10.1 Terminal convenience methods
+
+For common Elements, legal parent scopes may expose:
+
+```text
+text()
+image()
+input()
+button()
+icon()
+divider()
+spacer()
+```
+
+These are convenience methods over generic element creation, not separate Builder architectures.
+
+A generic escape hatch remains available internally/publicly where required:
+
+```ts
+scope.element('rating', 'service_rating', element => { ... });
+```
+
+Adding a new node type must not force a rewrite of `SduiBuilder`; a convenience method may be added later only if the type becomes common enough to justify it.
+
+---
+
+## 11. Fluent property categories
+
+Each current node scope exposes only the categories/capabilities legal for that node.
+
+Conceptual developer experience:
+
+```ts
+text.content()
+  .text('Welcome Partner!');
+
+text.style()
+  .fontSize(32)
+  .fontWeight(700)
+  .textAlign('center');
+
+text.metadata()
+  .contentDescription('Welcome heading');
+```
+
+Layout-capable structural node:
+
+```ts
+component.base()
+  .spacing(14)
+  .paddingHorizontal(24)
+  .crossAxisAlignment('center');
+
+component.style()
+  .background('#FFFFFF');
+```
+
+Input:
+
+```ts
+input.content()
+  .placeholder('98765 43210');
+
+input.behavior()
+  .binding('mobileNumber')
+  .keyboardType('phone')
+  .required()
+  .regex(MOBILE_REGEX);
+```
+
+Button:
+
+```ts
+button.content()
+  .text('Continue');
+
+button.behavior()
+  .onClick(action.request(...));
+```
+
+### 11.1 Type safety
+
+Autocomplete must expose only legal capabilities.
+
+These must fail at compile time or final validation:
+
+```ts
+image.style().fontSize(20);        // illegal
+text.behavior().keyboardType('phone'); // illegal
+```
+
+The system must not expose one unrestricted giant property bag to every node.
+
+### 11.2 Internal implementation constraint
+
+Do not create public classes such as:
+
+```text
+TextBuilder
+ImageBuilder
+InputBuilder
+ButtonBuilder
+StackTemplateBuilder
+StackComponentBuilder
+```
+
+Small internal reusable fluent capability scopes are allowed, for example:
+
+```text
+BasePropertyScope
+StylePropertyScope
+ContentPropertyScope
+BehaviorPropertyScope
+MetadataPropertyScope
+```
+
+They are views over the current node/configuration and must not become a second hierarchy framework.
+
+---
+
+## 12. Canonical Login authoring target
+
+The Partner Login screen becomes the Golden Reference before OTP migration.
+
+Conceptual target style:
 
 ```ts
 return sdui.screen(
   {
     id: 'partner_login',
     targetApp: 'PARTNER',
-    theme: lightTheme(),
+    theme: partnerAuthTheme,
   },
   screen => {
-    screen.template(
-      'stack_template',
-      'partner_login_template',
-      {
-        axis: 'vertical',
-        spacing: 24,
-      },
-      template => {
-        template.component(
-          'stack_component',
-          'login_content',
-          {
-            axis: 'vertical',
-            spacing: 16,
-          },
-          component => {
-            component.section(
-              'stack_section',
-              'mobile_section',
-              {},
-              section => {
-                section.input('mobile_number', {
-                  placeholder: '98765 43210',
-                  inputType: 'phone',
-                  binding: 'mobileNumber',
-                  required: true,
-                });
-              },
+    screen.template('stack_template', 'tpl_7K2M9Q', template => {
+      template.base()
+        .spacing(24)
+        .paddingHorizontal(24);
+
+      template.component('stack_component', 'brand_content', brand => {
+        brand.base()
+          .spacing(6)
+          .crossAxisAlignment('center');
+
+        brand.image('brand_logo', image => {
+          image.content().resource('carbroz_logo');
+          image.base().width(120).height(96);
+        });
+
+        brand.text('brand_name', text => {
+          text.content().text('CarBroz');
+          text.style().fontSize(44).fontWeight(700);
+        });
+      });
+
+      template.component('stack_component', 'login_content', login => {
+        login.base().spacing(14);
+
+        login.section('stack_section', 'mobile_field_section', section => {
+          section.group('stack_group', 'mobile_field', group => {
+            group.input('mobile_number', input => {
+              input.content().placeholder('98765 43210');
+              input.behavior()
+                .binding('mobileNumber')
+                .keyboardType('phone')
+                .required()
+                .regex(MOBILE_REGEX);
+            });
+          });
+        });
+
+        login.section('stack_section', 'action_section', section => {
+          section.button('continue_button', button => {
+            button.content().text('Continue');
+            button.behavior().onClick(
+              action.request({
+                method: 'POST',
+                endpoint: '/api/v1/partner/auth/send_otp',
+                authentication: 'NONE',
+                validate: true,
+                responseMode: 'destination',
+                body: {
+                  phoneNumber: ref.binding('mobileNumber'),
+                  deviceId: ref.context('deviceId'),
+                },
+              }),
             );
-          },
-        );
-      },
-    );
+          });
+        });
+      });
+    });
   },
 );
 ```
 
-Indentation reflects ownership:
-
-```text
-Screen
-  Template
-    Component
-      Section
-        Input
-```
-
-### 10.1 Internal scopes
-
-Internally the Builder may use small scope objects:
-
-```text
-ScreenScope
-TemplateScope
-ComponentScope
-SectionScope
-GroupScope
-```
-
-These exist only to expose legal child operations and collect children.
-
-They are not public architectural concepts that screen authors must instantiate.
-
-### 10.2 No Builder class for every type
-
-Do not create a separate public Builder class for every definition.
-
-Avoid designs such as:
-
-```text
-StackTemplateBuilder
-StackComponentBuilder
-StackSectionBuilder
-StackGroupBuilder
-TextBuilder
-InputBuilder
-ButtonBuilder
-TypedPropertyBuilder
-ElementParentBuilder
-```
-
-unless a concrete behavior cannot be expressed cleanly by the small scope DSL and typed definition.
-
-The default is: **definition + typed properties + generic scope method**.
+This example is an authoring model. The **wire output must remain exactly compatible** with the already-frozen Partner Login contract.
 
 ---
 
-## 11. Generic Node Creation Is Internal
+## 13. Actions — complete generic vocabulary
 
-A single internal helper is sufficient for ordinary node construction.
+The backend must support the frozen generic action vocabulary:
 
-Conceptually:
-
-```ts
-function createNode<TProperties>(
-  definition: NodeDefinition<TProperties>,
-  id: string,
-  properties: TProperties,
-  children?: SduiNode[],
-): SduiNode {
-  return {
-    id,
-    type: definition.type,
-    properties,
-    ...(children ? { children } : {}),
-  };
-}
+```text
+request
+navigate
+present
+dismiss
+state
+external_uri
+sequence
 ```
 
-There is no need for public TemplateFactory, ComponentFactory, SectionFactory, GroupFactory, ElementFactory, and BuilderFactory classes.
-
-The generic node creator is an engine implementation detail.
-
----
-
-## 12. Actions Are Typed Values, Not Builder Trees
-
-Actions remain strongly typed but use declarative typed objects and small helper functions.
-
-Preferred authoring:
+Public authoring should be grouped under one discoverable namespace:
 
 ```ts
-section.button('continue', {
-  text: 'Continue',
-  action: requestAction({
-    method: 'POST',
-    endpoint: '/api/v1/partner/auth/send_otp',
-    authentication: 'NONE',
-    validate: true,
-    responseMode: 'destination',
-    body: {
-      phoneNumber: binding('mobileNumber'),
-      deviceId: context('deviceId'),
-    },
-  }),
-});
+action.request(...)
+action.navigate(...)
+action.present(...)
+action.dismiss(...)
+action.state(...)
+action.externalUri(...)
+action.sequence(...)
 ```
 
-Small helpers own serialization details:
+Value references should be grouped under:
 
 ```ts
-binding('mobileNumber')
-context('deviceId')
-response('challengeId')
-literal('value')
+ref.binding(...)
+ref.context(...)
+ref.response(...)
+ref.literal(...)
 ```
 
-They serialize to the existing canonical wire contract such as:
+Canonical serialization remains:
 
 ```json
 { "$binding": "mobileNumber" }
+{ "$context": "deviceId" }
+{ "$response": "data.challengeId" }
+{ "$literal": "value" }
 ```
 
-Screen composers must not manually encode `$binding`, `$context`, or other protocol markers.
+No fluent ActionBuilder class hierarchy is authorized.
 
-No fluent `ActionBuilder` hierarchy is required unless future requirements prove declarative actions insufficient.
+### 13.1 Event-keyed actions
 
----
-
-## 13. Theme Is a Typed Value, Not a Builder Tree
-
-Theme configuration is data, not hierarchy.
-
-Preferred form:
+Elements declare generic event-keyed actions:
 
 ```ts
-theme: {
-  mode: 'light',
-  statusBar: 'transparent',
-  background: linearGradient({
-    angle: 135,
-    colors: [
-      ['#DDF8F6', 0],
-      ['#F7FEFD', 0.28],
-      ['#FFFFFF', 0.55],
-      ['#D9F7F4', 1],
-    ],
-  }),
-}
+button.behavior()
+  .onClick(action.request(...))
+  .onLongClick(action.present(...));
 ```
 
-Theme and gradient helpers must return canonical typed values.
+Examples of generic events:
 
-No `ThemeBuilder` hierarchy is required.
+```text
+onClick
+onLongClick
+onValueChange
+onFocus
+onBlur
+```
+
+Node definitions should declare supported events where this can be enforced without duplication. Unsupported events are rejected.
+
+### 13.2 Request-dependent navigation
+
+When navigation depends on request success:
+
+```text
+request + responseMode = destination
+```
+
+must be used.
+
+Do **not** model this as:
+
+```text
+sequence(request, navigate)
+```
+
+because failed requests must not navigate.
+
+### 13.3 Independent navigation
+
+Use `action.navigate(destination)` when navigation does not depend on a preceding business mutation.
+
+### 13.4 Present/dismiss
+
+`present` supports product-neutral overlays such as:
+
+```text
+dialog
+bottom_sheet
+popup
+```
+
+`dismiss` closes the active or targeted presentation.
+
+### 13.5 State actions
+
+State actions operate on semantic runtime state, not structural tree mutation.
+
+Allowed operations begin with:
+
+```text
+set
+toggle
+```
+
+Allowed semantic targets include:
+
+```text
+visible
+enabled
+selected
+expanded
+checked
+loading
+value
+```
+
+Arbitrary mutation such as `background.color` is forbidden.
+
+### 13.6 External URI and sequence
+
+`external_uri` delegates to platform-safe URI handling. `sequence` is only for genuinely ordered independent generic actions.
+
+The full canonical wire-level contract remains in `sdui/ui-sdk/ACTION-CONTRACT.md` during migration and must converge into engine ownership without changing semantics.
 
 ---
 
-## 14. Screen Composer Contract
+## 14. Destination and API request contract
 
-Actual product screens live inside the SDUI engine under `screens/<app>/`.
+Canonical Destination remains:
 
-They are named **Screen** or **ScreenComposer**, not `ScreenBuilder`.
+```text
+screenId
+templateId
+templateType
+endpoint
+method
+authentication
+```
 
-Reason:
+Loaded screen identity remains:
 
-- `SduiBuilder` is the reusable authoring tool;
-- `PartnerLoginScreen` is the recipe for one specific screen;
-- `ScreenRegistry` resolves recipes.
+```text
+screen.screenId
+screen.schemaVersion
+screen.targetApp
+screen.template.id
+screen.template.type
+```
+
+After destination fetch:
+
+```text
+destination.screenId     == loaded.screenId
+destination.templateId   == loaded.template.id
+destination.templateType == loaded.template.type
+```
+
+The client must not infer routes from screen/template IDs.
+
+Request action flow with `responseMode: destination`:
+
+```text
+validate applicable bindings/inputs
+→ resolve ref.* values
+→ execute request
+→ failure: expose/reduce error and DO NOT navigate
+→ success: retain required transient response/context
+→ validate returned destination
+→ satisfy destination authentication requirement
+→ fetch destination screen
+→ verify destination/screen identity parity
+→ navigate/render
+```
+
+Business request endpoints remain owned by their bounded contexts. The SDUI engine emits typed intent only.
+
+---
+
+## 15. Theme
+
+Theme is typed configuration, not structural hierarchy.
+
+Theme helpers may exist for reusable stable values, but no ThemeBuilder hierarchy is required.
+
+Screen-specific theme values must not create screen inheritance or base-screen classes.
+
+---
+
+## 16. ScreenComposer contract
+
+Every product screen lives under:
+
+```text
+sdui/engine/src/screens/<app>/
+```
 
 Canonical contract:
 
@@ -631,637 +905,124 @@ Canonical contract:
 export interface ScreenComposer {
   readonly screenId: string;
   readonly targetApp: TargetApp;
-
   build(context: ScreenContext): SduiScreen;
 }
 ```
 
-Example:
+Rules:
 
-```ts
-export class PartnerLoginScreen implements ScreenComposer {
-  readonly screenId = 'partner_login';
-  readonly targetApp = 'PARTNER' as const;
-
-  build(context: ScreenContext): SduiScreen {
-    return sdui.screen(
-      {
-        id: this.screenId,
-        targetApp: this.targetApp,
-        theme: partnerAuthTheme,
-      },
-      screen => {
-        // screen composition only
-      },
-    );
-  }
-}
-```
-
-A screen composer may use values from `ScreenContext`, but it must not contain domain business rules.
+- composers are stateless or effectively immutable;
+- composers build presentation only;
+- no Fastify request/response objects;
+- no repository locator/service-locator `ScreenContext`;
+- no direct database/Redis/network provider access;
+- no domain business-policy ownership;
+- no inheritance between product screens;
+- shared immutable theme/config helpers are allowed when genuinely reusable.
 
 ---
 
-## 15. Screen Ownership
+## 17. Screen registration — create + register once
 
-All SDUI screen composition belongs to the SDUI engine.
-
-Correct:
+Adding a new screen must require exactly:
 
 ```text
-sdui/engine/src/screens/partner/PartnerLoginScreen.ts
-sdui/engine/src/screens/partner/PartnerOtpScreen.ts
-sdui/engine/src/screens/customer/CustomerLoginScreen.ts
+1. create MyScreen.ts
+2. register MyScreen once
+3. done
 ```
 
-Incorrect:
-
-```text
-domains/identity/presentation/sdui/...
-domains/partner/presentation/sdui/...
-apps/api/src/surfaces/partner/screens/builders/...
-```
-
-After migration, no domain or API surface owns canonical SDUI screen composition.
-
-### 15.1 Identity remains shared
-
-Identity still owns shared authentication capability:
-
-```text
-OTP policy
-challenge state
-verification
-rate limits
-session creation
-refresh tokens
-authentication/authorization
-```
-
-Partner and Customer screens may both call/use the same Identity application contracts through the API flow, but Identity never owns Partner or Customer UI composition.
-
----
-
-## 16. Screen Registry
-
-`ScreenRegistry` maps `(targetApp, screenId)` to a `ScreenComposer`.
-
-Example:
+Prefer explicit deterministic registration:
 
 ```ts
-const screens = new Map<string, ScreenComposer>([
-  ['PARTNER:partner_login', new PartnerLoginScreen()],
-  ['PARTNER:partner_otp', new PartnerOtpScreen()],
-  ['PARTNER:partner_dashboard', new PartnerDashboardScreen()],
-  ['CUSTOMER:customer_login', new CustomerLoginScreen()],
+export const partnerScreens = [
+  new PartnerLoginScreen(),
+  new PartnerOtpScreen(),
+  new PartnerDashboardScreen(),
+];
+```
+
+Then:
+
+```ts
+new ScreenRegistry([
+  ...partnerScreens,
+  ...customerScreens,
+  ...adminScreens,
 ]);
 ```
 
-Canonical behavior:
+`ScreenRegistry` key:
 
-```ts
-export class ScreenRegistry {
-  constructor(
-    private readonly composers: readonly ScreenComposer[],
-  ) {}
-
-  get(targetApp: TargetApp, screenId: string): ScreenComposer {
-    const composer = this.lookup(targetApp, screenId);
-
-    if (!composer) {
-      throw new UnknownScreenError(targetApp, screenId);
-    }
-
-    return composer;
-  }
-}
+```text
+(targetApp, screenId)
 ```
 
-Registration must fail on duplicate `(targetApp, screenId)` ownership.
+It must reject duplicates and unknown screens.
 
-No API controller contains a large switch statement for screen IDs.
+Filesystem magic/automatic runtime discovery is not required. Explicit registration is searchable, deterministic and testable.
 
 ---
 
-## 17. SduiService Is the Single Public Entry Point
+## 18. NodeDefinitionRegistry
 
-External backend code talks to one façade:
+Every reusable node definition is registered once.
 
-```ts
-export class SduiService {
-  constructor(
-    private readonly screenRegistry: ScreenRegistry,
-    private readonly validator: SduiValidator,
-  ) {}
+It must:
 
-  buildScreen(request: BuildScreenRequest): SduiScreen {
-    const composer = this.screenRegistry.get(
-      request.targetApp,
-      request.screenId,
-    );
+- reject duplicate type registration;
+- reject unknown type resolution;
+- preserve hierarchy level/type identity;
+- expose definitions to builder/property resolution and validator;
+- avoid global mutable side-effect registration.
 
-    const screen = composer.build(request.context);
-
-    return this.validator.validate(screen);
-  }
-}
-```
-
-External callers must not orchestrate:
-
-```text
-registry.get(...)
-composer.build(...)
-validator.validate(...)
-serializer.serialize(...)
-```
-
-manually.
-
-They call:
-
-```ts
-sduiService.buildScreen(...)
-```
-
-This is the single obvious entry point.
+There must not be a second definition/property registry elsewhere.
 
 ---
 
-## 18. Complete Runtime Call Flow
+## 19. SduiService — single public orchestration entry
 
-### 18.1 Screen request
-
-```text
-Mobile App
-   │
-   │ GET /api/v1/partner/screen/auth_login
-   ▼
-Partner Route
-   ▼
-Partner Controller
-   ▼
-SduiService.buildScreen(...)
-   │
-   ├── targetApp = PARTNER
-   ├── screenId  = partner_login
-   └── context   = request/application context
-   ▼
-ScreenRegistry.get(PARTNER, partner_login)
-   ▼
-PartnerLoginScreen.build(context)
-   ▼
-SduiBuilder/Internal DSL
-   │
-   ├── Screen
-   ├── Template
-   ├── Components
-   ├── Sections/Groups
-   └── Elements
-   ▼
-SduiScreen object
-   ▼
-SduiValidator.validate(screen)
-   │
-   ├── structural schema
-   ├── hierarchy rules
-   ├── definition existence
-   ├── exact property schemas
-   ├── semantic invariants
-   ├── schema version
-   └── target app
-   ▼
-Validated canonical SduiScreen
-   ▼
-Controller response
-   ▼
-Mobile SDUI renderer
-```
-
-### 18.2 Authentication action flow
+The canonical flow is:
 
 ```text
-PartnerLoginScreen
-   ↓
-Button action
-   ↓
-POST /api/v1/partner/auth/send_otp
-   ↓
-Partner Auth Controller
-   ↓
-Identity SendOtpUseCase
-   ↓
-Identity/Redis authentication flow
-   ↓
-Destination metadata
-   ↓
-Client requests partner_otp screen
-   ↓
-SduiService
-   ↓
-PartnerOtpScreen
+(targetApp, screenId, context)
+      ↓
+ScreenRegistry
+      ↓
+ScreenComposer
+      ↓
+SduiBuilder + property resolution
+      ↓
+SduiValidator
+      ↓
+canonical SduiScreen
 ```
 
-Identity owns authentication behavior. SDUI owns the visual screen descriptions. Neither takes the other's responsibility.
+`SduiService` is the engine's public orchestration entry for dynamic screen resolution.
+
+API surfaces should request a screen from the service and serialize/return it; they must not build SDUI trees themselves.
 
 ---
 
-## 19. Class Responsibility and Call Matrix
+## 20. Validation — defense in depth
 
-| Class / Module | Responsibility | Calls / Uses | Must NOT Do |
-|---|---|---|---|
-| `SduiModel` | Canonical wire/domain-neutral SDUI TypeScript model | Zod/types as needed | Screen-specific behavior |
-| `NodeDefinition` | Contract describing one reusable node type | property schemas | Build product screens |
-| `StackComponentDefinition`, etc. | Type + exact properties + allowed hierarchy metadata | shared value schemas | Know Partner/Customer screens |
-| `SduiBuilder` | Build the hierarchy through nested scopes | definitions, internal `createNode` | Resolve screen IDs or business rules |
-| `ScreenScope` | Add one Template | `TemplateScope` | Add Sections/Elements directly |
-| `TemplateScope` | Add Components | `ComponentScope` | Add Sections/Groups/Elements directly |
-| `ComponentScope` | Add Elements OR Sections | element creation, `SectionScope` | Add Group directly or mix XOR modes |
-| `SectionScope` | Add Elements OR Groups | element creation, `GroupScope` | Mix XOR modes |
-| `GroupScope` | Add Elements only | element creation | Add Section/Group |
-| action helpers | Create canonical action/value-reference objects | action schemas/types | Perform HTTP calls |
-| theme helpers | Create canonical typed theme values | theme schemas/types | Build hierarchy |
-| `ScreenComposer` | Stable interface for one product screen | `SduiBuilder` | Domain business rules |
-| `PartnerLoginScreen` etc. | Exact composition for one screen | DSL, typed values/context | Define reusable primitive contracts |
-| `ScreenRegistry` | Map app + screen ID to composer | composers | Validate screen tree or contain screen composition |
-| `SduiValidator` | Validate completed canonical tree | node definitions + schemas | Modify invalid screens |
-| `SduiService` | Public façade/orchestration | registry + composer + validator | Contain product screen layout |
-| API Controller | Translate HTTP request/response | `SduiService` | Build SDUI nodes |
-| Business Domain | Business rules/use cases | domain ports | Import SDUI classes |
+Builder type safety never replaces final validation.
 
----
+Required validation stages:
 
-## 20. Validation Architecture
+1. root structural validation;
+2. hierarchy/XOR validation;
+3. node definition existence;
+4. exact property schema validation after defaults/overrides resolve;
+5. event/action compatibility validation;
+6. semantic/invariant validation;
+7. schema-version validation;
+8. target-app validation;
+9. publication validation where persisted lifecycle semantics apply.
 
-Validation remains strict and layered.
+Invalid values must never be repaired, silently dropped, coerced into unrelated meaning or bypassed because a Builder produced them.
 
-`SduiValidator` is the single canonical validation boundary for built screens.
-
-Validation stages:
-
-```text
-1. Root structural validation
-2. Hierarchy validation
-3. Definition existence validation
-4. Exact property validation per definition
-5. Semantic/invariant validation
-6. Schema version validation
-7. Target-app validation
-8. Publication validation where persisted SDUI lifecycle requires it
-```
-
-### 20.1 Structural validation
-
-Checks required fields and basic node shapes.
-
-### 20.2 Hierarchy validation
-
-Checks:
-
-```text
-Screen → exactly one Template
-Template → Components only
-Component → Elements XOR Sections
-Section → Elements XOR Groups
-Group → Elements only
-Element → no children
-```
-
-### 20.3 Definition validation
-
-Every `type` must exist at the expected hierarchy level.
-
-A `stack_component` cannot be accepted as an element merely because the JSON shape is technically valid.
-
-### 20.4 Exact property validation
-
-The selected node definition validates the complete property object.
-
-Unknown properties must not silently pass for known production definitions.
-
-### 20.5 Validator behavior
-
-The validator:
-
-- returns the validated canonical screen;
-- throws/returns a deterministic validation error on invalid input;
-- does not mutate input to repair mistakes;
-- does not silently drop invalid values;
-- does not weaken strictness for backward compatibility without an explicit schema-version rule.
-
----
-
-## 21. Serialization
-
-If the internal TypeScript model already matches the canonical JSON contract, no separate serializer class is required.
-
-Preferred flow:
-
-```text
-Typed object
-   ↓
-Validation
-   ↓
-JSON response
-```
-
-A dedicated serializer is allowed only if there is a real transformation that cannot be handled cleanly by typed helper functions.
-
-Protocol-specific translation such as:
-
-```ts
-binding('mobileNumber')
-```
-
-to:
-
-```json
-{ "$binding": "mobileNumber" }
-```
-
-is owned by the helper that creates the typed value.
-
----
-
-## 22. Persisted SDUI / Admin Publication Boundary
-
-The existing SDUI Registry package currently owns persisted lifecycle behavior. During convergence that behavior must not be deleted blindly.
-
-If persisted draft/publish/version functionality is still required, it moves inside the single SDUI engine behind explicitly named lifecycle services/repositories, for example:
-
-```text
-publication/
-    SduiPublicationService.ts
-    SduiDocumentRepository.ts
-```
-
-Do **not** call this product-screen lookup service `ScreenRegistry`; that name is reserved for code-defined screen composer resolution.
-
-Publication responsibilities may include:
-
-```text
-CREATE draft
-UPDATE draft
-VALIDATE draft
-PUBLISH
-ARCHIVE
-RETRIEVE published version
-VERSION HISTORY
-ROLLBACK where already supported
-```
-
-Publication must use the same `SduiValidator` before a document becomes publishable.
-
-There must never be a second canonical definition/validation system inside publication code.
-
----
-
-## 23. API Surface Responsibility
-
-API surfaces remain thin.
-
-Example:
-
-```ts
-const screen = sduiService.buildScreen({
-  targetApp: 'PARTNER',
-  screenId: 'partner_login',
-  context,
-});
-
-return reply.send(screen);
-```
-
-API surfaces may own:
-
-- route declaration;
-- authentication middleware;
-- HTTP DTO/request parsing;
-- request context creation;
-- mapping deterministic errors to HTTP status codes.
-
-They must not own:
-
-- SDUI node definitions;
-- reusable UI properties;
-- product screen composition;
-- screen-specific builders;
-- SDUI hierarchy validation.
-
----
-
-## 24. Full Partner Login Example
-
-The following is the target developer experience. Exact visual values may change with product requirements; architectural form is frozen.
-
-```ts
-export class PartnerLoginScreen implements ScreenComposer {
-  readonly screenId = 'partner_login';
-  readonly targetApp = 'PARTNER' as const;
-
-  build(_context: ScreenContext): SduiScreen {
-    return sdui.screen(
-      {
-        id: this.screenId,
-        targetApp: this.targetApp,
-        theme: {
-          mode: 'light',
-          statusBar: 'transparent',
-          background: linearGradient({
-            angle: 135,
-            colors: [
-              ['#DDF8F6', 0],
-              ['#F7FEFD', 0.28],
-              ['#FFFFFF', 0.55],
-              ['#D9F7F4', 1],
-            ],
-          }),
-        },
-      },
-      screen => {
-        screen.template(
-          'stack_template',
-          'partner_login_template',
-          {
-            axis: 'vertical',
-            spacing: 24,
-            padding: 24,
-          },
-          template => {
-            template.component(
-              'stack_component',
-              'brand',
-              {
-                axis: 'vertical',
-                alignment: 'center',
-                spacing: 8,
-              },
-              component => {
-                component.image('logo', {
-                  source: '/images/carbroz_logo.png',
-                });
-
-                component.text('brand_name', {
-                  text: 'CarBroz',
-                  fontSize: 44,
-                  fontWeight: 700,
-                });
-
-                component.text('welcome', {
-                  text: 'Welcome Partner!',
-                  fontSize: 32,
-                });
-              },
-            );
-
-            template.component(
-              'stack_component',
-              'login',
-              {
-                axis: 'vertical',
-                spacing: 16,
-              },
-              component => {
-                component.section(
-                  'stack_section',
-                  'mobile_section',
-                  {},
-                  section => {
-                    section.input('mobile_number', {
-                      inputType: 'phone',
-                      placeholder: '98765 43210',
-                      binding: 'mobileNumber',
-                      maxLength: 10,
-                      required: true,
-                    });
-                  },
-                );
-
-                component.section(
-                  'stack_section',
-                  'actions',
-                  {},
-                  section => {
-                    section.button('continue', {
-                      text: 'Continue',
-                      action: requestAction({
-                        method: 'POST',
-                        endpoint: '/api/v1/partner/auth/send_otp',
-                        authentication: 'NONE',
-                        validate: true,
-                        responseMode: 'destination',
-                        body: {
-                          phoneNumber: binding('mobileNumber'),
-                          deviceId: context('deviceId'),
-                        },
-                      }),
-                    });
-                  },
-                );
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-}
-```
-
-A new developer should be able to read this file and understand the screen without studying engine internals.
-
----
-
-## 25. Adding a New Reusable UI Type
-
-Example: adding a new `rating` element.
-
-Required steps:
-
-```text
-1. Create nodes/element/Rating.ts
-2. Define RATING type constant
-3. Define exact RatingPropertiesSchema
-4. Export RatingProperties type
-5. Define RatingDefinition
-6. Register once in nodes/definitions.ts
-7. Add a small typed `rating(...)` element helper to legal scopes
-8. Add definition/property/hierarchy tests
-9. Use it from a screen composer
-```
-
-Do NOT also create:
-
-```text
-RatingBuilder
-RatingFactory
-RatingPropertyBuilder
-RatingSerializer
-RatingRegistry
-```
-
-unless an actual requirement makes one necessary.
-
----
-
-## 26. Adding a New Screen
-
-Example: `PartnerEarningsScreen`.
-
-Steps:
-
-```text
-1. Create screens/partner/PartnerEarningsScreen.ts
-2. Implement ScreenComposer
-3. Compose with the existing SduiBuilder DSL
-4. Use only registered reusable node types
-5. Register PARTNER:partner_earnings in ScreenRegistry composition root
-6. Add unit/snapshot/contract tests
-7. Add route/destination mapping only if not already generic
-8. Run SDUI tests + full repository gates
-```
-
-No domain Builder and no API-surface Builder is created.
-
----
-
-## 27. Screen Context
-
-`ScreenContext` carries request/runtime data required for presentation decisions.
-
-It may include safe values such as:
-
-```text
-locale
-app version
-platform
-feature flags
-resolved presentation data
-safe user/partner/customer view data
-```
-
-It must not become a service locator.
-
-Forbidden inside `ScreenContext`:
-
-```text
-PrismaClient
-Redis client
-FastifyRequest
-repositories
-entire DI container
-arbitrary infrastructure services
-```
-
-Business data should be resolved through appropriate application use cases before or around the SDUI orchestration boundary, then passed as deterministic presentation data.
-
----
-
-## 28. Error Model
-
-The engine must use deterministic typed errors.
-
-Minimum categories:
+Minimum stable error categories:
 
 ```text
 UNKNOWN_SCREEN
@@ -1270,582 +1031,307 @@ INVALID_SCREEN_ROOT
 INVALID_HIERARCHY
 UNKNOWN_NODE_DEFINITION
 INVALID_NODE_PROPERTIES
+INVALID_ACTION
+UNSUPPORTED_EVENT
 UNSUPPORTED_SCHEMA_VERSION
 INVALID_TARGET_APP
 PUBLICATION_VALIDATION_FAILED
 ```
 
-Errors must contain enough path/context information to diagnose the node, for example:
+---
+
+## 21. Persisted Registry lifecycle migration
+
+Existing `sdui/registry` lifecycle may still own persisted draft/version/publish/archive/retrieve behavior during migration.
+
+That lifecycle must eventually consume the engine's canonical model and validation, not redefine them.
+
+Do not delete persisted registry behavior until reference, route, migration, version-history and production-data analysis proves removal/convergence safe.
+
+Final ownership target:
 
 ```text
-screen=partner_login
-path=template.components[1].sections[0].elements[0]
-type=input
-reason=unknown property "foo"
+engine → vocabulary/composition/property/action/validation authority
+registry lifecycle → persistence/publication capability consuming engine contracts
 ```
 
-Never log secrets, OTP plaintext, access tokens, or unmasked PII through validation diagnostics.
+If the registry remains a separate package for persistence reasons, it is not allowed to become a second SDUI language or screen-composition framework.
 
 ---
 
-## 29. Testing Strategy
+## 22. Partner Auth contracts that must not change
 
-Testing is part of the architecture contract.
-
-### 29.1 Definition tests
-
-For every reusable node definition verify:
-
-- valid minimum properties pass;
-- valid full properties pass;
-- unknown properties fail where strictness applies;
-- invalid enum/value types fail;
-- required properties fail when missing;
-- hierarchy level is correct.
-
-### 29.2 Builder/DSL tests
-
-Verify:
-
-- Screen accepts exactly one Template;
-- Template accepts Components only;
-- Component direct Elements work;
-- Component Sections work;
-- Component Elements + Sections fails;
-- Section direct Elements work;
-- Section Groups work;
-- Section Elements + Groups fails;
-- Group accepts Elements only;
-- Element cannot receive children;
-- nested callbacks preserve exact parent ownership;
-- sibling creation never changes previous parent ownership.
-
-### 29.3 Action helper tests
-
-Verify:
+### Login
 
 ```text
-binding(...) → {$binding: ...}
-context(...) → {$context: ...}
-response(...)→ expected canonical response reference
-literal(...) → expected literal representation
+screenId      = partner_login
+template.id   = tpl_7K2M9Q
+template.type = stack_template
+targetApp     = PARTNER
+GET /api/v1/partner/screen/auth_login
 ```
 
-Also verify request action fields and body validation.
-
-### 29.4 Theme tests
-
-Verify typed theme helpers produce exactly the canonical serialized contract.
-
-### 29.5 ScreenRegistry tests
-
-Verify:
-
-- known app + screen resolves correct composer;
-- unknown screen fails deterministically;
-- duplicate `(targetApp, screenId)` registration fails;
-- same `screenId` may exist for different apps only when intentionally registered under different target apps.
-
-### 29.6 Screen composer tests
-
-For Partner Login, OTP, Dashboard and each migrated screen verify:
-
-- expected root identity;
-- expected template type/ID;
-- expected critical node IDs/types;
-- expected action endpoint/authentication/body references;
-- final output passes canonical validator;
-- no raw manual hierarchy arrays are authored in production screen files.
-
-### 29.7 Validator negative tests
-
-Explicitly test malformed trees:
+Continue request:
 
 ```text
-Template → Element
-Component → Group
-Component → Element + Section
-Section → Element + Group
-Group → Group
-Group → Section
-Element → children
-unknown node type
-wrong definition level
-invalid property
-unknown property
-unsupported schema version
-invalid target app
-```
-
-All must fail.
-
-### 29.8 API integration tests
-
-Verify API route → `SduiService` → screen response for representative Partner and Customer screens.
-
-Verify errors are mapped deterministically.
-
-### 29.9 Architecture regression tests
-
-Automated gates must prevent:
-
-- SDUI imports inside business domain production code;
-- SDUI screen composers under `domains/**`;
-- canonical screen composers under `apps/api/**` after migration;
-- duplicate screen ownership;
-- reintroduction of old public `BaseSduiScreenBuilder`/typed-builder hierarchy after removal;
-- production raw giant screen JSON construction;
-- production use of hidden parent cursors;
-- parallel node-definition registries;
-- publication code redefining canonical node definitions.
-
----
-
-## 30. Verified Repository Commands
-
-Repository requirements currently declare:
-
-```text
-Node >= 22
-pnpm 11.9.0
-```
-
-### 30.1 Install
-
-From repository root:
-
-```bash
-corepack enable
-pnpm install --frozen-lockfile
-```
-
-### 30.2 Full workspace build
-
-```bash
-pnpm build
-```
-
-This runs workspace package builds recursively.
-
-### 30.3 Lint
-
-```bash
-pnpm lint
-```
-
-### 30.4 Full test suite
-
-Interactive/watch-style root command:
-
-```bash
-pnpm test
-```
-
-For deterministic CI-style execution prefer:
-
-```bash
-pnpm exec vitest run
-```
-
-### 30.5 Coverage
-
-```bash
-pnpm test:coverage
-```
-
-### 30.6 Production freeze suite
-
-```bash
-pnpm freeze:preflight
-pnpm test:freeze
-```
-
-### 30.7 Current `ui-sdk` package commands during migration
-
-Until the old package is retired:
-
-```bash
-pnpm --filter @carbroz/ui-sdk build
-pnpm --filter @carbroz/ui-sdk test
-pnpm --filter @carbroz/ui-sdk test:coverage
-```
-
-### 30.8 Current SDUI Registry build during migration
-
-Until the old Registry package is retired:
-
-```bash
-pnpm --filter @carbroz/sdui-registry build
-```
-
-Registry tests are currently executed through the repository Vitest configuration/root suite where applicable; the existing Registry package does not currently declare its own `test` script.
-
-### 30.9 Target engine commands
-
-The new `@carbroz/sdui-engine` package must expose at least:
-
-```json
-{
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
-  }
-}
-```
-
-After creation:
-
-```bash
-pnpm --filter @carbroz/sdui-engine build
-pnpm --filter @carbroz/sdui-engine test
-pnpm --filter @carbroz/sdui-engine test:coverage
-```
-
----
-
-## 31. Required Verification Sequence Before Each SDUI Phase Freeze
-
-Run in this order:
-
-```bash
-pnpm --filter @carbroz/sdui-engine build
-pnpm --filter @carbroz/sdui-engine test
-pnpm --filter @carbroz/sdui-engine test:coverage
-pnpm build
-pnpm lint
-pnpm exec vitest run
-pnpm test:coverage
-pnpm freeze:preflight
-pnpm test:freeze
-```
-
-During migration, also run relevant old-package builds/tests until all callers have moved.
-
-No architecture phase is frozen only because unit tests pass locally. The same source SHA must pass the repository's required CI/architecture gates before the phase is considered complete.
-
----
-
-## 32. Migration Strategy
-
-Implementation must be incremental and behavior-preserving.
-
-### Phase 0 — Baseline and usage audit
-
-Before changing source:
-
-- inventory all current SDUI packages/files;
-- trace all imports/exports;
-- identify runtime routes using Partner Login/OTP/Dashboard;
-- identify stale Identity and API-surface screen builders;
-- identify current Registry persistence/publication behavior;
-- record current canonical JSON outputs for golden screens;
-- run baseline tests and capture failures, if any.
-
-No deletion occurs in Phase 0.
-
-### Phase 1 — Create engine core
-
-Create:
-
-```text
-sdui/engine
-core model
-NodeDefinition
-value objects
-single definition registry
-validator skeleton
-```
-
-Reuse existing canonical schemas/contracts instead of rewriting behavior unnecessarily.
-
-### Phase 2 — Migrate node definitions
-
-Move/converge Template, Component, Section, Group, and Element definitions.
-
-For each definition:
-
-- type;
-- exact properties;
-- level;
-- hierarchy metadata;
-
-must become understandable from one local definition file.
-
-### Phase 3 — Implement small nested DSL
-
-Create `SduiBuilder` and hierarchy scopes.
-
-Prove all XOR/hierarchy rules with unit tests before migrating product screens.
-
-### Phase 4 — Converge Action and Theme authoring
-
-Replace fluent Action/Theme Builder requirements with typed values + small helpers while preserving canonical JSON output.
-
-### Phase 5 — Create screen contracts and ScreenRegistry
-
-Create:
-
-```text
-ScreenComposer
-ScreenContext
-ScreenRegistry
-```
-
-Add duplicate registration and unknown-screen tests.
-
-### Phase 6 — Create SduiService façade
-
-All external callers use `SduiService` as the public orchestration boundary.
-
-### Phase 7 — Migrate golden Partner screens
-
-Migrate in this order:
-
-```text
-Partner Login
-Partner OTP
-Partner Dashboard
-```
-
-For every screen compare canonical output and preserve frozen API/auth behavior.
-
-### Phase 8 — Remove duplicate screen ownership
-
-After references prove safe:
-
-- remove Identity-owned Partner SDUI builders;
-- remove API-surface-owned Partner screen builders once engine versions are wired;
-- add architecture gates preventing recurrence.
-
-### Phase 9 — Converge persisted Registry lifecycle
-
-Move any still-required draft/publish/version behavior behind the engine and the canonical validator.
-
-Do not re-create a second SDUI definition system.
-
-### Phase 10 — Migrate remaining screens
-
-Migrate remaining Partner, Customer, and Admin SDUI screens.
-
-### Phase 11 — Retire old packages/compatibility APIs
-
-Only after zero production references remain:
-
-- remove obsolete `ui-sdk` builder hierarchy;
-- remove obsolete NodeFactories;
-- remove obsolete separate property architecture;
-- remove obsolete duplicate Registry contracts;
-- remove compatibility exports;
-- update workspace dependencies and docs.
-
-### Phase 12 — Final forensic audit and freeze
-
-Audit the entire repository for:
-
-```text
-old SDUI imports
-duplicate builders
-raw giant JSON screen construction
-hidden hierarchy state
-duplicate definitions
-screen composition in domains
-screen composition in API surfaces
-parallel validators
-parallel serializers without need
-invalid hierarchy APIs
-stale documentation
-```
-
-Then run the complete verification sequence and CI on the same SHA.
-
----
-
-## 33. Frozen Authentication Behavior During SDUI Migration
-
-SDUI simplification must not redesign authentication business behavior.
-
-Preserve the existing Partner authentication contracts unless a separate explicitly approved requirement changes them.
-
-Examples that must remain behaviorally stable through migration include:
-
-```text
-Partner Login action
 POST /api/v1/partner/auth/send_otp
+authentication = NONE
+validate       = true
+responseMode   = destination
+```
 
-Partner OTP verification
+Body:
+
+```text
+phoneNumber ← ref.binding('mobileNumber')
+deviceId    ← ref.context('deviceId')
+```
+
+### Send OTP destination
+
+```text
+screenId       = partner_otp
+templateId     = tpl_partner_otp_v1
+templateType   = form_template
+endpoint       = /api/v1/partner/screen/auth_otp
+method         = GET
+authentication = NONE
+```
+
+### OTP verify request
+
+```text
 POST /api/v1/partner/auth/verify_otp
+authentication = NONE
+validate       = true
+responseMode   = destination
 ```
 
-Identity remains responsible for OTP/session semantics and Redis-backed production OTP challenge behavior.
+Body references:
 
-SDUI migration changes presentation ownership and authoring architecture only.
+```text
+challengeId ← ref.response('data.challengeId')
+phoneNumber ← ref.context('authFlow.phoneNumber')
+otp         ← ref.binding('otp')
+deviceId    ← ref.context('deviceId')
+```
+
+### Authenticated Dashboard destination
+
+```text
+screenId       = partner_dashboard
+templateId     = partner_dashboard_template
+templateType   = default_template
+endpoint       = /api/v1/partner/sdui/registry/partner_dashboard
+method         = GET
+authentication = SESSION
+```
+
+### OTP persistence
+
+Production OTP challenge persistence remains Redis-only. No Prisma/in-memory production fallback, dual-write, OTP plaintext response or duplicate challenge owner may be introduced.
 
 ---
 
-## 34. Naming Rules
+## 23. Compatibility and migration rules
 
-Use names that communicate responsibility.
-
-Preferred:
+Use:
 
 ```text
-SduiBuilder
-ScreenComposer
-PartnerLoginScreen
-ScreenRegistry
-SduiValidator
-SduiService
-StackComponentDefinition
-TextDefinition
+KEEP   → already-correct behavior/contracts
+EXTEND → missing capability without breaking owners
+MODIFY → wrong ownership/authoring architecture
+CREATE → genuinely missing target capability
+DELETE → only after zero-reference/proof
 ```
 
-Avoid ambiguous or overlapping names such as:
+Temporary compatibility is allowed only when:
 
-```text
-BaseSduiScreenBuilder
-ScreenBuilder
-SduiScreenBuilder
-PartnerLoginScreenBuilder
-BuilderFactory
-DefinitionBuilder
-TypedPropertyBuilder
-ElementParentBuilder
-```
+- exact callers are known;
+- the compatibility path delegates to the canonical engine;
+- parity tests prove output;
+- an explicit retirement condition exists.
 
-unless a future concrete requirement proves one is necessary.
+Compatibility must never become a second permanent authoring path.
 
 ---
 
-## 35. Public API Rules
+## 24. Revised implementation sequence — exact order
 
-The engine's public `index.ts` should expose the smallest practical surface.
+Implementation starts only after this documentation set is synchronized.
 
-Application/API consumers normally need:
+### Phase 0 — documentation freeze and source audit
 
-```text
-SduiService
-SduiScreen / output contract
-BuildScreenRequest / public error types
-```
+- freeze this contract and action/API handoff contracts;
+- inspect current engine implementation against the frozen design;
+- identify deltas without changing behavior;
+- preserve the already-green Login wire output as parity oracle.
 
-Screen composers inside the engine may import internal DSL and definitions through internal paths.
+### Phase 1 — property model foundation
 
-Do not export every internal scope/factory/helper merely because another file might someday use it.
+- introduce the five property categories;
+- establish reusable value objects/capabilities;
+- define deterministic default + override resolution;
+- keep exact strict schemas;
+- test default emission, overrides, optional omission, nested-object merge and array replacement.
+
+### Phase 2 — fluent property scopes
+
+- add `base()`, `style()`, `content()`, `behavior()`, `metadata()` fluent scopes;
+- expose only capabilities legal for each node type;
+- avoid per-node public Builder proliferation;
+- prove invalid cross-node properties are rejected.
+
+### Phase 3 — hierarchy DSL refinement
+
+- keep explicit `template/component/section/group` hierarchy methods;
+- add terminal convenience methods for common Elements;
+- retain generic `element(type, ...)` escape hatch;
+- preserve XOR enforcement and no hidden parent cursor.
+
+### Phase 4 — complete action authoring
+
+- move/group references under `ref`;
+- provide `action.request/navigate/present/dismiss/state/externalUri/sequence`;
+- preserve frozen action wire contract;
+- add supported-event validation where appropriate.
+
+### Phase 5 — screen registration simplification
+
+- explicit app screen lists;
+- one ScreenRegistry composition point;
+- duplicate/unknown tests;
+- new-screen workflow proven as create + register once.
+
+### Phase 6 — Partner Login Golden Reference migration
+
+- rewrite Login composer to the frozen fluent DSL;
+- preserve exact screen identity, theme, hierarchy and action contract;
+- deep-equality/parity proof against the current canonical Login output;
+- remove obsolete Login authoring path only after zero production refs;
+- all existing Login tests remain green.
+
+### Phase 7 — Partner OTP migration
+
+Only after Login Golden Reference is green:
+
+- compose OTP with `form_template` through the same DSL;
+- preserve exact OTP contract and transient references;
+- parity test against existing expected wire behavior;
+- no OTP-specific actions or business logic in SDUI.
+
+### Phase 8 — Partner Dashboard migration
+
+- move remaining screen composition into engine ownership;
+- preserve authenticated registry destination/runtime lifecycle behavior;
+- remove duplicate API/domain screen composition after reference proof.
+
+### Phase 9 — remove duplicate screen ownership
+
+- audit `apps/api` and `domains/*/presentation/sdui`;
+- delete only proven stale/unreferenced screen builders;
+- architecture gate: product screens only under engine `screens/<app>`.
+
+### Phase 10 — converge persisted registry lifecycle
+
+- consume engine canonical schemas/validator;
+- remove reusable vocabulary duplication;
+- retain required publication/version functionality.
+
+### Phase 11 — migrate remaining screens
+
+- Partner → Customer → Admin as prioritized;
+- create + register only;
+- reuse generic node/action/property vocabulary.
+
+### Phase 12 — retire old ui-sdk/compatibility packages
+
+Only after zero production references and test proof.
+
+### Phase 13 — final forensic audit and freeze
+
+Prove:
+
+- one SDUI language;
+- one composition engine;
+- one definition registry;
+- one validator authority;
+- one screen owner per screen;
+- exact Partner Auth behavior preserved;
+- no weak validation;
+- no duplicate OTP persistence;
+- full build/lint/test/coverage/freeze gates green.
 
 ---
 
-## 36. Definition of Done for the Architecture Migration
+## 25. Golden tests required before and during migration
 
-The migration is complete only when all are true:
+At minimum:
 
-- one canonical SDUI engine exists;
-- no production domain owns SDUI screen composition;
-- no production API surface owns canonical SDUI screen composition;
-- all code-defined product screens live under `sdui/engine/src/screens`;
-- one `SduiBuilder` DSL owns hierarchy construction;
-- UI definitions co-locate type + properties + hierarchy metadata;
-- one node-definition registry exists;
-- one canonical validator exists;
-- `SduiService` is the public orchestration entry point;
-- `ScreenRegistry` uniquely resolves app + screen ID;
-- Action and Theme are typed values/helpers rather than unnecessary builder trees;
-- hidden current-parent state does not exist;
-- manual production child-array composition does not exist;
-- stale Identity and API-surface screen builders are removed;
-- persisted publication behavior, if retained, uses the same validator/definitions;
-- Partner Login/OTP/Dashboard behavior remains compatible;
-- all new and existing tests pass;
-- coverage gates pass;
-- lint passes;
-- full workspace build passes;
-- architecture/freeze gates pass;
-- CI passes on the exact freeze SHA;
-- final forensic audit finds no parallel legacy SDUI architecture.
+- default properties always emitted;
+- allowed default override works per instance;
+- screen A override does not mutate screen B/default definition;
+- non-default property omitted unless set;
+- nested default object merge is deterministic;
+- arrays replace rather than merge;
+- exact property schema rejects unknown keys;
+- hierarchy/XOR rules reject invalid composition;
+- node registry rejects duplicates/unknowns;
+- screen registry rejects duplicates/unknowns;
+- each action helper serializes exactly to canonical wire form;
+- unsupported events are rejected where metadata is defined;
+- Login before/after canonical deep equality;
+- OTP before/after canonical deep equality;
+- API transport/auth behavior unchanged;
+- Redis-only OTP persistence unchanged.
 
 ---
 
-## 37. Permanent Architecture Rules
+## 26. Permanent anti-patterns
 
-The following rules are frozen.
+Do not introduce:
 
-1. **One SDUI engine owns SDUI presentation.**
-2. **Domains never own SDUI screens.**
-3. **API surfaces never build SDUI trees.**
-4. **Composite models the hierarchy.**
-5. **A small nested Builder DSL composes the hierarchy.**
-6. **Builders are not created for ordinary configuration values.**
-7. **Node definition and its exact properties are co-located.**
-8. **One definition registry exists.**
-9. **One canonical validator validates every final/published screen.**
-10. **Screen composers contain only screen composition, not domain business rules.**
-11. **ScreenRegistry resolves `(targetApp, screenId)` uniquely.**
-12. **SduiService is the single public orchestration entry point.**
-13. **Actions and themes use typed values/helpers.**
-14. **No hidden current-parent state.**
-15. **No screen-specific reusable primitive types.**
-16. **No duplicate SDUI framework in Identity, Partner, Customer, API, Registry, or another package.**
-17. **Compatibility code is temporary and must have proven callers.**
-18. **Strict validation is never weakened to make migration easier.**
-19. **Authentication/domain behavior is not redesigned as part of SDUI simplification.**
-20. **A new abstraction must justify itself with a real invariant, stable boundary, or meaningful duplication reduction.**
+```text
+screen-specific reusable node types
+screen inheritance/base-screen classes
+public Builder class per node type
+giant unrestricted properties object
+global mutable builder cursor
+factory-of-factory composition
+feature-specific action types
+manual $binding/$context/$response wire objects in screen composers
+request + navigate sequence for dependent navigation
+SDUI business logic in domains
+SDUI tree construction in API surfaces
+second canonical validator
+second node definition registry
+silent property dropping or validation weakening
+```
 
 ---
 
-## 38. Final Mental Model
+## 27. Final developer mental model
 
-A developer should remember only this:
-
-```text
-NODE DEFINITION
-    tells us what a reusable UI type supports
-
-        ↓
-
-SDUI BUILDER
-    builds a valid hierarchy
-
-        ↓
-
-SCREEN COMPOSER
-    describes one real product screen
-
-        ↓
-
-SCREEN REGISTRY
-    finds the correct screen composer
-
-        ↓
-
-SDUI SERVICE
-    orchestrates build + validation
-
-        ↓
-
-SDUI VALIDATOR
-    guarantees canonical output
-
-        ↓
-
-API
-    returns the screen JSON
-```
-
-And the runtime ownership is:
+A developer adding a screen should think only:
 
 ```text
-Business Domains                 SDUI Engine                  API
-───────────────                  ───────────                  ───
-Identity                         definitions                  route
-Partner                          builder DSL       ←──        controller
-Customer                         screens                       │
-Booking                          registry                      │
-Catalog                          validator                     │
-Financials                       SduiService ──────────────────┘
+What is the hierarchy?
+  template → component → section/group → element
 
-business rules                   presentation                 transport
+What does this node need to differ from its defaults?
+  base/style/content/behavior/metadata fluent methods
+
+What interaction should happen?
+  action.* using ref.* values
+
+Where is the screen available?
+  register once by targetApp + screenId
 ```
 
-This is the architecture to implement.
+Everything else—canonical defaults, exact schemas, hierarchy safety, action wire serialization, validation and final output—is engine responsibility.
 
-Any future change that materially alters these ownership boundaries, hierarchy rules, core patterns, or public orchestration flow requires an explicit architecture decision before implementation.
+---
+
+## 28. Final frozen architecture statement
+
+> **CarBroz SDUI is one Composite presentation model authored through one small internal Builder DSL. Hierarchy is explicit through Template/Component/Section/Group/Element scopes. Node configuration is fluent and discoverable through Base, Style, Content, Behavior and Metadata property categories. Every reusable node definition owns its exact schema and canonical defaults; defaults are emitted automatically and screens specify only intentional overrides or instance-specific values. Generic typed actions are authored through `action.*` and values through `ref.*`. Product screens are independent `ScreenComposer` strategies registered exactly once by `(targetApp, screenId)`. `SduiService` resolves, builds, validates and returns one canonical SDUI document. No domain, API surface, legacy SDK or registry lifecycle may become a second SDUI authoring authority.**
