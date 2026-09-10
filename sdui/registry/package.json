@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@carbroz/foundation-kernel": "workspace:*",
-    "@carbroz/ui-sdk": "workspace:*",
+    "@carbroz/sdui-engine": "workspace:*",
     "awilix": "^12.0.0"
   },
   "devDependencies": {
