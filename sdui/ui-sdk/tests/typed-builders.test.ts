@@ -6,10 +6,16 @@ import {
   CURRENT_SDUI_SCHEMA_VERSION,
   ElementFactory,
   GroupBuilder,
+  IconBuilder,
+  ImageBuilder,
+  InputBuilder,
   RequestActionBuilder,
   SduiThemeBuilder,
   SectionBuilder,
   StackComponentBuilder,
+  StackGroupBuilder,
+  StackSectionBuilder,
+  StackTemplateBuilder,
 } from '../src/public/index.js';
 
 describe('typed reusable SDUI object-graph builders', () => {
@@ -186,6 +192,71 @@ describe('typed reusable SDUI object-graph builders', () => {
     });
     screen.addStackTemplate('template').addStackComponent('component').addText('text', 'Text');
     expect(screen.build().metadata).toEqual({ source: 'coverage' });
+  });
+
+  it('covers optional element constructor values and validation messages', () => {
+    expect(() => new IconBuilder('icon_without_name').build()).toThrow();
+    expect(() => new ImageBuilder('image_without_source').build()).toThrow();
+
+    const input = new InputBuilder('validated_input')
+      .required('Required')
+      .pattern('^[0-9]+$', 'Digits only')
+      .build();
+    expect(input.validation).toEqual({ required: true, message: 'Digits only', pattern: '^[0-9]+$' });
+  });
+
+  it('serializes both orientation branches for stack group, section and template builders', () => {
+    const verticalGroup = new StackGroupBuilder('vertical_group').vertical().spacing(4).alignCenter();
+    verticalGroup.addText('vertical_group_text', 'Vertical');
+    expect(verticalGroup.build().properties).toMatchObject({
+      orientation: 'vertical',
+      verticalArrangement: { type: 'spacedBy', spacing: 4 },
+      horizontalAlignment: 'center',
+    });
+
+    const horizontalGroup = new StackGroupBuilder('horizontal_group').horizontal().spacing(5).alignCenter();
+    horizontalGroup.addText('horizontal_group_text', 'Horizontal');
+    expect(horizontalGroup.build().properties).toMatchObject({
+      orientation: 'horizontal',
+      horizontalArrangement: { type: 'spacedBy', spacing: 5 },
+      verticalAlignment: 'center',
+    });
+
+    const verticalSection = new StackSectionBuilder('vertical_section').vertical().spacing(6).alignCenter();
+    verticalSection.addText('vertical_section_text', 'Vertical');
+    expect(verticalSection.build().properties).toMatchObject({
+      orientation: 'vertical',
+      verticalArrangement: { type: 'spacedBy', spacing: 6 },
+      horizontalAlignment: 'center',
+    });
+
+    const horizontalSection = new StackSectionBuilder('horizontal_section').horizontal().spacing(7).alignCenter();
+    horizontalSection.addText('horizontal_section_text', 'Horizontal');
+    expect(horizontalSection.build().properties).toMatchObject({
+      orientation: 'horizontal',
+      horizontalArrangement: { type: 'spacedBy', spacing: 7 },
+      verticalAlignment: 'center',
+    });
+
+    const verticalTemplate = new StackTemplateBuilder('vertical_template').vertical().spacing(8).alignCenter();
+    verticalTemplate.addStackComponent('vertical_component').addText('vertical_text', 'Vertical');
+    expect(verticalTemplate.build().properties).toMatchObject({
+      orientation: 'vertical',
+      verticalArrangement: { type: 'spacedBy', spacing: 8 },
+      horizontalAlignment: 'center',
+    });
+
+    const horizontalTemplate = new StackTemplateBuilder('horizontal_template').horizontal().spacing(9).alignCenter();
+    horizontalTemplate.addStackComponent('horizontal_component').addText('horizontal_text', 'Horizontal');
+    expect(horizontalTemplate.build().properties).toMatchObject({
+      orientation: 'horizontal',
+      horizontalArrangement: { type: 'spacedBy', spacing: 9 },
+      verticalAlignment: 'center',
+    });
+  });
+
+  it('allows production factories to apply defaults when properties are omitted', () => {
+    expect(ElementFactory.create('spacer', { id: 'default_spacer' }).properties).toEqual({ semanticRole: 'spacing' });
   });
 
   it('rejects unknown properties for registered production definitions', () => {
