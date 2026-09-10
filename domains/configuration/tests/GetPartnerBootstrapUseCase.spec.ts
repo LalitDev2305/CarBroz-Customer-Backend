@@ -61,6 +61,33 @@ describe('GetPartnerBootstrapUseCase', () => {
     await expect(useCase.execute({ platform: 'DESKTOP', appVersion: '1.0.0', authenticated: false })).rejects.toThrow('Missing Partner update configuration for DESKTOP');
   });
 
+  it('rejects invalid bootstrap documents and startup identities', async () => {
+    const base = validDocument();
+    const missingVersion = { ...base, version: '   ' } as PartnerBootstrapDocument;
+    await expect(new GetPartnerBootstrapUseCase(providerReturning(missingVersion)).execute({ platform: 'ANDROID', appVersion: '1.0.0', authenticated: false })).rejects.toThrow('Invalid Partner bootstrap configuration document');
+
+    const missingScreenId: PartnerBootstrapDocument = { ...base, startup: { ...base.startup, guest: { ...base.startup.guest, screenId: '   ' } } };
+    await expect(new GetPartnerBootstrapUseCase(providerReturning(missingScreenId)).execute({ platform: 'ANDROID', appVersion: '1.0.0', authenticated: false })).rejects.toThrow('Invalid Partner guest startup screen configuration');
+
+    const protocolRelative: PartnerBootstrapDocument = { ...base, startup: { ...base.startup, guest: { ...base.startup.guest, endpoint: '//example.com/login' } } };
+    await expect(new GetPartnerBootstrapUseCase(providerReturning(protocolRelative)).execute({ platform: 'ANDROID', appVersion: '1.0.0', authenticated: false })).rejects.toThrow('Invalid Partner guest startup endpoint');
+  });
+
+  it('rejects invalid application-version and update ordering', async () => {
+    const base = validDocument();
+    await expect(new GetPartnerBootstrapUseCase(providerReturning(base)).execute({ platform: 'ANDROID', appVersion: 'version-one', authenticated: false })).rejects.toThrow('Invalid application version');
+
+    const invalidOrder: PartnerBootstrapDocument = { ...base, update: { ...base.update, ANDROID: { ...base.update.ANDROID, minimumVersion: '3.0.0', latestVersion: '2.0.0' } } };
+    await expect(new GetPartnerBootstrapUseCase(providerReturning(invalidOrder)).execute({ platform: 'ANDROID', appVersion: '2.5.0', authenticated: false })).rejects.toThrow('latestVersion is below minimumVersion');
+  });
+
+  it('compares uneven numeric version cores without treating missing segments as errors', async () => {
+    const base = validDocument();
+    const document: PartnerBootstrapDocument = { ...base, update: { ...base.update, ANDROID: { ...base.update.ANDROID, minimumVersion: '1', latestVersion: '1.0.1' } } };
+    const useCase = new GetPartnerBootstrapUseCase(providerReturning(document));
+    await expect(useCase.execute({ platform: 'ANDROID', appVersion: '1.0', authenticated: false })).resolves.toMatchObject({ config: { update: { required: false, optional: true } } });
+  });
+
   it('rejects absolute startup endpoints', async () => {
     const base = validDocument();
     const invalid: PartnerBootstrapDocument = { ...base, startup: { ...base.startup, guest: { ...base.startup.guest, endpoint: 'https://example.com/login' } } };
