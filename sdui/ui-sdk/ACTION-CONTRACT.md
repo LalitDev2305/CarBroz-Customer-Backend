@@ -1,38 +1,121 @@
-# CarBroz SDUI Action & Binding Contract
+# CarBroz SDUI Action, Event, Binding & Destination Contract
 
-> **Status:** FROZEN V1 contract
-> **Owner:** `sdui/ui-sdk`
-> **Authority:** subordinate to `docs/MASTER-BACKEND-CONSTITUTION.md`
+> **Status:** FROZEN GENERIC CONTRACT — synchronized with `sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`
+>
+> **Migration ownership:** the canonical long-term owner is `sdui/engine`. This file remains the wire-contract authority during `ui-sdk` migration so existing clients and tests retain one stable protocol.
+>
+> **Rule:** implementation may improve authoring APIs, but the serialized action/reference/destination semantics below must not drift without an explicit contract/version change.
 
-This document defines the generic, product-neutral interaction language emitted by SDUI documents. Business behavior invoked by an action remains in its owning bounded context. The UI SDK describes intent only.
+This document defines the generic, product-neutral interaction language emitted by SDUI documents. Business behavior invoked by actions remains in the owning bounded context. SDUI describes intent only.
+
+---
 
 ## 1. Core rules
 
 - Elements are terminal visual/interactive leaves and may declare event-keyed `actions`.
-- The SDUI runtime must not know product screens such as Login, OTP, Booking or Profile.
+- The runtime must not know product screens such as Login, OTP, Booking or Profile.
 - Actions are semantic and generic. Feature-specific action types are forbidden.
-- The server SDUI document is immutable after acceptance. Local interaction changes are runtime state overlays; actions do not mutate the structural tree.
-- Structural parent/child hierarchy and interactive source/target relationships are separate concepts.
-- Action payloads are typed contracts, not an unrestricted scripting language.
-- Arbitrary expression evaluation is forbidden.
+- Structural hierarchy and interactive source/target relationships are separate concepts.
+- Accepted SDUI structure is immutable; local runtime changes are semantic state overlays, not tree mutation.
+- Action payloads are typed contracts, not unrestricted scripting.
+- Arbitrary JavaScript/template/expression evaluation is forbidden.
+- Screen composers must author references through typed helpers, not hand-written protocol markers.
 
-## 2. Frozen V1 action vocabulary
+---
+
+## 2. Frozen generic action vocabulary
 
 ```text
 request       API/business request
 navigate      dynamic SDUI destination navigation
 present       show a dialog, bottom sheet or popup
- dismiss      close the active/target presentation
+dismiss       close the active/target presentation
 state         controlled local runtime-state mutation
 external_uri  open an external URI through a platform capability
 sequence      ordered execution when order is genuinely required
 ```
 
-Event names remain keys on `actions`, for example `onClick`, `onLongClick`, `onValueChange`, `onFocus`, and `onBlur`. Only events supported by the consuming element/runtime may execute.
+No action may be named after a product flow such as:
 
-## 3. Dynamic destination
+```text
+send_otp
+verify_otp
+open_booking
+accept_job
+```
 
-A destination is an instruction describing a future SDUI document:
+Those are business intents represented through generic actions.
+
+---
+
+## 3. Frozen authoring API direction
+
+Screen-composer code should use one discoverable namespace:
+
+```ts
+action.request(...)
+action.navigate(...)
+action.present(...)
+action.dismiss(...)
+action.state(...)
+action.externalUri(...)
+action.sequence(...)
+```
+
+References use:
+
+```ts
+ref.binding(...)
+ref.context(...)
+ref.response(...)
+ref.literal(...)
+```
+
+This is an authoring convenience only. Canonical wire JSON remains the contract below.
+
+A fluent `ActionBuilder` class hierarchy is not authorized.
+
+---
+
+## 4. Event contract
+
+Actions are stored under event keys:
+
+```json
+{
+  "actions": {
+    "onClick": { "type": "...", "payload": {} }
+  }
+}
+```
+
+Initial generic event vocabulary includes:
+
+```text
+onClick
+onLongClick
+onValueChange
+onFocus
+onBlur
+```
+
+Node definitions may advertise the events they support. The builder should expose only legal event methods where practical, and final validation must reject unsupported event/node combinations once event metadata is available.
+
+Example authoring:
+
+```ts
+button.behavior()
+  .onClick(action.request(...))
+  .onLongClick(action.present(...));
+```
+
+The event name is generic runtime behavior; it is not part of business-domain policy.
+
+---
+
+## 5. Dynamic Destination contract
+
+A Destination describes a future SDUI document:
 
 ```json
 {
@@ -45,14 +128,18 @@ A destination is an instruction describing a future SDUI document:
 }
 ```
 
-Semantics:
+Fields:
 
-- `screenId` identifies the logical backend-defined screen.
-- `templateId` is the opaque unique template/navigation identity and is the current back-stack identity. Clients must not derive business meaning from it. Preferred generated format: `tpl_<short-unique-id>`, e.g. `tpl_7K2M9Q`.
-- `templateType` tells the dynamic navigation/rendering runtime which generic template capability the destination requires.
-- `endpoint` identifies where the concrete SDUI document is fetched.
+```text
+screenId        logical backend screen identity
+templateId      expected destination template identity
+templateType    expected generic template rendering capability
+endpoint        endpoint used to fetch the loaded SDUI document
+method          request method, currently GET for screen destinations
+authentication  NONE | SESSION
+```
 
-After fetch, the runtime must verify:
+After fetch the runtime must verify:
 
 ```text
 expected.screenId      == response.screenId
@@ -60,11 +147,15 @@ expected.templateId    == response.template.id
 expected.templateType  == response.template.type
 ```
 
-A loaded `SduiScreen` therefore does not repeat `templateId` or `templateType` at its root. The canonical loaded-document owners are `template.id` and `template.type`. Destination contracts intentionally retain both fields because they are pre-fetch navigation/rendering expectations.
+A loaded `SduiScreen` does not repeat `templateId` or `templateType` at root; canonical owners are `template.id` and `template.type`.
 
-## 4. Binding
+The runtime must not infer an endpoint from a screen/template ID.
 
-An interactive input declares the runtime binding key it owns:
+---
+
+## 6. Binding and value references
+
+An interactive element may own a binding:
 
 ```json
 {
@@ -74,26 +165,35 @@ An interactive input declares the runtime binding key it owns:
 }
 ```
 
-Actions reference runtime values declaratively:
+Frozen reference forms:
 
 ```json
 { "$binding": "mobileNumber" }
+{ "$context": "deviceId" }
+{ "$response": "data.challengeId" }
+{ "$literal": "value" }
 ```
 
-Frozen binding/reference vocabulary:
+Semantics:
 
 ```text
 $binding   current runtime binding value
+$context   approved runtime/platform/flow context value
+$response  value from retained successful action-response context
 $literal   explicit literal value
-$response  value from the current successful action response context
-$context   approved runtime/platform context value
 ```
 
-Only one reference source is legal per reference object. References are data lookup instructions, not expressions. JavaScript/template/expression syntax is forbidden.
+Exactly one reference source is legal per reference object.
 
-## 5. Request action
+References are lookup instructions only. They do not support expressions, arbitrary functions, property scripts or template evaluation.
 
-Example Login Continue action:
+Screen authoring must use `ref.*`; manually encoding `$binding`, `$context`, `$response` or `$literal` in migrated screen composers is forbidden.
+
+---
+
+## 7. Request action
+
+Canonical example:
 
 ```json
 {
@@ -106,7 +206,8 @@ Example Login Continue action:
         "authentication": "NONE",
         "validate": true,
         "body": {
-          "mobileNumber": { "$binding": "mobileNumber" }
+          "phoneNumber": { "$binding": "mobileNumber" },
+          "deviceId": { "$context": "deviceId" }
         },
         "responseMode": "destination"
       }
@@ -115,13 +216,48 @@ Example Login Continue action:
 }
 ```
 
-`validate: true` requires applicable form/input validation before the request is prepared.
+Authoring equivalent:
 
-`responseMode: "destination"` means navigation is conditional on a successful request. The successful business response supplies a dynamic destination; the client does not execute an independent parallel navigation action. Failed requests must not navigate.
+```ts
+action.request({
+  method: 'POST',
+  endpoint: '/api/v1/partner/auth/send_otp',
+  authentication: 'NONE',
+  validate: true,
+  responseMode: 'destination',
+  body: {
+    phoneNumber: ref.binding('mobileNumber'),
+    deviceId: ref.context('deviceId'),
+  },
+});
+```
 
-## 6. Navigate action
+`validate: true` requires applicable input/form validation before preparing the request.
 
-Use when navigation itself does not depend on an API/business mutation:
+### 7.1 `responseMode: destination`
+
+This means destination navigation is conditional on request success:
+
+```text
+validate
+→ resolve references
+→ execute request
+→ failure: expose/reduce error, no navigation
+→ success: retain required response/flow context
+→ validate Destination
+→ satisfy authentication requirement
+→ fetch screen
+→ verify destination/screen identity
+→ navigate/render
+```
+
+Do not model dependent navigation as `sequence(request, navigate)`.
+
+---
+
+## 8. Navigate action
+
+Use when navigation itself does not depend on a preceding business mutation:
 
 ```json
 {
@@ -137,11 +273,19 @@ Use when navigation itself does not depend on an API/business mutation:
 }
 ```
 
-The runtime remains screen-name agnostic.
+Authoring:
 
-## 7. Presentation actions
+```ts
+action.navigate(destination)
+```
 
-`present` handles generic overlays without an API call:
+The runtime stays screen-name agnostic.
+
+---
+
+## 9. Present and dismiss
+
+`present` handles generic overlays:
 
 ```json
 {
@@ -151,7 +295,7 @@ The runtime remains screen-name agnostic.
 }
 ```
 
-Supported V1 presentation modes:
+Supported presentation modes:
 
 ```text
 dialog
@@ -159,11 +303,20 @@ bottom_sheet
 popup
 ```
 
-`dismiss` closes the active presentation or an optional `targetId`.
+`dismiss` closes the active presentation or optional target presentation.
 
-## 8. Local state actions
+Authoring:
 
-Interactive relationships between already-defined nodes use controlled runtime state:
+```ts
+action.present({ targetId: 'cancel_booking_dialog', presentation: 'dialog' })
+action.dismiss({ targetId: 'cancel_booking_dialog' })
+```
+
+---
+
+## 10. State action
+
+Interactive relationships between already-defined nodes use controlled semantic runtime state:
 
 ```json
 {
@@ -176,14 +329,14 @@ Interactive relationships between already-defined nodes use controlled runtime s
 }
 ```
 
-V1 state operations:
+Supported operations:
 
 ```text
 set
 toggle
 ```
 
-V1 mutable runtime-state properties:
+Supported semantic runtime properties:
 
 ```text
 visible
@@ -195,11 +348,13 @@ loading
 value
 ```
 
-Actions must not mutate arbitrary visual paths such as `background.color`. Renderers/definitions decide how semantic state appears.
+Actions must not mutate arbitrary visual paths such as `background.color`. Definitions/renderers decide how semantic state is rendered.
 
-## 9. External URI
+Structural parent-child ownership never changes because of a state action.
 
-External navigation uses a platform capability rather than feature-specific code:
+---
+
+## 11. External URI
 
 ```json
 {
@@ -210,11 +365,19 @@ External navigation uses a platform capability rather than feature-specific code
 }
 ```
 
-The client must apply its platform/security allow-list policy before opening a URI.
+The client must apply its platform/security allow-list policy before opening the URI.
 
-## 10. Sequence
+Authoring:
 
-Use `sequence` only when execution order genuinely matters:
+```ts
+action.externalUri({ uri: ref.literal('https://example.com/terms') })
+```
+
+---
+
+## 12. Sequence
+
+Use only when generic action execution order genuinely matters:
 
 ```json
 {
@@ -224,39 +387,110 @@ Use `sequence` only when execution order genuinely matters:
       {
         "type": "state",
         "targetId": "individual_fields",
-        "payload": { "operation": "set", "property": "visible", "value": true }
+        "payload": {
+          "operation": "set",
+          "property": "visible",
+          "value": true
+        }
       },
       {
         "type": "state",
         "targetId": "organization_fields",
-        "payload": { "operation": "set", "property": "visible", "value": false }
+        "payload": {
+          "operation": "set",
+          "property": "visible",
+          "value": false
+        }
       }
     ]
   }
 }
 ```
 
-Do not use sequence for request-then-navigation when navigation depends on request success; use request `responseMode: destination` instead.
+Do not use Sequence for request-success-dependent navigation.
 
-## 11. Ownership
+---
+
+## 13. Frontend execution architecture
+
+The backend emits typed generic action data. The frontend runtime should execute through isolated generic handlers/strategies, conceptually:
 
 ```text
-sdui/ui-sdk
-  owns generic action, destination, binding/reference and runtime-state vocabulary
+ActionExecutor
+  ├── RequestActionHandler
+  ├── NavigateActionHandler
+  ├── PresentActionHandler
+  ├── DismissActionHandler
+  ├── StateActionHandler
+  ├── ExternalUriActionHandler
+  └── SequenceActionHandler
+```
+
+This is a runtime concept, not a requirement for backend class names.
+
+Adding one future generic action type should add its contract + compatible runtime handler without changing unrelated screen composers.
+
+No product-screen switch statements are allowed in the generic runtime.
+
+---
+
+## 14. Ownership
+
+Final ownership target:
+
+```text
+sdui/engine
+  owns generic action, event, destination, binding/reference and semantic state vocabulary
+  owns typed action/ref authoring helpers
+  owns canonical SDUI validation
 
 business bounded context
   owns business behavior invoked by request actions
 
-apps/api surface
-  owns HTTP exposure/adaptation
+apps/api
+  owns HTTP transport/adaptation only
 
 frontend dynamic runtime
-  validates, resolves bindings, prepares actions, executes generic capabilities,
-  maintains runtime state/back stack, verifies destinations and renders SDUI
+  resolves references
+  validates/executes generic actions
+  owns transient client state/back stack
+  verifies destinations
+  renders SDUI
 ```
 
-No feature-specific action engine or screen-name switch is allowed.
+During migration `sdui/ui-sdk` may still physically contain canonical schemas, but it must not evolve into a competing permanent owner.
 
-## 12. Versioning rule
+---
 
-Changing the meaning of an existing action/reference is a breaking SDUI protocol change. Additive vocabulary must remain safely rejectable/ignorable according to the client compatibility policy. Contract changes require schema tests and documentation updates before production screen documents use them.
+## 15. Validation requirements
+
+Final SDUI validation must reject:
+
+- unknown action types;
+- malformed payloads;
+- multiple reference-source markers in one reference;
+- unsupported authentication/method values;
+- malformed Destinations;
+- unsupported event/node combinations once metadata is defined;
+- feature-specific/unregistered action types;
+- invalid Sequence children;
+- arbitrary state property mutation.
+
+Validation must not silently repair/drop invalid actions.
+
+---
+
+## 16. Versioning rule
+
+Changing the meaning of an existing action/reference/destination is a breaking SDUI protocol change.
+
+Additive vocabulary requires:
+
+1. architecture/document update first;
+2. schema/type update;
+3. client compatibility decision;
+4. handler support where executable;
+5. contract tests;
+6. only then production screen usage.
+
+Existing screens remain unchanged unless they intentionally adopt the new capability.
