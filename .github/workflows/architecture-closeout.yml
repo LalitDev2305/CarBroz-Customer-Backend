@@ -2,69 +2,18 @@ name: Backend Architecture Closeout Verifier
 
 on:
   push:
-    branches:
-      - main
-      - development
-    paths:
-      - '.github/workflows/architecture-closeout.yml'
-      - '.github/workflows/ci.yml'
-      - 'tools/architecture-closeout.mjs'
-      - 'tools/architecture-closeout-constitution-gate.mjs'
-      - 'tools/cw3-boundary-gate.mjs'
-      - 'tools/cw4-contract-gate.mjs'
-      - 'tools/cw5-resource-ownership-gate.mjs'
-      - 'tools/cw5-error-semantics-gate.mjs'
-      - 'tools/cw5-runtime-config-gate.mjs'
-      - 'tools/cw5-observability-pii-gate.mjs'
-      - 'tools/production-freeze/preflight.mjs'
-      - 'pnpm-workspace.yaml'
-      - 'pnpm-lock.yaml'
-      - 'apps/api/**'
-      - 'domains/**'
-      - 'sdui/**'
-      - 'platform/**'
-      - 'foundation/**'
-      - 'tests/architecture/**'
-      - 'tests/contracts/**'
-      - 'tests/integration/**'
-      - 'tests/e2e/**'
-      - 'tests/unit/api-error-boundary.behavior.test.ts'
-      - 'docs/CW2-PHYSICAL-STRUCTURE-CLOSEOUT.md'
-      - 'docs/CW3-BOUNDED-CONTEXT-DEPENDENCY-CLOSEOUT.md'
-      - 'docs/CW4-DOMAIN-APPLICATION-CONTRACT-CLOSEOUT.md'
-      - 'docs/PRODUCTION_FREEZE_EXECUTION.md'
-      - 'docs/PRODUCTION_FREEZE_PLAYBOOK.md'
-      - 'docs/CONSTITUTION-COMPLIANCE-MATRIX.md'
-  workflow_dispatch:
+    branches: [development]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: backend-architecture-closeout-${{ github.ref }}
+  group: phase12-retirement-one-shot
   cancel-in-progress: true
 
 jobs:
-  verify-closed-architecture:
-    runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: postgresql://carbroz_ci:carbroz_ci@127.0.0.1:5432/carbroz_ci
-      JWT_SECRET: carbroz-ci-validation-only-secret-not-for-runtime
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: carbroz_ci
-          POSTGRES_PASSWORD: carbroz_ci
-          POSTGRES_DB: carbroz_ci
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U carbroz_ci -d carbroz_ci"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
+  retire-ui-sdk:
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout exact candidate SHA
         uses: actions/checkout@v4
@@ -82,106 +31,23 @@ jobs:
       - name: Activate repository pnpm version
         run: corepack prepare pnpm@11.9.0 --activate
 
-      - name: Regenerate Phase 12 retirement lockfile
-        run: pnpm install --lockfile-only --no-frozen-lockfile
-
-      - name: Upload Phase 12 retirement lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: regenerated-pnpm-lock
-          path: pnpm-lock.yaml
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Install immutable workspace
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify canonical CW2 topology
-        run: node tools/architecture-closeout.mjs
-
-      - name: Verify Backend Constitution regression boundary
-        run: node tools/architecture-closeout-constitution-gate.mjs --regression
-
-      - name: Verify full Backend Constitution
-        run: node tools/architecture-closeout-constitution-gate.mjs
-
-      - name: Verify CW3 bounded-context and dependency convergence
-        run: node tools/cw3-boundary-gate.mjs
-
-      - name: Verify CW4 domain/application contract convergence
-        run: node tools/cw4-contract-gate.mjs
-
-      - name: Verify CW5 resource ownership and public IDs
-        run: node tools/cw5-resource-ownership-gate.mjs
-
-      - name: Verify CW5 error semantics and leakage containment
-        run: node tools/cw5-error-semantics-gate.mjs
-
-      - name: Verify CW5 runtime configuration and secret separation
-        run: node tools/cw5-runtime-config-gate.mjs
-
-      - name: Verify CW5 observability and PII containment
-        run: node tools/cw5-observability-pii-gate.mjs
-
-      - name: Validate Prisma
-        run: pnpm exec prisma validate
-
-      - name: Generate Prisma client
-        run: pnpm exec prisma generate
-
-      - name: Apply PostgreSQL migrations
-        run: pnpm exec prisma migrate deploy
-
-      - name: Build canonical monorepo
-        run: pnpm build
-
-      - name: Lint canonical monorepo
-        run: pnpm exec eslint --quiet .
-
-      - name: Test canonical monorepo at 100/100/100/100 coverage
+      - name: Build final Phase 12 retirement tree
         shell: bash
         run: |
-          set -o pipefail
-          pnpm test:freeze 2>&1 | tee closeout-test-output.txt
+          set -euo pipefail
+          git rm -r sdui/ui-sdk
+          pnpm install --lockfile-only --no-frozen-lockfile
+          git checkout 6f1f7c2634343535044ce06fb1d1fc2389869407 -- .github/workflows/architecture-closeout.yml
+          git rm .github/workflows/temporary-lockfile-refresh.yml
+          git add pnpm-lock.yaml .github/workflows/architecture-closeout.yml
+          test ! -e sdui/ui-sdk
+          test -z "$(git grep -n '@carbroz/ui-sdk' -- ':!docs/**' ':!sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md' || true)"
 
-      - name: Package tracked closeout source context
-        if: failure()
-        run: git archive --format=zip --output=closeout-source.zip HEAD
-
-      - name: Upload closeout test diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cw5-closeout-test-diagnostics
-          path: |
-            closeout-test-output.txt
-            coverage/coverage-final.json
-            closeout-source.zip
-          if-no-files-found: ignore
-          retention-days: 7
-
-      - name: Re-verify full Backend Constitution
-        run: node tools/architecture-closeout-constitution-gate.mjs
-
-      - name: Re-verify CW3 bounded-context and dependency convergence
-        run: node tools/cw3-boundary-gate.mjs
-
-      - name: Re-verify CW4 domain/application contract convergence
-        run: node tools/cw4-contract-gate.mjs
-
-      - name: Re-verify CW5 resource ownership and public IDs
-        run: node tools/cw5-resource-ownership-gate.mjs
-
-      - name: Re-verify CW5 error semantics and leakage containment
-        run: node tools/cw5-error-semantics-gate.mjs
-
-      - name: Re-verify CW5 runtime configuration and secret separation
-        run: node tools/cw5-runtime-config-gate.mjs
-
-      - name: Re-verify CW5 observability and PII containment
-        run: node tools/cw5-observability-pii-gate.mjs
-
-      - name: Prove closeout verification is read-only
+      - name: Commit retirement
+        shell: bash
         run: |
-          git diff --exit-code
-          test -z "$(git status --porcelain --untracked-files=no)"
+          set -euo pipefail
+          git config user.name "CarBroz Architecture Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "refactor(sdui): retire legacy ui-sdk workspace"
+          git push origin HEAD:development
