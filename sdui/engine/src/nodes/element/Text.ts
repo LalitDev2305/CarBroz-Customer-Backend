@@ -32,4 +32,6 @@ export const TextDefinition: NodeDefinition<TextProperties> = {
   defaults: { semanticRole: 'text' },
   properties: textPropertiesSchema,
   children: 'none',
+  categories: ['base', 'style', 'content', 'behavior', 'metadata'],
+  supportedEvents: ['onClick', 'onLongClick'],
 };
