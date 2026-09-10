@@ -1,57 +1,69 @@
 # Partner Authentication + SDUI + Redis Implementation Plan
 
-> **Status:** Phases 0–13 are COMPLETE + FROZEN. The Phase 7–13 campaign passed the complete implementation contract, mandatory second-pass forensic audit, canonical `CarBroz Backend CI`, and independent `Backend Architecture Closeout Verifier` on the exact documentation-complete freeze candidate. Any future modification to these contracts reopens the owning phase and requires the full closeout sequence again.
+> **Status:** AUTH/SECURITY BEHAVIOR FROZEN; SDUI composition ownership updated to the final single-engine architecture.
 >
 > **Branch:** `development`
 >
-> **Authority:** Subordinate to `MASTER-BACKEND-CONSTITUTION.md`, `PRODUCTION_FREEZE_CONSTITUTION.md`, `ENGINEERING-DOCUMENTATION-STANDARD.md`, and `FORENSIC-CHANGE-GATE.md`.
+> **Architecture authority:** `sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`
 >
-> **Scope:** Partner Bootstrap → Login → Send OTP → OTP Screen → Verify OTP → authenticated Partner Dashboard; Redis-only production OTP persistence; Prisma OTP retirement; full backend regression; backend-to-frontend MVI/UDF handoff.
+> **Behavior authority:** `sdui/PARTNER-AUTH-SDUI-CONTRACT.md`
+>
+> **Runtime handoff:** `docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md`
+>
+> The original Partner Auth phases established and proved the production auth/Redis/Destination behavior. Those security and transport guarantees remain frozen. The previous statement that `apps/api` owns Partner screen composition is superseded: final screen composition now belongs exclusively to `sdui/engine`.
 
-## 1. Non-negotiable architecture
+---
 
-All implementation continues to obey:
+## 1. Current non-negotiable ownership
 
 ```text
-KEEP → EXTEND → MODIFY → CREATE
+Identity domain
+  → OTP/session/token business policy
+  → IOtpChallengeRepository
 
-transport/composition
-       ↓
-application use case
-       ↓
-domain-owned ports/contracts
-       ↑
-infrastructure adapters
+platform/integrations
+  → Redis OTP repository adapter
+  → shared Redis client infrastructure
+
+sdui/engine
+  → generic SDUI vocabulary
+  → node definitions + defaults
+  → fluent hierarchy/property authoring
+  → generic actions/references
+  → Partner Login/OTP/Dashboard screen composition
+  → screen registry/service/validation
+
+sdui/registry
+  → persisted publication/version lifecycle only where still required
+
+apps/api
+  → Fastify transport/adaptation only
+
+frontend MVI/UDF runtime
+  → bindings/context/response resolution
+  → generic action execution
+  → transient auth-flow state
+  → destination verification/rendering
 ```
 
-Frozen ownership:
-
-- Identity owns OTP/session/token business policy and `IOtpChallengeRepository`.
-- `platform/integrations` owns the Redis OTP adapter.
-- `apps/api` owns Fastify transport/composition and Partner product-surface SDUI composition.
-- `sdui/ui-sdk` owns only generic SDUI vocabulary/schema.
-- Configuration owns Partner startup destination policy.
-- Prisma/PostgreSQL continues to own user/session/refresh-token and SDUI registry persistence.
-- Frontend MVI/UDF owns reducer/store/ViewModel/state/effect behavior; none is implemented in backend code.
-
-Forbidden throughout this campaign:
+Forbidden:
 
 - second auth stack;
-- second SDUI/ActionEngine/navigation framework;
+- second SDUI/action/navigation framework;
+- Partner-specific generic action types;
+- API/domain-owned permanent screen composition;
 - second cache/Redis abstraction;
-- Partner-specific generic SDK actions;
-- Redis→Prisma or Redis→memory production fallback;
+- Redis→Prisma or Redis→memory production OTP fallback;
 - Redis+Prisma OTP dual write;
 - plaintext OTP persistence/logging/API exposure;
-- backend reducers/stores/intents/ViewModels;
-- historical migration edits;
-- weakening architecture/security/test/migration gates.
+- backend reducer/store/ViewModel ownership;
+- weakening security/architecture/test/migration gates.
 
-## 2. Canonical contracts
+---
 
-### 2.1 Generic SDUI value references
+## 2. Canonical SDUI reference vocabulary
 
-The implemented SDK supports exactly:
+Wire forms remain exactly:
 
 ```text
 $binding
@@ -60,20 +72,31 @@ $response
 $literal
 ```
 
-No `$form`, `$payload`, or `$state` reference namespace is part of the current contract.
+New engine authoring uses:
 
-### 2.2 Canonical Destination
+```text
+ref.binding(...)
+ref.context(...)
+ref.response(...)
+ref.literal(...)
+```
+
+No `$form`, `$payload` or `$state` namespace is authorized.
+
+---
+
+## 3. Canonical Destination
 
 ```text
 screenId
 templateId
 templateType
 endpoint
-method = GET
+method
 authentication = NONE | SESSION
 ```
 
-Loaded Screen identity remains:
+Loaded screen identity:
 
 ```text
 screen.screenId
@@ -81,7 +104,7 @@ screen.template.id
 screen.template.type
 ```
 
-Required parity after fetch:
+After fetch:
 
 ```text
 destination.screenId     == loaded.screenId
@@ -89,50 +112,44 @@ destination.templateId   == loaded.template.id
 destination.templateType == loaded.template.type
 ```
 
-### 2.3 Canonical Partner auth flow
+---
+
+## 4. Canonical Partner Auth flow
 
 ```text
 GET /api/v1/partner/config/bootstrap
   guest → partner_login
 
 GET /api/v1/partner/screen/auth_login
-  Continue → POST /api/v1/partner/auth/send_otp
+  Login screen from SDUI engine
+
+Continue
+  → POST /api/v1/partner/auth/send_otp
 
 Send OTP success
-  → partner_otp
+  → partner_otp Destination
 
 GET /api/v1/partner/screen/auth_otp
-  Verify → POST /api/v1/partner/auth/verify_otp
+  OTP screen from SDUI engine
+
+Verify
+  → POST /api/v1/partner/auth/verify_otp
 
 Verify OTP success
-  → partner_dashboard (SESSION)
+  → partner_dashboard SESSION Destination
 
 GET /api/v1/partner/sdui/registry/partner_dashboard
   Authorization: Bearer <access token>
 
 Authenticated Bootstrap
-  → same partner_dashboard destination
+  → same partner_dashboard Destination
 ```
 
-## 3. Phase status
+The transport routes remain frozen while screen composition ownership migrates.
 
-### Phase 0 — Repository audit
+---
 
-**Status:** COMPLETE + FROZEN.
-
-Canonical owners, route composition, SDUI schema/action vocabulary, Identity persistence ports, Redis/cache composition, Configuration startup policy, and response/error envelope were established before implementation.
-
-### Phase 1–4 — Foundational backend contracts
-
-**Status:** COMPLETE + FROZEN.
-
-The previously frozen envelope, error handling, Identity OTP port, Redis adapter, shared Redis client, and ownership/dependency rules remain intact.
-
-### Phase 5 — Partner Login request alignment
-
-**Status:** COMPLETE + FROZEN.
-
-Login continues to use the existing generic request action:
+## 5. Login request — frozen
 
 ```text
 POST /api/v1/partner/auth/send_otp
@@ -141,7 +158,7 @@ validate       = true
 responseMode   = destination
 ```
 
-Request mapping:
+Body:
 
 ```json
 {
@@ -150,13 +167,25 @@ Request mapping:
 }
 ```
 
-No Partner-specific auth DTO/action/navigation mechanism was introduced.
+Authoring target:
 
-### Phase 6 — Send OTP canonical destination
+```ts
+action.request({
+  method: 'POST',
+  endpoint: '/api/v1/partner/auth/send_otp',
+  authentication: 'NONE',
+  validate: true,
+  responseMode: 'destination',
+  body: {
+    phoneNumber: ref.binding('mobileNumber'),
+    deviceId: ref.context('deviceId'),
+  },
+});
+```
 
-**Status:** COMPLETE + FROZEN.
+---
 
-Send OTP success destination is:
+## 6. Send OTP destination — frozen
 
 ```text
 screenId       = partner_otp
@@ -167,42 +196,31 @@ method         = GET
 authentication = NONE
 ```
 
-Legacy `{ template, api }` Send OTP navigation is forbidden.
+Legacy `{ template, api }` navigation is forbidden.
 
-### Phase 7 — Send OTP security/error regression
+---
 
-**Status:** COMPLETE + FROZEN.
+## 7. OTP screen + Verify request — frozen
 
-Implemented regression coverage includes:
-
-- resend cooldown;
-- rate limit;
-- concurrent atomic rate limit;
-- provider failure/throw;
-- repository/infrastructure failure behavior;
-- challenge invalidation after delivery failure;
-- no OTP/hash leakage;
-- canonical typed error semantics.
-
-Implementation preserves secure OTP generation, hashing, device binding and fail-closed behavior.
-
-### Phase 8 — Partner OTP SDUI Screen + route
-
-**Status:** COMPLETE + FROZEN.
-
-Real loaded screen:
+Loaded OTP identity:
 
 ```text
 screenId      = partner_otp
 template.id   = tpl_partner_otp_v1
 template.type = form_template
 targetApp     = PARTNER
-route         = GET /api/v1/partner/screen/auth_otp
 ```
 
-The screen uses only generic Template/Component/Section/Element/request/reference vocabulary.
+Verify request:
 
-Verify request mapping:
+```text
+POST /api/v1/partner/auth/verify_otp
+authentication = NONE
+validate       = true
+responseMode   = destination
+```
+
+References:
 
 ```text
 challengeId ← { $response: "data.challengeId" }
@@ -211,15 +229,11 @@ otp         ← { $binding: "otp" }
 deviceId    ← { $context: "deviceId" }
 ```
 
-No OTP-specific SDK action/type was added.
+The new screen implementation must express these through `ref.*` helpers without changing serialized output.
 
-### Phase 9 — Verify OTP contract/security alignment
+---
 
-**Status:** COMPLETE + FROZEN.
-
-`VerifyOtpResult.nextScreen` uses the same transport-neutral readonly `AuthFlowDestination` used by Send OTP.
-
-Security ordering remains:
+## 8. Verify OTP security order — permanent
 
 ```text
 load phone/device-bound challenge
@@ -228,17 +242,56 @@ load phone/device-bound challenge
 → record/invalidate failed attempt when needed
 → atomic one-time consume
 → only then create/update user/session
-→ only then issue hashed refresh-token family
+→ only then issue credential family
 → return authenticated destination
 ```
 
-Regression coverage includes invalid challenge, phone mismatch, device mismatch, invalid OTP, expiry, failed/max attempts, exactly-once consume, concurrent verify, replay rejection, and no session/token issuance before successful consume.
+Required invariants:
 
-### Phase 10 — Real authenticated Partner destination
+- exactly-once consume;
+- concurrent verification fail-closed;
+- replay rejection;
+- no user/session/token issuance before successful consume;
+- phone/device binding preserved;
+- bounded attempts;
+- TTL/expiry preserved.
 
-**Status:** COMPLETE + FROZEN.
+No SDUI architecture work may modify this ordering.
 
-Canonical destination:
+---
+
+## 9. Redis OTP persistence — permanent
+
+Production persistence is exactly:
+
+```text
+Identity IOtpChallengeRepository
+        ↑
+RedisOtpChallengeRepository
+        ↑
+shared singleton redisClient
+```
+
+Permanent requirements:
+
+- one root Redis client;
+- cache and OTP adapter use shared infrastructure;
+- OTP hash only;
+- resend cooldown;
+- bounded rate limit;
+- atomic create/rate-limit;
+- atomic failed-attempt update;
+- atomic exactly-once consume;
+- provider failure invalidates challenge;
+- no non-test memory fallback;
+- no Prisma OTP fallback;
+- no OTP dual write.
+
+Test-only deterministic in-memory composition is allowed only at executable test boundaries.
+
+---
+
+## 10. Dashboard destination — frozen
 
 ```text
 screenId       = partner_dashboard
@@ -249,189 +302,169 @@ method         = GET
 authentication = SESSION
 ```
 
-A real minimal Partner Dashboard composition exists under the Partner API surface. The authenticated registry route verifies JWT and hard-scopes lookup to `targetApp: PARTNER`.
+The published Dashboard registry document remains a deployment/runtime requirement until persisted-registry lifecycle convergence is complete.
 
-Critical deployment guarantee:
+Forward migration:
 
 ```text
 prisma/migrations/20260909142000_publish_partner_dashboard/migration.sql
 ```
 
-publishes the canonical Dashboard registry document. Production therefore does not depend on `prisma db seed` for the destination returned after Verify OTP.
+Production must not depend on manually running `prisma db seed`.
 
-Verify OTP and authenticated Bootstrap converge on this same destination. Guest Bootstrap remains `partner_login`.
-
-### Phase 11 — Prisma OTP persistence retirement
-
-**Status:** COMPLETE + FROZEN.
-
-Production OTP persistence is exactly one implementation:
+Final code-authored presentation ownership converges to:
 
 ```text
-Identity IOtpChallengeRepository
-        ↑
-RedisOtpChallengeRepository
-        ↑
-shared singleton redisClient
+sdui/engine/src/screens/partner/PartnerDashboardScreen.ts
 ```
 
-Completed retirement:
+The registry route may remain the retrieval mechanism while publication lifecycle remains required; it must consume canonical engine contracts rather than define a second SDUI language.
 
-- removed Prisma OTP adapter registration from Identity;
-- removed obsolete `PrismaOtpChallengeRepository` implementation;
-- added executable-boundary `InMemoryOtpChallengeRepository` for `NODE_ENV=test` only;
-- removed Prisma `OtpChallenge` model;
-- retired the table via forward migration `20260909134500_retire_prisma_otp_challenge`;
-- kept PostgreSQL user/session/refresh persistence intact;
-- preserved no-fallback/no-dual-write production behavior.
+---
 
-### Phase 12 — Full backend regression + production closeout
+## 11. SESSION error semantics — frozen
 
-**Status:** COMPLETE + FROZEN.
+Missing/invalid credentials for SESSION routes must produce safe canonical auth responses:
 
-The Phase 12 E2E uses the real Fastify application and the migration-published Dashboard. It proves:
+```text
+401 UNAUTHORIZED
+403 FORBIDDEN
+```
+
+Never convert transport-owned JWT/auth failures into 500 responses and never expose plugin/internal credential detail.
+
+---
+
+## 12. Frontend transient auth-flow state
+
+After successful Send OTP and before OTP destination execution:
+
+```text
+authFlow.phoneNumber   = resolved Send OTP request phoneNumber
+lastSuccessfulResponse = complete successful Send OTP response envelope
+```
+
+This supplies:
+
+```text
+$context: authFlow.phoneNumber
+$response: data.challengeId
+```
+
+Clear state on successful Verify OTP, abandoned flow, logout/reset or new auth flow.
+
+OTP plaintext must not become reusable persistent application state.
+
+---
+
+## 13. Property/default migration boundary
+
+Partner Auth screen source now follows the engine's five property categories:
+
+```text
+base/default
+style
+content/instance
+behavior
+metadata/semantic
+```
+
+Node definitions own canonical defaults. Screen composers specify only intentional overrides and instance-specific values.
+
+This is an authoring change only. Final canonical wire properties must preserve accepted behavior and pass strict schema validation.
+
+---
+
+## 14. Screen migration order
+
+The original auth behavior campaign is complete. The new SDUI-engine convergence follows a separate architecture migration order:
+
+```text
+property/default model
+→ fluent property scopes
+→ hierarchy DSL refinement
+→ complete action/ref authoring
+→ screen registration simplification
+→ Partner Login Golden Reference + deep parity
+→ Partner OTP + deep parity
+→ Partner Dashboard convergence
+→ duplicate screen-owner removal
+→ persisted registry convergence
+→ remaining screens
+→ old ui-sdk retirement after zero refs
+→ final forensic freeze
+```
+
+Do not start OTP migration before the new Login Golden Reference is green.
+
+---
+
+## 15. Historical completed security phases
+
+The earlier phases remain valid evidence for the behavior they proved:
+
+```text
+repository audit
+→ envelope/error foundation
+→ Identity OTP port
+→ Redis adapter/shared client
+→ Login request alignment
+→ Send OTP destination
+→ Send OTP regression/security
+→ OTP route/screen
+→ Verify OTP security
+→ authenticated Dashboard destination
+→ Prisma OTP retirement
+→ full E2E/production closeout
+→ frontend MVI/UDF handoff
+```
+
+Their old physical screen-owner locations do not override the current architecture ownership.
+
+---
+
+## 16. Required regression proof after SDUI migration
+
+The final migration must prove all prior security/transport behavior again, including:
 
 ```text
 guest Bootstrap
-→ Login screen identity
+→ Login
 → Send OTP
-→ OTP destination identity
-→ OTP screen identity
+→ OTP Destination
+→ OTP screen
 → Verify OTP
-→ access + refresh credentials
-→ unauthenticated SESSION destination rejected
-→ authenticated Dashboard fetched
-→ authenticated Bootstrap destination parity
+→ credentials
+→ unauthenticated Dashboard rejected
+→ authenticated Dashboard loaded
+→ authenticated Bootstrap parity
 ```
 
-The E2E does not create a Dashboard fixture; migration deployment is part of the proof.
+Plus architecture-specific parity:
 
-During forensic E2E validation, a real transport bug was found: raw `@fastify/jwt` 401/403 errors were falling through the global handler as 500. The fix belongs to the canonical transport error boundary and now maps transport-owned authentication/authorization failures to safe canonical 401/403 envelopes without exposing plugin internals.
+- Login old/new canonical deep equality;
+- OTP expected/new canonical deep equality;
+- request body mappings unchanged;
+- Destination identities unchanged;
+- strict validation unchanged or stronger;
+- Redis-only OTP persistence unchanged;
+- no API/domain screen-composition owner remains after safe migration.
 
-The same forensic pass also exposed a classic-Awilix SDUI composition defect: SDUI application use cases used a generic constructor parameter name that did not match the canonical `sduiRegistryRepository` registration. The existing use-case family now uses that canonical dependency name, eliminating the runtime resolution failure without adding an alias or second DI path.
+---
 
-The complete mandatory verification matrix passed:
+## 17. Persistence/deployment invariants
 
-- immutable dependency install;
-- CW2 physical architecture;
-- CW1/CW2 Constitution regression;
-- CW3 bounded-context/dependency;
-- CW4 domain/application contract;
-- CW5 resource/public-ID;
-- CW5 error/leakage;
-- CW5 runtime config/secrets;
-- CW5 observability/PII;
-- Prisma validate/generate;
-- complete forward migrations on fresh PostgreSQL;
-- fresh schema convergence/drift proof;
-- monorepo build;
-- ESLint;
-- full Vitest;
-- repeated CW1–CW5 gates;
-- non-mutating/read-only proof;
-- canonical Backend CI;
-- independent Architecture Closeout.
+- historical Prisma migrations remain immutable;
+- OTP retirement remains forward-only;
+- Dashboard publication remains forward-only;
+- fresh migration chain contains no production `OtpChallenge` table;
+- fresh migration chain contains the required published Dashboard document while that retrieval path is active;
+- `prisma db seed` remains optional development convenience, not production dependency.
 
-No gate was weakened.
+---
 
-### Phase 13 — Backend → frontend MVI/UDF handoff
+## 18. Final change rule
 
-**Status:** COMPLETE + FROZEN.
+Any future change to OTP security, persistence, Destination identity, auth payloads, SESSION semantics or credential ordering reopens the corresponding security/behavior contract and requires full closeout.
 
-Canonical handoff:
-
-```text
-docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md
-```
-
-It documents only existing backend behavior and the real generic reference vocabulary.
-
-Required frontend flow-state retention is explicit:
-
-```text
-after successful Send OTP and before OTP navigation:
-  authFlow.phoneNumber      = resolved Send OTP phoneNumber
-  lastSuccessfulResponse    = successful Send OTP response envelope
-```
-
-This supplies the OTP screen's `$context: "authFlow.phoneNumber"` and `$response: "data.challengeId"` references without adding hidden backend state or a second SDUI state-transfer mechanism.
-
-Transient auth-flow state is cleared after successful Verify OTP or flow reset/cancellation. OTP plaintext must not become reusable persistent application state.
-
-## 4. Redis/OTP invariants
-
-Permanent production requirements:
-
-- one root Redis client;
-- cache and OTP adapter use the same client;
-- OTP hash only;
-- phone/device binding;
-- resend cooldown;
-- bounded rate limit;
-- bounded attempts;
-- TTL/expiry;
-- atomic create/rate-limit;
-- atomic failed-attempt update;
-- atomic exactly-once consume;
-- replay rejection;
-- provider failure invalidates the created challenge;
-- no non-test memory fallback;
-- no Prisma OTP fallback;
-- no OTP dual write.
-
-## 5. Persistence/deployment invariants
-
-- historical migrations are immutable;
-- Prisma OTP retirement is forward-only;
-- Dashboard publication is forward-only;
-- a fresh database produced by the complete migration chain contains no `OtpChallenge` table and does contain the canonical published Partner Dashboard registry document;
-- `prisma db seed` may remain an idempotent development convenience but is not a production dependency for authenticated Partner startup.
-
-## 6. API/security invariants
-
-- canonical response envelope remains owned by `ResponseHelper` + global error handler;
-- HTTP/body status parity is preserved;
-- validation details and unhandled exception internals do not leak;
-- raw Fastify/JWT 401/403 errors are normalized into safe `UNAUTHORIZED`/`FORBIDDEN` envelopes;
-- OTP/hash/token/provider/SQL internals are not exposed;
-- SESSION screen retrieval requires a valid bearer token.
-
-## 7. Final forensic audit checklist — PASSED
-
-The mandatory second-pass source audit verified:
-
-1. no Identity→Fastify/Redis/Prisma/SDUI dependency inversion violation;
-2. no duplicate OTP repository or production fallback;
-3. no Prisma OTP model/adapter runtime reference;
-4. no legacy `{ template, api }` Partner auth success navigation;
-5. Login and OTP screens parse through canonical strict SDUI schemas;
-6. SDK reference namespaces remain exactly `$binding/$context/$response/$literal`;
-7. handoff contains no imaginary namespace/endpoint/field;
-8. OTP flow-state producer/retention rule is documented;
-9. Verify OTP creates no session/token before atomic consume;
-10. Verify OTP destination == authenticated Bootstrap destination;
-11. Dashboard destination == migration-published loaded Screen identity;
-12. Dashboard route is SESSION-protected and PARTNER-scoped;
-13. Dashboard availability does not depend on seed execution;
-14. fresh migrations converge without drift;
-15. Customer/Admin isolation remains unaffected;
-16. canonical docs match current implementation;
-17. Backend CI and Architecture Closeout succeed on the same documentation-complete freeze candidate.
-
-## 8. Definition of Done — SATISFIED
-
-The Partner auth Phases 7–13 campaign is COMPLETE + FROZEN because all of the following are simultaneously true:
-
-- Phase 7 security regressions complete;
-- Phase 8 OTP Screen/route complete;
-- Phase 9 Verify OTP security/destination complete;
-- Phase 10 authenticated Dashboard real, published, protected and parity-tested;
-- Phase 11 Prisma OTP retirement complete;
-- Phase 12 repository-wide verification fully green;
-- Phase 13 frontend handoff source-accurate;
-- no architecture/security/SDUI/persistence/configuration mismatch remains;
-- mandatory second-pass forensic audit is clean;
-- canonical Backend CI succeeds;
-- independent Architecture Closeout succeeds on the same documentation-complete freeze candidate.
-
-Any future change to a frozen contract reopens the owning phase and requires the complete verification sequence again.
+SDUI internal authoring may evolve only through the documentation-first process in `sdui/README.md` and `sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`.
