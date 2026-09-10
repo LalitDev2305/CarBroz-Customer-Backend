@@ -1,5 +1,5 @@
 import Fastify from 'fastify';
-import { dynamicDestinationSchema } from '@carbroz/ui-sdk';
+import { dynamicDestinationSchema } from '@carbroz/sdui-engine';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { registerPartnerAuthRoutes } from '../partner-auth.routes.js';
 
