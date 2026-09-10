@@ -1,6 +1,6 @@
 export type SduiNodeLevel = 'template' | 'component' | 'section' | 'group' | 'element';
 
-export type SduiChildMode =
+export type SduiContentMode =
   | 'components'
   | 'elements-or-sections'
   | 'elements-or-groups'
@@ -14,12 +14,12 @@ export interface PropertyParser<TProperties> {
 
 /**
  * Single source of truth for one reusable SDUI node type.
- * A concrete definition co-locates type identity, defaults, property contract and legal child mode.
+ * A concrete definition co-locates type identity, defaults, property contract and legal content mode.
  */
 export interface NodeDefinition<TProperties = unknown> {
   readonly type: string;
   readonly level: SduiNodeLevel;
   readonly defaults?: Readonly<Record<string, unknown>>;
   readonly properties: PropertyParser<TProperties>;
-  readonly children: SduiChildMode;
+  readonly children: SduiContentMode;
 }
