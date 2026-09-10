@@ -8,7 +8,7 @@ import type {
   SduiTemplate,
   SduiTheme,
 } from './SduiModel.js';
-import { CURRENT_SDUI_SCHEMA_VERSION } from './SduiModel.js';
+import { CURRENT_SDUI_SCHEMA_VERSION, DEFAULT_SDUI_THEME, themeSchema } from './SduiModel.js';
 import type { NodeDefinitionRegistry } from '../registry/NodeDefinitionRegistry.js';
 import { createProductionNodeDefinitionRegistry } from '../registry/createProductionNodeDefinitionRegistry.js';
 import {
@@ -287,12 +287,17 @@ export class SduiBuilder {
   screen(options: SduiScreenOptions, compose: Compose<ScreenScope>): SduiScreen {
     const scope = new ScreenScope(this.creator);
     compose(scope);
+    const theme = themeSchema.parse(deepMergeRecord(
+      DEFAULT_SDUI_THEME as Record<string, unknown>,
+      options.theme ?? {},
+    ));
+
     return {
       screenId: options.id,
       schemaVersion: options.schemaVersion ?? CURRENT_SDUI_SCHEMA_VERSION,
       targetApp: options.targetApp,
       template: scope.finish(options.id),
-      ...(options.theme ? { theme: options.theme } : {}),
+      theme,
       ...(options.metadata ? { metadata: options.metadata } : {}),
     };
   }
