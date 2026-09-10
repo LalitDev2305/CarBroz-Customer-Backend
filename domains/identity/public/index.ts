@@ -23,7 +23,5 @@ export * from '../application/use-cases/LogoutUseCase.js';
 export * from '../application/use-cases/RefreshTokenUseCase.js';
 export * from '../application/use-cases/SendOtpUseCase.js';
 export * from '../application/use-cases/VerifyOtpUseCase.js';
-export * from '../presentation/sdui/builders/partner-login-screen.builder.js';
-export * from '../presentation/sdui/builders/partner-otp-screen.builder.js';
 export * from '../identity.module.js';
 export * from '../module.manifest.js';
