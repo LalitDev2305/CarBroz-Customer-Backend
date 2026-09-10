@@ -1,21 +1,25 @@
-name: Temporary Lockfile Refresh
+name: Temporary Phase 12 Retirement
 
 on:
   push:
     branches: [development]
 
 permissions:
-  contents: read
+  contents: write
 
-# Temporary Phase 12 evidence only; remove after consuming the regenerated lock artifact.
+concurrency:
+  group: temporary-phase12-sdui-retirement
+  cancel-in-progress: true
+
 jobs:
-  refresh-lockfile:
+  retire-ui-sdk:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout exact candidate SHA
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
 
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
@@ -28,13 +32,23 @@ jobs:
       - name: Activate repository pnpm version
         run: corepack prepare pnpm@11.9.0 --activate
 
-      - name: Regenerate lockfile only
-        run: pnpm install --lockfile-only --no-frozen-lockfile
+      - name: Retire ui-sdk and regenerate exact workspace lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm -r sdui/ui-sdk
+          pnpm install --lockfile-only --no-frozen-lockfile
+          git checkout HEAD~2 -- .github/workflows/architecture-closeout.yml
+          git rm .github/workflows/temporary-lockfile-refresh.yml
+          git add pnpm-lock.yaml .github/workflows/architecture-closeout.yml
+          test -z "$(git grep -n '@carbroz/ui-sdk' -- ':!docs/**' ':!sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md' || true)"
+          test ! -e sdui/ui-sdk
 
-      - name: Upload regenerated lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: regenerated-pnpm-lock
-          path: pnpm-lock.yaml
-          if-no-files-found: error
-          retention-days: 1
+      - name: Commit final Phase 12 retirement tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "CarBroz Architecture Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "refactor(sdui): retire legacy ui-sdk workspace"
+          git push origin HEAD:development
