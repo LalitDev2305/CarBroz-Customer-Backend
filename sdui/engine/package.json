@@ -17,7 +17,6 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@carbroz/ui-sdk": "workspace:*",
     "zod": "^4.4.3"
   },
   "devDependencies": {
