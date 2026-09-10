@@ -29,6 +29,7 @@
     "@carbroz/platform-messaging": "workspace:*",
     "@carbroz/platform-observability": "workspace:*",
     "@carbroz/platform-storage": "workspace:*",
+    "@carbroz/sdui-engine": "workspace:*",
     "@carbroz/sdui-registry": "workspace:*",
     "@carbroz/ui-sdk": "workspace:*",
     "@fastify/awilix": "^8.2.0",
