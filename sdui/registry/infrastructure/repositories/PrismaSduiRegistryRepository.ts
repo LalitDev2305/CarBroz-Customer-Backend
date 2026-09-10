@@ -1,17 +1,14 @@
 import { KernelError, KernelErrorCode } from '@carbroz/foundation-kernel';
 import {
-  PRODUCTION_COMPONENT_TYPES,
-  PRODUCTION_ELEMENT_TYPES,
-  PRODUCTION_GROUP_TYPES,
-  PRODUCTION_SECTION_TYPES,
-  parseSduiScreen,
-  parseSduiScreenForPublication,
+  SduiValidator,
+  createProductionNodeDefinitionRegistry,
   targetAppSchema,
   templateSchema,
+  type SduiNodeLevel as EngineSduiNodeLevel,
   type SduiScreen,
   type SduiTargetApp,
   type SduiTemplate,
-} from '@carbroz/ui-sdk';
+} from '@carbroz/sdui-engine';
 import { SduiComponentEntity } from '../../domain/SduiComponent.js';
 import { SduiElementEntity } from '../../domain/SduiElement.js';
 import { SduiGroupEntity } from '../../domain/SduiGroup.js';
@@ -32,6 +29,9 @@ import type {
   TemplatePersistenceRecord,
 } from '../persistence/SduiPersistenceClient.js';
 
+const canonicalSduiValidator = new SduiValidator();
+const canonicalNodeDefinitions = createProductionNodeDefinitionRegistry();
+
 function invalidInput(message: string): KernelError {
   return new KernelError(KernelErrorCode.INVALID_INPUT, message, 400);
 }
@@ -49,18 +49,18 @@ function parseScreenStatus(status: string): SduiScreenStatus {
   throw invalidInput(`Unsupported SDUI screen status '${status}'`);
 }
 
-function assertLegacyRegistryDoesNotRedefineCoreType(input: RegistryNodeInput, nodeLevel: SduiNodeLevel): void {
-  const productionTypes: readonly string[] = nodeLevel === 'COMPONENT'
-    ? PRODUCTION_COMPONENT_TYPES
-    : nodeLevel === 'SECTION'
-      ? PRODUCTION_SECTION_TYPES
-      : nodeLevel === 'GROUP'
-        ? PRODUCTION_GROUP_TYPES
-        : PRODUCTION_ELEMENT_TYPES;
+function canonicalNodeLevel(nodeLevel: SduiNodeLevel): EngineSduiNodeLevel {
+  if (nodeLevel === 'COMPONENT') return 'component';
+  if (nodeLevel === 'SECTION') return 'section';
+  if (nodeLevel === 'GROUP') return 'group';
+  return 'element';
+}
 
-  if (productionTypes.includes(input.componentType)) {
+function assertLegacyRegistryDoesNotRedefineCoreType(input: RegistryNodeInput, nodeLevel: SduiNodeLevel): void {
+  const engineLevel = canonicalNodeLevel(nodeLevel);
+  if (canonicalNodeDefinitions.has(engineLevel, input.componentType)) {
     throw conflict(
-      `Runtime SDUI registry cannot redefine canonical ui-sdk ${nodeLevel.toLowerCase()} type '${input.componentType}'`,
+      `Runtime SDUI registry cannot redefine canonical engine ${engineLevel} type '${input.componentType}'`,
     );
   }
 }
@@ -77,7 +77,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
       targetApp: targetAppSchema.parse(record.targetApp),
       versionNumber: record.versionNumber,
       status: parseScreenStatus(record.status),
-      layoutJson: parseSduiScreen(record.layoutJson),
+      layoutJson: canonicalSduiValidator.validate(record.layoutJson),
       lockVersion: record.lockVersion,
       publishedAt: record.publishedAt,
       publishedBy: record.publishedBy,
@@ -117,7 +117,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     layoutJson: SduiScreen,
     isPublished = true,
   ): Promise<SduiScreenEntity> {
-    const document = parseSduiScreen(layoutJson);
+    const document = canonicalSduiValidator.validate(layoutJson);
     if (isPublished) return this.createDraftAndPublish(screenId, targetApp, document);
 
     const draft = await this.findDraft(screenId, targetApp);
@@ -137,7 +137,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
     targetApp: SduiTargetApp,
     layoutJson: SduiScreen,
   ): Promise<SduiScreenEntity> {
-    const publishableLayout = parseSduiScreenForPublication(layoutJson);
+    const publishableLayout = canonicalSduiValidator.validate(layoutJson);
 
     return this.prismaClient.$transaction(async (tx) => {
       const latest = await tx.sduiScreen.findFirst({
@@ -171,7 +171,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
 
   public async createDraft(input: CreateDraftInput): Promise<SduiScreenEntity> {
     const targetApp = input.targetApp ?? 'CUSTOMER';
-    const layoutJson = parseSduiScreen(input.layoutJson);
+    const layoutJson = canonicalSduiValidator.validate(input.layoutJson);
 
     return this.prismaClient.$transaction(async (tx) => {
       const existingDraft = await tx.sduiScreen.findFirst({
@@ -216,7 +216,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
 
   public async updateDraft(input: UpdateDraftInput): Promise<SduiScreenEntity> {
     const targetApp = input.targetApp ?? 'CUSTOMER';
-    const layoutJson = parseSduiScreen(input.layoutJson);
+    const layoutJson = canonicalSduiValidator.validate(input.layoutJson);
     const draft = await this.prismaClient.sduiScreen.findFirst({
       where: { screenId: input.screenId, targetApp, status: 'DRAFT' },
     });
@@ -250,7 +250,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
       }
       if (targetVersion.status === 'PUBLISHED') return this.mapScreen(targetVersion);
 
-      parseSduiScreenForPublication(targetVersion.layoutJson);
+      canonicalSduiValidator.validate(targetVersion.layoutJson);
 
       await tx.sduiScreen.updateMany({
         where: { screenId, targetApp, status: 'PUBLISHED' },
@@ -304,7 +304,7 @@ export class PrismaSduiRegistryRepository implements ISduiRegistryRepository {
         throw notFound(`Target rollback version ${targetVersionNumber} not found for screen '${screenId}'`);
       }
 
-      const canonicalLayout = parseSduiScreenForPublication(targetVersion.layoutJson);
+      const canonicalLayout = canonicalSduiValidator.validate(targetVersion.layoutJson);
       const latest = await tx.sduiScreen.findFirst({
         where: { screenId, targetApp },
         orderBy: { versionNumber: 'desc' },
