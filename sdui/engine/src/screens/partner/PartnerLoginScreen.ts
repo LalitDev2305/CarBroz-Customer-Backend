@@ -33,7 +33,7 @@ export class PartnerLoginScreen implements ScreenComposer {
               .fillMaxWidth();
 
             brand.image('brand_logo', image => {
-              image.content().url('/images/carbroz_logo.png').contentScale('fit');
+              image.content().url('/images/carbroz_logo.png');
               image.base().width(120).height(96);
             });
 
@@ -165,7 +165,7 @@ export class PartnerLoginScreen implements ScreenComposer {
             hero.base().horizontalAlignment('center').fillMaxWidth();
 
             hero.image('hero_car', image => {
-              image.content().url('/images/img_splash_car.png').contentScale('fit');
+              image.content().url('/images/img_splash_car.png');
               image.base().fillMaxWidth().maxWidth(420);
             });
           });
