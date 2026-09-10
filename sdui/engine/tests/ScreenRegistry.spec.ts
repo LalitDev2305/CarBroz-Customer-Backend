@@ -1,30 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import {
   CURRENT_SDUI_SCHEMA_VERSION,
-  SduiScreenBuilder,
-  type SduiScreen,
-} from '@carbroz/ui-sdk';
-import {
   DuplicateScreenRegistrationError,
   ScreenRegistry,
+  SduiBuilder,
   SduiService,
   SduiValidator,
   UnknownScreenError,
   type ScreenComposer,
+  type SduiScreen,
 } from '../src/index.js';
 
 function validPartnerScreen(screenId = 'partner_test'): SduiScreen {
-  const screen = new SduiScreenBuilder();
-  screen.id(screenId).schemaVersion(CURRENT_SDUI_SCHEMA_VERSION).targetApp('PARTNER');
-
-  const template = screen.addDefaultTemplate(`${screenId}_template`);
-  template.vertical().fillMaxSize();
-
-  const component = template.addStackComponent(`${screenId}_component`);
-  component.vertical();
-
-  component.addText(`${screenId}_title`).value('Test screen');
-  return screen.build();
+  return new SduiBuilder().screen({
+    id: screenId,
+    schemaVersion: CURRENT_SDUI_SCHEMA_VERSION,
+    targetApp: 'PARTNER',
+  }, root => {
+    root.template('default_template', `${screenId}_template`, template => {
+      template.component('stack_component', `${screenId}_component`, component => {
+        component.text(`${screenId}_title`, { text: 'Test screen' });
+      });
+    });
+  });
 }
 
 function composer(screenId = 'partner_test'): ScreenComposer {
