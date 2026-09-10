@@ -76,6 +76,9 @@ describe('SDUI action authoring', () => {
 
   it('rejects invalid state/sequence authoring', () => {
     expect(() => action.state({ targetId: 'x', operation: 'set', property: 'visible' })).toThrow();
+    expect(() => action.state({ targetId: 'x', operation: 'toggle', property: 'visible', value: false })).toThrow(
+      'SDUI state toggle action must not provide a value',
+    );
     expect(() => action.state({ targetId: 'x', operation: 'toggle', property: 'value' })).toThrow();
     expect(() => action.sequence([])).toThrow();
   });
