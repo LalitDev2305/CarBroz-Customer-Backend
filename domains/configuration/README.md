@@ -11,7 +11,7 @@ Configuration owns persisted runtime/product configuration and startup decisions
 Current Partner bootstrap endpoint:
 
 ```http
-GET /api/v1/partner/bootstrap
+GET /api/v1/partner/config/bootstrap
 ```
 
 Persisted configuration key:
