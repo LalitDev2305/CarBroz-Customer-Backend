@@ -141,6 +141,15 @@ jobs:
           path: |
             closeout-test-output.txt
             coverage/coverage-final.json
+            apps/api/src
+            domains
+            platform
+            foundation
+            sdui/engine/src
+            sdui/registry/src
+            sdui/ui-sdk/src
+            tests
+            vitest.config.ts
           if-no-files-found: ignore
           retention-days: 7
 
