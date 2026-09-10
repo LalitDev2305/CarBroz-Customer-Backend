@@ -1,15 +1,26 @@
-import { parseSduiScreen } from '@carbroz/ui-sdk';
 import type { SduiComponent, SduiElement, SduiGroup, SduiScreen, SduiSection, SduiTemplate } from './SduiModel.js';
+import { isSupportedSduiSchemaVersion, screenSchema } from './SduiModel.js';
 import type { NodeDefinition, SduiNodeLevel } from './NodeDefinition.js';
 import type { NodeDefinitionRegistry } from '../registry/NodeDefinitionRegistry.js';
 import { createProductionNodeDefinitionRegistry } from '../registry/createProductionNodeDefinitionRegistry.js';
 
-/** Canonical engine validation boundary: wire shape first, then hierarchy definition/property/event semantics. */
+/**
+ * Canonical engine validation boundary.
+ *
+ * Validation is deliberately layered once inside the engine:
+ * 1. strict wire shape + hierarchy XOR/non-empty/unique-id invariants
+ * 2. supported schema version
+ * 3. registered node definition + exact property contract
+ * 4. child capability + supported event semantics
+ */
 export class SduiValidator {
   constructor(private readonly definitions: NodeDefinitionRegistry = createProductionNodeDefinitionRegistry()) {}
 
   validate(input: unknown): SduiScreen {
-    const screen = parseSduiScreen(input);
+    const screen = screenSchema.parse(input);
+    if (!isSupportedSduiSchemaVersion(screen.schemaVersion)) {
+      throw new Error(`Unsupported SDUI schema version '${screen.schemaVersion}'`);
+    }
     this.validateTemplate(screen.template);
     return screen;
   }
