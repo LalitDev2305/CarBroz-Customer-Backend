@@ -3,6 +3,7 @@ import type { ScreenContext } from '../../core/ScreenContext.js';
 import type { SduiScreen } from '../../core/SduiModel.js';
 import { action, ref } from '../../core/Action.js';
 import { SduiBuilder } from '../../core/SduiBuilder.js';
+import { partnerAuthTheme } from './PartnerAuthTheme.js';
 
 export class PartnerLoginScreen implements ScreenComposer {
   readonly screenId = 'partner_login';
@@ -15,27 +16,11 @@ export class PartnerLoginScreen implements ScreenComposer {
       {
         id: this.screenId,
         targetApp: this.targetApp,
-        theme: {
-          theme: 'light',
-          statusBar: 'transparent',
-          properties: {
-            gradient: {
-              type: 'linear',
-              angle: 135,
-              colors: [
-                { color: '#DDF8F6', stop: 0 },
-                { color: '#F7FEFD', stop: 0.28 },
-                { color: '#FFFFFF', stop: 0.55 },
-                { color: '#D9F7F4', stop: 1 },
-              ],
-            },
-          },
-        },
+        theme: partnerAuthTheme,
       },
       screen => {
         screen.template('stack_template', 'tpl_7K2M9Q', template => {
           template.base()
-            .vertical()
             .spacing(24)
             .horizontalAlignment('center')
             .fillMaxSize()
@@ -43,7 +28,6 @@ export class PartnerLoginScreen implements ScreenComposer {
 
           template.component('stack_component', 'brand_content', brand => {
             brand.base()
-              .vertical()
               .spacing(6)
               .horizontalAlignment('center')
               .fillMaxWidth();
@@ -89,10 +73,10 @@ export class PartnerLoginScreen implements ScreenComposer {
           });
 
           template.component('stack_component', 'login_content', login => {
-            login.base().vertical().spacing(14).horizontalAlignment('center').fillMaxWidth();
+            login.base().spacing(14).horizontalAlignment('center').fillMaxWidth();
 
             login.section('stack_section', 'mobile_field_section', section => {
-              section.base().vertical().fillMaxWidth();
+              section.base().fillMaxWidth();
 
               section.group('stack_group', 'mobile_field', group => {
                 group.base()
@@ -133,7 +117,7 @@ export class PartnerLoginScreen implements ScreenComposer {
             });
 
             login.section('stack_section', 'action_section', section => {
-              section.base().vertical().spacing(12).horizontalAlignment('center').fillMaxWidth();
+              section.base().spacing(12).horizontalAlignment('center').fillMaxWidth();
 
               section.button('continue_button', button => {
                 button.content()
@@ -178,7 +162,7 @@ export class PartnerLoginScreen implements ScreenComposer {
           });
 
           template.component('stack_component', 'hero_content', hero => {
-            hero.base().vertical().horizontalAlignment('center').fillMaxWidth();
+            hero.base().horizontalAlignment('center').fillMaxWidth();
 
             hero.image('hero_car', image => {
               image.content().url('/images/img_splash_car.png').contentScale('fit');
