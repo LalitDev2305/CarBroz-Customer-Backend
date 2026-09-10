@@ -82,6 +82,17 @@ jobs:
       - name: Activate repository pnpm version
         run: corepack prepare pnpm@11.9.0 --activate
 
+      - name: Regenerate Phase 12 retirement lockfile
+        run: pnpm install --lockfile-only --no-frozen-lockfile
+
+      - name: Upload Phase 12 retirement lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-pnpm-lock
+          path: pnpm-lock.yaml
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Install immutable workspace
         run: pnpm install --frozen-lockfile
 
