@@ -35,6 +35,11 @@ describe('ConfigProvider', () => {
     );
   });
 
+  it('should preserve non-JSON string values', async () => {
+    (repository.findByKey as any).mockResolvedValueOnce({ value: 'plain-text-value' });
+    await expect(provider.get<string>('plain')).resolves.toBe('plain-text-value');
+  });
+
   it('should return true for has() if key exists', async () => {
     (repository.findByKey as any).mockResolvedValueOnce({ value: '1' });
     const result = await provider.has('test-key');
