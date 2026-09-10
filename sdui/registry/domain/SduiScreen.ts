@@ -1,4 +1,4 @@
-import type { SduiScreen, SduiTargetApp } from '@carbroz/ui-sdk';
+import type { SduiScreen, SduiTargetApp } from '@carbroz/sdui-engine';
 
 /** SduiScreenStatus is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export type SduiScreenStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
