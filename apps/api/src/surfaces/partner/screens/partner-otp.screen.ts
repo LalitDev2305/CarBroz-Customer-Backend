@@ -1,10 +1,6 @@
-import type { SduiScreen } from '@carbroz/ui-sdk';
-import { PartnerOtpScreenBuilder } from './builders/partner-otp-screen.builder.js';
+import { PartnerOtpScreen, type SduiScreen } from '@carbroz/sdui-engine';
 
-/**
- * Public Partner OTP SDUI composition.
- * OTP verification business/security behavior remains owned by Identity.
- */
+/** Transport compatibility wrapper; SDUI presentation composition is owned by the engine. */
 export function createPartnerOtpScreen(): SduiScreen {
-  return new PartnerOtpScreenBuilder().build();
+  return new PartnerOtpScreen().build({});
 }
