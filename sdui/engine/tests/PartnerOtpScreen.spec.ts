@@ -62,7 +62,6 @@ describe('PartnerOtpScreen', () => {
           id: 'otp_screen_title',
           type: 'text',
           properties: {
-            text: 'Verify Your Number',
             spans: [
               { text: 'Verify ' },
               { text: 'Your', color: '#13B8B5' },
@@ -75,7 +74,6 @@ describe('PartnerOtpScreen', () => {
           id: 'otp_phone_number',
           type: 'text',
           properties: {
-            text: { $context: 'authFlow.phoneNumber' },
             spans: [
               { text: '+91 ' },
               { text: { $context: 'authFlow.phoneNumber' }, fontWeight: 600 },
