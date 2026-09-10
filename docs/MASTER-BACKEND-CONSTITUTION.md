@@ -620,8 +620,8 @@ Published SDUI is an immutable versioned document stored in PostgreSQL JSONB aft
 
 ```text
 Admin editor / runtime configuration
--> @carbroz/ui-sdk factory/builder
--> canonical validator
+-> @carbroz/sdui-engine composition/contract
+-> canonical engine validator
 -> Draft
 -> Publish
 -> Immutable Version
@@ -815,7 +815,7 @@ Frozen migration order:
 1. Read this constitution and verify active branch/repository state.
 2. Complete file-level inventory/classification for the migration slice.
 3. Freeze/update architecture guardrails for the slice.
-4. Ensure canonical SDUI authority is `sdui/ui-sdk` + `sdui/registry`; remove duplicate authorities.
+4. Ensure canonical SDUI authority is `sdui/engine` for language/composition/definitions/validation/screen composition plus `sdui/registry` only for persisted lifecycle/version resolution; never restore `ui-sdk` and remove duplicate authorities.
 5. Evacuate business logic from `apps/api` into owning domains while establishing `surfaces/partner`, `surfaces/customer` and `surfaces/admin` transport boundaries.
 6. Consolidate Partner fragments into `domains/partner`.
 7. Complete/verify Customer consolidation into `domains/customer` without implementing unnecessary Customer features.

@@ -7,7 +7,7 @@
 Canonical related documents:
 
 - `sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`
-- `sdui/ui-sdk/ACTION-CONTRACT.md`
+- `sdui/engine/src/core/Action.ts` and canonical engine action/reference tests
 - `sdui/PARTNER-AUTH-SDUI-CONTRACT.md`
 
 ---

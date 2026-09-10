@@ -391,11 +391,11 @@ property/default model
 → duplicate screen-owner removal
 → persisted registry convergence
 → remaining screens
-→ old ui-sdk retirement after zero refs
+→ retired ui-sdk remains absent; canonical action/composition ownership stays in engine
 → final forensic freeze
 ```
 
-Do not start OTP migration before the new Login Golden Reference is green.
+Login and OTP migration are complete; retain this sequence only as historical migration evidence and do not restart completed phases.
 
 ---
 

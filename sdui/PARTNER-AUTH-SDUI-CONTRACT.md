@@ -4,7 +4,7 @@
 >
 > **Architecture authority:** `sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`
 >
-> **Interaction authority:** `sdui/ui-sdk/ACTION-CONTRACT.md` during migration, converging to `sdui/engine`.
+> **Interaction authority:** `sdui/engine/src/core/Action.ts` and the canonical engine action/reference tests.
 >
 > **Security authority:** `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` plus the backend constitutions.
 >
