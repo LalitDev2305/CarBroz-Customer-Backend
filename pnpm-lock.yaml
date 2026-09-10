@@ -415,6 +415,9 @@ importers:
       '@carbroz/platform-storage':
         specifier: workspace:*
         version: link:../../platform/storage
+      '@carbroz/sdui-engine':
+        specifier: workspace:*
+        version: link:../../sdui/engine
       '@carbroz/sdui-registry':
         specifier: workspace:*
         version: link:../../sdui/registry
