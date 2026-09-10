@@ -313,9 +313,6 @@ importers:
       '@carbroz/sdui-registry':
         specifier: workspace:*
         version: link:sdui/registry
-      '@carbroz/ui-sdk':
-        specifier: workspace:*
-        version: link:sdui/ui-sdk
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.6.0(jiti@2.7.0))
@@ -421,9 +418,6 @@ importers:
       '@carbroz/sdui-registry':
         specifier: workspace:*
         version: link:../../sdui/registry
-      '@carbroz/ui-sdk':
-        specifier: workspace:*
-        version: link:../../sdui/ui-sdk
       '@fastify/awilix':
         specifier: ^8.2.0
         version: 8.2.0(awilix@13.0.5)(fastify@5.9.0)
@@ -699,9 +693,6 @@ importers:
       '@carbroz/foundation-kernel':
         specifier: workspace:*
         version: link:../../foundation/kernel
-      '@carbroz/ui-sdk':
-        specifier: workspace:*
-        version: link:../../sdui/ui-sdk
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -740,9 +731,6 @@ importers:
       '@carbroz/foundation-kernel':
         specifier: workspace:*
         version: link:../../foundation/kernel
-      '@carbroz/ui-sdk':
-        specifier: workspace:*
-        version: link:../../sdui/ui-sdk
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@7.8.0(@types/react@19.2.17)(magicast@0.5.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
@@ -882,22 +870,6 @@ importers:
       '@types/node':
         specifier: ^22.20.1
         version: 22.20.1
-
-  sdui/ui-sdk:
-    dependencies:
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-    devDependencies:
-      '@types/node':
-        specifier: ^22.20.1
-        version: 22.20.1
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-      vitest:
-        specifier: ^4.1.9
-        version: 4.1.9(@types/node@22.20.1)(@vitest/coverage-v8@4.1.9)(vite@8.1.3(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.0)(yaml@2.9.0))
 
 packages:
 
