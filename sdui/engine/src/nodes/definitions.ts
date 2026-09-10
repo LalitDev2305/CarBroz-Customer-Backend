@@ -6,11 +6,13 @@ import { InputDefinition } from './element/Input.js';
 import { TextDefinition } from './element/Text.js';
 import { StackGroupDefinition } from './group/StackGroup.js';
 import { StackSectionDefinition } from './section/StackSection.js';
+import { FormTemplateDefinition } from './template/FormTemplate.js';
 import { StackTemplateDefinition } from './template/StackTemplate.js';
 
 /** Canonical reusable SDUI vocabulary currently required by the engine migration. */
 export const productionNodeDefinitions: readonly NodeDefinition[] = Object.freeze([
   StackTemplateDefinition,
+  FormTemplateDefinition,
   StackComponentDefinition,
   StackSectionDefinition,
   StackGroupDefinition,
