@@ -1,6 +1,6 @@
-import { PartnerDashboardScreen, type SduiScreen } from '@carbroz/sdui-engine';
+import { productionSduiService, type SduiScreen } from '@carbroz/sdui-engine';
 
-/** Transport compatibility wrapper; SDUI presentation composition is owned by the engine. */
+/** Transport compatibility wrapper; composition/registration/validation are engine-owned. */
 export function createPartnerDashboardScreen(): SduiScreen {
-  return new PartnerDashboardScreen().build({});
+  return productionSduiService.buildScreen({ targetApp: 'PARTNER', screenId: 'partner_dashboard' });
 }
