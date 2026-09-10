@@ -9,9 +9,9 @@ function exists(path: string): boolean {
 }
 
 describe('canonical SDUI production definition topology', () => {
-  it('keeps every reusable definition level under its canonical owner', () => {
-    const definitionsRoot = 'sdui/ui-sdk/src/definitions';
-    const required = ['templates', 'components', 'sections', 'groups', 'elements'];
+  it('keeps every reusable definition level under the canonical engine owner', () => {
+    const definitionsRoot = 'sdui/engine/src/nodes';
+    const required = ['template', 'component', 'section', 'group', 'element'];
 
     expect(exists(definitionsRoot)).toBe(true);
     for (const level of required) {
@@ -26,6 +26,7 @@ describe('canonical SDUI production definition topology', () => {
       'domains/customer/definitions',
       'apps/api/src/surfaces/partner/definitions',
       'apps/api/src/surfaces/customer/definitions',
+      'sdui/ui-sdk',
     ]) {
       expect(exists(forbidden), forbidden).toBe(false);
     }
