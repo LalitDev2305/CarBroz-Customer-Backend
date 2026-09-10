@@ -1,0 +1,75 @@
+name: Reconcile Current SDUI Authorities
+
+on:
+  push:
+    branches: [development]
+    paths:
+      - .github/reconcile-current-sdui-authorities.trigger
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: development
+          fetch-depth: 0
+
+      - name: Apply exact current-authority replacements
+        shell: python
+        run: |
+          from pathlib import Path
+
+          replacements = {
+            'docs/MASTER-BACKEND-CONSTITUTION.md': [
+              ('Admin editor / runtime configuration\n-> @carbroz/ui-sdk factory/builder\n-> canonical validator\n-> Draft',
+               'Admin editor / runtime configuration\n-> @carbroz/sdui-engine composition/contract\n-> canonical engine validator\n-> Draft'),
+              ('4. Ensure canonical SDUI authority is `sdui/ui-sdk` + `sdui/registry`; remove duplicate authorities.',
+               '4. Ensure canonical SDUI authority is `sdui/engine` for language/composition/definitions/validation/screen composition plus `sdui/registry` only for persisted lifecycle/version resolution; never restore `ui-sdk` and remove duplicate authorities.'),
+            ],
+            'sdui/PARTNER-AUTH-SDUI-CONTRACT.md': [
+              ('> **Interaction authority:** `sdui/ui-sdk/ACTION-CONTRACT.md` during migration, converging to `sdui/engine`.',
+               '> **Interaction authority:** `sdui/engine/src/core/Action.ts` and the canonical engine action/reference tests.'),
+            ],
+            'docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md': [
+              ('- `sdui/ui-sdk/ACTION-CONTRACT.md`',
+               '- `sdui/engine/src/core/Action.ts` and canonical engine action/reference tests'),
+            ],
+            'docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md': [
+              ('→ old ui-sdk retirement after zero refs',
+               '→ retired ui-sdk remains absent; canonical action/composition ownership stays in engine'),
+              ('Do not start OTP migration before the new Login Golden Reference is green.',
+               'Login and OTP migration are complete; retain this sequence only as historical migration evidence and do not restart completed phases.'),
+            ],
+          }
+
+          for filename, pairs in replacements.items():
+              path = Path(filename)
+              text = path.read_text()
+              for old, new in pairs:
+                  count = text.count(old)
+                  if count != 1:
+                      raise SystemExit(f'{filename}: expected one match, found {count}: {old[:100]!r}')
+                  text = text.replace(old, new)
+              path.write_text(text)
+
+      - name: Verify current authorities contain no stale active ownership
+        run: |
+          ! grep -q 'sdui/ui-sdk/ACTION-CONTRACT.md' sdui/PARTNER-AUTH-SDUI-CONTRACT.md
+          ! grep -q 'sdui/ui-sdk/ACTION-CONTRACT.md' docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md
+          ! grep -q '@carbroz/ui-sdk factory/builder' docs/MASTER-BACKEND-CONSTITUTION.md
+          ! grep -q 'canonical SDUI authority is `sdui/ui-sdk`' docs/MASTER-BACKEND-CONSTITUTION.md
+          grep -q 'sdui/engine/src/core/Action.ts' sdui/PARTNER-AUTH-SDUI-CONTRACT.md
+          grep -q '@carbroz/sdui-engine composition/contract' docs/MASTER-BACKEND-CONSTITUTION.md
+
+      - name: Commit reconciliation and remove one-shot files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/reconcile-current-sdui-authorities.yml .github/reconcile-current-sdui-authorities.trigger
+          git add docs/MASTER-BACKEND-CONSTITUTION.md sdui/PARTNER-AUTH-SDUI-CONTRACT.md docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md
+          git commit -m "docs(sdui): remove stale current authority references"
+          git push origin HEAD:development
