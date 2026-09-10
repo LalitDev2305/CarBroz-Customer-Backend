@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { SduiScreen, SduiTemplate } from '../../sdui/ui-sdk/src/index.js';
+import type { SduiScreen, SduiTemplate } from '../../sdui/engine/src/index.js';
 import { SduiComponentEntity } from '../../sdui/registry/domain/SduiComponent.js';
 import { SduiElementEntity } from '../../sdui/registry/domain/SduiElement.js';
 import { SduiGroupEntity } from '../../sdui/registry/domain/SduiGroup.js';
