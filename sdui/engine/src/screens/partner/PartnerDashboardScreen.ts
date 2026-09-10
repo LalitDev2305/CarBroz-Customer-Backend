@@ -13,7 +13,6 @@ export class PartnerDashboardScreen implements ScreenComposer {
     return this.builder.screen({
       id: this.screenId,
       targetApp: this.targetApp,
-      theme: { theme: 'light', statusBar: 'transparent' },
     }, screen => {
       screen.template('default_template', 'partner_dashboard_template', template => {
         template.base()
