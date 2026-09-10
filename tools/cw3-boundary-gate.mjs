@@ -137,7 +137,7 @@ for (const file of walk(path.join(root, 'domains')).filter((candidate) => candid
   }
 }
 
-// Product surfaces remain isolated, and both SDUI workspaces remain generic/product-neutral.
+// Product surfaces remain isolated, and the canonical SDUI engine plus lifecycle registry remain product-neutral.
 for (const [base, forbiddenSurface] of [
   ['apps/api/src/surfaces/partner', /surfaces\/(?:customer|admin)/],
   ['apps/api/src/surfaces/customer', /surfaces\/(?:partner|admin)/],
@@ -149,8 +149,9 @@ for (const [base, forbiddenSurface] of [
     }
   }
 }
-required('sdui/ui-sdk/package.json', 'generic UI SDK workspace is missing');
-required('sdui/registry/package.json', 'SDUI Registry workspace is missing');
+required('sdui/engine/package.json', 'canonical SDUI Engine workspace is missing');
+required('sdui/registry/package.json', 'SDUI lifecycle Registry workspace is missing');
+forbidden('sdui/ui-sdk', 'retired parallel SDUI authority survived Phase 12');
 for (const file of sourceFiles('sdui')) {
   const content = fs.readFileSync(file, 'utf8');
   if (/(?:@carbroz\/domain-(?:partner|customer)|domains\/(?:partner|customer)\/)/.test(content)) {
