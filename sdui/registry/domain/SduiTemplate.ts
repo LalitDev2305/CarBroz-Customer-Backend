@@ -1,4 +1,4 @@
-import type { SduiTemplate } from '@carbroz/ui-sdk';
+import type { SduiTemplate } from '@carbroz/sdui-engine';
 
 /** SduiTemplateProps is an exported sdui/registry contract/implementation; see the owning README for lifecycle and extension rules. */
 export interface SduiTemplateProps {
