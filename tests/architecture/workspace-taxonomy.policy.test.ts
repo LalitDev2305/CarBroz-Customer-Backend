@@ -7,7 +7,7 @@ const finalDescribe = existsSync(resolve(root, 'packages')) ? describe.skip : de
 const ignored = new Set(['node_modules', 'dist', 'coverage', '.turbo']);
 const expectedChildren: Record<string, readonly string[]> = {
   apps: ['api'],
-  sdui: ['engine', 'registry', 'ui-sdk'],
+  sdui: ['engine', 'registry'],
   foundation: ['kernel'],
   domains: ['audit', 'booking', 'catalog-pricing', 'communications', 'configuration', 'customer', 'dispute', 'engagement', 'enterprise', 'financials', 'identity', 'operations', 'partner'],
   platform: ['cache', 'database', 'integrations', 'messaging', 'observability', 'storage'],
@@ -43,8 +43,8 @@ finalDescribe('workspace taxonomy policy', () => {
     expect(packageName('apps/api')).toBe('@carbroz/api');
     expect(packageName('foundation/kernel')).toBe('@carbroz/foundation-kernel');
     expect(packageName('sdui/engine')).toBe('@carbroz/sdui-engine');
-    expect(packageName('sdui/ui-sdk')).toBe('@carbroz/ui-sdk');
     expect(packageName('sdui/registry')).toBe('@carbroz/sdui-registry');
+    expect(existsSync(resolve(root, 'sdui/ui-sdk'))).toBe(false);
   });
 
   it('uses only final workspace globs', () => {
