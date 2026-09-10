@@ -22,7 +22,11 @@ If a historical document describes a different builder, package, hierarchy, scre
 
 The Master Backend Constitution and the frozen SDUI implementation plan are reconciled to the same physical topology and ownership model: `sdui/engine` is canonical and the standalone `sdui/registry` is retained only for concrete persisted lifecycle/version responsibilities.
 
-**Latest frozen amendment:** the old illustrative `theme: partnerAuthTheme` example in `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md` is superseded by Section 12 of this README. There is no auth-specific theme abstraction in the current architecture. New screen composition uses one canonical default screen theme and per-screen overrides only where data genuinely differs.
+**Latest frozen amendments:**
+
+1. The old illustrative `theme: partnerAuthTheme` example in `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md` is superseded by Section 12 of this README. There is no auth-specific theme abstraction in the current architecture. New screen composition uses one canonical default screen theme and per-screen overrides only where data genuinely differs.
+2. The old illustrative Partner OTP identity `tpl_partner_otp_v1` in `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md` is superseded by the current Partner Auth contract. The frozen OTP template identity is the opaque stable ID `tpl_P6X8N3`. Concrete Template/Component/Section/Group/Element IDs are unique instance identities; reusable rendering/composition is expressed through `type`, generic properties and generic actions—not ID reuse.
+3. Partner OTP Resend UX is frozen by `PARTNER-AUTH-SDUI-CONTRACT.md`: `Resend OTP` remains visible but disabled/grey during an internal hidden cooldown; no countdown text is rendered. When ready it becomes clickable, calls the existing Send OTP capability again, retains the newest successful challenge, and restarts the hidden cooldown.
 
 ## 2. Permanent SDUI authority
 
