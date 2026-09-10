@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { screenSchema } from '@carbroz/ui-sdk';
+import { screenSchema } from '@carbroz/sdui-engine';
 import { VerifyOtpSchema } from '../../../transport/auth/dto/auth.dto.js';
 import { createPartnerOtpScreen } from './partner-otp.screen.js';
 
