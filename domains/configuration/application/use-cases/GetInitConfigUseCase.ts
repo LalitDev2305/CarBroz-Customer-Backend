@@ -27,7 +27,7 @@ export class GetInitConfigUseCase {
       authenticatedApi,
       featureFlags,
     ] = await Promise.all([
-      this.configProvider.get<string>('maintenance.enabled', 'false'),
+      this.configProvider.get<boolean | string>('maintenance.enabled', false),
       this.configProvider.get<string>('maintenance.message', ''),
       this.configProvider.get<string>('android.minVersion', '1.0.0'),
       this.configProvider.get<string>('android.latestVersion', '1.0.0'),
@@ -42,7 +42,10 @@ export class GetInitConfigUseCase {
 
     return {
       maintenance: {
-        enabled: maintenanceEnabled === 'true',
+        // ConfigProvider JSON-decodes persisted primitives, so canonical `true` is a boolean at
+        // runtime. Accept the legacy string representation too while old configuration rows are
+        // migrated through normal admin writes.
+        enabled: maintenanceEnabled === true || maintenanceEnabled === 'true',
         message: maintenanceMessage,
       },
       forceUpdate: {
