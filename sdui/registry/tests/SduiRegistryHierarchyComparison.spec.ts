@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { SduiScreen } from '@carbroz/sdui-engine';
 import { CompareSduiVersionsUseCase, SduiScreenEntity } from '../public/index.js';
 
 describe('SDUI Registry hierarchy comparison', () => {
   it('counts section elements and grouped elements through the canonical hierarchy', async () => {
-    const sourceLayout = {
+    const sourceLayout: SduiScreen = {
       screenId: 'hierarchy_compare',
       schemaVersion: '3.0.0',
-      targetApp: 'PARTNER' as const,
+      targetApp: 'PARTNER',
       template: {
         id: 'source_template',
         type: 'stack_template',
@@ -20,10 +21,10 @@ describe('SDUI Registry hierarchy comparison', () => {
       },
     };
 
-    const targetLayout = {
+    const targetLayout: SduiScreen = {
       screenId: 'hierarchy_compare',
       schemaVersion: '3.0.0',
-      targetApp: 'PARTNER' as const,
+      targetApp: 'PARTNER',
       template: {
         id: 'target_template',
         type: 'stack_template',
@@ -54,7 +55,7 @@ describe('SDUI Registry hierarchy comparison', () => {
       },
     };
 
-    const entity = (versionNumber: number, layoutJson: unknown) => new SduiScreenEntity({
+    const entity = (versionNumber: number, layoutJson: SduiScreen) => new SduiScreenEntity({
       id: versionNumber,
       publicId: `uuid-${versionNumber}`,
       screenId: 'hierarchy_compare',
