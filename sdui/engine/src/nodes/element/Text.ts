@@ -20,7 +20,7 @@ export type TextSpan = z.infer<typeof textSpanSchema>;
 
 export const textPropertiesSchema = z.object({
   semanticRole: z.literal('text').optional(),
-  text: z.union([z.string(), valueReferenceSchema]),
+  text: z.union([z.string(), valueReferenceSchema]).optional(),
   spans: z.array(textSpanSchema).min(1).optional(),
   fontSize: z.number().finite().positive().optional(),
   fontWeight: z.number().int().min(100).max(900).optional(),
@@ -37,7 +37,15 @@ export const textPropertiesSchema = z.object({
   enabled: z.boolean().optional(),
   leading: accessoriesSchema.optional(),
   trailing: accessoriesSchema.optional(),
-}).strict();
+}).strict().superRefine((properties, context) => {
+  if (properties.text === undefined && properties.spans === undefined) {
+    context.addIssue({
+      code: 'custom',
+      path: ['text'],
+      message: 'text element requires text or spans',
+    });
+  }
+});
 
 export type TextProperties = z.infer<typeof textPropertiesSchema>;
 
