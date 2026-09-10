@@ -19,6 +19,8 @@ For implementation, use this order:
 
 If a historical document describes a different builder, package, hierarchy, screen owner, or file path, it does not override this architecture.
 
+The Master Backend Constitution and the frozen SDUI implementation plan are now reconciled to the same physical topology and ownership model: `sdui/engine` is canonical and the standalone `sdui/registry` is retained only for concrete persisted lifecycle/version responsibilities.
+
 ## 2. Permanent SDUI authority
 
 `sdui/engine` is the sole SDUI language, composition, definition, validation and screen-composition authority.
@@ -63,7 +65,7 @@ They are required for one-time canonical definition registration and screen-comp
 
 ### `sdui/registry` workspace — persisted lifecycle only
 
-The standalone `@carbroz/sdui-registry` workspace remains only for persisted lifecycle/version capabilities that still have concrete runtime/admin callers or persisted records:
+The standalone `@carbroz/sdui-registry` workspace is **KEEP** for the current architecture because concrete runtime/admin callers and persisted records still require its lifecycle/version capabilities:
 
 ```text
 draft
@@ -193,6 +195,6 @@ Within this scope the target is:
 - Identity-owned Login/OTP business behavior;
 - Redis-backed production OTP challenge persistence;
 - Configuration-owned bootstrap/startup decision data;
-- standalone `sdui/registry` restricted to persisted lifecycle/version behavior;
+- standalone `sdui/registry` restricted to persisted lifecycle/version behavior and retained only because current Dashboard/Admin lifecycle consumers require it;
 - focused tests and documentation aligned with the exact implementation;
 - no unrelated backend feature expansion during this freeze.
