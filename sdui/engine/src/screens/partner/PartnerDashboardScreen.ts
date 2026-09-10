@@ -17,12 +17,11 @@ export class PartnerDashboardScreen implements ScreenComposer {
     }, screen => {
       screen.template('default_template', 'partner_dashboard_template', template => {
         template.base()
-          .vertical()
           .fillMaxSize()
           .padding({ start: 24, top: 24, end: 24, bottom: 24 });
 
         template.component('stack_component', 'dashboard_shell', shell => {
-          shell.base().vertical().spacing(8).fillMaxWidth();
+          shell.base().spacing(8).fillMaxWidth();
 
           shell.text('dashboard_title', title => {
             title.content().text('Partner Dashboard');
