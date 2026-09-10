@@ -26,6 +26,7 @@ export type ButtonProperties = z.infer<typeof buttonPropertiesSchema>;
 export const ButtonDefinition: NodeDefinition<ButtonProperties> = {
   type: BUTTON,
   level: 'element',
+  defaults: { semanticRole: 'action' },
   properties: buttonPropertiesSchema,
   children: 'none',
 };
