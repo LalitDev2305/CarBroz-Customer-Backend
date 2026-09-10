@@ -216,6 +216,26 @@ export const themeSchema = z.object({
 
 export type SduiTheme = z.infer<typeof themeSchema>;
 
+const defaultThemeGradientColors = Object.freeze([
+  { color: '#DDF8F6', stop: 0 },
+  { color: '#F7FEFD', stop: 0.28 },
+  { color: '#FFFFFF', stop: 0.55 },
+  { color: '#D9F7F4', stop: 1 },
+]);
+
+/** Canonical screen theme emitted by the builder unless a screen overrides legal fields. */
+export const DEFAULT_SDUI_THEME: Readonly<SduiTheme> = Object.freeze({
+  theme: 'light',
+  statusBar: 'transparent',
+  properties: Object.freeze({
+    gradient: Object.freeze({
+      type: 'linear',
+      angle: 135,
+      colors: defaultThemeGradientColors,
+    }),
+  }),
+});
+
 function collectNodeIds(template: SduiTemplate): string[] {
   const ids: string[] = [template.id];
   for (const component of template.components) {
