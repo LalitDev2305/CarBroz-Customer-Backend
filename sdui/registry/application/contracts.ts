@@ -1,4 +1,4 @@
-import type { SduiScreen, SduiTargetApp } from '@carbroz/ui-sdk';
+import type { SduiScreen, SduiTargetApp } from '@carbroz/sdui-engine';
 
 /** Transport-neutral reusable registry node definition input. */
 export interface SduiRegistryNodeInput {
