@@ -47,11 +47,11 @@ describe('SDUI action authoring', () => {
       body: { source: ref.literal('test') },
     })).toEqual({
       type: 'navigate',
-      targetId: 'continue_button',
       payload: {
+        targetId: 'continue_button',
         screenId: 'next', templateId: 'next_template', templateType: 'stack_template',
         endpoint: '/api/v1/screen/next', method: 'POST', authentication: 'NONE',
-        responseMode: 'screen', body: { source: { $literal: 'test' } },
+        body: { source: { $literal: 'test' } },
       },
     });
   });
