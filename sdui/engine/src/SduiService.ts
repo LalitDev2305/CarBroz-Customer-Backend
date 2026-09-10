@@ -1,7 +1,8 @@
-import type { SduiScreen, SduiTargetApp } from '@carbroz/ui-sdk';
+import type { SduiScreen, SduiTargetApp } from './core/SduiModel.js';
 import type { ScreenContext } from './core/ScreenContext.js';
 import { SduiValidator } from './core/SduiValidator.js';
 import { ScreenRegistry } from './registry/ScreenRegistry.js';
+import { createProductionScreenRegistry } from './registry/createProductionScreenRegistry.js';
 
 export interface BuildScreenRequest {
   readonly targetApp: SduiTargetApp;
@@ -21,17 +22,19 @@ export class SduiService {
     const screen = composer.build(request.context ?? {});
 
     if (screen.screenId !== request.screenId) {
-      throw new Error(
-        `SDUI composer returned screenId '${screen.screenId}' for requested screen '${request.screenId}'`,
-      );
+      throw new Error(`SDUI composer returned screenId '${screen.screenId}' for requested screen '${request.screenId}'`);
     }
-
     if (screen.targetApp !== request.targetApp) {
-      throw new Error(
-        `SDUI composer returned target '${screen.targetApp}' for requested target '${request.targetApp}'`,
-      );
+      throw new Error(`SDUI composer returned target '${screen.targetApp}' for requested target '${request.targetApp}'`);
     }
 
     return this.validator.validate(screen);
   }
 }
+
+export function createProductionSduiService(): SduiService {
+  return new SduiService(createProductionScreenRegistry(), new SduiValidator());
+}
+
+/** Stateless screen composers make this process-level service safe to reuse. */
+export const productionSduiService = createProductionSduiService();
