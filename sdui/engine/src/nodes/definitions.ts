@@ -6,6 +6,7 @@ import { InputDefinition } from './element/Input.js';
 import { TextDefinition } from './element/Text.js';
 import { StackGroupDefinition } from './group/StackGroup.js';
 import { StackSectionDefinition } from './section/StackSection.js';
+import { DefaultTemplateDefinition } from './template/DefaultTemplate.js';
 import { FormTemplateDefinition } from './template/FormTemplate.js';
 import { StackTemplateDefinition } from './template/StackTemplate.js';
 
@@ -13,6 +14,7 @@ import { StackTemplateDefinition } from './template/StackTemplate.js';
 export const productionNodeDefinitions: readonly NodeDefinition[] = Object.freeze([
   StackTemplateDefinition,
   FormTemplateDefinition,
+  DefaultTemplateDefinition,
   StackComponentDefinition,
   StackSectionDefinition,
   StackGroupDefinition,
