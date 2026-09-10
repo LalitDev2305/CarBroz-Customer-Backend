@@ -29,6 +29,7 @@ export type TextProperties = z.infer<typeof textPropertiesSchema>;
 export const TextDefinition: NodeDefinition<TextProperties> = {
   type: TEXT,
   level: 'element',
+  defaults: { semanticRole: 'text' },
   properties: textPropertiesSchema,
   children: 'none',
 };
