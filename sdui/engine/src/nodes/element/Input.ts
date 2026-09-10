@@ -25,6 +25,7 @@ export type InputProperties = z.infer<typeof inputPropertiesSchema>;
 export const InputDefinition: NodeDefinition<InputProperties> = {
   type: INPUT,
   level: 'element',
+  defaults: { semanticRole: 'input' },
   properties: inputPropertiesSchema,
   children: 'none',
 };
