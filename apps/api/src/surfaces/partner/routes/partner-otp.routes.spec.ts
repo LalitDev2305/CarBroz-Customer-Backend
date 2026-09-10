@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import { afterEach, describe, expect, it } from 'vitest';
-import { dynamicDestinationSchema, screenSchema } from '@carbroz/ui-sdk';
+import { dynamicDestinationSchema, screenSchema } from '@carbroz/sdui-engine';
 import { partnerOtpRoutes } from './partner-otp.routes.js';
 
 const reservedDestination = dynamicDestinationSchema.parse({
