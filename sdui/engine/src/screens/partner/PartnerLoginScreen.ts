@@ -3,7 +3,6 @@ import type { ScreenContext } from '../../core/ScreenContext.js';
 import type { SduiScreen } from '../../core/SduiModel.js';
 import { action, ref } from '../../core/Action.js';
 import { SduiBuilder } from '../../core/SduiBuilder.js';
-import { partnerAuthTheme } from './PartnerAuthTheme.js';
 
 export class PartnerLoginScreen implements ScreenComposer {
   readonly screenId = 'partner_login';
@@ -16,7 +15,6 @@ export class PartnerLoginScreen implements ScreenComposer {
       {
         id: this.screenId,
         targetApp: this.targetApp,
-        theme: partnerAuthTheme,
       },
       screen => {
         screen.template('stack_template', 'tpl_7K2M9Q', template => {
