@@ -2,8 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   BaseSduiScreenBuilder,
   ButtonBuilder,
+  ComponentBuilder,
   CURRENT_SDUI_SCHEMA_VERSION,
   ElementFactory,
+  GroupBuilder,
+  RequestActionBuilder,
+  SduiThemeBuilder,
+  SectionBuilder,
   StackComponentBuilder,
 } from '../src/public/index.js';
 
@@ -86,6 +91,25 @@ describe('typed reusable SDUI object-graph builders', () => {
     expect(() => section.addStackGroup('group')).toThrow(/both elements and groups/);
   });
 
+  it('rejects reverse-order mixing in the generic compatibility hierarchy builders', () => {
+    const text = ElementFactory.create('text', { id: 'text', properties: { text: 'Text' } });
+    const secondText = ElementFactory.create('text', { id: 'second_text', properties: { text: 'Second' } });
+
+    const group = new GroupBuilder({ id: 'group', type: 'stack_group' })
+      .addElement(text)
+      .build();
+    const sectionWithGroup = new SectionBuilder({ id: 'section_with_group', type: 'stack_section' })
+      .addGroup(group);
+    expect(() => sectionWithGroup.addElement(secondText)).toThrow(/both elements and groups/);
+
+    const section = new SectionBuilder({ id: 'section', type: 'stack_section' })
+      .addElement(text)
+      .build();
+    const componentWithSection = new ComponentBuilder({ id: 'component_with_section', type: 'stack_component' })
+      .addSection(section);
+    expect(() => componentWithSection.addElement(secondText)).toThrow(/both elements and sections/);
+  });
+
   it('preserves element interaction contracts while typing element properties', () => {
     const button = new ButtonBuilder('continue', 'Continue')
       .fillMaxWidth()
@@ -104,6 +128,64 @@ describe('typed reusable SDUI object-graph builders', () => {
 
     expect(button.properties).toMatchObject({ semanticRole: 'action', text: 'Continue', fillMaxWidth: true });
     expect(button.actions?.onClick?.type).toBe('navigate');
+  });
+
+  it('serializes all optional typed element extras through the compatibility facade', () => {
+    const button = new ButtonBuilder('rich_button', 'Rich')
+      .withAnalytics({ event: 'tap' })
+      .withAccessibility({ label: 'Rich button' })
+      .withVisibility({ visible: true })
+      .withMetadata({ source: 'coverage' })
+      .build();
+
+    expect(button.analytics).toEqual({ event: 'tap' });
+    expect(button.accessibility).toEqual({ label: 'Rich button' });
+    expect(button.visibility).toEqual({ visible: true });
+    expect(button.metadata).toEqual({ source: 'coverage' });
+  });
+
+  it('fails fast for incomplete request actions and omits an empty request body', () => {
+    expect(() => new RequestActionBuilder().build()).toThrow(/method/);
+    expect(() => new RequestActionBuilder().method('POST').build()).toThrow(/endpoint/);
+    expect(() => new RequestActionBuilder().method('POST').endpoint('/api/v1/test').build()).toThrow(/authentication/);
+
+    expect(new RequestActionBuilder()
+      .method('GET')
+      .endpoint('/api/v1/test')
+      .authentication('NONE')
+      .build()).toEqual({
+      type: 'request',
+      payload: {
+        method: 'GET',
+        endpoint: '/api/v1/test',
+        authentication: 'NONE',
+        validate: false,
+        responseMode: 'none',
+      },
+    });
+  });
+
+  it('covers optional theme omission and explicit false back-button authoring', () => {
+    expect(new SduiThemeBuilder().build()).toEqual({});
+    expect(new SduiThemeBuilder().showBackButton(false).build()).toEqual({ showBackButton: false });
+  });
+
+  it('fails fast for missing root screen identity fields and preserves metadata', () => {
+    expect(() => new BaseSduiScreenBuilder().build()).toThrow(/screen id/);
+    expect(() => new BaseSduiScreenBuilder().id('screen').build()).toThrow(/schema version/);
+    expect(() => new BaseSduiScreenBuilder()
+      .id('screen')
+      .schemaVersion(CURRENT_SDUI_SCHEMA_VERSION)
+      .build()).toThrow(/target app/);
+
+    const screen = new BaseSduiScreenBuilder({
+      screenId: 'metadata_screen',
+      schemaVersion: CURRENT_SDUI_SCHEMA_VERSION,
+      targetApp: 'PARTNER',
+      metadata: { source: 'coverage' },
+    });
+    screen.addStackTemplate('template').addStackComponent('component').addText('text', 'Text');
+    expect(screen.build().metadata).toEqual({ source: 'coverage' });
   });
 
   it('rejects unknown properties for registered production definitions', () => {
