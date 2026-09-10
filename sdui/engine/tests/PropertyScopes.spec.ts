@@ -55,22 +55,25 @@ describe('SDUI property scopes', () => {
     const properties = new PropertyAccumulator();
     const termsAction = action.externalUri(ref.context('legal.termsUri'));
 
-    properties.content
-      .text(ref.context('authFlow.phoneNumber'))
-      .spans([
-        { text: '+91 ' },
-        { text: ref.context('authFlow.phoneNumber'), fontWeight: 600 },
-        { text: 'Terms', color: '#13B8B5', underline: true, onClick: termsAction },
-      ]);
+    properties.content.spans([
+      { text: '+91 ' },
+      { text: ref.context('authFlow.phoneNumber'), fontWeight: 600 },
+      { text: 'Terms', color: '#13B8B5', underline: true, onClick: termsAction },
+    ]);
 
-    expect(properties.properties).toMatchObject({
-      text: { $context: 'authFlow.phoneNumber' },
+    expect(properties.properties).toEqual({
       spans: [
         { text: '+91 ' },
         { text: { $context: 'authFlow.phoneNumber' }, fontWeight: 600 },
         { text: 'Terms', color: '#13B8B5', underline: true, onClick: termsAction },
       ],
     });
+  });
+
+  it('authors dynamic plain text references independently of rich text spans', () => {
+    const properties = new PropertyAccumulator();
+    properties.content.text(ref.context('authFlow.phoneNumber'));
+    expect(properties.properties).toEqual({ text: { $context: 'authFlow.phoneNumber' } });
   });
 
   it('authors generic disabled presentation and segmented input configuration', () => {
