@@ -18,7 +18,7 @@ const canonicalWorkspaces = [
   'domains/identity', 'domains/partner', 'domains/customer', 'domains/catalog-pricing',
   'domains/booking', 'domains/operations', 'domains/financials', 'domains/communications',
   'domains/engagement', 'domains/configuration', 'domains/dispute', 'domains/enterprise', 'domains/audit',
-  'sdui/engine', 'sdui/ui-sdk', 'sdui/registry',
+  'sdui/engine', 'sdui/registry',
   'platform/database', 'platform/cache', 'platform/messaging', 'platform/storage',
   'platform/observability', 'platform/integrations',
   'foundation/kernel',
@@ -26,13 +26,9 @@ const canonicalWorkspaces = [
 const canonicalWorkspaceRoots = ['apps/*', 'domains/*', 'sdui/*', 'platform/*', 'foundation/*'];
 const canonicalApiRoots = ['bootstrap', 'surfaces', 'system', 'transport'];
 
-// Only unresolved later-workstream blockers may remain in regression mode.
-// Identity §41 is intentionally absent: CW5 Identity security must pass without a waiver.
+// No later-workstream observability waivers remain after CW5 convergence.
 const knownLaterBlockers = Object.freeze({
-  consoleLogging: new Set([
-    'apps/api/src/bootstrap/config/runtime-config.ts',
-    'domains/audit/application/AuditLogService.ts',
-  ]),
+  consoleLogging: new Set(),
 });
 
 const required = (relative, reason) => {
@@ -78,7 +74,7 @@ for (const workspace of canonicalWorkspaces) {
   required(`${workspace}/package.json`, 'canonical workspace package is missing');
   required(`${workspace}/README.md`, 'canonical workspace architecture documentation is missing');
 }
-for (const forbiddenRoot of ['packages', 'shared', 'libs', 'common']) {
+for (const forbiddenRoot of ['packages', 'shared', 'libs', 'common', 'sdui/ui-sdk']) {
   forbidden(forbiddenRoot, 'legacy/transitional top-level authority survived convergence');
 }
 const actualWorkspaces = [
@@ -149,7 +145,7 @@ for (const evidence of [
   'tests/contracts/canonical-public-contracts.contract.test.ts', 'tests/e2e/api-health.e2e.test.ts', 'tests/integration',
   'tests/unit/foundation-kernel.behavior.test.ts', 'tests/unit/final-production-runtime.behavior.test.ts',
   'tests/unit/sdui-registry-domain.behavior.test.ts', 'sdui/registry/tests/PrismaSduiRegistryRepository.spec.ts',
-  'sdui/ui-sdk/tests/screen-serializer.test.ts',
+  'sdui/engine/tests/SduiValidator.spec.ts',
 ]) required(evidence, 'required positive/negative/regression evidence layer is missing');
 
 // Constitution §49: deterministic production coverage scope and literal freeze thresholds.
@@ -244,10 +240,10 @@ for (const file of sourceFiles('sdui')) {
   const content = fs.readFileSync(file, 'utf8');
   if (legacySdui.test(content)) violations.push(`${relative(file)}: legacy SDUI structural vocabulary survived`);
 }
-for (const file of sourceFiles('sdui/ui-sdk')) {
+for (const file of sourceFiles('sdui/engine')) {
   const content = fs.readFileSync(file, 'utf8');
   if (/(?:@carbroz\/domain-(?:partner|customer)|domains\/(?:partner|customer)\/)/.test(content)) {
-    violations.push(`${relative(file)}: generic SDUI depends on Partner/Customer business ownership`);
+    violations.push(`${relative(file)}: canonical SDUI engine depends on Partner/Customer business ownership`);
   }
 }
 
