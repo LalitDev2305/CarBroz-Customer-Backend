@@ -88,8 +88,8 @@ jobs:
       - name: Verify canonical CW2 topology
         run: node tools/architecture-closeout.mjs
 
-      - name: Verify CW1/CW2 Constitution regression baseline
-        run: node tools/architecture-closeout-constitution-gate.mjs --regression
+      - name: Verify full Backend Constitution
+        run: node tools/architecture-closeout-constitution-gate.mjs
 
       - name: Verify CW3 bounded-context and dependency convergence
         run: node tools/cw3-boundary-gate.mjs
@@ -124,11 +124,11 @@ jobs:
       - name: Lint canonical monorepo
         run: pnpm exec eslint --quiet .
 
-      - name: Test canonical monorepo
+      - name: Test canonical monorepo at 100/100/100/100 coverage
         shell: bash
         run: |
           set -o pipefail
-          pnpm exec vitest run 2>&1 | tee closeout-test-output.txt
+          pnpm test:freeze 2>&1 | tee closeout-test-output.txt
 
       - name: Upload closeout test diagnostics
         if: failure()
@@ -139,8 +139,8 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-      - name: Re-verify CW1/CW2 Constitution regression baseline
-        run: node tools/architecture-closeout-constitution-gate.mjs --regression
+      - name: Re-verify full Backend Constitution
+        run: node tools/architecture-closeout-constitution-gate.mjs
 
       - name: Re-verify CW3 bounded-context and dependency convergence
         run: node tools/cw3-boundary-gate.mjs
