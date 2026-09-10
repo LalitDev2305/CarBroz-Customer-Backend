@@ -158,7 +158,6 @@ class SectionScope extends ElementScope {
   }
 
   finish(sectionId: string): SectionBranch {
-    if (!this.branch && this.directElements.length > 0) this.branch = { kind: 'elements', values: this.directElements };
     if (!this.branch || this.branch.values.length === 0) {
       throw new Error(`SDUI section '${sectionId}' requires exactly one non-empty branch: elements or groups`);
     }
@@ -211,7 +210,6 @@ class ComponentScope extends ElementScope {
   }
 
   finish(componentId: string): ComponentBranch {
-    if (!this.branch && this.directElements.length > 0) this.branch = { kind: 'elements', values: this.directElements };
     if (!this.branch || this.branch.values.length === 0) {
       throw new Error(`SDUI component '${componentId}' requires exactly one non-empty branch: elements or sections`);
     }
