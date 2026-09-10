@@ -27,6 +27,25 @@ describe('PartnerLoginScreen', () => {
       },
     });
 
+    const brandComponent = validated.template.components.find(component => component.id === 'brand_content');
+    expect(brandComponent).toMatchObject({
+      id: 'brand_content',
+      type: 'stack_component',
+      elements: expect.arrayContaining([
+        {
+          id: 'welcome_title',
+          type: 'text',
+          properties: {
+            text: 'Welcome Partner!',
+            spans: [
+              { text: 'Welcome ' },
+              { text: 'Partner!', color: '#13B8B5' },
+            ],
+          },
+        },
+      ]),
+    });
+
     const loginComponent = validated.template.components.find(component => component.id === 'login_content');
     expect(loginComponent).toBeDefined();
     expect(loginComponent).toMatchObject({
@@ -77,7 +96,24 @@ describe('PartnerLoginScreen', () => {
                 },
               },
             },
-            { id: 'legal_text', type: 'text' },
+            {
+              id: 'legal_text',
+              type: 'text',
+              properties: {
+                spans: [
+                  { text: 'By continuing, you agree to our ' },
+                  {
+                    text: 'Terms & Conditions',
+                    onClick: { type: 'external_uri', payload: { uri: { $context: 'legal.termsUri' } } },
+                  },
+                  { text: ' and ' },
+                  {
+                    text: 'Privacy Policy',
+                    onClick: { type: 'external_uri', payload: { uri: { $context: 'legal.privacyUri' } } },
+                  },
+                ],
+              },
+            },
           ],
         },
       ],
