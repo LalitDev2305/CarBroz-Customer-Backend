@@ -44,7 +44,7 @@ describe('SDUI Registry application lifecycle', () => {
       id: 't1',
       type: 'default_template',
       components: [
-        { id: 'c1', type: 'content_component', elements: [{ id: 'e1', type: 'text', properties: { text: 'e1' } }] },
+        { id: 'c1', type: 'stack_component', elements: [{ id: 'e1', type: 'text', properties: { text: 'e1' } }] },
       ],
     },
   };
@@ -249,7 +249,7 @@ describe('SDUI Registry application lifecycle', () => {
       template: {
         ...validLayoutJson.template,
         components: [
-          { id: 'c1', type: 'content_component', elements: [{ id: 'e1', type: 'text', properties: { text: 'e1' } }] },
+          { id: 'c1', type: 'stack_component', elements: [{ id: 'e1', type: 'text', properties: { text: 'e1' } }] },
         ],
       },
     };
@@ -258,8 +258,8 @@ describe('SDUI Registry application lifecycle', () => {
       template: {
         ...validLayoutJson.template,
         components: [
-          { id: 'c1', type: 'content_component', elements: [{ id: 'e1', type: 'text', properties: { text: 'e1' } }] },
-          { id: 'c2', type: 'content_component', elements: [{ id: 'e2', type: 'text', properties: { text: 'e2' } }] },
+          { id: 'c1', type: 'stack_component', elements: [{ id: 'e1', type: 'text', properties: { text: 'e1' } }] },
+          { id: 'c2', type: 'stack_component', elements: [{ id: 'e2', type: 'text', properties: { text: 'e2' } }] },
         ],
       },
     };
