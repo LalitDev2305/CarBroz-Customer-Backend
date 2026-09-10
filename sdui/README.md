@@ -200,3 +200,118 @@ Within this scope the target is:
 - standalone `sdui/registry` restricted to persisted lifecycle/version behavior and retained only because current Dashboard/Admin lifecycle consumers require it;
 - focused tests and documentation aligned with the exact implementation;
 - no unrelated backend feature expansion during this freeze.
+
+## 11. Frozen property/default model
+
+Every property supported by a reusable SDUI node belongs conceptually to exactly one of these five categories:
+
+| Classification | Meaning | Automatically returned? | Instance override? | Typical examples |
+|---|---|---|---|---|
+| **Base / default** | Fundamental layout/rendering behavior of that node type | **Yes only when the owning `NodeDefinition.defaults` declares a canonical value** | Yes | `padding`, `spacing`, `orientation`, `width`, `height`, alignment/arrangement |
+| **Style** | Visual customization | Only when explicitly set or deliberately defaulted by the owning definition | Yes | `background`, `border`, `shape`, `elevation`, `alpha`, typography |
+| **Content / instance** | Screen-specific display data | No, unless the owning definition has an explicit safe default | Yes | `text`, `imageUrl`, `placeholder`, `label`, `icon` |
+| **Behavior** | Runtime interaction/configuration | No, unless the owning definition has an explicit safe default | Yes | `binding`, `validation`, `actions`, `enabled`, `visibility`, `keyboardType` |
+| **Metadata / semantic** | Accessibility/meaning/runtime hints | Only when explicitly set or deliberately defaulted by the owning definition | Yes where legal | `semanticRole`, `contentDescription`, `testTag` |
+
+The category name does **not** itself create a default. The reusable node definition is the only authority for whether a property has an automatic value.
+
+The frozen resolution pipeline is:
+
+```text
+NodeDefinition.defaults
+        +
+instance values authored through base/style/content/behavior/metadata scopes
+        ↓
+deterministic deep merge
+        ↓
+strict node property parser/validation
+        ↓
+canonical serialized properties
+```
+
+Frozen semantics:
+
+1. Every value present in `NodeDefinition.defaults` is emitted even when the screen composer does not mention it.
+2. A screen may override any legal default for that node instance.
+3. A legal non-default property is omitted unless explicitly supplied.
+4. One screen/node override must never mutate the definition defaults or another screen/node instance.
+5. Nested plain objects merge recursively and deterministically.
+6. Arrays replace as complete values; they are not element-by-element merged.
+7. `undefined` means no override and leaves the default intact.
+8. The fully resolved property object is strictly validated after resolution.
+9. Unknown/illegal properties are rejected rather than silently dropped.
+10. Golden tests must prove default emission, legal override, isolation/non-mutation, omission of non-defaults, and deterministic nested merging.
+
+### 11.1 Current implemented defaults are the truth
+
+Do not infer defaults from examples, UI designs, property-category names or old documents. Read the current node definition.
+
+At the time of this freeze, the engine currently implements these canonical defaults:
+
+```text
+stack_template / default_template / stack_component / stack_section / stack_group
+  orientation = vertical
+  verticalArrangement = spacedBy(0)
+  padding = { start: 0, top: 0, end: 0, bottom: 0 }
+
+form_template
+  all stack defaults above
+  semanticRole = form
+
+text
+  semanticRole = text
+
+image
+  semanticRole = image
+  contentScale = fit
+
+input
+  semanticRole = input
+  keyboardType = text
+
+button
+  semanticRole = action
+```
+
+Properties such as width, height, fill behavior, alignment, background, border, shape and typography are **supported capabilities but are not automatically defaulted merely because they appear in conceptual examples**. If a universal default is required later, it must first be deliberately added to the owning `NodeDefinition.defaults`, documented here/current contract, covered by golden tests, and then consumed by screens without repeating the default.
+
+## 12. Frozen screen-theme authoring rule
+
+`theme` is a **screen-level protocol object**, not a Template/Component/Section/Group/Element node and therefore not part of the node `base()/style()/content()/behavior()/metadata()` fluent property scopes.
+
+Current rule:
+
+```text
+screen options -> typed SduiTheme -> canonical screen JSON
+```
+
+Do not add a separate `ThemeBuilder` merely to make theme syntax look like node syntax. A new fluent theme abstraction is allowed only if it later proves a stable invariant or removes meaningful repeated complexity.
+
+For shared Partner authentication visuals, prefer one typed reusable theme definition/helper such as:
+
+```ts
+theme: partnerAuthTheme
+```
+
+rather than duplicating the full gradient/status-bar object independently in Login and OTP. A screen may still supply a deliberately screen-specific typed theme when it genuinely differs.
+
+The reusable theme helper must remain presentation-only; it must not become a second SDUI builder/property framework.
+
+## 13. Frozen-decision documentation governance
+
+A decision that is discussed and declared **frozen** is not considered implementation authority while it exists only in chat, review comments or memory. It must be written into the current governing repository documentation before or in the same change that implements it.
+
+From this freeze forward:
+
+1. **Document first or together:** every new frozen architecture/contract/ownership/default/wire decision must update the highest relevant current authority before or with implementation.
+2. **No contradictory active documents:** when a new frozen decision supersedes old active guidance, the old active guidance must be updated in the same convergence change.
+3. **Historical evidence is explicit:** an obsolete phase/audit document may remain only when it is useful evidence and is clearly labeled `HISTORICAL`, `SUPERSEDED`, or equivalent near the top.
+4. **Delete noise when evidence has no value:** obsolete documents that add no useful audit/history value should be removed instead of retained indefinitely.
+5. **Current authority always wins:** the current read order in this README must point only to documents that describe the present frozen implementation direction.
+6. **No implementation from stale examples:** examples that differ from current definitions/contracts are illustrative only; current executable definitions and current frozen contract text govern.
+7. **Update the authority map:** if ownership/read order changes, this README must be updated in the same change.
+8. **Tests freeze behavior:** important frozen semantics must have executable regression/golden tests wherever practical; documentation alone is not sufficient for behavior that can regress.
+9. **Exact-SHA verification:** a freeze is not complete until the final documentation + implementation candidate is validated on the same exact commit SHA.
+10. **Never restore superseded architecture for convenience:** do not recreate wrappers, duplicate registries, duplicate validators, secondary builders, old package paths or compatibility ownership merely because an old document mentions them.
+
+This governance rule exists specifically to prevent future sessions from following migration history instead of the latest frozen architecture.
