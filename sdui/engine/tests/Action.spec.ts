@@ -29,12 +29,11 @@ describe('SDUI action authoring', () => {
     })).toMatchObject({ type: 'navigate', payload: { screenId: 'partner_profile' } });
   });
 
-  it('covers canonical request and navigation defaults and optional targets', () => {
+  it('covers canonical request defaults and navigation optional targets', () => {
     expect(action.request({
-      targetId: 'submit_button', method: 'GET', endpoint: '/api/v1/example', authentication: 'SESSION',
+      method: 'GET', endpoint: '/api/v1/example', authentication: 'SESSION',
     })).toEqual({
       type: 'request',
-      targetId: 'submit_button',
       payload: {
         method: 'GET', endpoint: '/api/v1/example', authentication: 'SESSION',
         validate: false, responseMode: 'none',
