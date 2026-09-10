@@ -36,7 +36,6 @@ describe('PartnerLoginScreen', () => {
           id: 'welcome_title',
           type: 'text',
           properties: {
-            text: 'Welcome Partner!',
             spans: [
               { text: 'Welcome ' },
               { text: 'Partner!', color: '#13B8B5' },
