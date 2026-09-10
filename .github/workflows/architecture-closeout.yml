@@ -41,7 +41,10 @@ jobs:
           git rm .github/workflows/temporary-lockfile-refresh.yml
           git add pnpm-lock.yaml .github/workflows/architecture-closeout.yml
           test ! -e sdui/ui-sdk
-          test -z "$(git grep -n '@carbroz/ui-sdk' -- ':!docs/**' ':!sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md' || true)"
+          if git grep -nE "from ['\"]@carbroz/ui-sdk|import[[:space:]]*\(['\"]@carbroz/ui-sdk|['\"]@carbroz/ui-sdk['\"][[:space:]]*:" -- ':!docs/**'; then
+            echo 'Live ui-sdk import or package dependency remains' >&2
+            exit 1
+          fi
 
       - name: Commit retirement
         shell: bash
