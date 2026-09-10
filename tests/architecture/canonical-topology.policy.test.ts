@@ -8,7 +8,7 @@ const canonicalWorkspaces = [
   'domains/identity', 'domains/partner', 'domains/customer', 'domains/catalog-pricing',
   'domains/booking', 'domains/operations', 'domains/financials', 'domains/communications',
   'domains/engagement', 'domains/configuration', 'domains/dispute', 'domains/enterprise', 'domains/audit',
-  'sdui/engine', 'sdui/ui-sdk', 'sdui/registry',
+  'sdui/engine', 'sdui/registry',
   'platform/database', 'platform/cache', 'platform/messaging', 'platform/storage',
   'platform/observability', 'platform/integrations',
   'foundation/kernel',
@@ -61,7 +61,8 @@ describe('canonical Backend V3 topology', () => {
   });
 
   it('contains exactly the canonical SDUI workspaces and no legacy structural vocabulary in production SDUI source', () => {
-    expect(packageDirectories('sdui')).toEqual(['sdui/engine', 'sdui/registry', 'sdui/ui-sdk']);
+    expect(packageDirectories('sdui')).toEqual(['sdui/engine', 'sdui/registry']);
+    expect(fs.existsSync(path.join(root, 'sdui/ui-sdk'))).toBe(false);
     const legacy = walk(path.join(root, 'sdui'))
       .filter((file) => file.endsWith('.ts'))
       .filter((file) => /\b(?:Subcomponent|SubComponent|ChildrenData)\b/.test(fs.readFileSync(file, 'utf8')))
