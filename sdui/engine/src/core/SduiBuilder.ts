@@ -14,7 +14,7 @@ import type { ImageProperties } from '../nodes/element/Image.js';
 import type { InputProperties } from '../nodes/element/Input.js';
 import type { TextProperties } from '../nodes/element/Text.js';
 import type { NodeDefinitionRegistry } from '../registry/NodeDefinitionRegistry.js';
-import { createProductionNodeDefinitionRegistry } from '../registry/productionNodeDefinitions.js';
+import { createProductionNodeDefinitionRegistry } from '../registry/createProductionNodeDefinitionRegistry.js';
 
 export interface SduiScreenOptions {
   readonly id: string;
