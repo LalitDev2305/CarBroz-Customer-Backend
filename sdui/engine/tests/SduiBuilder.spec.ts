@@ -42,6 +42,7 @@ describe('SduiBuilder', () => {
       sections: [
         {
           id: 'mobile_section',
+          type: 'stack_section',
           properties: stackDefaults,
           elements: [{
             id: 'mobile_number',
@@ -53,6 +54,19 @@ describe('SduiBuilder', () => {
               maxLength: 10,
             },
             binding: { key: 'mobileNumber' },
+          }],
+        },
+        {
+          id: 'actions',
+          type: 'stack_section',
+          properties: stackDefaults,
+          elements: [{
+            id: 'continue',
+            type: 'button',
+            properties: {
+              semanticRole: 'action',
+              text: 'Continue',
+            },
           }],
         },
       ],
@@ -73,7 +87,11 @@ describe('SduiBuilder', () => {
 
   it('rejects an unknown node definition', () => {
     expect(() => new SduiBuilder().screen({ id: 'screen', targetApp: 'PARTNER' }, root => {
-      root.template('unknown_template', 'template', () => undefined);
+      root.template('unknown_template', 'template', template => {
+        template.component('stack_component', 'component', component => {
+          component.text('title', text => text.content().text('CarBroz'));
+        });
+      });
     })).toThrow("SDUI definition 'unknown_template' is not registered at level 'template'");
   });
 
