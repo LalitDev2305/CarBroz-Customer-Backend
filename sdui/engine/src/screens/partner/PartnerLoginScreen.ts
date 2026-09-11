@@ -12,7 +12,7 @@ export class PartnerLoginScreen implements ScreenComposer {
 
   build(_context: ScreenContext): SduiScreen {
     return this.builder.screen(this.screenId, this.targetApp, $ =>
-      $.stackTemplate('tpl_7K2M9Q', $ =>
+      $.formTemplate('tpl_7K2M9Q', $ =>
         $.setSpacing(24)
           .setHorizontalAlignment('center')
           .setFillMaxSize()
