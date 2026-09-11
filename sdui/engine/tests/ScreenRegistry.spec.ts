@@ -12,17 +12,14 @@ import {
 } from '../src/index.js';
 
 function validPartnerScreen(screenId = 'partner_test'): SduiScreen {
-  return new SduiBuilder().screen({
-    id: screenId,
-    schemaVersion: CURRENT_SDUI_SCHEMA_VERSION,
-    targetApp: 'PARTNER',
-  }, root => {
-    root.template('default_template', `${screenId}_template`, template => {
-      template.component('stack_component', `${screenId}_component`, component => {
-        component.text(`${screenId}_title`, { text: 'Test screen' });
-      });
-    });
-  });
+  return new SduiBuilder().screen(screenId, 'PARTNER', $ =>
+    $.setSchemaVersion(CURRENT_SDUI_SCHEMA_VERSION)
+      .defaultTemplate(`${screenId}_template`, $ =>
+        $.stackComponent(`${screenId}_component`, $ =>
+          $.textElement(`${screenId}_title`, $ => $.setText('Test screen'))
+        )
+      )
+  );
 }
 
 function composer(screenId = 'partner_test'): ScreenComposer {
