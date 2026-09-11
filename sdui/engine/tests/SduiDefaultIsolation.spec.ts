@@ -3,25 +3,26 @@ import { DEFAULT_SDUI_THEME, SduiBuilder } from '../src/index.js';
 import { DEFAULT_STACK_BASE_PROPERTIES } from '../src/core/value-objects/Layout.js';
 
 function buildScreen(id: string) {
-  return new SduiBuilder().screen({ id, targetApp: 'PARTNER' }, root => {
-    root.template('stack_template', `${id}_template`, template => {
-      template.component('stack_component', `${id}_component`, component => {
-        component.text(`${id}_text`, text => text.content().text('CarBroz'));
-      });
-    });
-  });
+  return new SduiBuilder().screen(id, 'PARTNER', $ =>
+    $.stackTemplate(`${id}_template`, $ =>
+      $.stackComponent(`${id}_component`, $ =>
+        $.textElement(`${id}_text`, $ => $.setText('CarBroz'))
+      )
+    )
+  );
 }
 
 describe('SDUI default-property golden contract', () => {
   it('keeps defaults isolated across screen instances when one screen overrides them', () => {
-    const overridden = new SduiBuilder().screen({ id: 'screen_a', targetApp: 'PARTNER' }, root => {
-      root.template('stack_template', 'template_a', template => {
-        template.base().spacing(12).paddingTop(24);
-        template.component('stack_component', 'component_a', component => {
-          component.text('text_a', text => text.content().text('A'));
-        });
-      });
-    });
+    const overridden = new SduiBuilder().screen('screen_a', 'PARTNER', $ =>
+      $.stackTemplate('template_a', $ =>
+        $.setSpacing(12)
+          .setPaddingTop(24)
+          .stackComponent('component_a', $ =>
+            $.textElement('text_a', $ => $.setText('A'))
+          )
+      )
+    );
 
     const untouched = buildScreen('screen_b');
 
@@ -42,7 +43,7 @@ describe('SDUI default-property golden contract', () => {
     });
   });
 
-  it('emits declared defaults while omitting supported non-default properties that were not supplied', () => {
+  it('emits declared defaults while omitting supported non-default properties not supplied', () => {
     const screen = buildScreen('screen_defaults');
 
     expect(screen.template.properties).toEqual(DEFAULT_STACK_BASE_PROPERTIES);
@@ -51,31 +52,22 @@ describe('SDUI default-property golden contract', () => {
     expect(screen.template.properties).not.toHaveProperty('background');
   });
 
-  it('emits the canonical screen theme when a screen declares no theme data', () => {
-    const screen = buildScreen('screen_default_theme');
-
-    expect(screen.theme).toEqual(DEFAULT_SDUI_THEME);
+  it('emits the canonical screen theme when no theme override is authored', () => {
+    expect(buildScreen('screen_default_theme').theme).toEqual(DEFAULT_SDUI_THEME);
   });
 
-  it('deep merges a screen theme override without mutating the canonical theme or another screen', () => {
-    const overridden = new SduiBuilder().screen({
-      id: 'screen_theme_override',
-      targetApp: 'PARTNER',
-      theme: {
-        statusBar: 'default',
-        properties: {
-          gradient: {
-            angle: 90,
-          },
-        },
-      },
-    }, root => {
-      root.template('stack_template', 'theme_override_template', template => {
-        template.component('stack_component', 'theme_override_component', component => {
-          component.text('theme_override_text', text => text.content().text('Override'));
-        });
-      });
-    });
+  it('deep merges scoped theme setters without mutating the canonical theme or another screen', () => {
+    const overridden = new SduiBuilder().screen('screen_theme_override', 'PARTNER', $ =>
+      $.setTheme($ =>
+        $.setStatusBar('default')
+          .setGradientAngle(90)
+      )
+      .stackTemplate('theme_override_template', $ =>
+        $.stackComponent('theme_override_component', $ =>
+          $.textElement('theme_override_text', $ => $.setText('Override'))
+        )
+      )
+    );
 
     const untouched = buildScreen('screen_theme_untouched');
 
