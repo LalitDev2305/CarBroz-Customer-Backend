@@ -9,7 +9,7 @@ describe('PartnerLoginScreen', () => {
     expect(validated.screenId).toBe('partner_login');
     expect(validated.targetApp).toBe('PARTNER');
     expect(validated.template.id).toBe('tpl_7K2M9Q');
-    expect(validated.template.type).toBe('stack_template');
+    expect(validated.template.type).toBe('form_template');
     expect(validated.theme).toMatchObject({
       theme: 'light',
       statusBar: 'transparent',
