@@ -2,31 +2,23 @@
 
 > **Status:** ACTIVE — read this before changing SDUI code.
 
-This file identifies the current SDUI implementation authorities and separates them from historical migration evidence.
+This file defines the current SDUI implementation authorities and the active frozen rules that must govern implementation.
 
 ## 1. Current read order
 
 For implementation, use this order:
 
 ```text
-1. sdui/README.md                                  // current authority map + latest frozen amendments
-2. SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md
-3. PARTNER-AUTH-SDUI-CONTRACT.md                 // Login / OTP behavior
+1. sdui/README.md
+2. sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md
+3. sdui/PARTNER-AUTH-SDUI-CONTRACT.md
 4. docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md
 5. docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md
 6. docs/MASTER-BACKEND-CONSTITUTION.md
 7. executable architecture / freeze gates
 ```
 
-If a historical document describes a different builder, package, hierarchy, screen owner, file path, default, or theme rule, it does not override this architecture.
-
-The Master Backend Constitution and the frozen SDUI implementation plan are reconciled to the same physical topology and ownership model: `sdui/engine` is canonical and the standalone `sdui/registry` is retained only for concrete persisted lifecycle/version responsibilities.
-
-**Latest frozen amendments:**
-
-1. The old illustrative `theme: partnerAuthTheme` example in `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md` is superseded by Section 12 of this README. There is no auth-specific theme abstraction in the current architecture. New screen composition uses one canonical default screen theme and per-screen overrides only where data genuinely differs.
-2. The old illustrative Partner OTP identity `tpl_partner_otp_v1` in `SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md` is superseded by the current Partner Auth contract. The frozen OTP template identity is the opaque stable ID `tpl_P6X8N3`. Concrete Template/Component/Section/Group/Element IDs are unique instance identities; reusable rendering/composition is expressed through `type`, generic properties and generic actions—not ID reuse.
-3. Partner OTP Resend UX is frozen by `PARTNER-AUTH-SDUI-CONTRACT.md`: `Resend OTP` remains visible but disabled/grey during an internal hidden cooldown; no countdown text is rendered. When ready it becomes clickable, calls the existing Send OTP capability again, retains the newest successful challenge, and restarts the hidden cooldown.
+The Master Backend Constitution and the frozen SDUI implementation plan must remain consistent with the same physical topology and ownership model: `sdui/engine` is the canonical SDUI language/composition/validation owner and `sdui/registry` is limited to persisted lifecycle/version responsibilities that still have concrete runtime/admin consumers.
 
 ## 2. Permanent SDUI authority
 
@@ -35,69 +27,176 @@ The Master Backend Constitution and the frozen SDUI implementation plan are reco
 It owns:
 
 - `Screen`, `Template`, `Component`, `Section`, `Group`, `Element` contracts;
-- `action.*` and `ref.*` wire authoring;
-- property scopes and canonical defaults;
+- the scoped fluent `SduiBuilder` DSL;
+- `action.*` and `ref.*` authoring;
+- canonical node defaults and property resolution;
 - node definitions and `NodeDefinitionRegistry`;
 - `ScreenRegistry` and explicit screen registration;
-- `SduiBuilder`;
 - `SduiValidator`;
 - `SduiService`;
 - serialization/model contracts;
 - Partner/Customer/Admin screen composers under `sdui/engine/src/screens/*`.
 
-The retired `sdui/ui-sdk` package must not return.
+No API surface or domain may maintain a parallel screen-composition language.
 
-The canonical hierarchy is:
+## 3. Canonical hierarchy
 
-```text
-Template -> Component -> Element
-Template -> Component -> Section -> Element
-Template -> Component -> Section -> Group -> Element
-```
-
-Template and Component are mandatory. Element is terminal. Section and Group are optional according to the selected legal branch.
-
-## 3. Two meanings of registry
-
-### Engine registries — permanent
-
-These are part of the permanent engine architecture:
+The legal hierarchy is:
 
 ```text
-sdui/engine/src/registry/NodeDefinitionRegistry.ts
-sdui/engine/src/registry/ScreenRegistry.ts
+Screen
+  → Template
+      → Component
+          → Element
 ```
 
-They are required for one-time canonical definition registration and screen-composer lookup. They do not persist draft/publication history.
-
-### `sdui/registry` workspace — persisted lifecycle only
-
-The standalone `@carbroz/sdui-registry` workspace is **KEEP** for the current architecture because concrete runtime/admin callers and persisted records still require its lifecycle/version capabilities:
+or:
 
 ```text
-draft
-publish
-archive
-history
-compare
-rollback
-current-version resolution
-version transactions
-persisted screen versions
+Screen
+  → Template
+      → Component
+          → Section
+              → Element
 ```
 
-It consumes `@carbroz/sdui-engine` contracts and validation. It is **not** allowed to become a second SDUI vocabulary, builder, property framework, definition registry, validator or screen-composition authority.
-
-Compatibility catalogue persistence may remain only while concrete callers or persisted data require it. It must be removed/converged only after caller and persisted-data analysis proves that deletion is safe.
-
-## 4. Generic action contract
-
-The canonical action/reference implementation now belongs to the engine:
+or:
 
 ```text
-sdui/engine/src/core/Action.ts
-sdui/engine/tests/Action.spec.ts
+Screen
+  → Template
+      → Component
+          → Section
+              → Group
+                  → Element
 ```
+
+Frozen structural rules:
+
+```text
+Screen owns exactly one Template.
+Template owns one or more Components.
+Component owns Elements XOR Sections.
+Section owns Elements XOR Groups.
+Group owns Elements only.
+Element is terminal.
+```
+
+Template and Component are mandatory. Section and Group are optional only according to the legal branch above.
+
+## 4. Frozen scoped authoring DSL
+
+The authoring API mirrors the hierarchy directly.
+
+Type-specific creation methods encode reusable type and accept only the concrete ID plus child callback:
+
+```ts
+$.stackTemplate('tpl_7K2M9Q', $ => { ... });
+$.formTemplate('tpl_P6X8N3', $ => { ... });
+
+$.stackComponent('login_content', $ => { ... });
+$.stackSection('action_section', $ => { ... });
+$.rowGroup('field_group', $ => { ... });
+
+$.textElement('title', $ => { ... });
+$.imageElement('logo', $ => { ... });
+$.inputElement('mobile_number', $ => { ... });
+$.buttonElement('continue_button', $ => { ... });
+```
+
+`$` always means the current node in that lexical scope.
+
+The normal screen-composer style does not repeat `template`, `component`, `section`, `group` or `element` callback variable names.
+
+The hierarchy itself must be visible from nested creation methods.
+
+## 5. Frozen direct setter rule
+
+Properties are configured directly on the current node through legal `set<Property>()` methods.
+
+Examples:
+
+```ts
+$.setSpacing(24)
+ .setHorizontalAlignment('center')
+ .setFillMaxWidth()
+ .setPadding({ start: 24, top: 20, end: 24, bottom: 20 });
+```
+
+```ts
+$.setText('CarBroz')
+ .setFontSize(44)
+ .setFontWeight(700)
+ .setColor('#101522')
+ .setTextAlign('center');
+```
+
+```ts
+$.setLeading(...)
+ .setTrailing(...)
+ .setBinding('otp')
+ .setEnabled(false)
+ .setOnClick(action.request(...));
+```
+
+Screen composers do not navigate through separate property-category objects. The developer-facing model is:
+
+```text
+current node
+→ set<Property>()
+→ create legal child
+```
+
+Node definitions still own exact schemas, defaults and legal capabilities internally.
+
+## 6. Chaining and scope-return semantics
+
+Frozen behavior:
+
+```text
+setter → returns current scope
+child creation → executes nested callback, then returns parent scope
+```
+
+This allows:
+
+```ts
+$.setSpacing(18)
+ .setFillMaxWidth()
+ .stackSection('field_section', $ =>
+   $.rowGroup('field_group', $ =>
+     $.inputElement('otp_code_input', $ =>
+       $.setBinding('otp')
+        .setKeyboardType('number')
+     )
+   )
+ )
+ .stackSection('action_section', $ =>
+   $.buttonElement('verify_button', $ =>
+     $.setText('Verify & Continue')
+   )
+ );
+```
+
+No `endComponent()`, `endSection()`, `endGroup()` or global current-parent cursor is allowed.
+
+## 7. Generic creation escape hatches
+
+For extensibility the builder may expose generic methods where required:
+
+```ts
+$.setTemplate(type, id, $ => { ... });
+$.setComponent(type, id, $ => { ... });
+$.setSection(type, id, $ => { ... });
+$.setGroup(type, id, $ => { ... });
+$.setElement(type, id, $ => { ... });
+```
+
+Normal screen composition should prefer readable type-specific methods.
+
+There is one builder architecture only.
+
+## 8. Generic action/reference contract
 
 Frozen generic action vocabulary:
 
@@ -120,73 +219,170 @@ $response
 $literal
 ```
 
-Request-dependent navigation uses `request` with `responseMode = destination`; it must not be modeled as `sequence(request, navigate)`.
+Authoring:
 
-## 5. Partner Login / OTP behavior authority
+```ts
+action.request(...)
+action.navigate(...)
+action.present(...)
+action.dismiss(...)
+action.state(...)
+action.externalUri(...)
+action.sequence(...)
+
+ref.binding(...)
+ref.context(...)
+ref.response(...)
+ref.literal(...)
+```
+
+Events are set on the current Element with setters such as:
+
+```ts
+$.setOnClick(...)
+$.setOnLongClick(...)
+```
+
+Request-dependent navigation uses `request` with `responseMode = destination`.
+
+## 9. Partner Login / OTP authority
 
 `PARTNER-AUTH-SDUI-CONTRACT.md` freezes the external Partner auth flow:
 
 ```text
-Bootstrap -> Login -> Send OTP -> OTP -> Verify OTP -> Dashboard
+Bootstrap → Login → Send OTP → OTP → Verify OTP → Dashboard
 ```
 
-The concrete Login and OTP screen composers are owned only by:
+Concrete composers:
 
 ```text
 sdui/engine/src/screens/partner/PartnerLoginScreen.ts
 sdui/engine/src/screens/partner/PartnerOtpScreen.ts
 ```
 
-API Partner routes/controllers are transport adapters only. They may request a registered engine screen, but they must not maintain wrapper builders or duplicate screen composition under `apps/api` or `domains/*`.
+Frozen template identities:
 
-Business authentication and OTP policy remain in Identity/application ports and their infrastructure adapters. SDUI does not own authentication policy.
+```text
+Partner Login = tpl_7K2M9Q / stack_template
+Partner OTP   = tpl_P6X8N3 / form_template
+```
 
-## 6. OTP/security authority
+API Partner routes/controllers are transport adapters only. Identity owns authentication and OTP business behavior. SDUI owns presentation composition.
 
-`../docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` remains authoritative for OTP security/persistence where not superseded by a later security Constitution rule.
+## 10. OTP/security authority
 
-Production OTP persistence must not silently fall back to Prisma or process-memory state. Redis-backed challenge semantics, one-time consume behavior, attempt limits, expiry, security ordering and safe error behavior must remain tested.
+`../docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` governs OTP security/persistence together with the backend constitutions.
 
-## 7. Configuration boundary
+Production OTP persistence is Redis-backed only. One-time consume behavior, attempt limits, expiry, ordering and safe error behavior remain tested.
+
+## 11. Configuration boundary
 
 Configuration owns startup routing/configuration decisions, not screen structure.
 
 For Partner bootstrap:
 
 ```text
-guest -> Partner Login destination
-authenticated -> Partner Dashboard destination
+guest → Partner Login destination
+authenticated → Partner Dashboard destination
 ```
 
-The destination identifies the next resource; the actual Login/OTP screen definition remains engine-owned.
+The Destination identifies the next resource. The actual screen document remains engine-owned.
 
-## 8. Historical documents
+## 12. Canonical property/default model
 
-Phase/audit/reconciliation documents under `sdui/` are historical evidence unless explicitly listed above as a current authority. Keep them truthful to the repository state they audited; do not use old package paths or builder APIs from those files as implementation instructions.
+Every reusable NodeDefinition owns:
 
-`SDUI-FINAL-FORENSIC-AUDIT.md` and `PHASE-A-SOURCE-RECONCILIATION.md` are explicitly labeled historical/superseded because they retain migration-era `ui-sdk` evidence that must not be interpreted as current architecture.
+```text
+canonical type
+hierarchy level
+legal child/content mode
+exact property schema
+canonical defaults
+legal setter capabilities
+supported events where applicable
+```
 
-Examples include historical phase closeouts, source reconciliations and forensic audits.
+Frozen resolution pipeline:
 
-## 9. Change rule
+```text
+NodeDefinition.defaults
+        +
+explicit set<Property>() values
+        ↓
+deterministic merge
+        ↓
+strict property validation
+        ↓
+canonical serialized properties
+```
+
+Frozen semantics:
+
+1. Every value present in `NodeDefinition.defaults` is emitted even when the screen composer does not mention it.
+2. A screen may override any legal default for that node instance.
+3. A legal non-default property is omitted unless explicitly supplied.
+4. One screen/node override never mutates another node or definition defaults.
+5. Nested plain objects merge recursively where supported.
+6. Arrays replace as complete values.
+7. `undefined` means no override.
+8. The fully resolved property object is strictly validated.
+9. Unknown/illegal properties are rejected.
+10. Golden tests prove default emission, override, isolation, omission and deterministic merge semantics.
+
+Current canonical defaults are defined by the current engine NodeDefinitions. Screen code must not infer defaults from visual examples.
+
+## 13. Frozen screen-theme rule
+
+`theme` is a screen-level protocol object.
+
+The SDUI engine owns one canonical `DEFAULT_SDUI_THEME`. New screens do not repeat it.
+
+A screen that genuinely differs may call:
+
+```ts
+$.setTheme({
+  statusBar: 'default',
+  properties: {
+    gradient: { angle: 90 },
+  },
+});
+```
+
+Resolution:
+
+```text
+DEFAULT_SDUI_THEME
+        +
+optional setTheme override
+        ↓
+deterministic merge
+        ↓
+strict theme validation
+        ↓
+canonical screen.theme
+```
+
+No screen-specific theme framework is required.
+
+## 14. Change rule
 
 For an SDUI change:
 
 ```text
-latest governing contract
--> architecture/ownership check
--> implementation at the existing owner
--> focused positive + negative tests
--> wire/behavior parity proof where applicable
--> canonical architecture gates
--> exact-SHA verification
+current governing contract
+→ architecture/ownership check
+→ implementation at the existing owner
+→ focused positive + negative tests
+→ wire/behavior parity proof where applicable
+→ canonical architecture gates
+→ exact-SHA verification
 ```
 
-Do not add compatibility wrappers, aliases, secondary registries, secondary validators, duplicate screen composers or duplicate property systems to make a migration easier.
+Do not add compatibility wrappers, aliases, secondary registries, secondary validators, duplicate screen composers or duplicate property systems.
 
-## 10. Current focused freeze
+## 15. Current focused freeze
 
-The current freeze scope is deliberately limited to:
+Current focused scope:
 
 ```text
 Configuration
@@ -198,180 +394,28 @@ SDUI architecture/design
 Within this scope the target is:
 
 - one `sdui/engine` language/composition/validation authority;
-- no `ui-sdk`;
-- engine-owned Partner Login and OTP screen composers;
+- engine-owned Partner Login and OTP composers;
 - API transport-only screen delivery;
 - Identity-owned Login/OTP business behavior;
 - Redis-backed production OTP challenge persistence;
 - Configuration-owned bootstrap/startup decision data;
-- standalone `sdui/registry` restricted to persisted lifecycle/version behavior and retained only because current Dashboard/Admin lifecycle consumers require it;
+- one scoped setter DSL across Login and OTP;
+- canonical JSON and action/reference behavior unchanged;
 - focused tests and documentation aligned with the exact implementation;
-- no unrelated backend feature expansion during this freeze.
+- no unrelated backend feature expansion.
 
-## 11. Frozen property/default model
+## 16. Documentation governance
 
-Every property supported by a reusable SDUI node belongs conceptually to exactly one of these five categories:
+A frozen decision becomes implementation authority only when it is written into the active governing repository documentation.
 
-| Classification | Meaning | Automatically returned? | Instance override? | Typical examples |
-|---|---|---|---|---|
-| **Base / default** | Fundamental layout/rendering behavior of that node type | **Yes only when the owning `NodeDefinition.defaults` declares a canonical value** | Yes | `padding`, `spacing`, `orientation`, `width`, `height`, alignment/arrangement |
-| **Style** | Visual customization | Only when explicitly set or deliberately defaulted by the owning definition | Yes | `background`, `border`, `shape`, `elevation`, `alpha`, typography |
-| **Content / instance** | Screen-specific display data | No, unless the owning definition has an explicit safe default | Yes | `text`, `imageUrl`, `placeholder`, `label`, `icon` |
-| **Behavior** | Runtime interaction/configuration | No, unless the owning definition has an explicit safe default | Yes | `binding`, `validation`, `actions`, `enabled`, `visibility`, `keyboardType` |
-| **Metadata / semantic** | Accessibility/meaning/runtime hints | Only when explicitly set or deliberately defaulted by the owning definition | Yes where legal | `semanticRole`, `contentDescription`, `testTag` |
+Rules:
 
-The category name does **not** itself create a default. The reusable node definition is the only authority for whether a property has an automatic value.
+1. Update the highest relevant active authority before or with implementation.
+2. Active documents must not contradict one another.
+3. The read order above must always point to the current implementation direction.
+4. Important frozen semantics require executable regression/golden tests where practical.
+5. A freeze is complete only after the final documentation + implementation candidate is validated on the same exact commit SHA.
 
-The frozen resolution pipeline is:
+## 17. Frozen authoring statement
 
-```text
-NodeDefinition.defaults
-        +
-instance values authored through base/style/content/behavior/metadata scopes
-        ↓
-deterministic deep merge
-        ↓
-strict node property parser/validation
-        ↓
-canonical serialized properties
-```
-
-Frozen semantics:
-
-1. Every value present in `NodeDefinition.defaults` is emitted even when the screen composer does not mention it.
-2. A screen may override any legal default for that node instance.
-3. A legal non-default property is omitted unless explicitly supplied.
-4. One screen/node override must never mutate the definition defaults or another screen/node instance.
-5. Nested plain objects merge recursively and deterministically.
-6. Arrays replace as complete values; they are not element-by-element merged.
-7. `undefined` means no override and leaves the default intact.
-8. The fully resolved property object is strictly validated after resolution.
-9. Unknown/illegal properties are rejected rather than silently dropped.
-10. Golden tests must prove default emission, legal override, isolation/non-mutation, omission of non-defaults, and deterministic nested merging.
-
-### 11.1 Current implemented defaults are the truth
-
-Do not infer defaults from examples, UI designs, property-category names or old documents. Read the current node definition.
-
-At the time of this freeze, the engine currently implements these canonical defaults:
-
-```text
-stack_template / default_template / stack_component / stack_section / stack_group
-  orientation = vertical
-  verticalArrangement = spacedBy(0)
-  padding = { start: 0, top: 0, end: 0, bottom: 0 }
-
-form_template
-  all stack defaults above
-  semanticRole = form
-
-text
-  semanticRole = text
-
-image
-  semanticRole = image
-  contentScale = fit
-
-input
-  semanticRole = input
-  keyboardType = text
-
-button
-  semanticRole = action
-```
-
-Properties such as width, height, fill behavior, alignment, background, border, shape and typography are **supported capabilities but are not automatically defaulted merely because they appear in conceptual examples**. If a universal default is required later, it must first be deliberately added to the owning `NodeDefinition.defaults`, documented here/current contract, covered by golden tests, and then consumed by screens without repeating the default.
-
-## 12. Frozen screen-theme default/override rule
-
-`theme` is a **screen-level protocol object** and uses the same architectural principle as reusable node defaults: common data belongs to one canonical default; screen composers state only genuine differences.
-
-There is no Login theme, OTP theme, Partner Auth theme, Customer theme builder, or per-screen theme wrapper in the frozen architecture.
-
-The canonical default theme is owned by the SDUI engine as `DEFAULT_SDUI_THEME` and is resolved by `SduiBuilder.screen()` for every newly composed screen.
-
-Current canonical default:
-
-```text
-theme = light
-statusBar = transparent
-properties.gradient.type = linear
-properties.gradient.angle = 135
-properties.gradient.colors = CarBroz default gradient colors
-```
-
-Normal screen authoring therefore does **not** mention theme:
-
-```ts
-sdui.screen({
-  id: 'partner_login',
-  targetApp: 'PARTNER',
-}, screen => {
-  // compose template/components/elements only
-});
-```
-
-The builder emits the complete canonical theme automatically.
-
-If one screen genuinely differs, it supplies only the changed data:
-
-```ts
-sdui.screen({
-  id: 'special_screen',
-  targetApp: 'PARTNER',
-  theme: {
-    statusBar: 'default',
-    properties: {
-      gradient: { angle: 90 },
-    },
-  },
-}, screen => {
-  // compose screen
-});
-```
-
-Frozen theme-resolution pipeline:
-
-```text
-DEFAULT_SDUI_THEME
-        +
-optional screen theme overrides
-        ↓
-deterministic deep merge
-        ↓
-strict themeSchema validation
-        ↓
-complete canonical screen.theme JSON
-```
-
-Frozen semantics:
-
-1. Every newly composed screen receives the canonical default theme even when the composer declares no theme.
-2. Login, OTP, Dashboard and future screens must not repeat canonical theme values.
-3. A screen may override only the data that genuinely differs.
-4. Nested theme objects merge recursively and deterministically.
-5. Arrays such as gradient colors replace as complete values if explicitly overridden.
-6. One screen override must not mutate `DEFAULT_SDUI_THEME` or another screen.
-7. The resolved theme is validated by `themeSchema` before serialization.
-8. Do not create `partnerAuthTheme`, `ThemeBuilder`, per-feature theme wrappers or another theme framework merely for naming/syntax.
-9. Backward-compatible persisted documents may still be readable without `theme`, but all new builder-produced screens emit the resolved canonical theme.
-10. Any future change to the universal default must change the single engine default, documentation and golden tests together; screen composers remain unchanged unless they intentionally override it.
-
-## 13. Frozen-decision documentation governance
-
-A decision that is discussed and declared **frozen** is not considered implementation authority while it exists only in chat, review comments or memory. It must be written into the current governing repository documentation before or in the same change that implements it.
-
-From this freeze forward:
-
-1. **Document first or together:** every new frozen architecture/contract/ownership/default/wire decision must update the highest relevant current authority before or with implementation.
-2. **No contradictory active documents:** when a new frozen decision supersedes old active guidance, the old active guidance must be updated or explicitly superseded in the same convergence change.
-3. **Historical evidence is explicit:** an obsolete phase/audit document may remain only when it is useful evidence and is clearly labeled `HISTORICAL`, `SUPERSEDED`, or equivalent near the top.
-4. **Delete noise when evidence has no value:** obsolete documents that add no useful audit/history value should be removed instead of retained indefinitely.
-5. **Current authority always wins:** the current read order in this README must identify the latest implementation direction and any explicit amendments to older examples.
-6. **No implementation from stale examples:** examples that differ from current definitions/contracts are illustrative only; current executable definitions and current frozen contract text govern.
-7. **Update the authority map:** if ownership/read order changes, this README must be updated in the same change.
-8. **Tests freeze behavior:** important frozen semantics must have executable regression/golden tests wherever practical; documentation alone is not sufficient for behavior that can regress.
-9. **Exact-SHA verification:** a freeze is not complete until the final documentation + implementation candidate is validated on the same exact commit SHA.
-10. **Never restore superseded architecture for convenience:** do not recreate wrappers, duplicate registries, duplicate validators, secondary builders, old package paths or compatibility ownership merely because an old document mentions them.
-
-This governance rule exists specifically to prevent future sessions from following migration history instead of the latest frozen architecture.
+> **CarBroz SDUI screen source must read like the canonical tree. A developer creates a Screen, adds its typed Template, then typed Component, optional typed Section, optional typed Group and terminal Element nodes. Creation method names encode reusable type; the concrete ID is supplied once. Every nested callback uses `$` as the current-node receiver. Properties are configured directly through legal `set<Property>()` methods such as `setSpacing`, `setPadding`, `setText`, `setLeading`, `setTrailing`, `setBinding`, `setTheme` and `setOnClick`. Setters return the current scope, while child creation returns the parent scope after the nested callback. The engine preserves one canonical JSON contract, one validator authority and one NodeDefinition/default system.**
