@@ -79,6 +79,8 @@ $.inputElement(id, $ => ...)
 $.buttonElement(id, $ => ...)
 ```
 
+Screens whose primary interaction accepts user input and validates/submits data use `form_template`. Partner Login and Partner OTP therefore both use `form_template`.
+
 Horizontal rows use the registered `stack_group` plus orientation:
 
 ```ts
@@ -162,7 +164,7 @@ Authoring uses `ref.*` and `action.*`. Request-dependent navigation uses `reques
 ```text
 screenId      = partner_login
 template.id   = tpl_7K2M9Q
-template.type = stack_template
+template.type = form_template
 targetApp     = PARTNER
 route         = GET /api/v1/partner/screen/auth_login
 ```
@@ -189,7 +191,7 @@ Composition:
 
 ```text
 Screen partner_login
-└── stack_template tpl_7K2M9Q
+└── form_template tpl_7K2M9Q
     ├── stack_component brand_content
     │   ├── image brand_logo
     │   ├── text brand_name
@@ -419,6 +421,7 @@ guest Bootstrap
 Also prove:
 
 - exact Login/OTP IDs and types;
+- Login and OTP both use `form_template` because they are input/submission screens;
 - direct Screen root API;
 - current registered typed methods only;
 - `stack_group + horizontal orientation` for row layouts;
@@ -429,8 +432,8 @@ Also prove:
 - generic action/reference serialization;
 - newest challenge after resend;
 - Redis-only production OTP persistence;
-- focused architecture/build/lint/test gates green on exact SHA.
+- focused architecture/build/lint/test gates green on exact SHA when a freeze/release candidate is required.
 
 ## 18. Frozen final statement
 
-> **Partner Login and OTP use one canonical SDUI engine and the explicit Screen -> Template -> Component -> optional Section -> optional Group -> Element hierarchy. Screen identity is direct, `$` is the current lexical scope, properties are `set<Property>()`, current typed methods mirror only registered NodeDefinitions, and horizontal rows use `stackGroup(...).setOrientation('horizontal')`. Theme is globally defaulted and scoped overrides use `setTheme($ => ...)`. Auth behavior, Destination identity, Redis OTP security and canonical wire semantics remain unchanged.**
+> **Partner Login and OTP use one canonical SDUI engine and the explicit Screen -> Template -> Component -> optional Section -> optional Group -> Element hierarchy. Both screens use `form_template` because their primary interaction accepts and submits user input. Screen identity is direct, `$` is the current lexical scope, properties are `set<Property>()`, current typed methods mirror only registered NodeDefinitions, and horizontal rows use `stackGroup(...).setOrientation('horizontal')`. Theme is globally defaulted and scoped overrides use `setTheme($ => ...)`. Auth behavior, Destination identity, Redis OTP security and canonical wire semantics remain unchanged.**
