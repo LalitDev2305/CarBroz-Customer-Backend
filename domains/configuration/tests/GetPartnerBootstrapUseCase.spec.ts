@@ -17,7 +17,7 @@ function validDocument(): PartnerBootstrapDocument {
     },
     features: { registrationEnabled: true, individualPartnerEnabled: true, organizationPartnerEnabled: true },
     startup: {
-      guest: { screenId: 'partner_login', templateId: 'tpl_7K2M9Q', templateType: 'stack_template', endpoint: '/api/v1/partner/screen/auth_login', method: 'GET', authentication: 'NONE' },
+      guest: { screenId: 'partner_login', templateId: 'tpl_7K2M9Q', templateType: 'form_template', endpoint: '/api/v1/partner/screen/auth_login', method: 'GET', authentication: 'NONE' },
       authenticated: { screenId: 'partner_dashboard', templateId: 'partner_dashboard_template', templateType: 'default_template', endpoint: '/api/v1/partner/sdui/registry/partner_dashboard', method: 'GET', authentication: 'SESSION' },
     },
   };
@@ -27,7 +27,7 @@ describe('GetPartnerBootstrapUseCase', () => {
   it('returns the canonical unauthenticated Partner login destination', async () => {
     const result = await new GetPartnerBootstrapUseCase(providerReturning()).execute({ platform: 'ANDROID', appVersion: '1.0.0', authenticated: false });
     expect(result.startup).toEqual({ authenticated: false, nextScreen: {
-      screenId: 'partner_login', templateId: 'tpl_7K2M9Q', templateType: 'stack_template', endpoint: '/api/v1/partner/screen/auth_login', method: 'GET', authentication: 'NONE',
+      screenId: 'partner_login', templateId: 'tpl_7K2M9Q', templateType: 'form_template', endpoint: '/api/v1/partner/screen/auth_login', method: 'GET', authentication: 'NONE',
     } });
   });
 
