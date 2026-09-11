@@ -68,6 +68,8 @@ $.inputElement(id, $ => ...)
 $.buttonElement(id, $ => ...)
 ```
 
+`form_template` is the canonical template for screens whose primary interaction accepts user input and validates/submits data. Partner Login and Partner OTP therefore both use `form_template`.
+
 A horizontal row is currently authored through the real registered `stack_group` type plus an explicit orientation override:
 
 ```ts
@@ -234,7 +236,7 @@ Raw object-style `setTheme({...})`, screen-specific ThemeBuilder hierarchies and
 
 ```ts
 return sdui.screen('partner_login', 'PARTNER', $ =>
-  $.stackTemplate('tpl_7K2M9Q', $ =>
+  $.formTemplate('tpl_7K2M9Q', $ =>
     $.setSpacing(24)
      .stackComponent('brand_content', $ =>
        $.textElement('brand_name', $ =>
@@ -338,7 +340,7 @@ Login:
 ```text
 screenId      = partner_login
 template.id   = tpl_7K2M9Q
-template.type = stack_template
+template.type = form_template
 targetApp     = PARTNER
 GET /api/v1/partner/screen/auth_login
 ```
@@ -395,11 +397,12 @@ Focused implementation must prove:
 - child callbacks return the parent scope;
 - default/theme isolation;
 - scoped Theme override behavior;
+- Login and OTP both use `form_template` as input/submission screens;
 - Login and OTP canonical output/behavior parity;
 - generic action/reference parity;
 - API/auth behavior unchanged;
 - Redis-only OTP persistence unchanged;
-- build, lint, tests and architecture gates green for the exact candidate SHA.
+- focused validation for the affected change, with broader gates reserved for freeze/release or actual cross-module impact.
 
 ## 18. Permanent anti-patterns
 
@@ -422,4 +425,4 @@ silent property dropping
 
 ## 19. Final frozen statement
 
-> **CarBroz SDUI uses one canonical hierarchy and one scoped internal Builder DSL. Screen identity is authored as `sdui.screen(screenId, targetApp, $ => ...)`. The current registered vocabulary is stack/form/default templates, stack component/section/group, and text/image/input/button elements. `$` is always the current lexical scope. Properties are direct `set<Property>()` calls. Horizontal rows use the registered `stack_group` with `setOrientation('horizontal')`; no unregistered row type is implied. Theme starts from `DEFAULT_SDUI_THEME` and genuine differences use `setTheme($ => ...)`. Setters return current scope, child creation returns parent scope, and canonical NodeDefinitions plus the final validator remain authoritative.**
+> **CarBroz SDUI uses one canonical hierarchy and one scoped internal Builder DSL. Screen identity is authored as `sdui.screen(screenId, targetApp, $ => ...)`. The current registered vocabulary is stack/form/default templates, stack component/section/group, and text/image/input/button elements. Screens whose primary interaction accepts and submits user input use `form_template`; Partner Login and Partner OTP both follow that rule. `$` is always the current lexical scope. Properties are direct `set<Property>()` calls. Horizontal rows use the registered `stack_group` with `setOrientation('horizontal')`; no unregistered row type is implied. Theme starts from `DEFAULT_SDUI_THEME` and genuine differences use `setTheme($ => ...)`. Setters return current scope, child creation returns parent scope, and canonical NodeDefinitions plus the final validator remain authoritative.**
