@@ -1,20 +1,18 @@
-# Partner Authentication SDUI Contract Addendum
+# Partner Authentication SDUI Contract
 
-> **Status:** FROZEN BEHAVIOR CONTRACT — synchronized with the final single-engine SDUI architecture.
+> **Status:** FROZEN BEHAVIOR + COMPOSITION CONTRACT
 >
 > **Architecture authority:** `sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`
 >
-> **Interaction authority:** `sdui/engine/src/core/Action.ts` and the canonical engine action/reference tests.
+> **Interaction authority:** `sdui/engine/src/core/Action.ts` and canonical engine action/reference tests.
 >
 > **Security authority:** `docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` plus the backend constitutions.
->
-> This document freezes Partner Bootstrap → Login → OTP → authenticated Dashboard behavior and the final Login/OTP composition rules. Screen composition belongs only to `sdui/engine`.
+
+This document freezes Partner Bootstrap → Login → OTP → authenticated Dashboard behavior and the Login/OTP SDUI composition contract. Screen composition belongs only to `sdui/engine`.
 
 ---
 
 ## 1. Ownership boundary
-
-Frozen final ownership:
 
 ```text
 Identity domain
@@ -24,18 +22,20 @@ Identity domain
 
 SDUI Engine
   → Login / OTP / Dashboard presentation composition
-  → generic node/action/reference contracts
-  → property defaults/overrides
+  → generic hierarchy/property/action/reference contracts
+  → defaults/overrides
   → screen resolution + validation
 
 API surface
-  → HTTP routes, request adaptation, response serialization
+  → HTTP routes
+  → request adaptation
+  → response serialization
 
 Frontend runtime
   → bindings/context/response resolution
   → generic action execution
   → transient auth-flow state
-  → timer/countdown execution for generic UI state
+  → hidden cooldown execution
   → destination verification + rendering
 ```
 
@@ -43,7 +43,7 @@ Domains and API surfaces must not become parallel screen-composition owners.
 
 ---
 
-## 2. Loaded screen, Destination identity, and node identity
+## 2. Loaded screen, Destination and node identity
 
 Loaded screen owns:
 
@@ -76,43 +76,117 @@ destination.templateType == loaded.template.type
 
 Root-level `templateId` and `templateType` are not part of a loaded screen.
 
-### 2.1 Frozen unique-ID rule
-
-`id` and `type` have different responsibilities.
+### 2.1 Unique-ID rule
 
 ```text
 id   = unique identity of one concrete node instance
 type = reusable rendering/composition definition
 ```
 
-Every concrete node ID is unique. Similar UI between screens reuses the same `type` and composition pattern, never the same node `id`.
-
-This applies to every hierarchy level:
+Concrete IDs are unique at every level:
 
 ```text
-Template ID  → unique
-Component ID → unique
-Section ID   → unique
-Group ID     → unique
-Element ID   → unique
+Template
+Component
+Section
+Group
+Element
 ```
 
-Opaque stable template IDs are required for Partner Auth screens. Template IDs must not encode screen/business names such as `tpl_partner_otp_v1`.
-
-Frozen Partner template identities:
+Frozen Partner Auth template identities:
 
 ```text
 Partner Login template.id = tpl_7K2M9Q
 Partner OTP   template.id = tpl_P6X8N3
 ```
 
-Once published/frozen, these IDs are stable unless the contract is deliberately versioned.
+These IDs are stable until the contract is deliberately versioned.
 
 ---
 
-## 3. Generic action/reference contract
+## 3. Canonical hierarchy
 
-Partner Auth uses only generic actions and references.
+Legal branches:
+
+```text
+Screen
+  → Template
+      → Component
+          → Element
+```
+
+```text
+Screen
+  → Template
+      → Component
+          → Section
+              → Element
+```
+
+```text
+Screen
+  → Template
+      → Component
+          → Section
+              → Group
+                  → Element
+```
+
+Frozen structural rules:
+
+```text
+Screen owns exactly one Template.
+Template owns one or more Components.
+Component owns Elements XOR Sections.
+Section owns Elements XOR Groups.
+Group owns Elements only.
+Element is terminal.
+```
+
+Login and OTP must use this same canonical hierarchy.
+
+---
+
+## 4. Frozen scoped authoring rule
+
+Partner Login and OTP use the engine-wide scoped setter DSL.
+
+Type-specific creation methods encode reusable node type and accept the concrete ID once:
+
+```ts
+$.stackTemplate('tpl_7K2M9Q', $ => { ... });
+$.formTemplate('tpl_P6X8N3', $ => { ... });
+$.stackComponent('otp_content', $ => { ... });
+$.stackSection('otp_action_section', $ => { ... });
+$.rowGroup('otp_fields_group', $ => { ... });
+$.textElement('otp_screen_title', $ => { ... });
+$.inputElement('otp_code_input', $ => { ... });
+$.buttonElement('otp_verify_button', $ => { ... });
+```
+
+`$` always means the current node in that lexical scope.
+
+Properties are set directly:
+
+```ts
+$.setSpacing(...)
+ .setPadding(...)
+ .setText(...)
+ .setFontSize(...)
+ .setLeading(...)
+ .setTrailing(...)
+ .setBinding(...)
+ .setEnabled(...)
+ .setOnClick(...);
+```
+
+No separate property-category navigation is part of the Partner Auth screen-composer API.
+
+Setter calls return the current scope. Child creation executes the nested callback and returns the parent scope. No `end*()` hierarchy navigation or hidden mutable parent cursor is allowed.
+
+---
+
+## 5. Generic action/reference contract
 
 References:
 
@@ -123,7 +197,7 @@ $response
 $literal
 ```
 
-Authoring direction:
+Authoring:
 
 ```ts
 ref.binding(...)
@@ -132,9 +206,7 @@ ref.response(...)
 ref.literal(...)
 ```
 
-Partner-specific action types are forbidden.
-
-Frozen generic action vocabulary remains:
+Frozen generic action vocabulary:
 
 ```text
 request
@@ -146,9 +218,9 @@ external_uri
 sequence
 ```
 
-Request-dependent navigation uses `request` with `responseMode = destination`; it must not be represented as `sequence(request, navigate)`.
+Request-dependent navigation uses `request` with `responseMode = destination`.
 
-For request actions with `responseMode: destination`:
+Execution:
 
 ```text
 validate
@@ -163,11 +235,11 @@ validate
 → navigate/render
 ```
 
-No OTP-specific `resendOtp`, `startOtpTimer`, `verifyOtpAction`, or equivalent action type may be introduced.
+No OTP-specific action type is allowed.
 
 ---
 
-## 4. Partner Login — frozen golden reference
+## 6. Partner Login — frozen golden reference
 
 ```text
 screenId      = partner_login
@@ -195,26 +267,25 @@ Body:
 }
 ```
 
-The Login screen is the Golden Reference for Partner OTP composition. OTP should reuse Login's existing reusable node types, property model, theme default, brand/header composition pattern, action/reference vocabulary and binding model. Similarity never implies ID reuse; every OTP node receives its own unique ID.
-
-Current Login composition pattern:
+Frozen Login composition:
 
 ```text
-Template
-├── stack_component: brand/header content
-│   ├── image: logo
-│   ├── text: CarBroz
-│   ├── text: PARTNER with leading/trailing horizontal dividers
-│   ├── text: Premium Car Care At Your Doorstep
-│   ├── text: screen title
-│   └── text: screen subtitle
-├── stack_component: login interaction content
-│   ├── stack_section / stack_group: mobile input
-│   └── stack_section: Continue + legal text
-└── stack_component: hero image
+Screen partner_login
+└── Template tpl_7K2M9Q / stack_template
+    ├── Component brand/header / stack_component
+    │   ├── image: logo
+    │   ├── text: CarBroz
+    │   ├── text: PARTNER + leading/trailing dividers
+    │   ├── text: tagline
+    │   ├── text: title
+    │   └── text: subtitle
+    ├── Component login interaction / stack_component
+    │   ├── Section / Group: mobile input
+    │   └── Section: Continue + legal text
+    └── Component hero image / stack_component
 ```
 
-The Login screen remains owned by:
+Owner:
 
 ```text
 sdui/engine/src/screens/partner/PartnerLoginScreen.ts
@@ -222,7 +293,7 @@ sdui/engine/src/screens/partner/PartnerLoginScreen.ts
 
 ---
 
-## 5. Send OTP destination — frozen
+## 7. Send OTP destination — frozen
 
 Successful Send OTP returns:
 
@@ -235,15 +306,13 @@ method         = GET
 authentication = NONE
 ```
 
-Legacy navigation shapes such as `{ template, api }` are forbidden.
-
 OTP plaintext/hash is never returned.
 
-The Send OTP response remains the source of the active challenge identity. A resend is another invocation of the same Send OTP business capability and may return a new challenge ID; the frontend/runtime must retain the latest successful challenge for subsequent verification.
+The Send OTP response is the source of active challenge identity. A successful resend may return a new challenge ID; verification always uses the newest successful challenge.
 
 ---
 
-## 6. Partner OTP screen — frozen final composition
+## 8. Partner OTP screen — frozen final composition
 
 ```text
 screenId      = partner_otp
@@ -253,50 +322,133 @@ targetApp     = PARTNER
 route         = GET /api/v1/partner/screen/auth_otp
 ```
 
-Final implementation owner:
+Owner:
 
 ```text
 sdui/engine/src/screens/partner/PartnerOtpScreen.ts
 ```
 
-OTP uses the same generic fluent hierarchy/property/action model as Login. No OTP-specific builder, node hierarchy, action language, theme abstraction or parallel renderer contract is allowed.
-
-### 6.1 Frozen visual/composition reference
-
-The approved OTP UI reference is the Partner OTP design supplied during the freeze discussion. The existing Partner Login JSON is the structural reference for common content.
-
-OTP should use two primary components because the OTP design has no Login hero-car component:
+Frozen tree:
 
 ```text
-Template: form_template / tpl_P6X8N3
-│
-├── Component [unique ID], type = stack_component
-│   ├── logo image
-│   ├── CarBroz text
-│   ├── PARTNER text
-│   │   ├── leading horizontal divider
-│   │   └── trailing horizontal divider
-│   ├── Premium Car Care At Your Doorstep text
-│   ├── Verify Your Number title
-│   ├── We have sent a 6-digit code to subtitle
-│   └── phone-number text + trailing edit icon
-│
-└── Component [unique ID], type = stack_component
-    ├── Section [unique ID], type = stack_section
-    │   └── Group [unique ID], type = stack_group, horizontal
-    │       └── OTP digit input repeated/configured for 6 digits
+Screen partner_otp
+└── Template tpl_P6X8N3 / form_template
+    ├── Component otp_brand_content / stack_component
+    │   ├── Element otp_brand_logo / image
+    │   ├── Element otp_brand_name / text
+    │   ├── Element otp_partner_label / text
+    │   │   ├── leading horizontal divider property
+    │   │   └── trailing horizontal divider property
+    │   ├── Element otp_brand_tagline / text
+    │   ├── Element otp_screen_title / text
+    │   ├── Element otp_screen_subtitle / text
+    │   └── Element otp_phone_number / text + trailing edit icon
     │
-    └── Section [unique ID], type = stack_section
-        ├── Resend OTP text/control
-        ├── Verify & Continue button
-        └── legal text
+    └── Component otp_content / stack_component
+        ├── Section otp_field_section / stack_section
+        │   └── Group otp_fields_group / stack_group or row_group
+        │       └── Element otp_code_input / input
+        │
+        └── Section otp_action_section / stack_section
+            ├── Element otp_resend_text / text
+            ├── Element otp_verify_button / button
+            └── Element otp_legal_text / text
 ```
 
-The first OTP component intentionally mirrors the Login brand/header component. It is not split into a separate `verification_content` component merely because its title/subtitle data differs.
+The first OTP component mirrors the Login brand/header composition pattern while using unique OTP node IDs.
 
-### 6.2 Shared vs different Login/OTP data
+---
 
-Common visual structure:
+## 9. OTP authoring target
+
+Conceptually:
+
+```ts
+return sdui.screen(
+  {
+    id: 'partner_otp',
+    targetApp: 'PARTNER',
+  },
+  $ =>
+    $.formTemplate('tpl_P6X8N3', $ =>
+      $.setSpacing(24)
+       .setHorizontalAlignment('center')
+       .setFillMaxSize()
+       .setPadding({ start: 24, top: 20, end: 24, bottom: 20 })
+       .stackComponent('otp_brand_content', $ =>
+         $.setSpacing(6)
+          .setHorizontalAlignment('center')
+          .imageElement('otp_brand_logo', $ =>
+            $.setUrl('/images/carbroz_logo.png')
+             .setWidth(120)
+             .setHeight(96)
+          )
+          .textElement('otp_brand_name', $ =>
+            $.setText('CarBroz')
+             .setFontSize(44)
+             .setFontWeight(700)
+             .setTextAlign('center')
+          )
+       )
+       .stackComponent('otp_content', $ =>
+         $.setSpacing(18)
+          .stackSection('otp_field_section', $ =>
+            $.rowGroup('otp_fields_group', $ =>
+              $.inputElement('otp_code_input', $ =>
+                $.setMaxLength(6)
+                 .setKeyboardType('number')
+                 .setBinding('otp')
+                 .setValidation({
+                   required: true,
+                   pattern: '^[0-9]{6}$',
+                   message: 'Enter the 6-digit OTP',
+                 })
+              )
+            )
+          )
+          .stackSection('otp_action_section', $ =>
+            $.textElement('otp_resend_text', $ =>
+              $.setText('Resend OTP')
+               .setEnabled(false)
+               .setOnClick(action.request({
+                 method: 'POST',
+                 endpoint: '/api/v1/partner/auth/send_otp',
+                 authentication: 'NONE',
+                 validate: false,
+                 responseMode: 'none',
+                 body: {
+                   phoneNumber: ref.context('authFlow.phoneNumber'),
+                   deviceId: ref.context('deviceId'),
+                 },
+               }))
+            )
+            .buttonElement('otp_verify_button', $ =>
+              $.setText('Verify & Continue')
+               .setOnClick(action.request({
+                 method: 'POST',
+                 endpoint: '/api/v1/partner/auth/verify_otp',
+                 authentication: 'NONE',
+                 validate: true,
+                 responseMode: 'destination',
+                 body: {
+                   challengeId: ref.response('data.challengeId'),
+                   phoneNumber: ref.context('authFlow.phoneNumber'),
+                   otp: ref.binding('otp'),
+                   deviceId: ref.context('deviceId'),
+                 },
+               }))
+            )
+          )
+       )
+    ),
+);
+```
+
+This freezes the authoring shape, not a separate OTP framework.
+
+---
+
+## 10. Shared vs different Login/OTP data
 
 ```text
 Login                               OTP
@@ -309,44 +461,80 @@ Welcome Partner!                    Verify Your Number
 Login to continue your journey      We have sent a 6-digit code to
 ```
 
-OTP adds one row after the subtitle:
+OTP adds:
 
 ```text
 +91 <submitted phone number>   [trailing edit icon]
 ```
 
-The phone number is runtime data from the active auth flow; it must not be hardcoded into the screen definition.
+The phone number comes from runtime auth-flow context and is never hardcoded.
 
 ---
 
-## 7. OTP binding and verification contract
+## 11. Leading/trailing and rich text
 
-OTP input follows the same binding principle already used by the Login phone input:
+Leading/trailing content is configured directly on the owning Element:
 
-```text
-UI input → binding → request action reference
+```ts
+$.setText('PARTNER')
+ .setLeading({
+   type: 'divider',
+   properties: {
+     orientation: 'horizontal',
+     width: 36,
+     thickness: 2,
+     color: '#13B8B5',
+   },
+ })
+ .setTrailing({
+   type: 'divider',
+   properties: {
+     orientation: 'horizontal',
+     width: 36,
+     thickness: 2,
+     color: '#13B8B5',
+   },
+ });
 ```
 
-The six visual OTP cells represent one logical OTP value. The canonical logical binding key is:
+Rich text is generic:
+
+```ts
+$.setSpans([
+  { text: 'Verify ' },
+  { text: 'Your', color: '#13B8B5' },
+  { text: ' Number' },
+]);
+```
+
+Legal terms may carry generic `external_uri` actions.
+
+---
+
+## 12. OTP binding and verification
+
+Six visual OTP cells represent one logical value.
+
+Canonical binding key:
 
 ```text
 otp
 ```
 
-The implementation may render six single-character cells through the existing generic hierarchy or a generic repeat/count capability, but it must not create an OTP-specific renderer/action language. The serialized/request-facing value is one six-digit string resolved by:
+Request-facing value:
 
 ```text
 { "$binding": "otp" }
 ```
 
-Validation remains:
+Validation:
 
 ```text
 required = true
 pattern  = ^[0-9]{6}$
 ```
 
-Verify action:
+Verify request:
 
 ```text
 POST /api/v1/partner/auth/verify_otp
@@ -364,125 +552,71 @@ otp         ← { $binding: "otp" }
 deviceId    ← { $context: "deviceId" }
 ```
 
-The challenge reference may resolve from the latest successful response/runtime auth-flow context according to the generic reference implementation, but verification must always use the newest successful Send OTP challenge after a resend.
+Verification always uses the newest successful challenge after resend.
 
 ---
 
-## 8. Resend OTP + hidden cooldown — frozen UX behavior
+## 13. Resend OTP + hidden cooldown
 
-The approved UX does **not** display a visible countdown such as `Resend OTP in 00:25`.
-
-There are only two user-visible states:
+The approved UX has no visible countdown.
 
 ```text
 COOLDOWN
-  Resend OTP is visible but greyed/disabled and not clickable.
-  Cooldown timer runs internally and is not displayed.
+  Resend OTP visible
+  disabled / grey
+  not clickable
+  timer hidden
 
 READY
-  Resend OTP is enabled/clickable and styled as the active action.
+  Resend OTP visible
+  enabled
+  clickable
 ```
 
-### 8.1 Initial OTP arrival
+Initial successful Login → Send OTP starts the hidden cooldown.
 
-A successful Login → Send OTP request starts the resend cooldown for the OTP screen.
-
-When the OTP screen first appears:
+When READY and tapped:
 
 ```text
-Resend OTP = disabled/grey
-internal cooldown = running
-```
-
-When the cooldown completes:
-
-```text
-Resend OTP = enabled/clickable
-```
-
-### 8.2 Resend click
-
-When READY and the user taps Resend OTP:
-
-```text
-1. disable/grey Resend immediately for duplicate-tap protection
+1. disable Resend immediately
 2. POST /api/v1/partner/auth/send_otp
-3. body uses the active phoneNumber + deviceId through generic references
-4. on success:
-   - retain the newest successful challengeId/response
-   - keep Resend disabled
-   - restart the hidden cooldown
-5. when hidden cooldown completes:
-   - enable Resend OTP again
-6. on request failure:
-   - expose/reduce the request error
-   - restore Resend to an appropriate retryable READY state unless backend policy says otherwise
+3. use active phoneNumber + deviceId
+4. on success retain newest challengeId/response
+5. restart hidden cooldown
+6. enable again when cooldown completes
+7. on failure expose/reduce error and restore retryable state when allowed
 ```
 
-The cooldown must never be represented by an OTP-specific action type. Any runtime timer/state capability added to support this must be generic and reusable for other screens/features.
-
-A visible countdown is explicitly outside this frozen UX unless the contract is reopened.
-
-### 8.3 Cooldown source
-
-OTP expiry and resend cooldown are different concepts:
+OTP validity and resend cooldown are different concepts:
 
 ```text
-expiresInSeconds     = challenge/OTP validity
-resendAfterSeconds   = resend eligibility cooldown
+expiresInSeconds   = OTP/challenge validity
+resendAfterSeconds = resend eligibility cooldown
 ```
 
-Do not derive resend cooldown from `expiresInSeconds`.
-
-If resend cooldown is backend-configurable, the Send OTP response should expose a dedicated generic value such as `resendAfterSeconds`; otherwise the runtime uses the separately frozen product cooldown configuration. The frontend must not treat OTP validity as resend eligibility.
+Never derive resend cooldown from `expiresInSeconds`.
 
 ---
 
-## 9. Rich text / inline span requirement
+## 14. Transient auth-flow state
 
-Partner Login and OTP designs require partial styling and independently clickable inline text without splitting every phrase into unrelated layout nodes.
-
-The generic `text` element may therefore support reusable inline spans/runs. This is a generic text capability, not a Partner Auth primitive.
-
-Required use cases include:
+After successful Send OTP and before OTP navigation retain at minimum:
 
 ```text
-Welcome Partner!       → `Partner!` may have accent styling
-Verify Your Number     → `Your` may have accent styling
-Terms & Conditions     → independently clickable
-Privacy Policy         → independently clickable
+authFlow.phoneNumber
+latest successful Send OTP response/challenge
+resend eligibility/cooldown state
 ```
 
-Inline spans may carry legal text styling and generic actions such as `external_uri`. They must not introduce Partner-specific action types.
+After successful resend replace the previous challenge reference with the newest successful challenge.
 
-The existing Login legal sentence currently renders as one plain text value. When generic span support is implemented, Login and OTP should both use the same reusable text capability for Terms & Conditions and Privacy Policy rather than screen-specific workarounds.
+Clear transient auth-flow state after successful Verify OTP, abandoned auth flow, logout/reset or a new auth flow.
+
+OTP plaintext is never reusable persistent application state.
 
 ---
 
-## 10. Transient auth-flow state
-
-After successful Send OTP and before OTP navigation the frontend runtime retains at minimum:
-
-```text
-authFlow.phoneNumber = resolved submitted phone number
-latest successful Send OTP response/challenge = active challenge
-resend eligibility/cooldown state = transient UI state
-```
-
-After each successful resend, the previous challenge reference is replaced by the newest successful challenge.
-
-Clear auth-flow transient state after:
-
-- successful Verify OTP;
-- explicit cancellation/back that abandons auth;
-- logout/reset;
-- a new authentication flow.
-
-OTP plaintext must not become reusable persistent application state.
-
----
-
-## 11. Verify OTP security behavior — frozen
+## 15. Verify OTP security behavior
 
 Security order:
 
@@ -491,18 +625,18 @@ load bound challenge
 → validate lifecycle / phone / device / attempt state
 → verify secret hash
 → atomically consume one-time challenge
-→ only then user/session creation
-→ only then refresh/access credential issuance
+→ user/session creation
+→ refresh/access credential issuance
 → authenticated destination
 ```
 
 Concurrent/replay verification is fail-closed: at most one consume succeeds.
 
-No SDUI refactor may alter this ordering.
+No SDUI refactor may change this ordering.
 
 ---
 
-## 12. Redis OTP persistence — permanent
+## 16. Redis OTP persistence
 
 Production OTP persistence remains:
 
@@ -517,18 +651,18 @@ shared singleton redisClient
 Forbidden:
 
 ```text
-Prisma production OTP model/table
+Prisma production OTP challenge persistence
 production in-memory fallback
 dual write
 OTP plaintext persistence/response
 screen-owned OTP storage
 ```
 
-Test-only deterministic persistence is allowed only at executable test composition boundaries.
+Test-only deterministic persistence is allowed only at executable test-composition boundaries.
 
 ---
 
-## 13. Authenticated Partner Dashboard — frozen destination
+## 17. Authenticated Partner Dashboard destination
 
 ```text
 screenId       = partner_dashboard
@@ -539,47 +673,23 @@ method         = GET
 authentication = SESSION
 ```
 
-Runtime retrieval:
-
-```http
-GET /api/v1/partner/sdui/registry/partner_dashboard
-Authorization: Bearer <access token>
-```
-
-The existing published registry document remains required during lifecycle convergence.
-
-Authenticated Bootstrap and Verify OTP must continue to return the same Dashboard Destination.
+Authenticated Bootstrap and Verify OTP return the same Dashboard Destination.
 
 ---
 
-## 14. Fluent property architecture for Partner Auth screens
+## 18. Canonical defaults and theme
 
-Partner Login and OTP use the frozen five property categories where legal:
+Login and OTP use the same engine-wide NodeDefinition/default rules.
 
-```text
-base/default
-style
-content/instance
-behavior
-metadata/semantic
-```
+Screen composers set only values that differ from canonical node defaults.
 
-Rules:
+Theme is resolved from the engine-wide default screen theme. A screen may use `setTheme(...)` only for genuine screen-level differences.
 
-- node-definition defaults are emitted automatically;
-- screen composers do not repeat defaults;
-- allowed defaults may be overridden per node instance;
-- non-default properties appear only when explicitly supplied;
-- unknown properties are rejected;
-- one screen's override must never mutate another screen or global defaults;
-- screen/node IDs are unique instance identities and are never reused as a reuse mechanism;
-- reusable UI is expressed through node `type`, generic properties, composition patterns and generic actions.
-
-Login and OTP must not introduce screen-specific reusable primitives merely to avoid configuration.
+One screen override never mutates another screen or global defaults.
 
 ---
 
-## 15. Generic event/action usage
+## 19. Generic events
 
 Elements may bind generic events such as:
 
@@ -591,27 +701,22 @@ onFocus
 onBlur
 ```
 
-Partner Auth uses only the generic action vocabulary:
+Screen-composer authoring uses setters such as:
 
-```text
-request
-navigate
-present
-dismiss
-state
-external_uri
-sequence
+```ts
+$.setOnClick(...)
+$.setOnLongClick(...)
 ```
 
-Resend behavior may compose generic request/state/sequence/runtime timer capabilities, but no feature-specific action type is allowed.
+Only the generic action vocabulary is allowed.
 
 ---
 
-## 16. SESSION error semantics
+## 20. SESSION error semantics
 
-SESSION-protected screen fetches must never convert missing/invalid bearer credentials into 500 responses.
+SESSION-protected fetches never convert missing/invalid bearer credentials into 500 responses.
 
-Transport-owned auth failures remain safe:
+Transport auth failures remain:
 
 ```text
 401 UNAUTHORIZED
@@ -622,96 +727,37 @@ No internal credential/plugin detail leakage.
 
 ---
 
-## 17. Full-flow and golden proof required
+## 21. Full-flow proof required
 
-The executable flow must prove:
+Executable proof must cover:
 
 ```text
 guest Bootstrap
 → Login Screen
 → Send OTP
-→ OTP Destination (tpl_P6X8N3)
+→ OTP Destination tpl_P6X8N3
 → OTP Screen
-→ initial Resend disabled/grey
-→ hidden cooldown enables Resend
-→ Resend calls Send OTP again
-→ newest challenge retained
-→ hidden cooldown restarts
-→ six-digit OTP binding resolves as one value
 → Verify OTP
-→ credentials
-→ unauthenticated Dashboard request rejected
-→ authenticated Dashboard loaded
-→ authenticated Bootstrap destination parity
+→ Dashboard Destination
+→ unauthenticated Dashboard fetch = 401
+→ authenticated Dashboard fetch = 200
 ```
 
-SDUI regression/golden coverage must additionally prove:
+Also prove:
 
-```text
-Login remains the structural golden reference
-OTP expected canonical output == OTP engine output
-all OTP concrete node IDs are unique
-OTP IDs do not reuse Login IDs
-opaque OTP template identity is stable
-PARTNER label uses leading + trailing horizontal dividers
-OTP aggregate binding key = otp
-Verify request uses $binding otp
-Resend uses the same Send OTP endpoint/business capability
-Resend is disabled during hidden cooldown
-Resend re-enables only after cooldown completion
-resend success replaces active challenge with newest challenge
-no visible countdown is emitted
-rich text/span capability remains generic
-legal inline actions remain generic
-Destination identities match loaded screens
-Redis-only OTP persistence/security remains unchanged
-```
+- Login/OTP canonical screen identities;
+- unique concrete node IDs;
+- legal hierarchy/XOR rules;
+- type-specific creation methods serialize correct types;
+- direct setters mutate only current node;
+- child callback returns parent scope;
+- generic actions/references serialize canonically;
+- newest challenge used after resend;
+- Redis-only production OTP persistence;
+- focused architecture gates remain green.
 
 ---
 
-## 18. Screen registration rule
+## 22. Frozen final statement
 
-Partner screens are explicitly registered once in the engine, conceptually:
-
-```ts
-export const partnerScreens = [
-  new PartnerLoginScreen(),
-  new PartnerOtpScreen(),
-  new PartnerDashboardScreen(),
-];
-```
-
-Adding a new Partner screen means:
-
-```text
-create screen composer
-+ register once
-+ done
-```
-
-No API switch statement, domain registration, second builder factory or screen-name-specific runtime handler is required.
-
----
-
-## 19. Final freeze rule
-
-This contract is the current frozen Partner Auth SDUI behavior authority.
-
-If a future implementation change modifies any of the following, this contract must be explicitly reopened before code changes:
-
-- screen/template identity;
-- unique-ID semantics;
-- auth endpoint/method/authentication;
-- request body mapping;
-- Destination shape;
-- reference meaning;
-- responseMode behavior;
-- OTP input/binding semantics;
-- Resend visible/disabled/cooldown behavior;
-- active challenge replacement after resend;
-- rich text/legal inline behavior;
-- OTP persistence/security ordering;
-- SESSION semantics;
-- Dashboard destination identity.
-
-Architecture improvements are allowed only when these external behaviors remain compatible or are deliberately versioned.
+> **Partner Login and Partner OTP use the same canonical SDUI engine and the same explicit Screen → Template → Component → optional Section → optional Group → Element hierarchy. Type-specific creation methods encode reusable type; concrete node IDs are supplied once. Every nested callback uses `$` as the current node. Properties are authored directly with legal `set<Property>()` methods, including `setText`, `setSpacing`, `setPadding`, `setLeading`, `setTrailing`, `setBinding`, `setEnabled` and `setOnClick`. Setters return the current scope and child creation returns the parent scope after the child callback. The wire JSON, generic actions/references, Login/OTP destinations, OTP security behavior and Redis persistence remain canonical and independently validated.**
