@@ -10,41 +10,37 @@
 >
 > **Runtime handoff:** `docs/PARTNER-AUTH-SDUI-MVI-UDF-HANDOFF.md`
 
-This document defines the current Partner Auth security, Redis persistence, Destination and SDUI integration contract only.
-
----
-
-## 1. Current non-negotiable ownership
+## 1. Ownership
 
 ```text
-Identity domain
-  → OTP/session/token business policy
-  → IOtpChallengeRepository
+Identity
+  -> OTP/session/token business policy
+  -> IOtpChallengeRepository
 
 platform/integrations
-  → Redis OTP repository adapter
-  → shared Redis client infrastructure
+  -> Redis OTP adapter
+  -> shared Redis client infrastructure
 
 sdui/engine
-  → canonical SDUI hierarchy
-  → NodeDefinitions + defaults
-  → scoped setter authoring DSL
-  → generic actions/references
-  → Partner Login/OTP/Dashboard screen composition
-  → screen registry/service/validation
+  -> canonical hierarchy
+  -> NodeDefinitions/defaults
+  -> scoped setter DSL
+  -> generic actions/references
+  -> Partner Login/OTP/Dashboard screen composition
+  -> screen registry/service/validation
 
 sdui/registry
-  → persisted publication/version lifecycle only where required
+  -> persisted publication/version lifecycle only where required
 
 apps/api
-  → Fastify transport/adaptation only
+  -> Fastify transport/adaptation only
 
-frontend MVI/UDF runtime
-  → bindings/context/response resolution
-  → generic action execution
-  → transient auth-flow state
-  → hidden resend cooldown state/timing
-  → destination verification/rendering
+frontend runtime
+  -> binding/context/response resolution
+  -> generic action execution
+  -> transient auth-flow state
+  -> hidden resend cooldown
+  -> destination verification/rendering
 ```
 
 Forbidden:
@@ -53,79 +49,50 @@ Forbidden:
 - second SDUI/action/navigation framework;
 - Partner-specific generic action types;
 - API/domain-owned screen composition;
-- second cache/Redis abstraction;
-- Redis→Prisma or Redis→memory production OTP fallback;
+- second Redis abstraction;
+- Prisma or memory production OTP fallback;
 - Redis+Prisma OTP dual write;
 - plaintext OTP persistence/logging/API exposure;
-- backend reducer/store/ViewModel ownership;
-- weakening security, architecture or test gates.
+- weakening security/architecture/test gates.
 
----
-
-## 2. Canonical SDUI hierarchy
-
-Partner Auth screens use exactly:
+## 2. Canonical hierarchy
 
 ```text
-Screen
-  → Template
-      → Component
-          → Element
+Screen -> Template -> Component -> Element
+Screen -> Template -> Component -> Section -> Element
+Screen -> Template -> Component -> Section -> Group -> Element
 ```
 
-or:
-
-```text
-Screen
-  → Template
-      → Component
-          → Section
-              → Element
-```
-
-or:
-
-```text
-Screen
-  → Template
-      → Component
-          → Section
-              → Group
-                  → Element
-```
-
-Rules:
-
-```text
-Screen owns exactly one Template.
-Template owns one or more Components.
-Component owns Elements XOR Sections.
-Section owns Elements XOR Groups.
-Group owns Elements only.
-Element is terminal.
-```
-
----
+Component owns Elements XOR Sections. Section owns Elements XOR Groups. Group owns Elements only. Element is terminal.
 
 ## 3. Current SDUI authoring rule
 
-Partner Login and OTP use the engine-wide scoped setter DSL.
-
-Type-specific creation examples:
+Partner Login/OTP use the registered current vocabulary only:
 
 ```ts
-$.stackTemplate('tpl_7K2M9Q', $ => { ... });
-$.formTemplate('tpl_P6X8N3', $ => { ... });
-$.stackComponent('otp_content', $ => { ... });
-$.stackSection('otp_action_section', $ => { ... });
-$.rowGroup('otp_fields_group', $ => { ... });
-$.inputElement('otp_code_input', $ => { ... });
-$.buttonElement('otp_verify_button', $ => { ... });
+$.stackTemplate(...)
+$.formTemplate(...)
+$.stackComponent(...)
+$.stackSection(...)
+$.stackGroup(...)
+$.textElement(...)
+$.imageElement(...)
+$.inputElement(...)
+$.buttonElement(...)
 ```
 
-`$` always means the current node.
+Horizontal rows use:
 
-Properties are authored directly:
+```ts
+$.stackGroup('otp_fields_group', $ =>
+  $.setOrientation('horizontal')
+   .inputElement('otp_code_input', $ => ...)
+)
+```
+
+There is no current `row_group` NodeDefinition.
+
+Properties are direct setters:
 
 ```ts
 $.setText(...)
@@ -138,13 +105,9 @@ $.setText(...)
  .setOnClick(...);
 ```
 
-NodeDefinitions remain the authority for exact property schemas, defaults and legal capabilities.
+NodeDefinitions own exact property schemas/defaults/capabilities. The authoring DSL does not change canonical wire JSON.
 
-The authoring DSL does not change the canonical wire JSON.
-
----
-
-## 4. Canonical SDUI reference vocabulary
+## 4. References
 
 Wire forms:
 
@@ -164,11 +127,7 @@ ref.response(...)
 ref.literal(...)
 ```
 
-No additional reference namespace is part of this contract.
-
----
-
-## 5. Canonical Destination and identity semantics
+## 5. Destination
 
 ```text
 screenId
@@ -179,60 +138,39 @@ method
 authentication = NONE | SESSION
 ```
 
-Loaded screen identity:
+Loaded screen/template identity must equal Destination identity.
 
-```text
-screen.screenId
-screen.template.id
-screen.template.type
-```
+Concrete node IDs are unique instances; reuse is through generic type/properties/actions/composition.
 
-After fetch:
-
-```text
-destination.screenId     == loaded.screenId
-destination.templateId   == loaded.template.id
-destination.templateType == loaded.template.type
-```
-
-Concrete Template/Component/Section/Group/Element IDs are unique instance identities. Reuse belongs to generic node `type`, properties/actions and composition patterns.
-
----
-
-## 6. Canonical Partner Auth flow
+## 6. Partner Auth flow
 
 ```text
 GET /api/v1/partner/config/bootstrap
-  guest → partner_login
+  guest -> partner_login
 
 GET /api/v1/partner/screen/auth_login
-  Login screen from SDUI engine
+  -> Login from SDUI engine
 
 Continue
-  → POST /api/v1/partner/auth/send_otp
+  -> POST /api/v1/partner/auth/send_otp
 
 Send OTP success
-  → partner_otp Destination
+  -> partner_otp Destination
 
 GET /api/v1/partner/screen/auth_otp
-  OTP screen from SDUI engine
+  -> OTP from SDUI engine
 
 Verify
-  → POST /api/v1/partner/auth/verify_otp
+  -> POST /api/v1/partner/auth/verify_otp
 
-Verify OTP success
-  → partner_dashboard SESSION Destination
-
-GET /api/v1/partner/sdui/registry/partner_dashboard
-  Authorization: Bearer <access token>
+Verify success
+  -> partner_dashboard SESSION Destination
 
 Authenticated Bootstrap
-  → same partner_dashboard Destination
+  -> same partner_dashboard Destination
 ```
 
----
-
-## 7. Login request — frozen
+## 7. Login request
 
 ```text
 POST /api/v1/partner/auth/send_otp
@@ -250,25 +188,7 @@ Body:
 }
 ```
 
-Authoring:
-
-```ts
-action.request({
-  method: 'POST',
-  endpoint: '/api/v1/partner/auth/send_otp',
-  authentication: 'NONE',
-  validate: true,
-  responseMode: 'destination',
-  body: {
-    phoneNumber: ref.binding('mobileNumber'),
-    deviceId: ref.context('deviceId'),
-  },
-});
-```
-
----
-
-## 8. Send OTP destination — frozen
+## 8. Send OTP destination
 
 ```text
 screenId       = partner_otp
@@ -279,13 +199,9 @@ method         = GET
 authentication = NONE
 ```
 
-This opaque template ID is the only current Partner OTP template identity in the active contract.
+`tpl_P6X8N3` is the only current Partner OTP template identity.
 
-Navigation is Destination-based.
-
----
-
-## 9. OTP screen + Verify request — frozen
+## 9. OTP verify
 
 Loaded OTP identity:
 
@@ -296,10 +212,10 @@ template.type = form_template
 targetApp     = PARTNER
 ```
 
-Six visual OTP cells represent one logical six-digit binding:
+Logical OTP binding:
 
 ```text
-otp ← { $binding: "otp" }
+otp <- { $binding: "otp" }
 ```
 
 Verify request:
@@ -314,94 +230,60 @@ responseMode   = destination
 References:
 
 ```text
-challengeId ← latest successful Send OTP challenge
-phoneNumber ← { $context: "authFlow.phoneNumber" }
-otp         ← { $binding: "otp" }
-deviceId    ← { $context: "deviceId" }
+challengeId <- latest successful Send OTP challenge
+phoneNumber <- { $context: "authFlow.phoneNumber" }
+otp         <- { $binding: "otp" }
+deviceId    <- { $context: "deviceId" }
 ```
 
-The screen uses the generic engine action/reference model only.
+## 10. Resend OTP and cooldown
 
----
+Backend/Redis policy remains authoritative for resend eligibility.
 
-## 10. Resend OTP + cooldown boundary — frozen
-
-Redis/backend policy remains authoritative for whether another OTP request is allowed. Frontend UX state never bypasses server rate/cooldown enforcement.
-
-The screen does not render a visible countdown.
+No visible countdown is rendered.
 
 ```text
-COOLDOWN
-  Resend OTP visible
-  disabled / grey
-  hidden timer runs in frontend/runtime
-
-READY
-  Resend OTP visible
-  enabled / clickable
+COOLDOWN -> visible, disabled/grey, hidden timer
+READY    -> visible, enabled/clickable
 ```
 
-The initial successful Send OTP starts the hidden cooldown.
-
-A READY tap calls:
+READY tap uses the same Send OTP capability. UI disables immediately; on success frontend retains the newest challenge and restarts the hidden cooldown.
 
 ```text
-POST /api/v1/partner/auth/send_otp
+expiresInSeconds   = OTP/challenge validity
+resendAfterSeconds = resend eligibility cooldown
 ```
 
-using the active phone number and device ID.
+Do not derive resend cooldown from expiry.
 
-On click:
-
-```text
-1. disable Resend immediately
-2. execute Send OTP
-3. on success retain newest challengeId/response
-4. restart hidden cooldown
-5. enable when cooldown completes
-6. on failure expose request error and restore retryable state subject to backend policy
-```
-
-`expiresInSeconds` is OTP/challenge validity.
-
-If resend cooldown is backend-configurable it is represented independently, for example:
-
-```text
-resendAfterSeconds
-```
-
----
-
-## 11. Verify OTP security order — permanent
+## 11. Verify OTP security order
 
 ```text
 load phone/device-bound challenge
-→ reject invalid/consumed/expired/max-attempt challenge
-→ verify OTP hash
-→ record/invalidate failed attempt when needed
-→ atomic one-time consume
-→ only then create/update user/session
-→ only then issue credential family
-→ return authenticated destination
+-> reject invalid/consumed/expired/max-attempt challenge
+-> verify OTP hash
+-> record/invalidate failed attempt when required
+-> atomic one-time consume
+-> only then create/update user/session
+-> only then issue credentials
+-> return authenticated destination
 ```
 
 Required invariants:
 
 - exactly-once consume;
-- concurrent verification fail-closed;
+- concurrent verify fail-closed;
 - replay rejection;
-- no user/session/token issuance before successful consume;
-- phone/device binding preserved;
+- no user/session/token before successful consume;
+- phone/device binding;
 - bounded attempts;
-- TTL/expiry preserved.
+- TTL/expiry.
 
-SDUI changes must not modify this ordering.
+SDUI work must not alter this ordering.
 
----
+## 12. Redis persistence
 
-## 12. Redis OTP persistence — permanent
-
-Production persistence:
+Production persistence is exactly:
 
 ```text
 Identity IOtpChallengeRepository
@@ -414,23 +296,19 @@ shared singleton redisClient
 Required:
 
 - one root Redis client;
-- cache and OTP adapter use shared infrastructure;
 - OTP hash only;
-- resend cooldown;
-- bounded rate limit;
+- resend cooldown/rate policy;
 - atomic create/rate-limit;
 - atomic failed-attempt update;
 - atomic exactly-once consume;
 - provider failure invalidates challenge;
 - no production memory fallback;
 - no Prisma OTP fallback;
-- no OTP dual write.
+- no dual write.
 
-Test-only deterministic in-memory composition is allowed only at executable test boundaries.
+Test-only deterministic in-memory composition is allowed only at test boundaries.
 
----
-
-## 13. Dashboard destination — frozen
+## 13. Dashboard destination
 
 ```text
 screenId       = partner_dashboard
@@ -441,103 +319,55 @@ method         = GET
 authentication = SESSION
 ```
 
-The Dashboard screen document must conform to canonical engine contracts and validation.
+## 14. SESSION errors
 
----
-
-## 14. SESSION error semantics — frozen
-
-Missing/invalid credentials for SESSION routes produce safe canonical auth responses:
+Missing/invalid credentials for SESSION routes produce:
 
 ```text
 401 UNAUTHORIZED
 403 FORBIDDEN
 ```
 
-Transport-owned JWT/auth failures never become 500 responses and never expose internal credential/plugin detail.
+They do not become 500 responses and do not expose internal auth/plugin detail.
 
----
+## 15. Transient auth-flow state
 
-## 15. Frontend transient auth-flow state
-
-After successful Send OTP and before OTP destination execution:
+After successful Send OTP retain:
 
 ```text
-authFlow.phoneNumber = resolved Send OTP request phoneNumber
-latestSuccessfulSendOtpResponse = successful Send OTP response envelope
-activeChallengeId = latest successful Send OTP challengeId
+authFlow.phoneNumber
+latestSuccessfulSendOtpResponse
+activeChallengeId = newest successful challenge
 resendEnabled = false
 hidden resend cooldown = running
 ```
 
-After every successful resend, the newest successful challenge replaces the previous active challenge.
+Clear on successful Verify OTP, abandoned flow, logout/reset or new auth flow. OTP plaintext never becomes persistent application state.
 
-Clear state on successful Verify OTP, abandoned flow, logout/reset or new auth flow.
+## 16. Defaults/theme boundary
 
-OTP plaintext never becomes reusable persistent application state.
+Screen composers specify only values that differ from NodeDefinition defaults.
 
----
+Every screen starts from `DEFAULT_SDUI_THEME`. Genuine theme differences use scoped `setTheme($ => ...)`. Raw object-style theme authoring is not part of the current frozen composer contract.
 
-## 16. Canonical property/default boundary
+## 17. Focused verification
 
-Partner Auth screen source follows the same direct setter model as every engine screen:
-
-```text
-NodeDefinition.defaults
-        +
-explicit set<Property>() overrides/additions
-        ↓
-deterministic merge
-        ↓
-strict property validation
-        ↓
-canonical serialized properties
-```
-
-Screen composers specify only intentional overrides and instance-specific values.
-
-Generic rich text/inline spans belong to the reusable `text` element contract. Generic enabled/disabled presentation belongs to reusable behavior/state contracts. Neither becomes Partner-specific.
-
----
-
-## 17. Required verification
-
-Focused proof must include:
+Must prove:
 
 ```text
-guest Bootstrap → Login
-Login → Send OTP
-Send OTP → OTP Destination tpl_P6X8N3
-OTP screen identity + hierarchy
-Verify OTP → Dashboard Destination
-unauthenticated Dashboard fetch → 401
-successful authenticated Dashboard fetch → 200
+guest Bootstrap -> Login
+Login -> Send OTP
+Send OTP -> OTP Destination tpl_P6X8N3
+OTP screen identity/hierarchy
+Verify OTP -> Dashboard Destination
+unauthenticated Dashboard fetch -> 401
+authenticated Dashboard fetch -> 200
 ```
 
-Security proof must include:
+Security proof includes hash-at-rest, expiry, attempt limits, phone/device binding, resend policy, atomic consume, replay/concurrency rejection and Redis-only production persistence.
 
-- OTP hash-at-rest;
-- expiry;
-- attempt limits;
-- phone/device binding;
-- resend rate/cooldown policy;
-- atomic one-time consume;
-- replay rejection;
-- concurrent verify fail-closed;
-- no user/session/token creation before successful consume;
-- Redis-only production OTP persistence.
-
-SDUI proof must include:
-
-- legal hierarchy/XOR rules;
-- unique concrete IDs;
-- correct type-specific creation serialization;
-- direct setter isolation;
-- canonical action/reference serialization;
-- no duplicate screen-composition owner.
-
----
+SDUI proof includes legal hierarchy/XOR, unique IDs, real registered typed creation methods, `stack_group + horizontal orientation` where needed, direct setter isolation/chaining, action/reference serialization and one screen-composition owner.
 
 ## 18. Frozen final statement
 
-> **Partner Auth security remains Identity-owned and Redis-backed, while Partner Login/OTP presentation remains exclusively SDUI-engine-owned. Login and OTP use the canonical Screen → Template → Component → optional Section → optional Group → Element hierarchy, type-specific creation methods, `$` as the current lexical node and direct `set<Property>()` configuration. The authoring syntax never changes OTP security ordering, Redis persistence, Destination identity, generic action/reference behavior or canonical wire JSON.**
+> **Partner Auth security remains Identity-owned and Redis-backed. Partner Login/OTP presentation remains exclusively SDUI-engine-owned. The current authoring DSL mirrors only registered NodeDefinitions; horizontal rows use `stackGroup(...).setOrientation('horizontal')`. The DSL never changes OTP security ordering, Redis persistence, Destination identity, generic action/reference behavior or canonical wire JSON.**

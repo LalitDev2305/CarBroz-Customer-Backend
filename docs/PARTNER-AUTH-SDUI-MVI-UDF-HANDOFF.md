@@ -1,17 +1,8 @@
 # Partner Auth + SDUI Backend → Frontend MVI/UDF Handoff
 
 > **Status:** FROZEN INTEGRATION CONTRACT
->
-> This document defines the backend/frontend boundary only. It does not prescribe frontend class names and does not move reducer, Store, ViewModel, navigation-state or rendering ownership into the backend.
 
-Canonical related documents:
-
-- `sdui/README.md`
-- `sdui/SDUI-COMPOSE-CONTRACT-IMPLEMENTATION-PLAN.md`
-- `sdui/PARTNER-AUTH-SDUI-CONTRACT.md`
-- `sdui/engine/src/core/Action.ts` and canonical engine action/reference tests
-
----
+This document defines the backend/frontend boundary only. Backend SDUI authoring syntax is not a frontend runtime API.
 
 ## 1. Ownership boundary
 
@@ -23,32 +14,24 @@ Backend owns:
 - canonical response envelopes;
 - canonical Destination values;
 - canonical SDUI Screen documents;
-- generic SDUI hierarchy/property/action/reference vocabulary.
+- generic hierarchy/property/action/reference vocabulary.
 
 Frontend owns:
 
-- MVI intents/actions;
-- immutable UI state;
-- reducer/store lifecycle;
-- one-way state updates;
-- runtime binding values;
-- approved runtime/context values;
-- latest successful action-response context where required;
+- MVI/UDF intents and immutable UI state;
+- runtime binding/context values;
+- retained successful action-response context where required;
 - generic SDUI action execution;
 - navigation/back-stack effects;
 - local semantic state overlays;
 - hidden resend cooldown execution;
-- destination fetch/identity verification;
+- destination fetch and identity verification;
 - loading/error presentation;
 - platform URI/security handling.
 
-The backend never requires a frontend-specific ViewModel, reducer, Store implementation or mutable client-state class.
-
----
-
 ## 2. Canonical API envelope
 
-Successful response:
+Success:
 
 ```json
 {
@@ -60,13 +43,9 @@ Successful response:
 }
 ```
 
-Errors use the same top-level shape with HTTP/body status parity, typed `code`, safe `message`, `data: null` and optional `traceId`.
+Errors preserve HTTP/body status parity, typed `code`, safe `message`, `data: null` and optional `traceId`.
 
-Frontend logic must not depend on parsing human-readable error messages.
-
----
-
-## 3. Canonical Destination
+## 3. Destination
 
 ```text
 screenId
@@ -77,8 +56,6 @@ method
 authentication = NONE | SESSION
 ```
 
-The runtime must not derive a route from `screenId`, `templateId` or `templateType`.
-
 After fetch:
 
 ```text
@@ -87,38 +64,14 @@ destination.templateId   == loaded.template.id
 destination.templateType == loaded.template.type
 ```
 
-Mismatch is a safe navigation/render failure.
+The runtime never derives a route from IDs.
 
-Concrete Template/Component/Section/Group/Element IDs are unique instance identities. Reusable UI behavior comes from node `type`, canonical properties, generic actions and composition patterns.
-
----
-
-## 4. Canonical screen hierarchy
-
-Frontend consumes one of the legal canonical branches:
+## 4. Canonical hierarchy consumed by frontend
 
 ```text
-Screen
-  → Template
-      → Component
-          → Element
-```
-
-```text
-Screen
-  → Template
-      → Component
-          → Section
-              → Element
-```
-
-```text
-Screen
-  → Template
-      → Component
-          → Section
-              → Group
-                  → Element
+Screen -> Template -> Component -> Element
+Screen -> Template -> Component -> Section -> Element
+Screen -> Template -> Component -> Section -> Group -> Element
 ```
 
 Rules:
@@ -132,58 +85,31 @@ Group owns Elements only.
 Element is terminal.
 ```
 
-The backend authoring DSL does not change this wire hierarchy.
+## 5. Backend authoring vs wire contract
 
----
-
-## 5. Backend authoring vs frontend wire contract
-
-Backend screen composers use the frozen scoped DSL:
+Current backend authoring for a horizontal OTP field uses the registered `stack_group` type plus orientation:
 
 ```ts
 $.formTemplate('tpl_P6X8N3', $ =>
   $.stackComponent('otp_content', $ =>
     $.stackSection('otp_field_section', $ =>
-      $.rowGroup('otp_fields_group', $ =>
-        $.inputElement('otp_code_input', $ =>
-          $.setBinding('otp')
-           .setKeyboardType('number')
-        )
+      $.stackGroup('otp_fields_group', $ =>
+        $.setOrientation('horizontal')
+         .inputElement('otp_code_input', $ =>
+           $.setBinding('otp')
+            .setKeyboardType('number')
+         )
       )
     )
   )
 );
 ```
 
-This authoring syntax is backend-only.
+The frontend does not execute `$`, builder methods or `set<Property>()`. It receives canonical serialized nodes with `id`, `type`, resolved `properties`, actions/bindings and legal child collections.
 
-The frontend receives the canonical serialized JSON with node `id`, `type`, resolved `properties` and legal child collections. It does not execute backend builder methods and does not need to understand `$` or `set<Property>()` syntax.
+## 6. Generic actions
 
----
-
-## 6. Generic action execution model
-
-Backend documents use generic event-keyed actions. The frontend executes them through generic isolated handlers/strategies, conceptually:
-
-```text
-ActionExecutor
-  ├── RequestActionHandler
-  ├── NavigateActionHandler
-  ├── PresentActionHandler
-  ├── DismissActionHandler
-  ├── StateActionHandler
-  ├── ExternalUriActionHandler
-  └── SequenceActionHandler
-```
-
-Required behavior:
-
-- action execution is generic;
-- no screen-name switch exists in the Action Engine;
-- unsupported action types fail according to compatibility policy;
-- adding a new generic action type does not modify unrelated handlers/screens.
-
-Frozen vocabulary:
+Frozen action vocabulary:
 
 ```text
 request
@@ -197,11 +123,7 @@ sequence
 
 No OTP-specific backend action type is permitted.
 
----
-
-## 7. Generic event model
-
-Actions may be attached to events such as:
+Actions may bind generic events such as:
 
 ```text
 onClick
@@ -211,20 +133,7 @@ onFocus
 onBlur
 ```
 
-Backend authoring uses direct setters such as:
-
-```ts
-$.setOnClick(...)
-$.setOnLongClick(...)
-```
-
-Frontend executes an event only when the rendered element supports it according to the compatible SDUI definition/runtime contract.
-
-Product business meaning must not be encoded into event names.
-
----
-
-## 8. Generic value-reference vocabulary
+## 7. Generic value references
 
 Exactly:
 
@@ -244,44 +153,30 @@ $response  retained successful action-response context
 $literal   explicit literal
 ```
 
-References are lookups, not executable expressions.
+## 8. Resolved properties/defaults
 
----
-
-## 9. Property/default handling boundary
-
-Backend SDUI documents contain **resolved canonical properties**.
-
-Backend engine owns:
+Backend already resolves:
 
 ```text
 NodeDefinition.defaults
-+ explicit set<Property>() overrides/additions
++ explicit screen overrides
 + strict validation
-→ canonical serialized properties
+-> canonical serialized properties
 ```
 
-Frontend must not invent missing backend defaults to make a malformed document renderable.
+Frontend must not invent missing backend defaults to repair malformed documents.
 
-Backend internal property organization is not a required frontend wire shape. The frontend consumes only the canonical serialized `properties` contract.
-
-Unknown or invalid properties are rejected by backend validation rather than silently repaired.
-
----
-
-## 10. Partner startup
+## 9. Partner startup
 
 Request:
 
 ```text
 GET /api/v1/partner/config/bootstrap
 x-carbroz-platform: ANDROID | IOS | DESKTOP
-x-carbroz-app-version: semantic application version
+x-carbroz-app-version: semantic version
 x-carbroz-build-number: non-negative integer
-Authorization: Bearer <access token> // only when a local session exists
+Authorization: Bearer <access token> // only when local session exists
 ```
-
-If a bearer token is supplied it must be valid. Backend must not silently downgrade an invalid authenticated client into guest startup.
 
 Guest Destination:
 
@@ -305,9 +200,9 @@ method         = GET
 authentication = SESSION
 ```
 
----
+If a bearer token is supplied it must be valid; backend does not silently downgrade invalid auth to guest.
 
-## 11. Login → Send OTP
+## 10. Login → Send OTP
 
 ```text
 POST /api/v1/partner/auth/send_otp
@@ -316,23 +211,14 @@ validate       = true
 responseMode   = destination
 ```
 
-Canonical references:
+References:
 
 ```text
-phoneNumber ← { $binding: "mobileNumber" }
-deviceId    ← { $context: "deviceId" }
+phoneNumber <- { $binding: "mobileNumber" }
+deviceId    <- { $context: "deviceId" }
 ```
 
-Resolved body:
-
-```json
-{
-  "phoneNumber": "<phone>",
-  "deviceId": "<stable client device id>"
-}
-```
-
-Successful Send OTP data includes at minimum:
+Successful response includes at minimum:
 
 ```text
 message
@@ -341,8 +227,6 @@ expiresInSeconds
 isNewUser
 nextScreen
 ```
-
-A dedicated resend cooldown value such as `resendAfterSeconds` may be supplied by backend/configuration. It is distinct from OTP validity.
 
 `nextScreen`:
 
@@ -357,40 +241,23 @@ authentication = NONE
 
 OTP plaintext/hash is never returned.
 
----
-
-## 12. Transient auth-flow state before and during OTP
+## 11. Transient auth-flow state
 
 After successful Send OTP retain:
 
 ```text
-authFlow.phoneNumber = resolved request body phoneNumber
-latestSuccessfulSendOtpResponse = successful response envelope
+authFlow.phoneNumber
+latestSuccessfulSendOtpResponse
 activeChallengeId = latest successful challengeId
 resendEnabled = false
 hidden resend cooldown = running
 ```
 
-OTP references:
+Every successful resend replaces the active challenge with the newest successful challenge.
 
-```text
-challengeId ← latest successful challenge
-phoneNumber ← { $context: "authFlow.phoneNumber" }
-otp         ← { $binding: "otp" }
-deviceId    ← { $context: "deviceId" }
-```
+Clear state after successful Verify OTP, abandoned auth flow, logout/reset or a new auth flow.
 
-Every successful resend replaces the previous active challenge with the newest successful challenge.
-
-Clear transient auth-flow state after successful Verify OTP, abandoned auth flow, logout/reset or a new authentication flow.
-
-OTP plaintext must not be retained as reusable persistent application state.
-
----
-
-## 13. OTP screen + aggregate OTP binding
-
-Frozen OTP identity:
+## 12. OTP screen and binding
 
 ```text
 screenId      = partner_otp
@@ -399,25 +266,21 @@ template.type = form_template
 targetApp     = PARTNER
 ```
 
-The OTP screen uses two primary stack components: brand/header content and OTP interaction content. Every concrete OTP node ID is unique.
-
-Six visual OTP cells represent one logical six-digit value with binding key:
+Six visual cells represent one logical binding:
 
 ```text
 otp
 ```
 
-Request-facing value:
+Request value:
 
 ```text
 { $binding: "otp" }
 ```
 
-No OTP-specific renderer/action contract is allowed.
+The wire Group remains `type = stack_group` with horizontal orientation; no `row_group` runtime type is part of the current contract.
 
----
-
-## 14. OTP → Verify OTP
+## 13. Verify OTP
 
 ```text
 POST /api/v1/partner/auth/verify_otp
@@ -437,100 +300,51 @@ Resolved body:
 }
 ```
 
-Verify OTP success contains credentials/user data plus the authenticated Dashboard Destination.
+A local session is never synthesized before backend verification succeeds.
 
-A local session must never be synthesized before backend verification succeeds.
+## 14. Resend OTP
 
----
-
-## 15. Resend OTP + hidden cooldown
-
-Frozen UX has no visible countdown.
+No visible countdown.
 
 ```text
-COOLDOWN
-  Resend OTP visible
-  disabled / grey
-  not clickable
-  timer hidden
-
-READY
-  Resend OTP visible
-  enabled
-  clickable
+COOLDOWN -> visible, disabled/grey, timer hidden
+READY    -> visible, enabled/clickable
 ```
 
-Initial successful Login → Send OTP starts the hidden cooldown.
-
-When READY and tapped:
+On READY tap:
 
 ```text
 1. disable immediately
 2. POST /api/v1/partner/auth/send_otp
 3. resolve phoneNumber + deviceId
-4. on success retain newest challengeId/response
+4. on success retain newest challenge
 5. restart hidden cooldown
 6. enable when cooldown completes
 7. on failure expose/reduce error and restore retryable state where allowed
 ```
 
-`expiresInSeconds` is challenge validity, not resend cooldown.
+`expiresInSeconds` is OTP validity, not resend cooldown. A separate `resendAfterSeconds` may define cooldown.
 
----
-
-## 16. `responseMode: destination`
-
-Runtime sequence:
+## 15. responseMode=destination
 
 ```text
-validate applicable inputs/bindings
-→ resolve references
-→ execute request
-→ failure: reduce/expose error; do not navigate
-→ success: preserve required flow state/response
-→ validate Destination
-→ satisfy SESSION credential requirement if needed
-→ fetch destination screen
-→ verify loaded identity
-→ emit navigation/render result
+validate inputs/bindings
+-> resolve references
+-> execute request
+-> failure: reduce/expose error, do not navigate
+-> success: preserve required flow context/response
+-> validate Destination
+-> satisfy SESSION credential requirement when needed
+-> fetch destination
+-> verify loaded identity
+-> navigate/render
 ```
 
-Do not execute a separate independent `navigate` action after a request when navigation depends on request success.
+Do not execute an independent `navigate` after a request when navigation depends on that request succeeding.
 
----
+## 16. Semantic local state
 
-## 17. Independent navigation
-
-`navigate` is used when navigation does not depend on a preceding business mutation.
-
-Runtime follows the supplied Destination, fetches the screen and verifies identity.
-
----
-
-## 18. Present / dismiss
-
-Generic presentation modes may include:
-
-```text
-dialog
-bottom_sheet
-popup
-```
-
-`present` opens a target presentation. `dismiss` closes the active or target presentation.
-
----
-
-## 19. Semantic local state
-
-Generic state operations:
-
-```text
-set
-toggle
-```
-
-Allowed semantic properties begin with:
+Generic state operations are product-neutral and may target semantic values such as:
 
 ```text
 visible
@@ -542,117 +356,51 @@ loading
 value
 ```
 
-Runtime state overlay does not mutate accepted structural SDUI hierarchy.
+OTP resend uses generic `enabled` state; the runtime does not structurally mutate the accepted SDUI tree.
 
-OTP Resend uses generic `enabled` state.
+## 17. Rich text / external URI
 
----
+Login/OTP text may use generic styled/actionable spans for titles and legal links. External URI actions remain subject to platform/security allow-list policy.
 
-## 20. Rich text / legal inline actions
-
-Login and OTP require generic styled/actionable spans.
-
-Required cases include:
-
-```text
-Welcome Partner!
-Verify Your Number
-Terms & Conditions
-Privacy Policy
-```
-
-Inline actions use generic actions such as `external_uri`.
-
----
-
-## 21. External URI
-
-External URI actions use platform/security allow-list policy before opening a destination.
-
-Backend does not bypass platform security by sending an URI action.
-
----
-
-## 22. Sequence
-
-Sequence executes children in declared order only where ordered independent generic actions are genuinely required.
-
-Do not use Sequence for request-success-dependent navigation.
-
----
-
-## 23. Authenticated Dashboard retrieval
+## 18. Dashboard retrieval
 
 ```text
 GET /api/v1/partner/sdui/registry/partner_dashboard
 Authorization: Bearer <access token>
 ```
 
-Route is SESSION-protected and Partner-scoped.
+Loaded screen identity must equal Destination identity.
 
-Loaded parity:
+## 19. MVI/UDF mapping
 
-```text
-loaded.screenId      == destination.screenId
-loaded.template.id   == destination.templateId
-loaded.template.type == destination.templateType
-```
-
----
-
-## 24. MVI/UDF mapping
-
-Recommended semantic flow:
+Conceptual flow:
 
 ```text
 User Intent
-→ Store accepts intent
-→ renderer/runtime emits generic SDUI event
-→ ActionEngine resolves references
-→ generic handler executes action
-→ transport envelope parsed
-→ reducer produces immutable state
-→ transient context/response retained when required
-→ Destination emitted as one-time effect where applicable
-→ screen fetched
-→ identity validated
-→ renderer consumes immutable screen document
+-> Store
+-> generic rendered SDUI event
+-> ActionEngine resolves references
+-> generic action handler
+-> transport response
+-> reducer immutable state
+-> retain transient response/context when required
+-> Destination effect
+-> screen fetch
+-> identity verification
+-> render immutable screen document
 ```
 
-Possible frontend auth semantics:
+Frontend feature semantics such as `ResendOtpRequested` or `VerifyOtpSucceeded` are frontend semantics, not backend SDUI action types.
 
-```text
-EnterPhone / SubmitPhone
-SendOtpSucceeded
-SendOtpFailed
-EnterOtp / SubmitOtp
-ResendOtpRequested / ResendOtpSucceeded / ResendOtpFailed
-ResendCooldownCompleted
-VerifyOtpSucceeded
-VerifyOtpFailed
-DestinationReceived
-ScreenLoaded
-ScreenLoadFailed
-```
+## 20. Security/error handling
 
-These are frontend feature semantics, not backend SDUI action types.
-
----
-
-## 25. Credential and error handling
-
-- Access token is sent as `Authorization: Bearer <token>` for SESSION destinations.
+- Access token uses `Authorization: Bearer <token>` for SESSION destinations.
 - Refresh token belongs in secure storage.
 - Never log OTP, OTP hash, access token or refresh token.
 - Replay/concurrent losing OTP verification remains an auth failure.
-- Map typed backend error `code` and preserve `traceId` for safe diagnostics.
-- Frontend timers/retry UI must never bypass backend authority.
+- Frontend retry/timer UI never bypasses backend authority.
 
----
-
-## 26. Contract parity rules
-
-Must remain true:
+## 21. Contract parity
 
 ```text
 SendOtp.nextScreen   == Partner OTP identity tpl_P6X8N3
@@ -660,21 +408,15 @@ VerifyOtp.nextScreen == authenticated Bootstrap destination
 VerifyOtp.nextScreen == Partner Dashboard identity
 ```
 
-Canonical navigation is Destination-based and no alternate `{ template, api }` shape is part of this contract.
+Canonical navigation is Destination-based.
 
----
-
-## 27. Change-management rule
-
-Future SDUI/runtime changes follow:
+## 22. Change rule
 
 ```text
 document contract first
-→ schema/type compatibility decision
-→ backend implementation
-→ frontend generic handler support if executable
-→ contract/integration tests
-→ production usage
+-> schema/type compatibility decision
+-> backend implementation
+-> frontend generic handler support if required
+-> contract/integration tests
+-> production usage
 ```
-
-Reuse/extend generic Destination, Screen, hierarchy, action, reference, property and envelope contracts before introducing any new mechanism.
