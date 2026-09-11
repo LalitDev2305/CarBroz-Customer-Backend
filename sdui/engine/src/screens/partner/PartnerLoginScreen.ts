@@ -11,182 +11,181 @@ export class PartnerLoginScreen implements ScreenComposer {
   constructor(private readonly builder = new SduiBuilder()) {}
 
   build(_context: ScreenContext): SduiScreen {
-    return this.builder.screen(
-      {
-        id: this.screenId,
-        targetApp: this.targetApp,
-      },
-      screen => {
-        screen.template('stack_template', 'tpl_7K2M9Q', template => {
-          template.base()
-            .spacing(24)
-            .horizontalAlignment('center')
-            .fillMaxSize()
-            .padding({ start: 24, top: 20, end: 24, bottom: 20 });
-
-          template.component('stack_component', 'brand_content', brand => {
-            brand.base()
-              .spacing(6)
-              .horizontalAlignment('center')
-              .fillMaxWidth();
-
-            brand.image('brand_logo', image => {
-              image.content().url('/images/carbroz_logo.png');
-              image.base().width(120).height(96);
-            });
-
-            brand.text('brand_name', text => {
-              text.content().text('CarBroz');
-              text.style().fontSize(44).fontWeight(700).color('#101522').textAlign('center');
-            });
-
-            brand.text('partner_label', text => {
-              text.content()
-                .text('PARTNER')
-                .leading([{
-                  type: 'divider',
-                  properties: { orientation: 'horizontal', width: 36, thickness: 2, color: '#13B8B5' },
-                }])
-                .trailing([{
-                  type: 'divider',
-                  properties: { orientation: 'horizontal', width: 36, thickness: 2, color: '#13B8B5' },
-                }]);
-              text.style().fontSize(18).fontWeight(600).letterSpacing(4).color('#13B8B5').textAlign('center');
-            });
-
-            brand.text('brand_tagline', text => {
-              text.content().text('Premium Car Care At Your Doorstep');
-              text.style().fontSize(14).fontWeight(400).color('#6B7078').textAlign('center');
-            });
-
-            brand.text('welcome_title', text => {
-              text.content().spans([
-                { text: 'Welcome ' },
-                { text: 'Partner!', color: '#13B8B5' },
-              ]);
-              text.style().fontSize(32).fontWeight(700).color('#101522').textAlign('center');
-            });
-
-            brand.text('welcome_subtitle', text => {
-              text.content().text('Login to continue your journey');
-              text.style().fontSize(16).fontWeight(400).color('#6B7078').textAlign('center');
-            });
-          });
-
-          template.component('stack_component', 'login_content', login => {
-            login.base().spacing(14).horizontalAlignment('center').fillMaxWidth();
-
-            login.section('stack_section', 'mobile_field_section', section => {
-              section.base().fillMaxWidth();
-
-              section.group('stack_group', 'mobile_field', group => {
-                group.base()
-                  .horizontal()
-                  .verticalAlignment('center')
-                  .spacing(12)
-                  .fillMaxWidth()
-                  .height(56)
-                  .padding({ start: 16, end: 16 });
-                group.style()
-                  .background({ color: '#FFFFFF' })
-                  .border({ width: 1, color: '#CCE0E3' })
-                  .shape({ type: 'roundedCorner', cornerRadius: 16 });
-
-                group.text('country_code', text => {
-                  text.content()
-                    .text('+91')
-                    .trailing([{
-                      type: 'divider',
-                      properties: { orientation: 'vertical', height: 24, thickness: 1, color: '#D4DEE1' },
-                    }]);
-                  text.style().fontSize(18).fontWeight(600).color('#101522');
-                });
-
-                group.input('mobile_number', input => {
-                  input.content().placeholder('98765 43210').maxLength(10);
-                  input.base().weight(1);
-                  input.behavior()
-                    .keyboardType('phone')
-                    .binding('mobileNumber')
-                    .validation({
-                      required: true,
-                      pattern: '^[6-9][0-9]{9}$',
-                      message: 'Enter a valid 10-digit mobile number',
-                    });
-                });
-              });
-            });
-
-            login.section('stack_section', 'action_section', section => {
-              section.base().spacing(12).horizontalAlignment('center').fillMaxWidth();
-
-              section.button('continue_button', button => {
-                button.content()
-                  .text('Continue')
-                  .trailing([{
-                    type: 'icon',
-                    properties: { name: 'arrow_forward', size: 22, color: '#FFFFFF' },
-                  }]);
-                button.base().fillMaxWidth().height(56);
-                button.style()
-                  .fontSize(18)
-                  .fontWeight(600)
-                  .textColor('#FFFFFF')
-                  .shape({ type: 'roundedCorner', cornerRadius: 16 })
-                  .background({
-                    type: 'linearGradient',
-                    angle: 90,
-                    colors: [
-                      { color: '#28CBC7', stop: 0 },
-                      { color: '#10B6B3', stop: 1 },
-                    ],
-                  });
-                button.behavior().onClick(action.request({
-                  method: 'POST',
-                  endpoint: '/api/v1/partner/auth/send_otp',
-                  authentication: 'NONE',
-                  validate: true,
-                  responseMode: 'destination',
-                  body: {
-                    phoneNumber: ref.binding('mobileNumber'),
-                    deviceId: ref.context('deviceId'),
-                  },
-                }));
-              });
-
-              section.text('legal_text', text => {
-                text.content().spans([
-                  { text: 'By continuing, you agree to our ' },
-                  {
-                    text: 'Terms & Conditions',
-                    color: '#13B8B5',
-                    underline: true,
-                    onClick: action.externalUri(ref.context('legal.termsUri')),
-                  },
-                  { text: ' and ' },
-                  {
-                    text: 'Privacy Policy',
-                    color: '#13B8B5',
-                    underline: true,
-                    onClick: action.externalUri(ref.context('legal.privacyUri')),
-                  },
-                ]);
-                text.base().fillMaxWidth();
-                text.style().fontSize(13).fontWeight(400).lineHeight(19).color('#6B7078').textAlign('center');
-              });
-            });
-          });
-
-          template.component('stack_component', 'hero_content', hero => {
-            hero.base().horizontalAlignment('center').fillMaxWidth();
-
-            hero.image('hero_car', image => {
-              image.content().url('/images/img_splash_car.png');
-              image.base().fillMaxWidth().maxWidth(420);
-            });
-          });
-        });
-      },
+    return this.builder.screen(this.screenId, this.targetApp, $ =>
+      $.stackTemplate('tpl_7K2M9Q', $ =>
+        $.setSpacing(24)
+          .setHorizontalAlignment('center')
+          .setFillMaxSize()
+          .setPadding({ start: 24, top: 20, end: 24, bottom: 20 })
+          .stackComponent('brand_content', $ =>
+            $.setSpacing(6)
+              .setHorizontalAlignment('center')
+              .setFillMaxWidth()
+              .imageElement('brand_logo', $ =>
+                $.setUrl('/images/carbroz_logo.png')
+                  .setWidth(120)
+                  .setHeight(96)
+              )
+              .textElement('brand_name', $ =>
+                $.setText('CarBroz')
+                  .setFontSize(44)
+                  .setFontWeight(700)
+                  .setColor('#101522')
+                  .setTextAlign('center')
+              )
+              .textElement('partner_label', $ =>
+                $.setText('PARTNER')
+                  .setLeading({
+                    type: 'divider',
+                    properties: { orientation: 'horizontal', width: 36, thickness: 2, color: '#13B8B5' },
+                  })
+                  .setTrailing({
+                    type: 'divider',
+                    properties: { orientation: 'horizontal', width: 36, thickness: 2, color: '#13B8B5' },
+                  })
+                  .setFontSize(18)
+                  .setFontWeight(600)
+                  .setLetterSpacing(4)
+                  .setColor('#13B8B5')
+                  .setTextAlign('center')
+              )
+              .textElement('brand_tagline', $ =>
+                $.setText('Premium Car Care At Your Doorstep')
+                  .setFontSize(14)
+                  .setFontWeight(400)
+                  .setColor('#6B7078')
+                  .setTextAlign('center')
+              )
+              .textElement('welcome_title', $ =>
+                $.setSpans([
+                  { text: 'Welcome ' },
+                  { text: 'Partner!', color: '#13B8B5' },
+                ])
+                  .setFontSize(32)
+                  .setFontWeight(700)
+                  .setColor('#101522')
+                  .setTextAlign('center')
+              )
+              .textElement('welcome_subtitle', $ =>
+                $.setText('Login to continue your journey')
+                  .setFontSize(16)
+                  .setFontWeight(400)
+                  .setColor('#6B7078')
+                  .setTextAlign('center')
+              )
+          )
+          .stackComponent('login_content', $ =>
+            $.setSpacing(14)
+              .setHorizontalAlignment('center')
+              .setFillMaxWidth()
+              .stackSection('mobile_field_section', $ =>
+                $.setFillMaxWidth()
+                  .stackGroup('mobile_field', $ =>
+                    $.setOrientation('horizontal')
+                      .setVerticalAlignment('center')
+                      .setSpacing(12)
+                      .setFillMaxWidth()
+                      .setHeight(56)
+                      .setPadding({ start: 16, end: 16 })
+                      .setBackground({ color: '#FFFFFF' })
+                      .setBorder({ width: 1, color: '#CCE0E3' })
+                      .setShape({ type: 'roundedCorner', cornerRadius: 16 })
+                      .textElement('country_code', $ =>
+                        $.setText('+91')
+                          .setTrailing({
+                            type: 'divider',
+                            properties: { orientation: 'vertical', height: 24, thickness: 1, color: '#D4DEE1' },
+                          })
+                          .setFontSize(18)
+                          .setFontWeight(600)
+                          .setColor('#101522')
+                      )
+                      .inputElement('mobile_number', $ =>
+                        $.setPlaceholder('98765 43210')
+                          .setMaxLength(10)
+                          .setWeight(1)
+                          .setKeyboardType('phone')
+                          .setBinding('mobileNumber')
+                          .setValidation({
+                            required: true,
+                            pattern: '^[6-9][0-9]{9}$',
+                            message: 'Enter a valid 10-digit mobile number',
+                          })
+                      )
+                  )
+              )
+              .stackSection('action_section', $ =>
+                $.setSpacing(12)
+                  .setHorizontalAlignment('center')
+                  .setFillMaxWidth()
+                  .buttonElement('continue_button', $ =>
+                    $.setText('Continue')
+                      .setTrailing({
+                        type: 'icon',
+                        properties: { name: 'arrow_forward', size: 22, color: '#FFFFFF' },
+                      })
+                      .setFillMaxWidth()
+                      .setHeight(56)
+                      .setFontSize(18)
+                      .setFontWeight(600)
+                      .setTextColor('#FFFFFF')
+                      .setShape({ type: 'roundedCorner', cornerRadius: 16 })
+                      .setBackground({
+                        type: 'linearGradient',
+                        angle: 90,
+                        colors: [
+                          { color: '#28CBC7', stop: 0 },
+                          { color: '#10B6B3', stop: 1 },
+                        ],
+                      })
+                      .setOnClick(action.request({
+                        method: 'POST',
+                        endpoint: '/api/v1/partner/auth/send_otp',
+                        authentication: 'NONE',
+                        validate: true,
+                        responseMode: 'destination',
+                        body: {
+                          phoneNumber: ref.binding('mobileNumber'),
+                          deviceId: ref.context('deviceId'),
+                        },
+                      }))
+                  )
+                  .textElement('legal_text', $ =>
+                    $.setSpans([
+                      { text: 'By continuing, you agree to our ' },
+                      {
+                        text: 'Terms & Conditions',
+                        color: '#13B8B5',
+                        underline: true,
+                        onClick: action.externalUri(ref.context('legal.termsUri')),
+                      },
+                      { text: ' and ' },
+                      {
+                        text: 'Privacy Policy',
+                        color: '#13B8B5',
+                        underline: true,
+                        onClick: action.externalUri(ref.context('legal.privacyUri')),
+                      },
+                    ])
+                      .setFillMaxWidth()
+                      .setFontSize(13)
+                      .setFontWeight(400)
+                      .setLineHeight(19)
+                      .setColor('#6B7078')
+                      .setTextAlign('center')
+                  )
+              )
+          )
+          .stackComponent('hero_content', $ =>
+            $.setHorizontalAlignment('center')
+              .setFillMaxWidth()
+              .imageElement('hero_car', $ =>
+                $.setUrl('/images/img_splash_car.png')
+                  .setFillMaxWidth()
+                  .setMaxWidth(420)
+              )
+          )
+      )
     );
   }
 }
