@@ -151,6 +151,13 @@ Login and OTP must use this same canonical hierarchy.
 
 Partner Login and OTP use the engine-wide scoped setter DSL.
 
+Screen creation is direct and mandatory identity is supplied once:
+
+```ts
+sdui.screen('partner_login', 'PARTNER', $ => { ... });
+sdui.screen('partner_otp', 'PARTNER', $ => { ... });
+```
+
 Type-specific creation methods encode reusable node type and accept the concrete ID once:
 
 ```ts
@@ -164,7 +171,7 @@ $.inputElement('otp_code_input', $ => { ... });
 $.buttonElement('otp_verify_button', $ => { ... });
 ```
 
-`$` always means the current node in that lexical scope.
+`$` always means the current lexical scope.
 
 Properties are set directly:
 
@@ -364,83 +371,78 @@ The first OTP component mirrors the Login brand/header composition pattern while
 Conceptually:
 
 ```ts
-return sdui.screen(
-  {
-    id: 'partner_otp',
-    targetApp: 'PARTNER',
-  },
-  $ =>
-    $.formTemplate('tpl_P6X8N3', $ =>
-      $.setSpacing(24)
-       .setHorizontalAlignment('center')
-       .setFillMaxSize()
-       .setPadding({ start: 24, top: 20, end: 24, bottom: 20 })
-       .stackComponent('otp_brand_content', $ =>
-         $.setSpacing(6)
-          .setHorizontalAlignment('center')
-          .imageElement('otp_brand_logo', $ =>
-            $.setUrl('/images/carbroz_logo.png')
-             .setWidth(120)
-             .setHeight(96)
-          )
-          .textElement('otp_brand_name', $ =>
-            $.setText('CarBroz')
-             .setFontSize(44)
-             .setFontWeight(700)
-             .setTextAlign('center')
-          )
-       )
-       .stackComponent('otp_content', $ =>
-         $.setSpacing(18)
-          .stackSection('otp_field_section', $ =>
-            $.rowGroup('otp_fields_group', $ =>
-              $.inputElement('otp_code_input', $ =>
-                $.setMaxLength(6)
-                 .setKeyboardType('number')
-                 .setBinding('otp')
-                 .setValidation({
-                   required: true,
-                   pattern: '^[0-9]{6}$',
-                   message: 'Enter the 6-digit OTP',
-                 })
-              )
+return sdui.screen('partner_otp', 'PARTNER', $ =>
+  $.formTemplate('tpl_P6X8N3', $ =>
+    $.setSpacing(24)
+     .setHorizontalAlignment('center')
+     .setFillMaxSize()
+     .setPadding({ start: 24, top: 20, end: 24, bottom: 20 })
+     .stackComponent('otp_brand_content', $ =>
+       $.setSpacing(6)
+        .setHorizontalAlignment('center')
+        .imageElement('otp_brand_logo', $ =>
+          $.setUrl('/images/carbroz_logo.png')
+           .setWidth(120)
+           .setHeight(96)
+        )
+        .textElement('otp_brand_name', $ =>
+          $.setText('CarBroz')
+           .setFontSize(44)
+           .setFontWeight(700)
+           .setTextAlign('center')
+        )
+     )
+     .stackComponent('otp_content', $ =>
+       $.setSpacing(18)
+        .stackSection('otp_field_section', $ =>
+          $.rowGroup('otp_fields_group', $ =>
+            $.inputElement('otp_code_input', $ =>
+              $.setMaxLength(6)
+               .setKeyboardType('number')
+               .setBinding('otp')
+               .setValidation({
+                 required: true,
+                 pattern: '^[0-9]{6}$',
+                 message: 'Enter the 6-digit OTP',
+               })
             )
           )
-          .stackSection('otp_action_section', $ =>
-            $.textElement('otp_resend_text', $ =>
-              $.setText('Resend OTP')
-               .setEnabled(false)
-               .setOnClick(action.request({
-                 method: 'POST',
-                 endpoint: '/api/v1/partner/auth/send_otp',
-                 authentication: 'NONE',
-                 validate: false,
-                 responseMode: 'none',
-                 body: {
-                   phoneNumber: ref.context('authFlow.phoneNumber'),
-                   deviceId: ref.context('deviceId'),
-                 },
-               }))
-            )
-            .buttonElement('otp_verify_button', $ =>
-              $.setText('Verify & Continue')
-               .setOnClick(action.request({
-                 method: 'POST',
-                 endpoint: '/api/v1/partner/auth/verify_otp',
-                 authentication: 'NONE',
-                 validate: true,
-                 responseMode: 'destination',
-                 body: {
-                   challengeId: ref.response('data.challengeId'),
-                   phoneNumber: ref.context('authFlow.phoneNumber'),
-                   otp: ref.binding('otp'),
-                   deviceId: ref.context('deviceId'),
-                 },
-               }))
-            )
+        )
+        .stackSection('otp_action_section', $ =>
+          $.textElement('otp_resend_text', $ =>
+            $.setText('Resend OTP')
+             .setEnabled(false)
+             .setOnClick(action.request({
+               method: 'POST',
+               endpoint: '/api/v1/partner/auth/send_otp',
+               authentication: 'NONE',
+               validate: false,
+               responseMode: 'none',
+               body: {
+                 phoneNumber: ref.context('authFlow.phoneNumber'),
+                 deviceId: ref.context('deviceId'),
+               },
+             }))
           )
-       )
-    ),
+          .buttonElement('otp_verify_button', $ =>
+            $.setText('Verify & Continue')
+             .setOnClick(action.request({
+               method: 'POST',
+               endpoint: '/api/v1/partner/auth/verify_otp',
+               authentication: 'NONE',
+               validate: true,
+               responseMode: 'destination',
+               body: {
+                 challengeId: ref.response('data.challengeId'),
+                 phoneNumber: ref.context('authFlow.phoneNumber'),
+                 otp: ref.binding('otp'),
+                 deviceId: ref.context('deviceId'),
+               },
+             }))
+          )
+        )
+     )
+  )
 );
 ```
 
@@ -683,9 +685,20 @@ Login and OTP use the same engine-wide NodeDefinition/default rules.
 
 Screen composers set only values that differ from canonical node defaults.
 
-Theme is resolved from the engine-wide default screen theme. A screen may use `setTheme(...)` only for genuine screen-level differences.
+Every screen starts from the engine-owned `DEFAULT_SDUI_THEME`, so normal Login/OTP composition does not repeat theme values.
 
-One screen override never mutates another screen or global defaults.
+If a screen genuinely differs, theme uses the same scoped setter model:
+
+```ts
+$.setTheme($ =>
+  $.setStatusBar('default')
+   .setGradientAngle(90)
+);
+```
+
+The nested `$` is the current Theme scope and exposes only legal theme setters. The explicit theme values merge over `DEFAULT_SDUI_THEME`, then the complete resolved theme is strictly validated.
+
+One screen theme override never mutates another screen or global defaults. Raw object-style `setTheme({...})` and screen-specific theme wrappers are not part of the frozen Partner Auth authoring contract.
 
 ---
 
@@ -746,6 +759,9 @@ guest Bootstrap
 Also prove:
 
 - Login/OTP canonical screen identities;
+- `screen(screenId, targetApp, ...)` root identity output;
+- default theme emission when no Theme scope is opened;
+- scoped Theme override isolation when a screen differs;
 - unique concrete node IDs;
 - legal hierarchy/XOR rules;
 - type-specific creation methods serialize correct types;
@@ -760,4 +776,4 @@ Also prove:
 
 ## 22. Frozen final statement
 
-> **Partner Login and Partner OTP use the same canonical SDUI engine and the same explicit Screen → Template → Component → optional Section → optional Group → Element hierarchy. Type-specific creation methods encode reusable type; concrete node IDs are supplied once. Every nested callback uses `$` as the current node. Properties are authored directly with legal `set<Property>()` methods, including `setText`, `setSpacing`, `setPadding`, `setLeading`, `setTrailing`, `setBinding`, `setEnabled` and `setOnClick`. Setters return the current scope and child creation returns the parent scope after the child callback. The wire JSON, generic actions/references, Login/OTP destinations, OTP security behavior and Redis persistence remain canonical and independently validated.**
+> **Partner Login and Partner OTP use the same canonical SDUI engine and the same explicit Screen → Template → Component → optional Section → optional Group → Element hierarchy. Screen identity is authored directly through `sdui.screen(screenId, targetApp, $ => ...)`. Type-specific creation methods encode reusable type; concrete node IDs are supplied once. Every nested callback uses `$` as the current lexical scope. Node properties are authored directly with legal `set<Property>()` methods. Theme is defaulted globally and overridden only when needed through `setTheme($ => ...)`, whose nested Theme scope exposes only theme setters. Setters return the current scope and child creation returns the parent scope after the child callback. The wire JSON, generic actions/references, Login/OTP destinations, OTP security behavior and Redis persistence remain canonical and independently validated.**
