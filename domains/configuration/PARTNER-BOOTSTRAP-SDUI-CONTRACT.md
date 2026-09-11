@@ -24,7 +24,7 @@ Older `/api/v1/partner/bootstrap` examples are stale.
 {
   "screenId": "partner_login",
   "templateId": "tpl_7K2M9Q",
-  "templateType": "stack_template",
+  "templateType": "form_template",
   "endpoint": "/api/v1/partner/screen/auth_login",
   "method": "GET",
   "authentication": "NONE"
@@ -36,8 +36,10 @@ Fetched Login identity must remain:
 ```text
 screen.screenId      = partner_login
 screen.template.id   = tpl_7K2M9Q
-screen.template.type = stack_template
+screen.template.type = form_template
 ```
+
+Partner Login is a form screen because it accepts user input, validates it, and submits data. Input/submission screens use `form_template`.
 
 ## 4. Authenticated startup destination — IMPLEMENTED
 
