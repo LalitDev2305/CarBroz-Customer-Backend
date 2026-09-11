@@ -137,7 +137,7 @@ describe('Identity authentication use cases', () => {
       isNewUser: true,
       nextScreen: {
         screenId: 'partner_otp',
-        templateId: 'tpl_partner_otp_v1',
+        templateId: 'tpl_P6X8N3',
         templateType: 'form_template',
         endpoint: '/api/v1/partner/screen/auth_otp',
         method: 'GET',
