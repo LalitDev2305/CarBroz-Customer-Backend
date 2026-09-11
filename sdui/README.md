@@ -95,11 +95,11 @@ No unregistered `row_group`, `row_component`, `row_section`, icon element, divid
 
 ## 5. Screen root
 
-Frozen authoring:
+Frozen authoring for an input/submission screen:
 
 ```ts
 return sdui.screen('partner_login', 'PARTNER', $ =>
-  $.stackTemplate('tpl_7K2M9Q', $ => {
+  $.formTemplate('tpl_7K2M9Q', $ => {
     ...
   })
 );
@@ -160,7 +160,15 @@ $.setElement(type, id, $ => ...)
 
 They exist for registered definitions and extensibility. Normal screen composition prefers current typed methods.
 
-## 9. Theme
+## 9. Template usage rule
+
+`form_template` is the canonical template for screens whose primary interaction includes user input that is validated/submitted to send data, such as Login and OTP.
+
+`stack_template` remains available for non-form screens where the primary purpose is layout/content composition rather than form submission.
+
+This is a semantic screen-level choice; Elements and hierarchy rules remain unchanged.
+
+## 10. Theme
 
 Every screen starts from `DEFAULT_SDUI_THEME`. Normal screens do not repeat it.
 
@@ -175,7 +183,7 @@ $.setTheme($ =>
 
 Theme scope is typed and only exposes legal theme setters. Explicit overrides merge into the default and the complete result is strictly validated. Raw object-style `setTheme({...})` is not part of the frozen composer API.
 
-## 10. Defaults/property resolution
+## 11. Defaults/property resolution
 
 ```text
 NodeDefinition.defaults
@@ -191,7 +199,7 @@ canonical serialized properties
 
 Defaults are isolated, arrays replace as complete values, `undefined` means no override, and unknown properties are rejected.
 
-## 11. Generic actions/references
+## 12. Generic actions/references
 
 Actions:
 
@@ -216,14 +224,14 @@ $literal
 
 Authoring uses `action.*` and `ref.*`. Request-dependent navigation uses `request` with `responseMode = destination`.
 
-## 12. Partner Login / OTP freeze
+## 13. Partner Login / OTP freeze
 
 Login:
 
 ```text
 screenId      = partner_login
 template.id   = tpl_7K2M9Q
-template.type = stack_template
+template.type = form_template
 targetApp     = PARTNER
 GET /api/v1/partner/screen/auth_login
 ```
@@ -247,7 +255,7 @@ sdui/engine/src/screens/partner/PartnerOtpScreen.ts
 
 Identity owns Login/OTP business behavior. Production OTP persistence is Redis-backed only. Configuration owns bootstrap/startup routing decisions.
 
-## 13. Change rule
+## 14. Change rule
 
 ```text
 current governing contract
@@ -255,13 +263,13 @@ current governing contract
 -> change the canonical owner only
 -> focused positive + negative tests
 -> wire/behavior parity proof
--> architecture/build/lint/test gates
--> exact-SHA verification
+-> architecture/build/lint/test gates when the change requires them
+-> exact-SHA verification for a freeze/release candidate
 ```
 
 Do not add compatibility wrappers, aliases, secondary builders, secondary validators or duplicate screen owners.
 
-## 14. Current focused freeze
+## 15. Current focused freeze
 
 The active focused scope is:
 
@@ -274,6 +282,6 @@ SDUI builder/composition architecture
 
 Unrelated module coverage debt or feature work is outside this freeze.
 
-## 15. Frozen authoring statement
+## 16. Frozen authoring statement
 
-> **CarBroz SDUI screen source reads like the canonical tree. Screen creation is `sdui.screen(screenId, targetApp, $ => ...)`. The current typed vocabulary exactly mirrors registered NodeDefinitions: stack/form/default Template, stack Component/Section/Group, and text/image/input/button Elements. `$` is the current lexical scope. Properties are direct `set<Property>()` calls. Horizontal layout uses `stackGroup(...).setOrientation('horizontal')`. Theme uses `setTheme($ => ...)` only for differences from `DEFAULT_SDUI_THEME`. Setters return current scope; child creation returns parent scope. One canonical JSON contract, validator and NodeDefinition/default system remain authoritative.**
+> **CarBroz SDUI screen source reads like the canonical tree. Screen creation is `sdui.screen(screenId, targetApp, $ => ...)`. The current typed vocabulary exactly mirrors registered NodeDefinitions: stack/form/default Template, stack Component/Section/Group, and text/image/input/button Elements. `$` is the current lexical scope. Properties are direct `set<Property>()` calls. Screens whose primary interaction is input validation/submission use `form_template`; Partner Login and Partner OTP therefore both use `form_template`. Horizontal layout uses `stackGroup(...).setOrientation('horizontal')`. Theme uses `setTheme($ => ...)` only for differences from `DEFAULT_SDUI_THEME`. Setters return current scope; child creation returns parent scope. One canonical JSON contract, validator and NodeDefinition/default system remain authoritative.**
