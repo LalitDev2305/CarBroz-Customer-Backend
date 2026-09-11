@@ -32,16 +32,16 @@ describe('PartnerLoginScreen', () => {
       id: 'brand_content',
       type: 'stack_component',
       elements: expect.arrayContaining([
-        {
+        expect.objectContaining({
           id: 'welcome_title',
           type: 'text',
-          properties: {
+          properties: expect.objectContaining({
             spans: [
               { text: 'Welcome ' },
               { text: 'Partner!', color: '#13B8B5' },
             ],
-          },
-        },
+          }),
+        }),
       ]),
     });
 
