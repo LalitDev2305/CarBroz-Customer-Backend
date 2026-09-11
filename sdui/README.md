@@ -84,7 +84,27 @@ Element is terminal.
 
 Template and Component are mandatory. Section and Group are optional only according to the legal branch above.
 
-## 4. Frozen scoped authoring DSL
+## 4. Frozen screen-root API
+
+Mandatory screen identity is supplied directly to `sdui.screen`:
+
+```ts
+sdui.screen('partner_login', 'PARTNER', $ => {
+  ...
+});
+```
+
+Frozen rule:
+
+```text
+screen(screenId, targetApp, callback)
+```
+
+`screenId` and `targetApp` are mandatory root identity values, so normal screen composers do not wrap them in an object merely to create the Screen.
+
+Inside the callback, `$` is the current Screen scope.
+
+## 5. Frozen scoped authoring DSL
 
 The authoring API mirrors the hierarchy directly.
 
@@ -106,11 +126,11 @@ $.buttonElement('continue_button', $ => { ... });
 
 `$` always means the current node in that lexical scope.
 
-The normal screen-composer style does not repeat `template`, `component`, `section`, `group` or `element` callback variable names.
+The normal screen-composer style does not repeat `screen`, `template`, `component`, `section`, `group` or `element` callback variable names.
 
 The hierarchy itself must be visible from nested creation methods.
 
-## 5. Frozen direct setter rule
+## 6. Frozen direct setter rule
 
 Properties are configured directly on the current node through legal `set<Property>()` methods.
 
@@ -149,7 +169,7 @@ current node
 
 Node definitions still own exact schemas, defaults and legal capabilities internally.
 
-## 6. Chaining and scope-return semantics
+## 7. Chaining and scope-return semantics
 
 Frozen behavior:
 
@@ -180,7 +200,7 @@ $.setSpacing(18)
 
 No `endComponent()`, `endSection()`, `endGroup()` or global current-parent cursor is allowed.
 
-## 7. Generic creation escape hatches
+## 8. Generic creation escape hatches
 
 For extensibility the builder may expose generic methods where required:
 
@@ -196,7 +216,7 @@ Normal screen composition should prefer readable type-specific methods.
 
 There is one builder architecture only.
 
-## 8. Generic action/reference contract
+## 9. Generic action/reference contract
 
 Frozen generic action vocabulary:
 
@@ -245,7 +265,7 @@ $.setOnLongClick(...)
 
 Request-dependent navigation uses `request` with `responseMode = destination`.
 
-## 9. Partner Login / OTP authority
+## 10. Partner Login / OTP authority
 
 `PARTNER-AUTH-SDUI-CONTRACT.md` freezes the external Partner auth flow:
 
@@ -269,13 +289,13 @@ Partner OTP   = tpl_P6X8N3 / form_template
 
 API Partner routes/controllers are transport adapters only. Identity owns authentication and OTP business behavior. SDUI owns presentation composition.
 
-## 10. OTP/security authority
+## 11. OTP/security authority
 
 `../docs/PARTNER-AUTH-SDUI-REDIS-IMPLEMENTATION-PLAN.md` governs OTP security/persistence together with the backend constitutions.
 
 Production OTP persistence is Redis-backed only. One-time consume behavior, attempt limits, expiry, ordering and safe error behavior remain tested.
 
-## 11. Configuration boundary
+## 12. Configuration boundary
 
 Configuration owns startup routing/configuration decisions, not screen structure.
 
@@ -288,7 +308,7 @@ authenticated → Partner Dashboard destination
 
 The Destination identifies the next resource. The actual screen document remains engine-owned.
 
-## 12. Canonical property/default model
+## 13. Canonical property/default model
 
 Every reusable NodeDefinition owns:
 
@@ -331,29 +351,47 @@ Frozen semantics:
 
 Current canonical defaults are defined by the current engine NodeDefinitions. Screen code must not infer defaults from visual examples.
 
-## 13. Frozen screen-theme rule
+## 14. Frozen screen-theme rule
 
-`theme` is a screen-level protocol object.
+`theme` is screen-level typed configuration and the SDUI engine owns one canonical `DEFAULT_SDUI_THEME`.
 
-The SDUI engine owns one canonical `DEFAULT_SDUI_THEME`. New screens do not repeat it.
-
-A screen that genuinely differs may call:
+Normal screens do not mention theme at all:
 
 ```ts
-$.setTheme({
-  statusBar: 'default',
-  properties: {
-    gradient: { angle: 90 },
-  },
-});
+return sdui.screen('partner_login', 'PARTNER', $ =>
+  $.stackTemplate('tpl_7K2M9Q', $ => {
+    ...
+  })
+);
 ```
 
-Resolution:
+When one screen genuinely differs from the default, it opens a Theme scope and sets only the changed values:
+
+```ts
+$.setTheme($ =>
+  $.setStatusBar('default')
+   .setGradientAngle(90)
+);
+```
+
+The nested `$` inside `setTheme` means the current Theme scope. Theme scope exposes only legal theme setters, such as:
+
+```text
+setMode(...)
+setStatusBar(...)
+setGradientType(...)
+setGradientAngle(...)
+setGradientColors(...)
+```
+
+A Theme scope must not expose unrelated element/layout setters.
+
+Frozen theme resolution:
 
 ```text
 DEFAULT_SDUI_THEME
         +
-optional setTheme override
+explicit values authored in setTheme($ => ...)
         ↓
 deterministic merge
         ↓
@@ -362,9 +400,9 @@ strict theme validation
 canonical screen.theme
 ```
 
-No screen-specific theme framework is required.
+One screen theme override never mutates `DEFAULT_SDUI_THEME` or another screen. No Login theme, OTP theme, Partner Auth theme, ThemeBuilder hierarchy or raw object-style theme authoring is part of the frozen screen-composer API.
 
-## 14. Change rule
+## 15. Change rule
 
 For an SDUI change:
 
@@ -380,7 +418,7 @@ current governing contract
 
 Do not add compatibility wrappers, aliases, secondary registries, secondary validators, duplicate screen composers or duplicate property systems.
 
-## 15. Current focused freeze
+## 16. Current focused freeze
 
 Current focused scope:
 
@@ -404,7 +442,7 @@ Within this scope the target is:
 - focused tests and documentation aligned with the exact implementation;
 - no unrelated backend feature expansion.
 
-## 16. Documentation governance
+## 17. Documentation governance
 
 A frozen decision becomes implementation authority only when it is written into the active governing repository documentation.
 
@@ -416,6 +454,6 @@ Rules:
 4. Important frozen semantics require executable regression/golden tests where practical.
 5. A freeze is complete only after the final documentation + implementation candidate is validated on the same exact commit SHA.
 
-## 17. Frozen authoring statement
+## 18. Frozen authoring statement
 
-> **CarBroz SDUI screen source must read like the canonical tree. A developer creates a Screen, adds its typed Template, then typed Component, optional typed Section, optional typed Group and terminal Element nodes. Creation method names encode reusable type; the concrete ID is supplied once. Every nested callback uses `$` as the current-node receiver. Properties are configured directly through legal `set<Property>()` methods such as `setSpacing`, `setPadding`, `setText`, `setLeading`, `setTrailing`, `setBinding`, `setTheme` and `setOnClick`. Setters return the current scope, while child creation returns the parent scope after the nested callback. The engine preserves one canonical JSON contract, one validator authority and one NodeDefinition/default system.**
+> **CarBroz SDUI screen source must read like the canonical tree. Screen creation uses `sdui.screen(screenId, targetApp, $ => ...)`, with mandatory identity supplied directly once. A developer then adds its typed Template, typed Component, optional typed Section, optional typed Group and terminal Element nodes. Creation method names encode reusable type; the concrete ID is supplied once. Every nested callback uses `$` as the current-scope receiver. Node properties are configured directly through legal `set<Property>()` methods. Theme uses the same scoped rule through `setTheme($ => ...)`, where the nested Theme scope exposes only theme setters and overrides only values that differ from `DEFAULT_SDUI_THEME`. Setters return the current scope, while child creation returns the parent scope after the nested callback. The engine preserves one canonical JSON contract, one validator authority and one NodeDefinition/default system.**
