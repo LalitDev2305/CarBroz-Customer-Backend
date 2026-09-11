@@ -27,7 +27,7 @@ const DEFAULT_PARTNER_BOOTSTRAP_DOCUMENT: PartnerBootstrapDocument = {
     guest: {
       screenId: 'partner_login',
       templateId: 'tpl_7K2M9Q',
-      templateType: 'stack_template',
+      templateType: 'form_template',
       endpoint: '/api/v1/partner/screen/auth_login',
       method: 'GET',
       authentication: 'NONE',
