@@ -159,9 +159,9 @@ There is one current-node receiver inside every nested callback:
 $
 ```
 
-`$` always means **the current SDUI node for that lexical scope**.
+`$` always means **the current SDUI scope for that lexical callback**.
 
-The same convention is used for Template, Component, Section, Group and Element callbacks. Long callback names such as `template =>`, `component =>`, `section =>` and `element =>` are not part of the frozen authoring style.
+The same convention is used for Screen, Theme, Template, Component, Section, Group and Element callbacks. Long callback names such as `screen =>`, `theme =>`, `template =>`, `component =>`, `section =>` and `element =>` are not part of the frozen authoring style.
 
 ---
 
@@ -369,29 +369,71 @@ The serialized JSON may still contain all canonical defaults after resolution.
 
 ---
 
-## 11. Theme — screen-level setter rule
+## 11. Screen root authoring — frozen
 
-Theme is screen-level typed configuration, not structural hierarchy.
-
-The engine owns one canonical default screen theme. New screens do not repeat that default.
-
-When a screen genuinely differs it may set only the override:
+Mandatory screen identity is passed directly to `SduiBuilder.screen()`:
 
 ```ts
-$.setTheme({
-  statusBar: 'default',
-  properties: {
-    gradient: { angle: 90 },
-  },
+sdui.screen('partner_login', 'PARTNER', $ => {
+  ...
 });
 ```
 
-Resolution remains:
+Frozen signature shape:
+
+```text
+screen(screenId, targetApp, callback)
+```
+
+`screenId` and `targetApp` are mandatory root identity values. Normal screen composers do not wrap them in an object just to create the Screen.
+
+Inside the callback, `$` is the current Screen scope.
+
+---
+
+## 12. Theme — frozen scoped setter rule
+
+Theme is screen-level typed configuration, not structural hierarchy.
+
+The engine owns one canonical `DEFAULT_SDUI_THEME`. New screens do not repeat that default and normal screen authoring contains no theme block.
+
+Example normal screen:
+
+```ts
+return sdui.screen('partner_login', 'PARTNER', $ =>
+  $.stackTemplate('tpl_7K2M9Q', $ => {
+    ...
+  })
+);
+```
+
+When a screen genuinely differs, the Screen scope opens a Theme scope:
+
+```ts
+$.setTheme($ =>
+  $.setStatusBar('default')
+   .setGradientAngle(90)
+);
+```
+
+The nested `$` inside `setTheme` means the current Theme scope. Theme scope exposes only legal theme setters, for example:
+
+```text
+setMode(...)
+setStatusBar(...)
+setGradientType(...)
+setGradientAngle(...)
+setGradientColors(...)
+```
+
+Theme scope must not expose structural, text, input or unrelated node setters.
+
+Frozen theme resolution:
 
 ```text
 DEFAULT_SDUI_THEME
         +
-optional screen setTheme override
+explicit values authored in setTheme($ => ...)
         ↓
 deterministic merge
         ↓
@@ -400,85 +442,76 @@ strict theme validation
 canonical screen.theme
 ```
 
-No screen-specific theme framework is required.
+Frozen semantics:
+
+1. Every new screen starts from `DEFAULT_SDUI_THEME`.
+2. Normal screens do not repeat default theme values.
+3. `setTheme($ => ...)` supplies only genuine screen-level differences.
+4. Theme setters return the current Theme scope for chaining.
+5. Theme overrides merge deterministically into the default theme.
+6. Arrays such as gradient colors replace as complete values when explicitly set.
+7. One screen override never mutates `DEFAULT_SDUI_THEME` or another screen.
+8. Final resolved theme is strictly validated before serialization.
+9. No Login theme, OTP theme, Partner Auth theme, ThemeBuilder hierarchy or raw object-style `setTheme({...})` authoring is part of the frozen screen-composer API.
 
 ---
 
-## 12. Frozen scoped DSL shape
+## 13. Frozen scoped DSL shape
 
 The canonical authoring shape is:
 
 ```ts
-return sdui.screen(
-  {
-    id: 'partner_otp',
-    targetApp: 'PARTNER',
-  },
-  $ =>
-    $.formTemplate('tpl_P6X8N3', $ =>
-      $.setSpacing(24)
-       .setHorizontalAlignment('center')
-       .setFillMaxSize()
-       .setPadding({ start: 24, top: 20, end: 24, bottom: 20 })
-       .stackComponent('otp_content', $ =>
-         $.setSpacing(18)
-          .setHorizontalAlignment('center')
-          .setFillMaxWidth()
-          .stackSection('otp_field_section', $ =>
-            $.setFillMaxWidth()
-             .rowGroup('otp_fields_group', $ =>
-               $.setHorizontalAlignment('center')
-                .inputElement('otp_code_input', $ =>
-                  $.setMaxLength(6)
-                   .setKeyboardType('number')
-                   .setBinding('otp')
-                )
-             )
-          )
-       )
-    ),
+return sdui.screen('partner_otp', 'PARTNER', $ =>
+  $.formTemplate('tpl_P6X8N3', $ =>
+    $.setSpacing(24)
+     .setHorizontalAlignment('center')
+     .setFillMaxSize()
+     .setPadding({ start: 24, top: 20, end: 24, bottom: 20 })
+     .stackComponent('otp_content', $ =>
+       $.setSpacing(18)
+        .setHorizontalAlignment('center')
+        .setFillMaxWidth()
+        .stackSection('otp_field_section', $ =>
+          $.setFillMaxWidth()
+           .rowGroup('otp_fields_group', $ =>
+             $.setHorizontalAlignment('center')
+              .inputElement('otp_code_input', $ =>
+                $.setMaxLength(6)
+                 .setKeyboardType('number')
+                 .setBinding('otp')
+              )
+           )
+        )
+     )
+  )
+);
+```
+
+A screen with theme differences follows the same scoped rule:
+
+```ts
+return sdui.screen('special_screen', 'PARTNER', $ =>
+  $.setTheme($ =>
+    $.setStatusBar('default')
+     .setGradientAngle(90)
+  )
+  .stackTemplate('tpl_SPECIAL', $ => {
+    ...
+  })
 );
 ```
 
 Key rules:
 
-- nested callbacks define hierarchy boundaries;
-- `$` always refers to the current node;
+- mandatory Screen identity is passed once to `screen(screenId, targetApp, ...)`;
+- nested callbacks define hierarchy/configuration scope boundaries;
+- `$` always refers to the current lexical scope;
 - property methods return the current scope for chaining;
 - child-creation methods return the current parent scope after the child callback completes;
+- `setTheme` executes a nested Theme callback and then returns the Screen scope;
 - no `.endComponent()`, `.endSection()`, `.endGroup()` or similar navigation methods;
 - no global mutable current-parent cursor;
 - lexical nesting is the source of hierarchy truth.
-
----
-
-## 13. Screen root authoring
-
-`SduiBuilder.screen()` creates the screen root from mandatory identity data and applies the canonical theme automatically.
-
-Canonical shape:
-
-```ts
-sdui.screen(
-  {
-    id: 'partner_login',
-    targetApp: 'PARTNER',
-  },
-  $ => {
-    $.stackTemplate('tpl_7K2M9Q', $ => {
-      // template properties and components
-    });
-  },
-);
-```
-
-A screen-level property is set on the screen scope:
-
-```ts
-$.setTheme(...);
-```
-
-The screen callback does not require a variable named `screen`.
 
 ---
 
@@ -489,61 +522,56 @@ Partner Login is the first golden-reference screen for this DSL.
 Conceptual target:
 
 ```ts
-return sdui.screen(
-  {
-    id: 'partner_login',
-    targetApp: 'PARTNER',
-  },
-  $ =>
-    $.stackTemplate('tpl_7K2M9Q', $ =>
-      $.setSpacing(24)
-       .setPadding({ start: 24, end: 24 })
-       .stackComponent('brand_content', $ =>
-         $.setSpacing(6)
-          .setHorizontalAlignment('center')
-          .imageElement('brand_logo', $ =>
-            $.setUrl('/images/carbroz_logo.png')
-             .setWidth(120)
-             .setHeight(96)
-          )
-          .textElement('brand_name', $ =>
-            $.setText('CarBroz')
-             .setFontSize(44)
-             .setFontWeight(700)
-             .setTextAlign('center')
-          )
-       )
-       .stackComponent('login_content', $ =>
-         $.setSpacing(14)
-          .stackSection('mobile_field_section', $ =>
-            $.stackGroup('mobile_field', $ =>
-              $.inputElement('mobile_number', $ =>
-                $.setPlaceholder('98765 43210')
-                 .setBinding('mobileNumber')
-                 .setKeyboardType('phone')
-              )
+return sdui.screen('partner_login', 'PARTNER', $ =>
+  $.stackTemplate('tpl_7K2M9Q', $ =>
+    $.setSpacing(24)
+     .setPadding({ start: 24, end: 24 })
+     .stackComponent('brand_content', $ =>
+       $.setSpacing(6)
+        .setHorizontalAlignment('center')
+        .imageElement('brand_logo', $ =>
+          $.setUrl('/images/carbroz_logo.png')
+           .setWidth(120)
+           .setHeight(96)
+        )
+        .textElement('brand_name', $ =>
+          $.setText('CarBroz')
+           .setFontSize(44)
+           .setFontWeight(700)
+           .setTextAlign('center')
+        )
+     )
+     .stackComponent('login_content', $ =>
+       $.setSpacing(14)
+        .stackSection('mobile_field_section', $ =>
+          $.stackGroup('mobile_field', $ =>
+            $.inputElement('mobile_number', $ =>
+              $.setPlaceholder('98765 43210')
+               .setBinding('mobileNumber')
+               .setKeyboardType('phone')
             )
           )
-          .stackSection('action_section', $ =>
-            $.buttonElement('continue_button', $ =>
-              $.setText('Continue')
-               .setOnClick(
-                 action.request({
-                   method: 'POST',
-                   endpoint: '/api/v1/partner/auth/send_otp',
-                   authentication: 'NONE',
-                   validate: true,
-                   responseMode: 'destination',
-                   body: {
-                     phoneNumber: ref.binding('mobileNumber'),
-                     deviceId: ref.context('deviceId'),
-                   },
-                 }),
-               )
-            )
+        )
+        .stackSection('action_section', $ =>
+          $.buttonElement('continue_button', $ =>
+            $.setText('Continue')
+             .setOnClick(
+               action.request({
+                 method: 'POST',
+                 endpoint: '/api/v1/partner/auth/send_otp',
+                 authentication: 'NONE',
+                 validate: true,
+                 responseMode: 'destination',
+                 body: {
+                   phoneNumber: ref.binding('mobileNumber'),
+                   deviceId: ref.context('deviceId'),
+                 },
+               }),
+             )
           )
-       )
-    ),
+        )
+     )
+  )
 );
 ```
 
@@ -937,8 +965,9 @@ Production OTP persistence remains Redis-only.
 
 Implementation begins only after the active documentation set is synchronized.
 
-### Phase 1 — scoped DSL foundation
+### Phase 1 — screen root + scoped DSL foundation
 
+- change normal screen creation to `screen(screenId, targetApp, callback)`;
 - add type-specific creation methods for Template/Component/Section/Group/Element;
 - use `$` as the standard current-scope callback receiver in screen composers;
 - preserve lexical nesting with no hidden mutable parent cursor;
@@ -951,26 +980,34 @@ Implementation begins only after the active documentation set is synchronized.
 - preserve node-specific type safety;
 - keep defaults and exact schemas owned by NodeDefinitions.
 
-### Phase 3 — child chaining semantics
+### Phase 3 — scoped theme override
+
+- preserve one engine-owned `DEFAULT_SDUI_THEME`;
+- add `setTheme($ => ...)` on Screen scope;
+- expose only legal theme setters in Theme scope;
+- merge only explicitly set theme differences over defaults;
+- remove raw object-style theme authoring from the normal composer API.
+
+### Phase 4 — child chaining semantics
 
 - child creation executes a nested callback;
 - after callback completion the method returns the parent scope;
 - no explicit `end*()` navigation API;
 - prove sibling creation remains readable and deterministic.
 
-### Phase 4 — Partner Login convergence
+### Phase 5 — Partner Login convergence
 
 - rewrite Login composer to the frozen DSL;
 - preserve exact identity, hierarchy, theme output and action contract;
 - prove canonical output parity.
 
-### Phase 5 — Partner OTP convergence
+### Phase 6 — Partner OTP convergence
 
 - rewrite OTP composer through the same DSL;
 - preserve `tpl_P6X8N3`, references, actions and wire behavior;
 - no OTP-specific builder/action language.
 
-### Phase 6 — remaining engine convergence
+### Phase 7 — remaining engine convergence
 
 - update tests and examples to one authoring language;
 - remove duplicate authoring paths only after zero production references;
@@ -982,6 +1019,11 @@ Implementation begins only after the active documentation set is synchronized.
 
 At minimum:
 
+- screen root identity serializes correctly from `screen(screenId, targetApp, ...)`;
+- canonical default theme is emitted when `setTheme` is absent;
+- scoped theme override changes only explicit values;
+- Theme scope exposes only legal theme setters;
+- theme override does not mutate defaults or another screen;
 - hierarchy/XOR rules reject invalid composition;
 - type-specific creation methods serialize correct canonical `type`;
 - concrete IDs remain unique;
@@ -1027,6 +1069,9 @@ silent property dropping
 explicit endComponent/endSection/endGroup navigation
 screen-composer property category navigation such as base()/style()/content()/behavior()
 long callback receiver names as the canonical authoring convention
+object-wrapped mandatory screen identity in normal screen authoring
+raw object-style setTheme({...}) authoring
+screen-specific ThemeBuilder/theme wrapper abstractions
 ```
 
 ---
@@ -1037,7 +1082,10 @@ A developer adding or reading a screen should think:
 
 ```text
 What screen am I composing?
-  screen root
+  sdui.screen(screenId, targetApp, $ => ...)
+
+Does this screen differ from the default theme?
+  if yes → setTheme($ => set only changed theme values)
 
 What template type is it?
   stackTemplate(...) / formTemplate(...) / ...
@@ -1058,4 +1106,4 @@ The screen source should read like the canonical tree itself.
 
 ## 29. Final frozen architecture statement
 
-> **CarBroz SDUI uses one canonical Composite presentation model and one small internal Builder DSL. The hierarchy remains explicit as Screen → Template → Component → optional Section → optional Group → Element. Reusable node type is encoded by readable creation methods such as `formTemplate`, `stackComponent`, `stackSection`, `rowGroup`, `textElement`, `inputElement` and `buttonElement`; the concrete ID is supplied once at creation. Every nested callback uses `$` as the current-node receiver. Properties are authored directly through legal `set<Property>()` methods such as `setSpacing`, `setPadding`, `setText`, `setLeading`, `setTrailing`, `setBinding` and `setOnClick`. Setters return the current scope; child creation returns the parent scope after the nested callback, so hierarchy remains readable without `end*()` calls or hidden mutable parent state. NodeDefinitions remain the single authority for type, legal children, exact schema, canonical defaults and legal capabilities. `SduiService` resolves, builds, validates and returns one canonical SDUI document, and no domain or API surface may become a second authoring authority.**
+> **CarBroz SDUI uses one canonical Composite presentation model and one small internal Builder DSL. Screen identity is authored directly as `sdui.screen(screenId, targetApp, $ => ...)`. The hierarchy remains explicit as Screen → Template → Component → optional Section → optional Group → Element. Reusable node type is encoded by readable creation methods such as `formTemplate`, `stackComponent`, `stackSection`, `rowGroup`, `textElement`, `inputElement` and `buttonElement`; the concrete ID is supplied once at creation. Every nested callback uses `$` as the current lexical scope. Node properties are authored directly through legal `set<Property>()` methods. Theme follows the same scoped model through `setTheme($ => ...)`: every screen starts from `DEFAULT_SDUI_THEME`, only genuine differences are set through legal Theme setters, and the resolved theme is validated before serialization. Setters return the current scope; child creation returns the parent scope after the nested callback, so hierarchy remains readable without `end*()` calls or hidden mutable parent state. NodeDefinitions remain the single authority for type, legal children, exact schema, canonical defaults and legal capabilities. `SduiService` resolves, builds, validates and returns one canonical SDUI document, and no domain or API surface may become a second authoring authority.**
