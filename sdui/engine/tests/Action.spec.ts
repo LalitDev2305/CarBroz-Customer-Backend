@@ -9,50 +9,89 @@ describe('SDUI action authoring', () => {
     expect(ref.literal('PARTNER')).toEqual({ $literal: 'PARTNER' });
   });
 
-  it('creates canonical request and navigation actions', () => {
+  it('creates request actions whose destination is returned by the business API', () => {
     expect(action.request({
-      method: 'POST', endpoint: '/api/v1/partner/auth/send_otp', authentication: 'NONE',
-      validate: true, responseMode: 'destination',
-      body: { phoneNumber: ref.binding('mobileNumber'), deviceId: ref.context('deviceId') },
+      method: 'POST',
+      endpoint: '/api/v1/partner/auth/send_otp',
+      authentication: 'NONE',
+      validate: true,
+      responseMode: 'destination',
+      navigationMode: 'push',
+      body: {
+        phoneNumber: ref.binding('mobileNumber'),
+        deviceId: ref.context('deviceId'),
+      },
+      contextUpdates: {
+        authFlow: { phoneNumber: ref.binding('mobileNumber') },
+      },
     })).toEqual({
-      type: 'request', payload: {
-        method: 'POST', endpoint: '/api/v1/partner/auth/send_otp', authentication: 'NONE',
+      type: 'request',
+      payload: {
+        method: 'POST',
+        endpoint: '/api/v1/partner/auth/send_otp',
+        authentication: 'NONE',
         validate: true,
-        body: { phoneNumber: { $binding: 'mobileNumber' }, deviceId: { $context: 'deviceId' } },
+        body: {
+          phoneNumber: { $binding: 'mobileNumber' },
+          deviceId: { $context: 'deviceId' },
+        },
         responseMode: 'destination',
+        navigationMode: 'push',
+        contextUpdates: {
+          authFlow: { phoneNumber: { $binding: 'mobileNumber' } },
+        },
       },
     });
-
-    expect(action.navigate({
-      screenId: 'partner_profile', templateId: 'tpl_profile', templateType: 'stack_template',
-      endpoint: '/api/v1/partner/screen/profile', method: 'GET', authentication: 'SESSION',
-    })).toMatchObject({ type: 'navigate', payload: { screenId: 'partner_profile' } });
   });
 
-  it('covers canonical request defaults and navigation optional targets', () => {
+  it('keeps direct navigation separate from request actions', () => {
+    expect(action.navigate({
+      screenId: 'partner_profile',
+      templateId: 'tpl_profile',
+      templateType: 'stack_template',
+      endpoint: '/api/v1/partner/screen/profile',
+      method: 'GET',
+      authentication: 'SESSION',
+    }, 'replace')).toEqual({
+      type: 'navigate',
+      payload: {
+        screenId: 'partner_profile',
+        templateId: 'tpl_profile',
+        templateType: 'stack_template',
+        endpoint: '/api/v1/partner/screen/profile',
+        method: 'GET',
+        authentication: 'SESSION',
+      },
+      navigationMode: 'replace',
+    });
+  });
+
+  it('applies safe generic request and navigation defaults', () => {
     expect(action.request({
       method: 'GET', endpoint: '/api/v1/example', authentication: 'SESSION',
     })).toEqual({
       type: 'request',
       payload: {
-        method: 'GET', endpoint: '/api/v1/example', authentication: 'SESSION',
-        validate: false, responseMode: 'none',
+        method: 'GET',
+        endpoint: '/api/v1/example',
+        authentication: 'SESSION',
+        validate: false,
+        responseMode: 'none',
+        navigationMode: 'push',
       },
     });
 
     expect(action.navigate({
-      targetId: 'continue_button',
-      screenId: 'next', templateId: 'next_template', templateType: 'stack_template',
-      endpoint: '/api/v1/screen/next', method: 'POST', authentication: 'NONE',
-      body: { source: ref.literal('test') },
-    })).toEqual({
+      screenId: 'next',
+      templateId: 'next_template',
+      templateType: 'stack_template',
+      endpoint: '/api/v1/screen/next',
+      method: 'GET',
+      authentication: 'NONE',
+    })).toMatchObject({
       type: 'navigate',
-      payload: {
-        targetId: 'continue_button',
-        screenId: 'next', templateId: 'next_template', templateType: 'stack_template',
-        endpoint: '/api/v1/screen/next', method: 'POST', authentication: 'NONE',
-        body: { source: { $literal: 'test' } },
-      },
+      navigationMode: 'push',
+      payload: { screenId: 'next' },
     });
   });
 
