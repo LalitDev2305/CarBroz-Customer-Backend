@@ -144,9 +144,15 @@ export class PartnerLoginScreen implements ScreenComposer {
                         authentication: 'NONE',
                         validate: true,
                         responseMode: 'destination',
+                        navigationMode: 'push',
                         body: {
                           phoneNumber: ref.binding('mobileNumber'),
                           deviceId: ref.context('deviceId'),
+                        },
+                        contextUpdates: {
+                          authFlow: {
+                            phoneNumber: ref.binding('mobileNumber'),
+                          },
                         },
                       }))
                   )
