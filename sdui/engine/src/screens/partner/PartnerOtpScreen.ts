@@ -90,11 +90,11 @@ export class PartnerOtpScreen implements ScreenComposer {
                   .setOnClick(action.navigate({
                     screenId: 'partner_login',
                     templateId: 'tpl_7K2M9Q',
-                    templateType: 'stack_template',
+                    templateType: 'form_template',
                     endpoint: '/api/v1/partner/screen/auth_login',
                     method: 'GET',
                     authentication: 'NONE',
-                  }))
+                  }, 'reset'))
               )
           )
           .stackComponent('otp_content', $ =>
@@ -181,6 +181,7 @@ export class PartnerOtpScreen implements ScreenComposer {
                         authentication: 'NONE',
                         validate: true,
                         responseMode: 'destination',
+                        navigationMode: 'reset',
                         body: {
                           challengeId: ref.response('data.challengeId'),
                           phoneNumber: ref.context('authFlow.phoneNumber'),

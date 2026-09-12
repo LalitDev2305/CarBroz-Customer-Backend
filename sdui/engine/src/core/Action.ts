@@ -1,6 +1,7 @@
 import type {
   SduiAction,
   SduiAuthentication,
+  SduiNavigationMode,
   SduiRequestMethod,
   SduiValueReference,
 } from './SduiModel.js';
@@ -21,6 +22,8 @@ export interface RequestActionOptions {
   readonly validate?: boolean;
   readonly body?: Readonly<Record<string, RequestBodyValue>>;
   readonly responseMode?: 'none' | 'destination';
+  readonly navigationMode?: SduiNavigationMode;
+  readonly contextUpdates?: Readonly<Record<string, RequestBodyValue>>;
 }
 
 export interface DynamicDestination {
@@ -58,12 +61,17 @@ export function requestAction(options: RequestActionOptions): SduiAction {
       validate: options.validate ?? false,
       ...(options.body ? { body: options.body as Record<string, RequestBodyValue> } : {}),
       responseMode: options.responseMode ?? 'none',
+      navigationMode: options.navigationMode ?? 'push',
+      ...(options.contextUpdates ? { contextUpdates: options.contextUpdates as Record<string, RequestBodyValue> } : {}),
     },
   };
 }
 
-export function navigateAction(destination: DynamicDestination): SduiAction {
-  return { type: 'navigate', payload: destination };
+export function navigateAction(
+  destination: DynamicDestination,
+  navigationMode: SduiNavigationMode = 'push',
+): SduiAction {
+  return { type: 'navigate', payload: destination, navigationMode };
 }
 
 export function presentAction(targetId: string, presentation: PresentationMode): SduiAction {

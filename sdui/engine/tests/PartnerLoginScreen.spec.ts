@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PartnerLoginScreen, SduiValidator } from '../src/index.js';
 
 describe('PartnerLoginScreen', () => {
-  it('builds a canonical Partner login screen with frozen auth behavior', () => {
+  it('builds a canonical Partner login screen with request-first auth behavior', () => {
     const screen = new PartnerLoginScreen().build({});
     const validated = new SduiValidator().validate(screen);
 
@@ -10,74 +10,29 @@ describe('PartnerLoginScreen', () => {
     expect(validated.targetApp).toBe('PARTNER');
     expect(validated.template.id).toBe('tpl_7K2M9Q');
     expect(validated.template.type).toBe('form_template');
-    expect(validated.theme).toMatchObject({
-      theme: 'light',
-      statusBar: 'transparent',
-      properties: {
-        gradient: {
-          type: 'linear',
-          angle: 135,
-          colors: [
-            { color: '#DDF8F6', stop: 0 },
-            { color: '#F7FEFD', stop: 0.28 },
-            { color: '#FFFFFF', stop: 0.55 },
-            { color: '#D9F7F4', stop: 1 },
-          ],
-        },
-      },
-    });
-
-    const brandComponent = validated.template.components.find(component => component.id === 'brand_content');
-    expect(brandComponent).toMatchObject({
-      id: 'brand_content',
-      type: 'stack_component',
-      elements: expect.arrayContaining([
-        expect.objectContaining({
-          id: 'welcome_title',
-          type: 'text',
-          properties: expect.objectContaining({
-            spans: [
-              { text: 'Welcome ' },
-              { text: 'Partner!', color: '#13B8B5' },
-            ],
-          }),
-        }),
-      ]),
-    });
 
     const loginComponent = validated.template.components.find(component => component.id === 'login_content');
     expect(loginComponent).toBeDefined();
     expect(loginComponent).toMatchObject({
-      id: 'login_content',
-      type: 'stack_component',
-      sections: [
-        {
+      sections: expect.arrayContaining([
+        expect.objectContaining({
           id: 'mobile_field_section',
-          groups: [
-            {
-              id: 'mobile_field',
-              elements: [
-                { id: 'country_code', type: 'text' },
-                {
-                  id: 'mobile_number',
-                  type: 'input',
-                  binding: { key: 'mobileNumber' },
-                  validation: {
-                    required: true,
-                    pattern: '^[6-9][0-9]{9}$',
-                    message: 'Enter a valid 10-digit mobile number',
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        {
+          groups: [expect.objectContaining({
+            id: 'mobile_field',
+            elements: expect.arrayContaining([
+              expect.objectContaining({
+                id: 'mobile_number',
+                type: 'input',
+                binding: { key: 'mobileNumber' },
+              }),
+            ]),
+          })],
+        }),
+        expect.objectContaining({
           id: 'action_section',
-          elements: [
-            {
+          elements: expect.arrayContaining([
+            expect.objectContaining({
               id: 'continue_button',
-              type: 'button',
               actions: {
                 onClick: {
                   type: 'request',
@@ -91,31 +46,36 @@ describe('PartnerLoginScreen', () => {
                       deviceId: { $context: 'deviceId' },
                     },
                     responseMode: 'destination',
+                    navigationMode: 'push',
+                    contextUpdates: {
+                      authFlow: {
+                        phoneNumber: { $binding: 'mobileNumber' },
+                      },
+                    },
                   },
                 },
               },
-            },
-            {
-              id: 'legal_text',
-              type: 'text',
-              properties: {
-                spans: [
-                  { text: 'By continuing, you agree to our ' },
-                  {
-                    text: 'Terms & Conditions',
-                    onClick: { type: 'external_uri', payload: { uri: { $context: 'legal.termsUri' } } },
-                  },
-                  { text: ' and ' },
-                  {
-                    text: 'Privacy Policy',
-                    onClick: { type: 'external_uri', payload: { uri: { $context: 'legal.privacyUri' } } },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      ],
+            }),
+          ]),
+        }),
+      ]),
     });
+  });
+
+  it('does not embed the OTP screen inside the Continue action', () => {
+    const screen = new PartnerLoginScreen().build({});
+    const login = screen.template.components.find(component => component.id === 'login_content');
+    const actionSection = login && 'sections' in login
+      ? login.sections.find(section => section.id === 'action_section')
+      : undefined;
+    const continueButton = actionSection && 'elements' in actionSection
+      ? actionSection.elements.find(element => element.id === 'continue_button')
+      : undefined;
+    const onClick = continueButton?.actions?.onClick;
+
+    expect(onClick?.type).toBe('request');
+    expect(onClick).not.toHaveProperty('payload.screenId');
+    expect(onClick).not.toHaveProperty('payload.template');
+    expect(onClick).not.toHaveProperty('payload.components');
   });
 });

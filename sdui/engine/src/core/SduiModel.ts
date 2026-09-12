@@ -17,10 +17,12 @@ export const targetAppSchema = z.enum(['GLOBAL', 'PARTNER', 'CUSTOMER']);
 
 export const authenticationSchema = z.enum(['NONE', 'SESSION']);
 export const requestMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
+export const navigationModeSchema = z.enum(['push', 'replace', 'reset']);
 
 export type SduiAuthentication = z.infer<typeof authenticationSchema>;
 export type SduiRequestMethod = z.infer<typeof requestMethodSchema>;
 export type SduiRequestResponseMode = 'none' | 'destination';
+export type SduiNavigationMode = z.infer<typeof navigationModeSchema>;
 export type SduiTargetApp = z.infer<typeof targetAppSchema>;
 
 export const dynamicDestinationSchema = z.object({
@@ -65,12 +67,15 @@ const requestActionSchema = z.object({
     validate: z.boolean().default(false),
     body: z.record(z.string(), requestBodyValueSchema).optional(),
     responseMode: z.enum(['none', 'destination']).default('none'),
+    navigationMode: navigationModeSchema.default('push'),
+    contextUpdates: z.record(z.string(), requestBodyValueSchema).optional(),
   }).strict(),
 }).strict();
 
 const navigateActionSchema = z.object({
   type: z.literal('navigate'),
   payload: dynamicDestinationSchema,
+  navigationMode: navigationModeSchema.default('push'),
 }).strict();
 
 const presentActionSchema = z.object({
